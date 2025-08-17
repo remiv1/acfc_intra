@@ -1,0 +1,10 @@
+/* Custom overrides for the site. Put your CSS here to override Bootstrap defaults. */
+
+/* Example: change primary color */
+:root{
+  --bs-primary: #0d6efd;
+}
+
+body{
+  padding-top: 56px; /* example spacing for fixed nav */
+}
