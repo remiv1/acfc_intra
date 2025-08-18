@@ -1,8 +1,5 @@
-{% extends base.html %}
-
-{% block title %}Suivi Clients{% endblock %}
-
-{% block content %}
 <h1>Suivi Clients</h1>
 <p>Bienvenue sur la page de suivi des clients.</p>
-{% endblock %}
+{% if sub_context=='research' %}
+    {% include 'clients/research.html' %}
+{% endif %}

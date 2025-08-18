@@ -1,0 +1,84 @@
+services:
+  acfc-app:
+    container_name: acfc-app
+    build:
+      context: .
+      dockerfile: app_acfc/dockerfile.app
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=mysql+pymysql://user:password@acfc-db/acfc
+    networks:
+      - acfc-network
+  
+  acfc-nginx:
+    container_name: acfc-nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - acfc-network
+
+  acfc-db:
+    container_name: acfc-db
+    image: mariadb:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - acfc-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mariadb", "-u", "root", "-p${DB_ROOT_PASSWORD}", "-e", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - acfc-network
+
+  acfc-logs:
+    container_name: acfc-logs
+    image: mongo:latest
+    volumes:
+      - acfc-logs-data:/data/db
+      - ./mongo/mongod.conf:/etc/mongod.conf
+      - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+    networks:
+      - acfc-network
+    restart: always
+    ports:
+      - "27017:27017"
+    command: ['mongod', '--config', '/etc/mongod.conf']
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'db.runCommand({ ping: 1 })' | mongosh localhost:27017/logs --quiet"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+
+volumes:
+  acfc-db-data:
+    driver: local
+  acfc-logs-data:
+    driver: local
+  acfc-factures:
+    driver: local
+  acfc-rch:
+    driver: local
+  
+networks:
+  acfc-network:
+    driver: bridge

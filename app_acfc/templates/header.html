@@ -1,0 +1,81 @@
+<nav class="navbar navbar-expand-md navbar-light bg-light">
+    <div class="container-fluid">
+        <div class="d-flex align-items-center">
+            <div class="logo me-2">
+                <img src="{{ url_for('static', filename='common/img/Logo.svg') }}" alt="Logo ACFC" height="36">
+            </div>
+        </div>
+
+        <span class="navbar-text mx-auto h5 mb-0">{{ title }}</span>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarCollapse">
+            <ul class="navbar-nav align-items-center">
+                <li class="nav-item dropdown">
+                    <button class="nav-link dropdown-toggle btn btn-link" id="clientsDropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button">
+                        Clients
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="clientsDropdown">
+                        <li><a class="dropdown-item" href="/clients/rechercher">Rechercher</a></li>
+                        <li><a class="dropdown-item" href="/clients">Liste</a></li>
+                        <li><a class="dropdown-item" href="/clients">Traiter une commande</a></li>
+                        <li><a class="dropdown-item" href="/clients">Commandes en cours</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <button class="nav-link dropdown-toggle btn btn-link" id="comptabiliteDropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button">
+                        Comptabilité
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="comptabiliteDropdown">
+                        <li><a class="dropdown-item" href="/comptabilite">Livre-Journal</a></li>
+                        <li><a class="dropdown-item" href="/comptabilite">Grand-Livre</a></li>
+                        <li><a class="dropdown-item" href="/comptabilite">Export comptable</a></li>
+                        <li><a class="dropdown-item" href="/comptabilite">Paiement chèque</a></li>
+                        <li><a class="dropdown-item" href="/comptabilite">Paiement virement</a></li>
+                        <li><a class="dropdown-item" href="/comptabilite">Paiement espèces</a></li>
+                        <li><a class="dropdown-item" href="/comptabilite">Suivi impayés</a></li>
+                        <li><a class="dropdown-item" href="/comptabilite">Vérifier une facture</a></li>
+                        <li><a class="dropdown-item" href="/comptabilite">Trouver une remise de chèques</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <button class="nav-link dropdown-toggle btn btn-link" id="catalogueDropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button">
+                        Catalogue
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="catalogueDropdown">
+                        <li><a class="dropdown-item" href="/catalogue">Vue catalogue</a></li>
+                        <li><a class="dropdown-item" href="/catalogue">Gestion des produits</a></li>
+                        <li><a class="dropdown-item" href="/catalogue">Gestion des combinaisons</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <button class="nav-link dropdown-toggle btn btn-link" id="commercialDropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button">
+                        Commercial
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="commercialDropdown">
+                        <li><a class="dropdown-item" href="/commercial">Suivi Mensuel</a></li>
+                        <li><a class="dropdown-item" href="/commercial">Suivi par client</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <button class="nav-link dropdown-toggle btn btn-link" id="stocksDropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button">
+                        Stocks
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="stocksDropdown">
+                        <li><a class="dropdown-item" href="/stocks">Ouverture du stock</a></li>
+                        <li><a class="dropdown-item" href="/stocks">Utiliser des timbres</a></li>
+                        <li><a class="dropdown-item" href="/stocks">Rentrer des timbres</a></li>
+                        <li><a class="dropdown-item" href="/stocks">Inventorier une valeur</a></li>
+                        <li><a class="dropdown-item" href="/stocks">Visualiser les stocks</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-primary ms-2" type="button">Se connecter</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

@@ -3,33 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document | {{ title }}</title>
-    <!-- CSS propriétaires -->
+    <title>{{ title }}</title>
 
     <!-- CSS Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CSS propriétaire (charge après Bootstrap pour surcharger si besoin) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='common/css/base.css') }}">
 </head>
 <body>
-    <header>
-        {% contain header.html %}
-    </header>
-    <main>
-        <div class="container">
-            <div class="content">
-                {% contain main.html %}
-            </div>
-            <div class="sidebar">
-                {% contain sidebar.html %}
-            </div>
-        </div>
-    </main>
-    <footer>
-        {% contain footer.html %}
-    </footer>
+
+<header>
+    {% include 'header.html' %}
+</header>
+
+<main class="container-fluid">
+    <div class="column flex-nowrap">
+
+        <!-- Sidebar fixe desktop -->
+        <aside class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-light sidebar d-none d-md-block">
+            {% include 'sidebar.html' %}
+        </aside>
+
+        <!-- Contenu principal -->
+        <section class="col py-3 main-content">
+            {% include 'main.html' %}
+        </section>
+
+    </div>
+</main>
+
+<footer class="bg-light border-top py-3">
+    <div class="container-fluid">
+        {% include 'footer.html' %}
+    </div>
+</footer>
+
+<!-- Offcanvas (mobile) -->
+<div class="offcanvas offcanvas-start bg-light" tabindex="-1" id="sidebarOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Navigation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
+    </div>
+    <div class="offcanvas-body">
+        {% include 'sidebar.html' %}
+    </div>
+</div>
+
+<!-- Scripts Bootstrap et personnalisés -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='common/js/common.js') }}"></script>
+
 </body>
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
-    crossorigin="anonymous">
-</script>
 </html>

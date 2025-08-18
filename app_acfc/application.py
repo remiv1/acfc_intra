@@ -1,7 +1,10 @@
-from flask import Flask, Response
+from flask import Flask, Response, render_template
+from waitress import serve
 
 # Create the Flask app
-acfc = Flask(__name__, static_folder='statics', template_folder='templates')
+acfc = Flask(__name__,
+             static_folder='statics',
+             template_folder='templates')
 
 @acfc.before_request
 def before_request() -> None:
@@ -11,6 +14,10 @@ def before_request() -> None:
 def after_request(response: Response) -> Response:
     print("After request")
     return response
+
+@acfc.route('/')
+def index() -> str:
+    return render_template('base.html', title='ACFC - Accueil', context='clients')
 
 # Import and register other blueprints
 try:
@@ -31,3 +38,7 @@ except Exception:
 
 for bp in (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp, stocks_bp):
     acfc.register_blueprint(bp)
+
+
+if __name__ == '__main__':
+    serve(acfc, host="0.0.0.0", port=5000)

@@ -1,0 +1,6 @@
+<form action="{{ url_for('clients_bp.clients_list') }}" method="post">
+    <input type="text" name="client_recherche" placeholder="Rechercher un client">
+    <ul id="clients_suggestions" class="dropdown"></ul>
+    <input type="hidden" id="client" name="client" required>
+    <button type="submit">Rechercher</button>
+</form>
