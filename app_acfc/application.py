@@ -70,47 +70,55 @@ def index() -> str:
 
 @acfc.route('/login', methods=['GET', 'POST'])
 def login() -> Any:
-    # Authentification en cas de demande de connexion (POST)
-    if request.method == 'POST':
-        username = request.form.get('username', '')
-        password = request.form.get('password', '')
-        db_session = SessionBdD()
-        user = db_session.query(User).filter_by(username=username).first()
-        # Si un utilisateur est trouvé en base de données
-        if user:
-            # Validation du mot de passe
-            _return = ph_acfc.verify_password(password, user.sha_mdp)
 
-            # Si le mot de passe est valide, création de la session et redirection vers la page des clients
-            if _return:
-                session.clear()
-                session['user_id'] = user.id
-                session['username'] = user.username
-                session['email'] = user.email
-                session['role'] = user.role
-                user.nb_errors = 0
-                try:
-                    db_session.commit()
-                except Exception as e:
-                    db_session.rollback()
-                    return render_template(BASE, title=LOGIN['title'], context='500', message=str(e))
-                # TODO: Vérifier si le mot de passe est noté comme devant être modifié
-                if user.is_chg_mdp:
-                    return render_template(BASE, title=LOGIN['title'], context='change_password', message="Veuillez changer votre mot de passe.")
-                return render_template(CLIENT['page'], title=CLIENT['title'], context=CLIENT['context'])
-            else:
-                return render_template(BASE, title=LOGIN['title'], context='login', message=INVALID)
-        # Si l'utilisateur n'existe pas
-        else:
-            return render_template(BASE, title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
+    def _get_credentials() -> Tuple[str, str]:
+        return request.form.get('username', ''), request.form.get('password', '')
 
-    # Affichage de la page de connexion en cas de méthode GET
-    elif request.method == 'GET':
-        return render_template(BASE, title=LOGIN['title'], context=LOGIN['context'])
-    
-    # Retour d'erreur 400 dans les autres cas
-    else:
+    def _render_login() -> str:
+        return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'])
+
+    def _apply_successful_login(user: User) -> None:
+        session.clear()
+        session['user_id'] = user.id
+        session['username'] = user.username
+        session['email'] = user.email
+        session['role'] = user.role
+        user.nb_errors = 0
+
+    # Accès à la page de connexion (GET)
+    if request.method == 'GET':
+        return _render_login()
+    elif request.method != 'POST':
         return render_template(BASE, title=LOGIN['title'], context='400')
+
+    # Passage sur la méthode POST (authentification)
+    username, password = _get_credentials()
+    db_session = SessionBdD()
+    user = db_session.query(User).filter_by(username=username).first()
+
+    if not user:
+        return render_template(BASE, title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
+
+    if not ph_acfc.verify_password(password, user.sha_mdp):
+        user.nb_errors += 1
+        try:
+            db_session.commit()
+            return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
+        except Exception as e:
+            db_session.rollback()
+            return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=str(e))
+
+    _apply_successful_login(user)
+    try:
+        db_session.commit()
+    except Exception as e:
+        db_session.rollback()
+        return render_template(BASE, title=LOGIN['title'], context='500', message=str(e))
+    # TODO: Vérifier si le mot de passe est noté comme devant être modifié
+    if user.is_chg_mdp:
+        return render_template(BASE, title=LOGIN['title'], context='change_password', message="Veuillez changer votre mot de passe.")
+    return render_template(CLIENT['page'], title=CLIENT['title'], context=CLIENT['context'])
+
 
 @acfc.route('/users', methods=['GET', 'POST'])
 def users() -> Any:
