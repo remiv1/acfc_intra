@@ -5,5 +5,12 @@
         alt="Erreur 500, problème server"
         sizes="(max-width: 600px) 100vw, 600px">
     <p>Ce n'est pas vous, c'est nous !</p>
+    {% if message %}
+    <div class="container messages">
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    </div>
+    {% endif %}
     <p>Veuillez contacter l'administrateur de l'application.</p>
 </div>

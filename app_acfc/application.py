@@ -1,13 +1,38 @@
-from flask import Flask, Response, render_template, request, session, Blueprint
+from flask import Flask, Response, render_template, request, Blueprint, session
+from flask_session import Session
 from waitress import serve
 from typing import Any, Dict, Tuple
 from werkzeug.exceptions import HTTPException
-from password_service import PasswordService
+from services import PasswordService, SecureSessionService
+from modeles import SessionBdD, User
 
 # Create the Flask app
 acfc = Flask(__name__,
              static_folder='statics',
              template_folder='templates')
+
+
+# Importer et enregistrer les autres blueprints
+try:
+    # prefer absolute import when package is installed or run as module
+    from app_acfc.contextes_bp.clients import clients_bp
+    from app_acfc.contextes_bp.catalogue import catalogue_bp
+    from app_acfc.contextes_bp.commercial import commercial_bp
+    from app_acfc.contextes_bp.comptabilite import comptabilite_bp
+    from app_acfc.contextes_bp.stocks import stocks_bp
+except Exception:
+    # fallback to local imports when running files directly
+    from contextes_bp.clients import clients_bp
+    from contextes_bp.catalogue import catalogue_bp
+    from contextes_bp.commercial import commercial_bp
+    from contextes_bp.comptabilite import comptabilite_bp
+    from contextes_bp.stocks import stocks_bp
+
+# Création du tuple des blueprints
+acfc_blueprints: Tuple[Blueprint, ...] = (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp, stocks_bp)
+
+SecureSessionService(acfc)
+Session(acfc)
 
 # Création des constantes pour la maintenabilité
 BASE: str = 'base.html'
@@ -21,6 +46,12 @@ CLIENT: Dict[str, str] = {
     'context': 'clients',
     'page': BASE
 }
+USER: Dict[str, str] = {
+    'title': 'ACFC - Utilisateurs',
+    'context': 'user',
+    'page': BASE
+}
+INVALID: str = 'Identifiants invalides.'
 ph_acfc = PasswordService()
 
 @acfc.before_request
@@ -39,13 +70,39 @@ def index() -> str:
 
 @acfc.route('/login', methods=['GET', 'POST'])
 def login() -> Any:
-    #TODO : Création d'une route d'authentification
-
     # Authentification en cas de demande de connexion (POST)
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        _return = ph_acfc.verify_password(password, user.password)
+        username = request.form.get('username', '')
+        password = request.form.get('password', '')
+        db_session = SessionBdD()
+        user = db_session.query(User).filter_by(username=username).first()
+        # Si un utilisateur est trouvé en base de données
+        if user:
+            # Validation du mot de passe
+            _return = ph_acfc.verify_password(password, user.sha_mdp)
+
+            # Si le mot de passe est valide, création de la session et redirection vers la page des clients
+            if _return:
+                session.clear()
+                session['user_id'] = user.id
+                session['username'] = user.username
+                session['email'] = user.email
+                session['role'] = user.role
+                user.nb_errors = 0
+                try:
+                    db_session.commit()
+                except Exception as e:
+                    db_session.rollback()
+                    return render_template(BASE, title=LOGIN['title'], context='500', message=str(e))
+                # TODO: Vérifier si le mot de passe est noté comme devant être modifié
+                if user.is_chg_mdp:
+                    return render_template(BASE, title=LOGIN['title'], context='change_password', message="Veuillez changer votre mot de passe.")
+                return render_template(CLIENT['page'], title=CLIENT['title'], context=CLIENT['context'])
+            else:
+                return render_template(BASE, title=LOGIN['title'], context='login', message=INVALID)
+        # Si l'utilisateur n'existe pas
+        else:
+            return render_template(BASE, title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
 
     # Affichage de la page de connexion en cas de méthode GET
     elif request.method == 'GET':
@@ -66,25 +123,6 @@ def users() -> Any:
         return render_template(BASE, title='ACFC - Users', context='users')
     else:
         return render_template(BASE, title='ACFC - Users', context='400')
-
-# Import and register other blueprints
-try:
-    # prefer absolute import when package is installed or run as module
-    from app_acfc.contextes_bp.clients import clients_bp
-    from app_acfc.contextes_bp.catalogue import catalogue_bp
-    from app_acfc.contextes_bp.commercial import commercial_bp
-    from app_acfc.contextes_bp.comptabilite import comptabilite_bp
-    from app_acfc.contextes_bp.stocks import stocks_bp
-except Exception:
-    # fallback to local imports when running files directly
-    from contextes_bp.clients import clients_bp
-    from contextes_bp.catalogue import catalogue_bp
-    from contextes_bp.commercial import commercial_bp
-    from contextes_bp.comptabilite import comptabilite_bp
-    from contextes_bp.stocks import stocks_bp
-
-# Création du tuple des blueprints
-acfc_blueprints: Tuple[Blueprint, ...] = (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp, stocks_bp)
 
 # Custom error handlers
 @acfc.errorhandler(400)

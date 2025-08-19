@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Boolean, Text, Numeric, event, Computed, LargeBinary
+from sqlalchemy import Integer, String, Date, Boolean, Text, Numeric, event, Computed, LargeBinary
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Mapper, relationship, mapped_column
@@ -68,7 +68,7 @@ engine = create_engine(db_url, echo=False)
 Base.metadata.create_all(engine)
 
 # Créer une session de base de données
-Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionBdD = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 PK_CLIENTS = '01_clients.id'
 PK_ADRESSE = '04_adresse.id'
@@ -80,135 +80,136 @@ class User(Base):
     '''Représente un utilisateur dans le système.'''
     __tablename__ = "99_users"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    prenom = Column(String(100), nullable=False)
-    nom = Column(String(100), nullable=False)
-    pseudo = Column(String(100), nullable=False)
-    sha_mdp = Column(String(255), nullable=False)
-    email = Column(String(100), nullable=False)
-    telephone = Column(String(20), nullable=False)
-    created_at = Column(Date, default=func.now(), nullable=False)
-    is_active = Column(Boolean, default=True, nullable=False)
-    debut = Column(Date, nullable=False, default=func.now())
-    fin = Column(Date, nullable=True)
-    nb_errors = Column(Integer, default=0, nullable=False)
-    is_locked = Column(Boolean, default=False, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    prenom = mapped_column(String(100), nullable=False)
+    nom = mapped_column(String(100), nullable=False)
+    pseudo = mapped_column(String(100), nullable=False)
+    sha_mdp = mapped_column(String(255), nullable=False)
+    is_chg_mdp = mapped_column(Boolean, default=False, nullable=False)
+    email = mapped_column(String(100), nullable=False)
+    telephone = mapped_column(String(20), nullable=False)
+    created_at = mapped_column(Date, default=func.now(), nullable=False)
+    is_active = mapped_column(Boolean, default=True, nullable=False)
+    debut = mapped_column(Date, nullable=False, default=func.now())
+    fin = mapped_column(Date, nullable=True)
+    nb_errors = mapped_column(Integer, default=0, nullable=False)
+    is_locked = mapped_column(Boolean, default=False, nullable=False)
 
 class Client(Base):
     '''Représente un client dans le système, qu'il soit particulier ou professionnel.'''
     __tablename__ = '01_clients'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    type_client = Column(Integer, nullable=False)
-    id_part = Column(Integer, nullable=True, foreign_key='011_part.id')
-    id_pro = Column(Integer, nullable=True, foreign_key='012_pro.id')
-    created_at = Column(Date, default=func.now(), nullable=False)
-    is_active = Column(Boolean, default=True, nullable=False)
-    notes = Column(Text, nullable=True)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    type_client = mapped_column(Integer, nullable=False)
+    id_part = mapped_column(Integer, nullable=True, foreign_key='011_part.id')
+    id_pro = mapped_column(Integer, nullable=True, foreign_key='012_pro.id')
+    created_at = mapped_column(Date, default=func.now(), nullable=False)
+    is_active = mapped_column(Boolean, default=True, nullable=False)
+    notes = mapped_column(Text, nullable=True)
 
 class Part(Base):
     '''Représente un particulier dans le système.'''
     __tablename__ = '011_part'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    prenom = Column(String(255), nullable=False)
-    nom = Column(String(255), nullable=False)
-    date_naissance = Column(Date, nullable=False)
-    lieu_naissance = Column(String(255), nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    prenom = mapped_column(String(255), nullable=False)
+    nom = mapped_column(String(255), nullable=False)
+    date_naissance = mapped_column(Date, nullable=False)
+    lieu_naissance = mapped_column(String(255), nullable=False)
 
 class Pro(Base):
     '''Représente un professionnel dans le système.'''
     __tablename__ = '012_pro'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    raison_sociale = Column(String(255), nullable=False)
-    type_pro = Column(Integer, nullable=False)
-    siren = Column(String(9), nullable=True)
-    rna = Column(String(10), nullable=True)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    raison_sociale = mapped_column(String(255), nullable=False)
+    type_pro = mapped_column(Integer, nullable=False)
+    siren = mapped_column(String(9), nullable=True)
+    rna = mapped_column(String(10), nullable=True)
 
 class Mail(Base):
     '''Représente une adresse e-mail associée à un client.'''
     __tablename__ = '02_mail'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    id_client = Column(Integer, nullable=False, foreign_key=PK_CLIENTS)
-    type_mail = Column(String(100), nullable=False)
-    detail = Column(String(255), nullable=True)
-    mail = Column(String(255), nullable=False)
-    is_principal = Column(Boolean, default=False, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_client = mapped_column(Integer, nullable=False, foreign_key=PK_CLIENTS)
+    type_mail = mapped_column(String(100), nullable=False)
+    detail = mapped_column(String(255), nullable=True)
+    mail = mapped_column(String(255), nullable=False)
+    is_principal = mapped_column(Boolean, default=False, nullable=False)
 
 class Telephone(Base):
     '''Représente un numéro de téléphone associé à un client.'''
     __tablename__ = '03_telephone'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    id_client = Column(Integer, nullable=False, foreign_key=PK_CLIENTS)
-    type_telephone = Column(String(100), nullable=False)
-    detail = Column(String(255), nullable=True)
-    indicatif = Column(String(5), nullable=True)
-    telephone = Column(String(255), nullable=False)
-    is_principal = Column(Boolean, default=False, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_client = mapped_column(Integer, nullable=False, foreign_key=PK_CLIENTS)
+    type_telephone = mapped_column(String(100), nullable=False)
+    detail = mapped_column(String(255), nullable=True)
+    indicatif = mapped_column(String(5), nullable=True)
+    telephone = mapped_column(String(255), nullable=False)
+    is_principal = mapped_column(Boolean, default=False, nullable=False)
 
 class Adresse(Base):
     '''Représente une adresse associée à un client.'''
     __tablename__ = '04_adresse'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    id_client = Column(Integer, nullable=False, foreign_key=PK_CLIENTS)
-    adresse_l1 = Column(String(255), nullable=False)
-    adresse_l2 = Column(String(255), nullable=True)
-    code_postal = Column(String(10), nullable=False)
-    ville = Column(String(100), nullable=False)
-    created_at = Column(Date, default=func.now(), nullable=False)
-    is_active = Column(Boolean, default=True, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_client = mapped_column(Integer, nullable=False, foreign_key=PK_CLIENTS)
+    adresse_l1 = mapped_column(String(255), nullable=False)
+    adresse_l2 = mapped_column(String(255), nullable=True)
+    code_postal = mapped_column(String(10), nullable=False)
+    ville = mapped_column(String(100), nullable=False)
+    created_at = mapped_column(Date, default=func.now(), nullable=False)
+    is_active = mapped_column(Boolean, default=True, nullable=False)
 
 class Commande(Base):
     '''Représente une commande dans le système.'''
     __tablename__ = '11_commandes'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    id_client = Column(Integer, nullable=False, foreign_key=PK_CLIENTS)
-    is_ad_livraison = Column(Boolean, default=False, nullable=False)
-    id_adresse = Column(Integer, nullable=True, foreign_key=PK_ADRESSE)
-    descriptif = Column(String(255), nullable=True)
-    date_commande = Column(Date, default=func.now(), nullable=False)
-    montant = Column(Numeric(10, 2), nullable=False, default=0.00)
-    is_facture = Column(Boolean, default=False, nullable=False)
-    date_facturation = Column(Date, nullable=True)
-    is_expedie = Column(Boolean, default=False, nullable=False)
-    date_expedition = Column(Date, nullable=True)
-    id_suivi = Column(String(100), nullable=True)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_client = mapped_column(Integer, nullable=False, foreign_key=PK_CLIENTS)
+    is_ad_livraison = mapped_column(Boolean, default=False, nullable=False)
+    id_adresse = mapped_column(Integer, nullable=True, foreign_key=PK_ADRESSE)
+    descriptif = mapped_column(String(255), nullable=True)
+    date_commande = mapped_column(Date, default=func.now(), nullable=False)
+    montant = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
+    is_facture = mapped_column(Boolean, default=False, nullable=False)
+    date_facturation = mapped_column(Date, nullable=True)
+    is_expedie = mapped_column(Boolean, default=False, nullable=False)
+    date_expedition = mapped_column(Date, nullable=True)
+    id_suivi = mapped_column(String(100), nullable=True)
 
 class DevisesFactures(Base):
     '''Représente les éléments des commandes et des factures dans le système.'''
     __tablename__ = '12_devises_factures'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    id_commande = Column(Integer, nullable=False, foreign_key=PK_COMMANDE)
-    id_facture = Column(Integer, nullable=True)
-    reference = Column(String(100), nullable=False)
-    designation = Column(String(255), nullable=False)
-    qte = Column(Integer, nullable=False, default=1)
-    prix_unitaire = Column(Numeric(10, 4), nullable=False, default=0.00)
-    remise = Column(Numeric(10, 4), nullable=False, default=0.10)
-    prix_total = Column(Numeric(10, 4), computed=Computed('qte * prix_unitaire * (1 - remise)'), nullable=False, persisted=True)
-    remise_euro = Column(Numeric(10, 4), computed=Computed('qte * prix_unitaire * remise'), nullable=False, persisted=True)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_commande = mapped_column(Integer, nullable=False, foreign_key=PK_COMMANDE)
+    id_facture = mapped_column(Integer, nullable=True)
+    reference = mapped_column(String(100), nullable=False)
+    designation = mapped_column(String(255), nullable=False)
+    qte = mapped_column(Integer, nullable=False, default=1)
+    prix_unitaire = mapped_column(Numeric(10, 4), nullable=False, default=0.00)
+    remise = mapped_column(Numeric(10, 4), nullable=False, default=0.10)
+    prix_total = mapped_column(Numeric(10, 4), computed=Computed('qte * prix_unitaire * (1 - remise)'), nullable=False, persisted=True)
+    remise_euro = mapped_column(Numeric(10, 4), computed=Computed('qte * prix_unitaire * remise'), nullable=False, persisted=True)
 
 class Facture(Base):
     '''Représente une facture dans le système.'''
     __tablename__ = '13_factures'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    id_fiscal = Column(String(13), unique=True)
-    id_client = Column(Integer, nullable=False, foreign_key=PK_CLIENTS)
-    id_commande = Column(Integer, nullable=False, foreign_key=PK_COMMANDE)
-    is_adresse_facturation = Column(Boolean, default=False, nullable=False)
-    id_adresse = Column(Integer, nullable=False, foreign_key=PK_ADRESSE)
-    date_facturation = Column(Date, nullable=False, default=func.now())
-    montant_facture = Column(Numeric(10, 2), nullable=False, default=0.00)
-    is_imprime = Column(Boolean, default=False, nullable=False)
-    date_impression = Column(Date, nullable=True)
-    is_prestation_facturee = Column(Boolean, default=False, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_fiscal = mapped_column(String(13), unique=True)
+    id_client = mapped_column(Integer, nullable=False, foreign_key=PK_CLIENTS)
+    id_commande = mapped_column(Integer, nullable=False, foreign_key=PK_COMMANDE)
+    is_adresse_facturation = mapped_column(Boolean, default=False, nullable=False)
+    id_adresse = mapped_column(Integer, nullable=False, foreign_key=PK_ADRESSE)
+    date_facturation = mapped_column(Date, nullable=False, default=func.now())
+    montant_facture = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
+    is_imprime = mapped_column(Boolean, default=False, nullable=False)
+    date_impression = mapped_column(Date, nullable=True)
+    is_prestation_facturee = mapped_column(Boolean, default=False, nullable=False)
 
     def generate_fiscal_id(self) -> str:
         """
@@ -253,90 +254,90 @@ event.listen(Facture, 'after_insert', Facture.set_id_fiscal_after_insert)
 class Catalogue(Base):
     __tablename__ = '21_catalogue'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    type_produit = Column(String(100), nullable=False)
-    stype_produit = Column(String(100), nullable=False)
-    millesime = Column(Integer, nullable=True)
-    ref_auto = Column(String(8), nullable=False, computed=Computed('calculate_ref_auto()'), persisted=True)
-    des_auto = Column(String(100), nullable=False, computed=Computed('calculate_designation_auto()'), persisted=True)
-    prix_unitaire_ht = Column(Numeric(10, 2), nullable=True, default=0.00)
-    geographie = Column(String(10), computed=Computed('get_geographie()'), persisted=True)
-    poids = Column(String(5), computed=Computed('get_weight()'), persisted=True)
-    created_at = Column(Date, default=func.now(), nullable=False)
-    updated_at = Column(Date, default=func.now(), onupdate=func.now(), nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    type_produit = mapped_column(String(100), nullable=False)
+    stype_produit = mapped_column(String(100), nullable=False)
+    millesime = mapped_column(Integer, nullable=True)
+    ref_auto = mapped_column(String(8), nullable=False, computed=Computed('calculate_ref_auto()'), persisted=True)
+    des_auto = mapped_column(String(100), nullable=False, computed=Computed('calculate_designation_auto()'), persisted=True)
+    prix_unitaire_ht = mapped_column(Numeric(10, 2), nullable=True, default=0.00)
+    geographie = mapped_column(String(10), computed=Computed('get_geographie()'), persisted=True)
+    poids = mapped_column(String(5), computed=Computed('get_weight()'), persisted=True)
+    created_at = mapped_column(Date, default=func.now(), nullable=False)
+    updated_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False)
 
     def calculate_ref_auto(self) -> str:
         """
         Calcule la référence automatique du produit au format AATYPE:4ID:2.
         """
-        codage = f'{str(self.millesime)[-2:]}{str(self.type_produit[:4]).upper()}{str(self.id).zfill(2)}'
-        return codage
+        _ref_auto = f'{str(self.millesime)[-2:]}{str(self.type_produit[:4]).upper()}{str(self.id).zfill(2)}'
+        return _ref_auto
     
     def calculate_designation_auto(self) -> str:
         """
         Calcule la désignation automatique du produit au format STYPE TARIF MILLESIME:4.
         """
-        codage = f'{str(self.stype_produit.upper())} TARIF {str(self.millesime)}'
-        return codage
+        _des_auto = f'{str(self.stype_produit.upper())} TARIF {str(self.millesime)}'
+        return _des_auto
     
     def get_geographie(self) -> str:
         """
         Calcule la géographie automatique du produit au format REGION.
         """
-        geo = str(self.stype_produit).split(' ')[3].capitalize()
-        return geo
+        _geo = str(self.stype_produit).split(' ')[3].capitalize()
+        return _geo
     
     def get_weight(self) -> str:
         """
         Calcule le poids automatique du produit au format WEIGHT.
         """
-        weight = str(self.stype_produit).split(' ')[2]
-        return weight
+        _weight = str(self.stype_produit).split(' ')[2]
+        return _weight
     
 class PCG(Base):
     """Classe représentant un Plan Comptable Général (PCG)."""
     __tablename__ = '30_pcg'
 
-    classe = Column(Integer, nullable=False)
-    categorie = Column(Integer, nullable=False)
-    compte = Column(Integer, primary_key=True)
-    denomination = Column(String(100), nullable=False)
+    classe = mapped_column(Integer, nullable=False)
+    categorie = mapped_column(Integer, nullable=False)
+    compte = mapped_column(Integer, primary_key=True)
+    denomination = mapped_column(String(100), nullable=False)
 
 class Operations(Base):
     """Classe représentant les opérations comptables."""
     __tablename__ = '31_operations'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    date_operation = Column(Date, nullable=False)
-    libelle_operation = Column(String(100), nullable=False)
-    montant_operation = Column(Numeric(10, 2), nullable=False)
-    annee_comptable = Column(Integer, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    date_operation = mapped_column(Date, nullable=False)
+    libelle_operation = mapped_column(String(100), nullable=False)
+    montant_operation = mapped_column(Numeric(10, 2), nullable=False)
+    annee_comptable = mapped_column(Integer, nullable=False)
 
 class Ventilations(Base):
     """Classe représentant les ventilations comptables."""
     __tablename__ = '32_ventilations'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    id_operation = Column(Integer, nullable=False, foreign_key=PK_OPERATION)
-    compte_id = Column(Integer, nullable=False, foreign_key=PK_COMPTE)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_operation = mapped_column(Integer, nullable=False, foreign_key=PK_OPERATION)
+    compte_id = mapped_column(Integer, nullable=False, foreign_key=PK_COMPTE)
     compte = relationship('PCG', primaryjoin='Ventilations.compte_id == PCG.compte')
-    sens = Column(String(10), nullable=False)
-    montant_debit = Column(Numeric(10, 2), nullable=True)
-    montant_credit = Column(Numeric(10, 2), nullable=True)
-    banque = Column(String(100), nullable=True)
-    id_facture = Column(String(13), nullable=True)
-    id_cheque = Column(String(7), nullable=True)
+    sens = mapped_column(String(10), nullable=False)
+    montant_debit = mapped_column(Numeric(10, 2), nullable=True)
+    montant_credit = mapped_column(Numeric(10, 2), nullable=True)
+    banque = mapped_column(String(100), nullable=True)
+    id_facture = mapped_column(String(13), nullable=True)
+    id_cheque = mapped_column(String(7), nullable=True)
 
 class Documents(Base):
     """Classe représentant les documents comptables."""
     __tablename__ = '33_documents'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    id_operation = Column(Integer, nullable=False, foreign_key=PK_OPERATION)
-    type_document = Column(String(50), nullable=True)
-    date_document = Column(Date, nullable=True)
-    montant_document = Column(Numeric(10, 2), nullable=True)
-    document = Column(LargeBinary, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_operation = mapped_column(Integer, nullable=False, foreign_key=PK_OPERATION)
+    type_document = mapped_column(String(50), nullable=True)
+    date_document = mapped_column(Date, nullable=True)
+    montant_document = mapped_column(Numeric(10, 2), nullable=True)
+    document = mapped_column(LargeBinary, nullable=False)
 
 class Stock(Base):
     """Classe représentant le stock des timbres."""
@@ -416,37 +417,37 @@ class Villes(Base):
     """Classe représentant les villes."""
     __tablename__ = '91_villes'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    nom = Column(String(100), nullable=False)
-    code_postal = Column(Integer, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    nom = mapped_column(String(100), nullable=False)
+    code_postal = mapped_column(Integer, nullable=False)
 
 class IndicatifsTel(Base):
     """Classe représentant les indicatifs téléphoniques."""
     __tablename__ = '92_indicatifs_tel'
 
-    tri = Column(Integer, primary_key=True)
-    indicatif = Column(String(4), nullable=False)
-    pays = Column(String(100), nullable=False)
+    tri = mapped_column(Integer, primary_key=True)
+    indicatif = mapped_column(String(4), nullable=False)
+    pays = mapped_column(String(100), nullable=False)
 
 class Moi(Base):
     """Classe représentant l'entreprise propriétaire de la base de données."""
     __tablename__ = '93_moi'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    nom = Column(String(100), nullable=False)
-    adresse_l1 = Column(String(255), nullable=False)
-    adresse_l2 = Column(String(255), nullable=True)
-    code_postal = Column(Integer, nullable=False)
-    ville = Column(String(100), nullable=False)
-    siret = Column(String(14), nullable=False)
-    siren = Column(String(9), computed=Computed('get_siren()'), nullable=False)
-    is_tva_intra = Column(Boolean, nullable=False, default=False)
-    id_tva_intra = Column(String(15), nullable=True)
-    logo = Column(LargeBinary, nullable=True)
-    type_activite = Column(String(100), nullable=False)
-    telephone = Column(String(15), nullable=False)
-    mail = Column(String(100), nullable=False)
-    mois_comptable = Column(Integer, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    nom = mapped_column(String(100), nullable=False)
+    adresse_l1 = mapped_column(String(255), nullable=False)
+    adresse_l2 = mapped_column(String(255), nullable=True)
+    code_postal = mapped_column(Integer, nullable=False)
+    ville = mapped_column(String(100), nullable=False)
+    siret = mapped_column(String(14), nullable=False)
+    siren = mapped_column(String(9), computed=Computed('get_siren()'), persisted=True, nullable=False)
+    is_tva_intra = mapped_column(Boolean, nullable=False, default=False)
+    id_tva_intra = mapped_column(String(15), nullable=True)
+    logo = mapped_column(LargeBinary, nullable=True)
+    type_activite = mapped_column(String(100), nullable=False)
+    telephone = mapped_column(String(15), nullable=False)
+    mail = mapped_column(String(100), nullable=False)
+    mois_comptable = mapped_column(Integer, nullable=False)
 
     def get_siren(self) -> str:
         """

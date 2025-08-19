@@ -5,5 +5,12 @@
         alt="Erreur 400, route barrée !"
         sizes="(max-width: 600px) 100vw, 600px">
     <p>Vous ne pouvez pas accéder à cette ressource.</p>
+    {% if message %}
+    <div class="container messages">
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    </div>
+    {% endif %}
     <p>Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur du site.</p>
 </div>
