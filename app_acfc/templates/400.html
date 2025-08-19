@@ -1,0 +1,9 @@
+<div class="container">
+    <h1>Erreur {{ status_code }} : {{ status_message }}</h1>
+    <img
+        src="{{ url_for('static', filename='common/img/blocked_road.svg') }}"
+        alt="Erreur 400, route barrée !"
+        sizes="(max-width: 600px) 100vw, 600px">
+    <p>Vous ne pouvez pas accéder à cette ressource.</p>
+    <p>Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur du site.</p>
+</div>

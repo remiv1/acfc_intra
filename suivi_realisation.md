@@ -124,4 +124,4 @@
 **Prochaines étapes identifiées :** Implémentation de la logique métier dans les contrôleurs, tests fonctionnels, et déploiement en environnement de production.
 
 ---
-*Rapport généré automatiquement à partir de l'analyse des commits Git*
+Rapport généré automatiquement à partir de l'analyse des commits Git

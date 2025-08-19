@@ -9,6 +9,12 @@
     {% include 'comptabilite/comptabilite.html' %}
 {% elif context == 'stocks' %}
     {% include 'stocks/stocks.html' %}
+{% elif context == 400 %}
+    {% include '400.html' %}
+{% elif context == 500 %}
+    {% include '500.html' %}
+{% elif context == 'login' %}
+    {% include 'login.html' %}
 {% else %}
     {# template par défaut si `context` absent ou inconnu #}
     {% include 'common/default.html' %}

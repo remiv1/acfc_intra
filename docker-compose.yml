@@ -24,7 +24,9 @@ services:
 
   acfc-db:
     container_name: acfc-db
-    image: mariadb:latest
+    build:
+      context: ./mariadb
+      dockerfile: dockerfile.mariadb
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}

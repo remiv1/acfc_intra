@@ -1,0 +1,9 @@
+<div class="container">
+    <h1>Erreur {{ status_code }} : {{ status_message }}</h1>
+    <img
+        src="{{ url_for('static', filename='common/img/serv-err.svg') }}"
+        alt="Erreur 500, problème server"
+        sizes="(max-width: 600px) 100vw, 600px">
+    <p>Ce n'est pas vous, c'est nous !</p>
+    <p>Veuillez contacter l'administrateur de l'application.</p>
+</div>

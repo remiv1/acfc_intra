@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   width="922.11896"
+   height="769.62329"
+   viewBox="0 0 27.663569 23.088699"
+   fill="none"
+   version="1.1"
+   id="svg3"
+   sodipodi:docname="serv-err.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title4">Server Error</title>
+  <defs
+     id="defs3" />
+  <sodipodi:namedview
+     id="namedview3"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     showgrid="false"
+     inkscape:zoom="1.00875"
+     inkscape:cx="357.86865"
+     inkscape:cy="358.36431"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg3" />
+  <path
+     fill-rule="evenodd"
+     clip-rule="evenodd"
+     d="M 0,3.75 C 0,1.67893 1.67893,0 3.75,0 h 14 c 2.0711,0 3.75,1.67893 3.75,3.75 0,1.2267 -0.589,2.31583 -1.4996,3 0.9106,0.68417 1.4996,1.7733 1.4996,3 0,2.0711 -1.6789,3.75 -3.75,3.75 H 11.5 v 1.6035 c 0.9158,0.259 1.6375,0.9807 1.8965,1.8965 H 20.75 c 0.4142,0 0.75,0.3358 0.75,0.75 0,0.4142 -0.3358,0.75 -0.75,0.75 h -7.3535 c -0.3265,1.1543 -1.3877,2 -2.6465,2 -1.2588,0 -2.32002,-0.8457 -2.64648,-2 H 0.75 C 0.33579,18.5 0,18.1642 0,17.75 0,17.3358 0.33579,17 0.75,17 H 8.10352 C 8.36255,16.0842 9.0842,15.3625 10,15.1035 V 13.5 H 3.75 C 1.67893,13.5 0,11.8211 0,9.75 0,8.5233 0.58901,7.43417 1.49963,6.75 0.58901,6.06583 0,4.9767 0,3.75 Z M 3.75,6 C 2.50736,6 1.5,4.99264 1.5,3.75 1.5,2.50736 2.50736,1.5 3.75,1.5 h 14 C 18.9926,1.5 20,2.50736 20,3.75 20,4.99264 18.9926,6 17.75,6 Z m 14,1.5 h -14 C 2.50736,7.5 1.5,8.50736 1.5,9.75 1.5,10.9926 2.50736,12 3.75,12 h 14 C 18.9926,12 20,10.9926 20,9.75 20,8.50736 18.9926,7.5 17.75,7.5 Z M 11,3.75 C 11,3.33579 11.3358,3 11.75,3 h 6 c 0.4142,0 0.75,0.33579 0.75,0.75 0,0.41421 -0.3358,0.75 -0.75,0.75 h -6 C 11.3358,4.5 11,4.16421 11,3.75 Z m 0,6 C 11,9.3358 11.3358,9 11.75,9 h 6 c 0.4142,0 0.75,0.3358 0.75,0.75 0,0.4142 -0.3358,0.75 -0.75,0.75 h -6 C 11.3358,10.5 11,10.1642 11,9.75 Z M 10.75,16.5 C 10.0596,16.5 9.5,17.0596 9.5,17.75 9.5,18.4404 10.0596,19 10.75,19 11.4404,19 12,18.4404 12,17.75 12,17.0596 11.4404,16.5 10.75,16.5 Z"
+     fill="#1C274C"
+     id="path1"
+     style="fill:#404040;fill-opacity:1" />
+  <path
+     d="m 5.75,3.75 c 0,0.55228 -0.44772,1 -1,1 -0.55228,0 -1,-0.44772 -1,-1 0,-0.55228 0.44772,-1 1,-1 0.55228,0 1,0.44772 1,1 z"
+     fill="#1C274C"
+     id="path2"
+     style="fill:#196b24;fill-opacity:1" />
+  <path
+     d="m 5.75,9.75 c 0,0.5523 -0.44772,1 -1,1 -0.55228,0 -1,-0.4477 -1,-1 0,-0.5523 0.44772,-1 1,-1 0.55228,0 1,0.4477 1,1 z"
+     fill="#1C274C"
+     id="path3"
+     style="fill:#196b24;fill-opacity:1" />
+  <path
+     style="fill:#196b24;fill-opacity:1;stroke:#196b24;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+     d="M 10.76487,6.1849441 26.913569,22.333643"
+     id="path4" />
+  <path
+     style="fill:#196b24;fill-opacity:1;stroke:#196b24;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+     d="M 10.72,22.338699 26.868699,6.19"
+     id="path4-0" />
+  <metadata
+     id="metadata4">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>Server Error</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>

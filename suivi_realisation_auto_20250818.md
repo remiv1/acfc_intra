@@ -18,7 +18,6 @@
 
 ## Analyse des commits par période
 
-
 ### 17 August 2025
 
 #### 21:26 - 755e313 - feat: Ajout de la structure de l'application Flask avec plusieurs blueprints et modÃ¨les de pages
@@ -27,9 +26,10 @@
 **Impact :** +190 -1 lignes, 37 fichiers
 
 **Fichiers modifiés :**
-- `Author: RÃ©mi Verschuur <verschuurrmm@outlook.fr>`
+
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
 - `Date:   Sun Aug 17 21:26:15 2025 +0200`
-- `    feat: Ajout de la structure de l'application Flask avec plusieurs blueprints et modÃ¨les de pages`
+- `feat: Ajout de la structure de l'application Flask avec plusieurs blueprints et modÃ¨les de pages`
 - ... et 34 autres fichiers
 
 #### 20:01 - 2b562e1 - feat: Ajout du fichier de modÃ¨le de base HTML pour la structure du projet
@@ -38,22 +38,23 @@
 **Impact :** +1 -0 lignes, 4 fichiers
 
 **Fichiers modifiés :**
-- `Author: RÃ©mi Verschuur <167684225+remiv1@users.noreply.github.com>`
+
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
 - `Date:   Sun Aug 17 20:01:25 2025 +0200`
-- `    feat: Ajout du fichier de modÃ¨le de base HTML pour la structure du projet`
+- `feat: Ajout du fichier de modÃ¨le de base HTML pour la structure du projet`
 - ... et 1 autres fichiers
 
-#### 16:30 - fd93f77 - feat: Ajout des fichiers de base pour le projet de gestion de base de donnÃ©es avec interface, y compris .gitignore, README.md, et fichiers de configuration.
+#### 16:30 - fd93f77 - feat: Ajout des fichiers de base pour le projet de gestion de base de donnÃ©es avec interface, y compris .gitignore, README.md, et fichiers de configuration
 
 **Catégorie :** Développement de fonctionnalités  
 **Impact :** +15 -0 lignes, 18 fichiers
 
 **Fichiers modifiés :**
+
 - `Author: RÃ©mi Verschuur <167684225+remiv1@users.noreply.github.com>`
 - `Date:   Sun Aug 17 16:30:27 2025 +0200`
-- `    feat: Ajout des fichiers de base pour le projet de gestion de base de donnÃ©es avec interface, y compris .gitignore, README.md, et fichiers de configuration.`
+- `feat: Ajout des fichiers de base pour le projet de gestion de base de donnÃ©es avec interface, y compris .gitignore, README.md, et fichiers de configuration.`
 - ... et 15 autres fichiers
-
 
 ### 18 August 2025
 
@@ -63,11 +64,11 @@
 **Impact :** +1336 -77 lignes, 39 fichiers
 
 **Fichiers modifiés :**
+
 - `Author: RÃ©mi Verschuur <167684225+remiv1@users.noreply.github.com>`
 - `Date:   Mon Aug 18 19:20:44 2025 +0200`
-- `    feat: Add error pages and enhance base template structure`
+- `feat: Add error pages and enhance base template structure`
 - ... et 37 autres fichiers
-
 
 ---
 
@@ -103,4 +104,5 @@
 Période de développement **active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 1542 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
-*Rapport généré automatiquement le 18 August 2025*
+
+Rapport généré automatiquement le 18 August 2025
