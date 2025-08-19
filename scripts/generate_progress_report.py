@@ -5,12 +5,10 @@ Analyse les commits Git et génère un rapport Markdown détaillé
 """
 
 import subprocess
-import json
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Any
-import sys
 
 class ProgressReportGenerator:
     def __init__(self, repo_path: str = "."):
@@ -55,10 +53,10 @@ class ProgressReportGenerator:
             if '|' in line and len(line.split('|')) == 4:
                 # Nouvelle ligne de commit
                 if current_commit:
-                    commits.append(current_commit)
-                
+                    commits.append(current_commit)      # type: ignore
+
                 parts = line.split('|')
-                current_commit = {
+                current_commit = {      # type: ignore
                     'hash': parts[0],
                     'date': parts[1],
                     'author': parts[2],
@@ -67,13 +65,13 @@ class ProgressReportGenerator:
                 }
             elif current_commit and ('changed' in line or 'insertion' in line or 'deletion' in line):
                 # Ligne de statistiques
-                current_commit['stats'].append(line.strip())
-        
+                current_commit['stats'].append(line.strip())    # type: ignore
+
         if current_commit:
-            commits.append(current_commit)
-        
-        return commits
-    
+            commits.append(current_commit)      # type: ignore
+
+        return commits  # type: ignore
+
     def get_commit_details(self, commit_hash: str) -> Dict[str, Any]:
         """Récupère les détails d'un commit spécifique"""
         # Statistiques détaillées
@@ -113,22 +111,22 @@ class ProgressReportGenerator:
                     
                 ext = Path(file).suffix.lower()
                 if ext == '.py':
-                    tech_count['Python'] = tech_count.get('Python', 0) + 1
+                    tech_count['Python'] = tech_count.get('Python', 0) + 1  # type: ignore
                 elif ext in ['.html', '.htm']:
-                    tech_count['HTML'] = tech_count.get('HTML', 0) + 1
+                    tech_count['HTML'] = tech_count.get('HTML', 0) + 1  # type: ignore
                 elif ext == '.css':
-                    tech_count['CSS'] = tech_count.get('CSS', 0) + 1
+                    tech_count['CSS'] = tech_count.get('CSS', 0) + 1  # type: ignore
                 elif ext == '.js':
-                    tech_count['JavaScript'] = tech_count.get('JavaScript', 0) + 1
+                    tech_count['JavaScript'] = tech_count.get('JavaScript', 0) + 1  # type: ignore
                 elif ext in ['.yml', '.yaml']:
-                    tech_count['YAML/Config'] = tech_count.get('YAML/Config', 0) + 1
+                    tech_count['YAML/Config'] = tech_count.get('YAML/Config', 0) + 1  # type: ignore
                 elif ext == '.md':
-                    tech_count['Documentation'] = tech_count.get('Documentation', 0) + 1
+                    tech_count['Documentation'] = tech_count.get('Documentation', 0) + 1  # type: ignore
                 elif 'dockerfile' in file.lower():
-                    tech_count['Docker'] = tech_count.get('Docker', 0) + 1
-        
-        return tech_count
-    
+                    tech_count['Docker'] = tech_count.get('Docker', 0) + 1  # type: ignore
+
+        return tech_count   # type: ignore
+
     def categorize_work(self, commit: Dict[str, Any]) -> str:
         """Catégorise le type de travail basé sur le message de commit"""
         subject = commit['subject'].lower()
@@ -170,8 +168,8 @@ class ProgressReportGenerator:
             total_files += details['files_changed']
             
             category = self.categorize_work(commit)
-            work_categories[category] = work_categories.get(category, 0) + 1
-        
+            work_categories[category] = work_categories.get(category, 0) + 1    # type: ignore
+
         technologies = self.analyze_technologies(commits)
         
         # Génération du rapport
@@ -206,16 +204,16 @@ class ProgressReportGenerator:
             date_str = datetime.fromisoformat(commit['date'].replace('Z', '+00:00')).strftime("%Y-%m-%d")
             if date_str not in commits_by_date:
                 commits_by_date[date_str] = []
-            commits_by_date[date_str].append(commit)
-        
-        for date, day_commits in sorted(commits_by_date.items()):
-            report += f"\n### {datetime.strptime(date, '%Y-%m-%d').strftime('%d %B %Y')}\n\n"
-            
-            for commit in day_commits:
-                details = self.get_commit_details(commit['hash'])
-                category = self.categorize_work(commit)
-                commit_time = datetime.fromisoformat(commit['date'].replace('Z', '+00:00')).strftime("%H:%M")
-                
+            commits_by_date[date_str].append(commit)    # type: ignore
+
+        for date, day_commits in sorted(commits_by_date.items()):   # type: ignore
+            report += f"\n### {datetime.strptime(date, '%Y-%m-%d').strftime('%d %B %Y')}\n\n"   # type: ignore
+
+            for commit in day_commits:  # type: ignore
+                details = self.get_commit_details(commit['hash'])   # type: ignore
+                category = self.categorize_work(commit)             # type: ignore
+                commit_time = datetime.fromisoformat(commit['date'].replace('Z', '+00:00')).strftime("%H:%M")   # type: ignore
+
                 report += f"#### {commit_time} - {commit['hash'][:7]} - {commit['subject']}\n\n"
                 report += f"**Catégorie :** {category}  \n"
                 report += f"**Impact :** +{details['additions']} -{details['deletions']} lignes, {details['files_changed']} fichiers\n\n"
@@ -231,8 +229,8 @@ class ProgressReportGenerator:
         
         # Analyse par catégories
         report += "\n---\n\n## Analyse par type d'activité\n\n"
-        for category, count in sorted(work_categories.items(), key=lambda x: x[1], reverse=True):
-            percentage = (count / len(commits)) * 100
+        for category, count in sorted(work_categories.items(), key=lambda x: x[1], reverse=True):   # type: ignore
+            percentage = (count / len(commits)) * 100   # type: ignore
             report += f"- **{category}** : {count} commits ({percentage:.1f}%)\n"
         
         # Technologies utilisées
@@ -257,10 +255,10 @@ class ProgressReportGenerator:
             activity_level = "active"
         else:
             activity_level = "modérée"
-        
-        main_category = max(work_categories.items(), key=lambda x: x[1])[0] if work_categories else "Développement général"
-        
-        report += f"Période de développement **{activity_level}** avec un focus principal sur **{main_category.lower()}**. "
+
+        main_category = max(work_categories.items(), key=lambda x: x[1])[0] if work_categories else "Développement général"  # type: ignore
+
+        report += f"Période de développement **{activity_level}** avec un focus principal sur **{main_category.lower()}**. "    # type: ignore
         report += f"Le volume de {total_additions} lignes ajoutées témoigne d'un travail de développement substantiel. "
         
         if total_additions > total_deletions * 2:

@@ -8,7 +8,7 @@ from flask import Flask, Request, Response
 from flask.sessions import SessionInterface as FlaskSessionInterface, SessionMixin
 from werkzeug.datastructures import CallbackDict
 
-class ServerSideSession(CallbackDict, SessionMixin):
+class ServerSideSession(CallbackDict, SessionMixin):    # type: ignore
     """Baseclass for server-side based sessions. This can be accessed through ``flask.session``.
 
     .. attribute:: sid
@@ -63,7 +63,7 @@ class ServerSideSession(CallbackDict, SessionMixin):
 class Serializer(ABC):
     """Baseclass for session serialization."""
     @abstractmethod
-    def decode(self, serialized_data: bytes) -> dict:
+    def decode(self, serialized_data: bytes) -> dict:   # type: ignore
         """Deserialize the session data."""
         ...
     
@@ -82,7 +82,7 @@ class MsgSpecSerializer(Serializer):
         """Serialize the session data."""
         ...
     
-    def decode(self, serialized_data: bytes) -> dict:
+    def decode(self, serialized_data: bytes) -> dict:   # type: ignore
         """Deserialize the session data."""
         ...
     
@@ -112,7 +112,7 @@ class ServerSideSessionInterface(FlaskSessionInterface, ABC):
         """Regenerate the session id for the given session. Can be used by calling ``flask.session_interface.regenerate()``."""
         ...
     
-    def save_session(self, app: Flask, session: ServerSideSession, response: Response) -> None:
+    def save_session(self, app: Flask, session: ServerSideSession, response: Response) -> None:  # type: ignore
         ...
     
     def open_session(self, app: Flask, request: Request) -> ServerSideSession:

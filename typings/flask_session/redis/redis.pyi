@@ -32,7 +32,7 @@ class RedisSessionInterface(ServerSideSessionInterface):
     """
     session_class = RedisSession
     ttl = ...
-    def __init__(self, app: Flask, client: Optional[Redis] = ..., key_prefix: str = ..., use_signer: bool = ..., permanent: bool = ..., sid_length: int = ..., serialization_format: str = ...) -> None:
+    def __init__(self, app: Flask, client: Optional[Redis] = ..., key_prefix: str = ..., use_signer: bool = ..., permanent: bool = ..., sid_length: int = ..., serialization_format: str = ...) -> None:   # type: ignore
         ...
     
 

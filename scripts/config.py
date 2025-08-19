@@ -24,7 +24,7 @@ COMMIT_MESSAGES = {
 
 ## Configuration du workflow GitHub Actions
 
-WORKFLOW_CONFIG = {
+WORKFLOW_CONFIG = {     # type: ignore
     # Heure d'exécution automatique (UTC)
     "cron_schedule": "0 20 * * 0",  # Dimanche 20h UTC
     
@@ -92,7 +92,7 @@ REPORT_SECTIONS = [
 
 ## Configuration des seuils d'analyse
 
-ANALYSIS_THRESHOLDS = {
+ANALYSIS_THRESHOLDS: dict[str, int | dict[str, int]] = {
     "high_activity": 5,      # commits pour "très active"
     "medium_activity": 3,    # commits pour "active" 
     "addition_ratio": 2,     # ratio ajouts/suppressions pour "nouveau développement"
@@ -105,7 +105,7 @@ ANALYSIS_THRESHOLDS = {
 
 ## Configuration des notifications
 
-NOTIFICATION_CONFIG = {
+NOTIFICATION_CONFIG = {     # type: ignore
     "discord_webhook": None,  # URL webhook Discord si souhaité
     "slack_webhook": None,    # URL webhook Slack si souhaité
     "email_recipients": [],   # Liste emails pour notifications

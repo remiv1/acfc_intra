@@ -3,3 +3,4 @@ dotenv==0.9.9
 waitress==3.0.2
 argon2-cffi==25.1.0
 flask-session==0.8.0
+sqlalchemy==2.0.43
