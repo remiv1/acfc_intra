@@ -2,17 +2,17 @@
 
 **Date du rapport :** 21 August 2025  
 **Période analysée :** 14 August 2025 - 21 August 2025 (7 jours)  
-**Nombre de commits :** 16  
+**Nombre de commits :** 18  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 16 commits sur 7 jours  
-**Volume de code :** 4878 lignes ajoutées, 805 lignes supprimées  
-**Fichiers impactés :** 265 fichiers modifiés  
-**Productivité moyenne :** 696 lignes/jour
+**Activité de développement :** 18 commits sur 7 jours  
+**Volume de code :** 5046 lignes ajoutées, 876 lignes supprimées  
+**Fichiers impactés :** 278 fichiers modifiés  
+**Productivité moyenne :** 720 lignes/jour
 
 ---
 
@@ -173,6 +173,28 @@
 
 ### 21 August 2025
 
+#### 21:52 - e8883c3 - feat(password): Ajout de la fonctionnalité de changement de mot de passe avec validation et redirection
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +128 -53 lignes, 9 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Thu Aug 21 21:52:38 2025 +0200`
+- `    feat(password): Ajout de la fonctionnalité de changement de mot de passe avec validation et redirection`
+- ... et 7 autres fichiers
+
+#### 17:51 - 40c8ab0 - 📊 Mise à jour automatique du rapport de suivi (21/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +40 -18 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Thu Aug 21 17:51:52 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (21/08/2025)`
+- ... et 1 autres fichiers
+
 #### 19:43 - a9db200 - feat: Ajout de la gestion des logs, mise à jour des modèles et amélioration de la gestion des mots de passe
 
 **Catégorie :** Développement de fonctionnalités  
@@ -211,35 +233,35 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 11 commits (68.8%)
-- **Interface utilisateur** : 5 commits (31.2%)
+- **Développement de fonctionnalités** : 12 commits (66.7%)
+- **Interface utilisateur** : 6 commits (33.3%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **HTML** : 38 fichiers modifiés
-- **Python** : 33 fichiers modifiés
-- **Documentation** : 14 fichiers modifiés
+- **HTML** : 40 fichiers modifiés
+- **Python** : 34 fichiers modifiés
+- **Documentation** : 15 fichiers modifiés
+- **JavaScript** : 12 fichiers modifiés
 - **CSS** : 12 fichiers modifiés
-- **JavaScript** : 11 fichiers modifiés
+- **YAML/Config** : 7 fichiers modifiés
 - **Docker** : 7 fichiers modifiés
-- **YAML/Config** : 6 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 2.3 commits/jour
-- **Volume de code :** 5683 modifications totales
-- **Ratio ajouts/suppressions :** 6.06
-- **Moyenne lignes par commit :** 355
+- **Fréquence de commit :** 2.6 commits/jour
+- **Volume de code :** 5922 modifications totales
+- **Ratio ajouts/suppressions :** 5.76
+- **Moyenne lignes par commit :** 329
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 4878 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 5046 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 21 August 2025*
