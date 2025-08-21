@@ -61,8 +61,8 @@ services:
   acfc-db:
     container_name: acfc-db
     build:
-      context: ./mariadb                     # Dossier contenant Dockerfile et scripts
-      dockerfile: dockerfile.mariadb         # Dockerfile spécialisé MariaDB
+      context: .                   # Dossier contenant Dockerfile et scripts
+      dockerfile: /mariadb/dockerfile.mariadb         # Dockerfile spécialisé MariaDB
     restart: always                          # Redémarrage permanent (service critique)
     environment:
       # Variables d'environnement sécurisées via fichier .env

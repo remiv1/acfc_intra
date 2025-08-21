@@ -40,7 +40,7 @@ ENV MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD} \
 # Copie du script d'initialisation dans le répertoire spécial de MariaDB
 # Ce script sera exécuté automatiquement au premier démarrage du conteneur
 # Contient : création des tables, index, données de référence, utilisateurs
-COPY init_db.sql /docker-entrypoint-initdb.d/
+COPY mariadb/init_db.sql /docker-entrypoint-initdb.d/
 
 # === CONFIGURATION RÉSEAU ===
 # Exposition du port standard MariaDB/MySQL (3306)

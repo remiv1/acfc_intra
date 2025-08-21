@@ -42,3 +42,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+// Fonction d'activation du bouton de soumission
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.querySelector("form");
+    const oldPasswordInput = document.getElementById("old_password");
+    const newPasswordInput = document.getElementById("new_password");
+    const confirmPasswordInput = document.getElementById("confirm_password");
+    const submitButton = form.querySelector("button[type='submit']");
+
+    const toggleSubmitButton = () => {
+        const isFormValid = oldPasswordInput.value && newPasswordInput.value && confirmPasswordInput.value;
+        const allConditionsMet = Object.values(conditions).every((check) => check(newPasswordInput.value));
+        const passwordsMatch = newPasswordInput.value === confirmPasswordInput.value;
+        submitButton.disabled = !(isFormValid && allConditionsMet && passwordsMatch);
+    };
+
+    oldPasswordInput.addEventListener("input", toggleSubmitButton);
+    newPasswordInput.addEventListener("input", toggleSubmitButton);
+    confirmPasswordInput.addEventListener("input", toggleSubmitButton);
+});

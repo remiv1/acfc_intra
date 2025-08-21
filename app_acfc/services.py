@@ -20,6 +20,9 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from flask import Flask
 from os import getenv
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 class PasswordService:
     """
@@ -91,8 +94,10 @@ class PasswordService:
         """
         try:
             self.hasher.verify(hashed_pwd, pwd)
+            logging.info("Password verification successful")
             return True
         except VerifyMismatchError:
+            logging.warning("Password verification failed")
             return False
     
     def needs_rehash(self, hashed_pwd: str) -> bool:

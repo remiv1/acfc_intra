@@ -33,6 +33,7 @@ WORKDIR /app
 # Copie du fichier de dépendances en premier pour optimiser le cache Docker
 # Si requirements-app.txt ne change pas, cette couche sera réutilisée
 COPY requirements-app.txt /app/requirements.txt
+COPY .env /app/.env
 
 # Installation des dépendances Python avec optimisations
 # --no-cache-dir : Évite le stockage du cache pip (réduit la taille de l'image)

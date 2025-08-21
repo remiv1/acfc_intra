@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, Date, Boolean, Text, Numeric, event, Computed, LargeBinary
+from sqlalchemy import Integer, String, Date, Boolean, Text, Numeric, event, Computed, LargeBinary, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Mapper, relationship, mapped_column
@@ -8,7 +8,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from dotenv import load_dotenv
 from os import getenv
-
 
 """
 ACFC - Modèles de Données et Configuration Base de Données
@@ -40,18 +39,6 @@ Architecture :
 Auteur : ACFC Development Team
 Version : 1.0
 """
-
-from sqlalchemy import Integer, String, Date, Boolean, Text, Numeric, event, Computed, LargeBinary
-from sqlalchemy.sql import func
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Mapper, relationship, mapped_column
-from typing import Any
-from sqlalchemy.engine import Connection
-from sqlalchemy import create_engine
-from sqlalchemy.engine.url import URL
-from dotenv import load_dotenv
-from os import getenv
-
 
 def verify_env() -> bool:
     """
@@ -177,7 +164,6 @@ engine = create_engine(
 )
 
 # Création automatique des tables si elles n'existent pas
-# Note: En production, utiliser Alembic pour les migrations
 Base.metadata.create_all(engine)
 
 # Factory de sessions pour l'accès aux données
@@ -197,6 +183,13 @@ PK_ADRESSE = '04_adresse.id'           # Référence vers la table adresses
 PK_COMMANDE = '11_commandes.id'        # Référence vers la table commandes
 PK_OPERATION = '31_operations.id'      # Référence vers la table opérations comptables
 PK_COMPTE = '30_pcg.compte'            # Référence vers le plan comptable général
+
+# ====================================================================
+# AUTRES CONSTANTES
+# ====================================================================
+# Centralisation des références pour maintenir la cohérence du schéma
+
+UNIQUE_ID = 'Identifiant unique'
 
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE UTILISATEURS ET AUTHENTIFICATION
@@ -224,7 +217,7 @@ class User(Base):
     __tablename__ = "99_users"
 
     # === IDENTIFIANTS ET INFORMATIONS PERSONNELLES ===
-    id = mapped_column(Integer, primary_key=True, autoincrement=True, comment="Identifiant unique")
+    id = mapped_column(Integer, primary_key=True, autoincrement=True, comment=UNIQUE_ID)
     prenom = mapped_column(String(100), nullable=False, comment="Prénom de l'utilisateur")
     nom = mapped_column(String(100), nullable=False, comment="Nom de famille de l'utilisateur")
     pseudo = mapped_column(String(100), nullable=False, unique=True, comment="Nom d'utilisateur pour connexion")
@@ -235,6 +228,8 @@ class User(Base):
     sha_mdp = mapped_column(String(255), nullable=False, comment="Mot de passe haché avec Argon2")
     is_chg_mdp = mapped_column(Boolean, default=False, nullable=False, 
                               comment="Force le changement de mot de passe à la prochaine connexion")
+    date_chg_mdp = mapped_column(Date, default=func.now(), nullable=False, 
+                                 comment="Date du dernier changement de mot de passe")
     nb_errors = mapped_column(Integer, default=0, nullable=False, 
                              comment="Nombre d'erreurs d'authentification consécutives")
     is_locked = mapped_column(Boolean, default=False, nullable=False, 
@@ -307,7 +302,7 @@ class Part(Base):
     __tablename__ = '011_part'
 
     # === IDENTIFIANT ===
-    id = mapped_column(Integer, primary_key=True, autoincrement=True, comment="Identifiant unique")
+    id = mapped_column(Integer, primary_key=True, autoincrement=True, comment=UNIQUE_ID)
     
     # === INFORMATIONS PERSONNELLES ===
     prenom = mapped_column(String(255), nullable=False, comment="Prénom")
@@ -336,7 +331,7 @@ class Pro(Base):
     __tablename__ = '012_pro'
 
     # === IDENTIFIANT ===
-    id = mapped_column(Integer, primary_key=True, autoincrement=True, comment="Identifiant unique")
+    id = mapped_column(Integer, primary_key=True, autoincrement=True, comment=UNIQUE_ID)
     
     # === INFORMATIONS LÉGALES ===
     raison_sociale = mapped_column(String(255), nullable=False, comment="Dénomination sociale complète")
@@ -434,7 +429,7 @@ class Adresse(Base):
     __tablename__ = '04_adresse'
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    id_client = mapped_column(Integer, nullable=False, foreign_key=PK_CLIENTS)
+    id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False)
     adresse_l1 = mapped_column(String(255), nullable=False)
     adresse_l2 = mapped_column(String(255), nullable=True)
     code_postal = mapped_column(String(10), nullable=False)
@@ -442,14 +437,18 @@ class Adresse(Base):
     created_at = mapped_column(Date, default=func.now(), nullable=False)
     is_active = mapped_column(Boolean, default=True, nullable=False)
 
+# ====================================================================
+# MODÈLES DE DONNÉES - MODULE GESTION DES COMMANDES ET FACTURATION
+# ====================================================================
+
 class Commande(Base):
     '''Représente une commande dans le système.'''
     __tablename__ = '11_commandes'
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    id_client = mapped_column(Integer, nullable=False, foreign_key=PK_CLIENTS)
+    id_client = mapped_column(Integer, ForeignKey('clients.id'), nullable=False)
     is_ad_livraison = mapped_column(Boolean, default=False, nullable=False)
-    id_adresse = mapped_column(Integer, nullable=True, foreign_key=PK_ADRESSE)
+    id_adresse = mapped_column(Integer, ForeignKey('adresses.id'), nullable=True)
     descriptif = mapped_column(String(255), nullable=True)
     date_commande = mapped_column(Date, default=func.now(), nullable=False)
     montant = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
@@ -464,15 +463,15 @@ class DevisesFactures(Base):
     __tablename__ = '12_devises_factures'
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    id_commande = mapped_column(Integer, nullable=False, foreign_key=PK_COMMANDE)
+    id_commande = mapped_column(Integer, ForeignKey(PK_COMMANDE), nullable=False)
     id_facture = mapped_column(Integer, nullable=True)
     reference = mapped_column(String(100), nullable=False)
     designation = mapped_column(String(255), nullable=False)
     qte = mapped_column(Integer, nullable=False, default=1)
     prix_unitaire = mapped_column(Numeric(10, 4), nullable=False, default=0.00)
     remise = mapped_column(Numeric(10, 4), nullable=False, default=0.10)
-    prix_total = mapped_column(Numeric(10, 4), computed=Computed('qte * prix_unitaire * (1 - remise)'), nullable=False, persisted=True)
-    remise_euro = mapped_column(Numeric(10, 4), computed=Computed('qte * prix_unitaire * remise'), nullable=False, persisted=True)
+    prix_total = mapped_column(Numeric(10, 4), Computed('qte * prix_unitaire * (1 - remise)'), nullable=False)
+    remise_euro = mapped_column(Numeric(10, 4), Computed('qte * prix_unitaire * remise'), nullable=False)
 
 class Facture(Base):
     '''Représente une facture dans le système.'''
@@ -480,10 +479,10 @@ class Facture(Base):
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_fiscal = mapped_column(String(13), unique=True)
-    id_client = mapped_column(Integer, nullable=False, foreign_key=PK_CLIENTS)
-    id_commande = mapped_column(Integer, nullable=False, foreign_key=PK_COMMANDE)
+    id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False)
+    id_commande = mapped_column(Integer, ForeignKey(PK_COMMANDE), nullable=False)
     is_adresse_facturation = mapped_column(Boolean, default=False, nullable=False)
-    id_adresse = mapped_column(Integer, nullable=False, foreign_key=PK_ADRESSE)
+    id_adresse = mapped_column(Integer, ForeignKey(PK_ADRESSE), nullable=False)
     date_facturation = mapped_column(Date, nullable=False, default=func.now())
     montant_facture = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
     is_imprime = mapped_column(Boolean, default=False, nullable=False)
@@ -530,6 +529,10 @@ class Facture(Base):
 # Enregistrement de l'écouteur qui délègue la logique à la méthode de la classe
 event.listen(Facture, 'after_insert', Facture.set_id_fiscal_after_insert)
 
+# ====================================================================
+# MODÈLES DE DONNÉES - MODULE GESTION DES PRODUITS
+# ====================================================================
+
 class Catalogue(Base):
     __tablename__ = '21_catalogue'
 
@@ -537,11 +540,11 @@ class Catalogue(Base):
     type_produit = mapped_column(String(100), nullable=False)
     stype_produit = mapped_column(String(100), nullable=False)
     millesime = mapped_column(Integer, nullable=True)
-    ref_auto = mapped_column(String(8), nullable=False, computed=Computed('calculate_ref_auto()'), persisted=True)
-    des_auto = mapped_column(String(100), nullable=False, computed=Computed('calculate_designation_auto()'), persisted=True)
+    ref_auto = mapped_column(String(8), Computed('calculate_ref_auto()'), nullable=False)
+    des_auto = mapped_column(String(100), Computed('calculate_designation_auto()'), nullable=False)
     prix_unitaire_ht = mapped_column(Numeric(10, 2), nullable=True, default=0.00)
-    geographie = mapped_column(String(10), computed=Computed('get_geographie()'), persisted=True)
-    poids = mapped_column(String(5), computed=Computed('get_weight()'), persisted=True)
+    geographie = mapped_column(String(10), Computed('get_geographie()'))
+    poids = mapped_column(String(5), Computed('get_weight()'))
     created_at = mapped_column(Date, default=func.now(), nullable=False)
     updated_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -573,6 +576,10 @@ class Catalogue(Base):
         _weight = str(self.stype_produit).split(' ')[2]
         return _weight
     
+# ====================================================================
+# MODÈLES DE DONNÉES - MODULE GESTION COMPTABLE
+# ====================================================================
+
 class PCG(Base):
     """Classe représentant un Plan Comptable Général (PCG)."""
     __tablename__ = '30_pcg'
@@ -597,8 +604,8 @@ class Ventilations(Base):
     __tablename__ = '32_ventilations'
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    id_operation = mapped_column(Integer, nullable=False, foreign_key=PK_OPERATION)
-    compte_id = mapped_column(Integer, nullable=False, foreign_key=PK_COMPTE)
+    id_operation = mapped_column(Integer, ForeignKey(PK_OPERATION), nullable=False)
+    compte_id = mapped_column(Integer, ForeignKey(PK_COMPTE), nullable=False)
     compte = relationship('PCG', primaryjoin='Ventilations.compte_id == PCG.compte')
     sens = mapped_column(String(10), nullable=False)
     montant_debit = mapped_column(Numeric(10, 2), nullable=True)
@@ -612,27 +619,31 @@ class Documents(Base):
     __tablename__ = '33_documents'
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    id_operation = mapped_column(Integer, nullable=False, foreign_key=PK_OPERATION)
+    id_operation = mapped_column(Integer, ForeignKey(PK_OPERATION), nullable=False)
     type_document = mapped_column(String(50), nullable=True)
     date_document = mapped_column(Date, nullable=True)
     montant_document = mapped_column(Numeric(10, 2), nullable=True)
     document = mapped_column(LargeBinary, nullable=False)
 
+# ====================================================================
+# MODÈLES DE DONNÉES - MODULE GESTION DES STOCKS
+# ====================================================================
+
 class Stock(Base):
     """Classe représentant le stock des timbres."""
     __tablename__ = '40_stock'
 
-    type_code = mapped_column(Integer, nullable=False)     # 1: Francs (FR), 2: Euros (EU), 3: Valeur Permanente France (VPF), 4: Valeur Permanente Europe (VPE), 5: Valeur Permanente Monde (VPM)
-    type_valeur = mapped_column(String(3), computed=Computed('get_type_valeur()'), persisted=True, nullable=False)
-    val_code = mapped_column(String(4), computed=Computed('calculate_val_code()'), persisted=True, nullable=False)
-    code_produit = mapped_column(String(6), computed=Computed('calculate_code_produit()'), persisted=True, nullable=False)
-    val_valeur = mapped_column(Numeric(5, 2), nullable=False, default=0.00)
+    type_code = mapped_column(Integer, primary_key=True, nullable=False)     # 1: Francs (FR), 2: Euros (EU), 3: Valeur Permanente France (VPF), 4: Valeur Permanente Europe (VPE), 5: Valeur Permanente Monde (VPM)
+    type_valeur = mapped_column(String(3), Computed('get_type_valeur()'), nullable=False)
+    val_code = mapped_column(String(4), Computed('calculate_val_code()'), nullable=False)
+    code_produit = mapped_column(String(6), Computed('calculate_code_produit()'), nullable=False)
+    val_valeur = mapped_column(Numeric(5, 2), primary_key=True, nullable=False, default=0.00)
     qte = mapped_column(Integer, nullable=False, default=0)
     tvp_valeur = mapped_column(Numeric(5, 2), nullable=True)
     tvp_poids = mapped_column(String(4), nullable=True)
-    pu_ht = mapped_column(Numeric(8, 4), computed=Computed('calculate_pu_ht()'), persisted=True, nullable=False, default=0.00)
-    pt_fr = mapped_column(Numeric(5, 2), computed=Computed('calculate_pt_fr()'), persisted=True, nullable=False, default=0.00)
-    pt_eu = mapped_column(Numeric(5, 2), computed=Computed('calculate_pt_eu()'), persisted=True, nullable=False, default=0.00)
+    pu_ht = mapped_column(Numeric(8, 4), Computed('calculate_pu_ht()'), nullable=False, default=0.00)
+    pt_fr = mapped_column(Numeric(5, 2), Computed('calculate_pt_fr()'), nullable=False, default=0.00)
+    pt_eu = mapped_column(Numeric(5, 2), Computed('calculate_pt_eu()'), nullable=False, default=0.00)
 
     def calculate_code_produit(self) -> str:
         """
@@ -692,6 +703,10 @@ class Stock(Base):
         else:
             return float(self.qte * self.tvp_valeur)
         
+# ====================================================================
+# MODÈLES DE DONNÉES - MODULE TECHNIQUE
+# ====================================================================
+
 class Villes(Base):
     """Classe représentant les villes."""
     __tablename__ = '91_villes'
@@ -719,7 +734,7 @@ class Moi(Base):
     code_postal = mapped_column(Integer, nullable=False)
     ville = mapped_column(String(100), nullable=False)
     siret = mapped_column(String(14), nullable=False)
-    siren = mapped_column(String(9), computed=Computed('get_siren()'), persisted=True, nullable=False)
+    siren = mapped_column(String(9), Computed('get_siren()'), nullable=False)
     is_tva_intra = mapped_column(Boolean, nullable=False, default=False)
     id_tva_intra = mapped_column(String(15), nullable=True)
     logo = mapped_column(LargeBinary, nullable=True)

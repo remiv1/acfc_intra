@@ -1,4 +1,4 @@
-"""
+'''
 ACFC - Application de Gestion d'Entreprise
 ===========================================
 
@@ -17,7 +17,7 @@ Authentification : Sessions sécurisées avec hachage Argon2
 
 Auteur : ACFC Development Team
 Version : 1.0
-"""
+'''
 
 from flask import Flask, Response, render_template, request, Blueprint, session
 from flask_session import Session
@@ -26,6 +26,21 @@ from typing import Any, Dict, Tuple
 from werkzeug.exceptions import HTTPException
 from services import PasswordService, SecureSessionService
 from modeles import SessionBdD, User
+#TODO: modifier les systèmes de logs
+import logging
+import sys
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout)  # Écrit dans stdout
+    ]
+)
+
+logging.debug("Ceci est un message de débogage")
+logging.info("Ceci est un message d'information")
+logging.error("Ceci est un message d'erreur")
 
 # Création de l'instance Flask principale avec configuration des dossiers statiques et templates
 acfc = Flask(__name__,
@@ -96,6 +111,7 @@ USER: Dict[str, str] = {
 
 # Messages d'erreur standardisés pour l'authentification
 INVALID: str = 'Identifiants invalides.'
+WRONG_ROAD: str = 'Méthode non autorisée ou droits insuffisants.'
 
 # Instance du service de gestion des mots de passe (hachage Argon2)
 ph_acfc = PasswordService()
@@ -106,7 +122,7 @@ ph_acfc = PasswordService()
 
 @acfc.before_request
 def before_request() -> str | None:
-    """
+    '''
     Middleware exécuté avant chaque requête.
     
     Vérifie l'état de la session utilisateur et redirige vers la page de connexion
@@ -114,8 +130,8 @@ def before_request() -> str | None:
     
     Returns:
         str | None: Template de connexion si pas de session, None sinon
-    """
-    if not session:
+    '''
+    if 'user_id' not in session and request.endpoint != 'login':
         return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'])
 
 @acfc.after_request
@@ -182,27 +198,33 @@ def login() -> Any:
         """
         session.clear()
         session['user_id'] = user.id
-        session['username'] = user.username
+        session['pseudo'] = user.pseudo
+        session['last_name'] = user.nom
+        session['first_name'] = user.prenom
         session['email'] = user.email
-        session['role'] = user.role
         user.nb_errors = 0  # Remise à zéro du compteur d'erreurs
 
     # === TRAITEMENT GET : Affichage du formulaire de connexion ===
     if request.method == 'GET':
+        logging.debug("GET request for login")
         return _render_login()
     elif request.method != 'POST':
-        return render_template(BASE, title=LOGIN['title'], context='400')
+        logging.warning("Invalid request method")
+        return render_template(BASE, title=LOGIN['title'], context='400', message=WRONG_ROAD)
 
     # === TRAITEMENT POST : Validation des identifiants ===
     username, password = _get_credentials()
+    logging.debug(f"Attempting login for user: {username}")
     db_session = SessionBdD()
-    user = db_session.query(User).filter_by(username=username).first()
+    user = db_session.query(User).filter_by(pseudo=username).first()
+    logging.debug(f"User found: {user is not None}")
 
     # Vérification de l'existence de l'utilisateur
     if not user:
-        return render_template(BASE, title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
+        logging.warning("User not found")
+        return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
 
-    # Vérification du mot de passe avec Argon2
+    # Vérification du mot de passe avec Argon2... si mot de passe faux
     if not ph_acfc.verify_password(password, user.sha_mdp):
         user.nb_errors += 1  # Incrémentation du compteur d'erreurs (sécurité)
         try:
@@ -218,12 +240,20 @@ def login() -> Any:
         db_session.commit()
     except Exception as e:
         db_session.rollback()
-        return render_template(BASE, title=LOGIN['title'], context='500', message=str(e))
+        return render_template(LOGIN['page'], title=LOGIN['title'], context='500', message=str(e))
     
-    # TODO: Vérification de la nécessité de changement de mot de passe
-    # Note: Fonctionnalité de sécurité pour forcer le renouvellement des mots de passe
+    # Vérification de la nécessité de re-hashage de mot de passe
+    if ph_acfc.needs_rehash(user.sha_mdp):
+        user.sha_mdp = ph_acfc.hash_password(password)
+        try:
+            db_session.commit()
+        except Exception as e:
+            db_session.rollback()
+            return render_template(LOGIN['page'], title=LOGIN['title'], context='500', message=str(e))
+
+    # Fonctionnalité de sécurité pour forcer le renouvellement des mots de passe
     if user.is_chg_mdp:
-        return render_template(BASE, title=LOGIN['title'], context='change_password', 
+        return render_template(LOGIN['page'], title=LOGIN['title'], context='change_password', 
                              message="Veuillez changer votre mot de passe.")
     
     # Redirection vers la page d'accueil (module Clients)
@@ -245,20 +275,20 @@ def users() -> Any:
     Returns:
         Any: Template de gestion des utilisateurs ou message d'erreur
         
-    Note: 
+    TODO: 
         Fonctionnalité en développement - nécessite l'implémentation complète 
         de la logique de gestion des utilisateurs et des contrôles d'autorisation.
     """
     # Traitement de la création/modification d'utilisateur
     if request.method == 'POST':
-        # Note: Logique de création d'utilisateur à implémenter
+        # TODO: Logique de création d'utilisateur à implémenter
         # Devra inclure: validation des données, hashage du mot de passe,
         # vérification des autorisations, sauvegarde en base
         pass
     
     # Traitement de l'affichage de la liste des utilisateurs
     elif request.method == 'GET':
-        # Note: Récupération et affichage de la liste des utilisateurs
+        # TODO: Récupération et affichage de la liste des utilisateurs
         # Devra inclure: pagination, filtrage, contrôle des autorisations
         return render_template(BASE, title='ACFC - Gestion Utilisateurs', context='users')
     else:
