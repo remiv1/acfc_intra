@@ -19,7 +19,7 @@ Auteur : ACFC Development Team
 Version : 1.0
 '''
 
-from flask import Flask, Response, render_template, request, Blueprint, session
+from flask import Flask, Response, render_template, request, Blueprint, session, url_for, redirect
 from flask_session import Session
 from waitress import serve
 from typing import Any, Dict, Tuple
@@ -106,6 +106,12 @@ CLIENT: Dict[str, str] = {
 USER: Dict[str, str] = {
     'title': 'ACFC - Administration Utilisateurs',
     'context': 'user',
+    'page': BASE
+}
+# Configuration changement de mot de passe
+CHG_PWD: Dict[str, str] = {
+    'title': 'ACFC - Changement de Mot de Passe',
+    'context': 'change_password',
     'page': BASE
 }
 
@@ -254,11 +260,65 @@ def login() -> Any:
     # Fonctionnalité de sécurité pour forcer le renouvellement des mots de passe
     if user.is_chg_mdp:
         return render_template(LOGIN['page'], title=LOGIN['title'], context='change_password', 
-                             message="Veuillez changer votre mot de passe.")
-    
+                             message="Veuillez changer votre mot de passe.", username=user.pseudo)
+
     # Redirection vers la page d'accueil (module Clients)
     return render_template(CLIENT['page'], title=CLIENT['title'], context=CLIENT['context'])
 
+@acfc.route('/logout')
+def logout() -> Any:
+    """
+    Déconnexion de l'utilisateur.
+    """
+    session.clear()
+    return url_for('login')
+
+@acfc.route('/chg_pwd', methods=['POST'])
+def chg_pwd() -> Any:
+    """
+    Changement de mot de passe utilisateur.
+    """
+    if request.method == 'POST':
+        # Récupération des données du formulaire
+        username = request.form.get('username', '')
+        old_password = request.form.get('old_password', '')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        # Validation des données
+        if not all([username, old_password, new_password, confirm_password]):
+            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
+                                   message='Merci de remplir tous les champs.', username=username)
+
+        if new_password != confirm_password:
+            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
+                                   message="Les mots de passe ne correspondent pas.", username=username)
+
+        if new_password == old_password:
+            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
+                                   message="Le nouveau mot de passe ne peut pas être identique à l'ancien.", username=username)
+
+        # Vérification de l'ancien mot de passe
+        db_session = SessionBdD()
+        user = db_session.query(User).filter_by(pseudo=username).first()
+        if not user or not ph_acfc.verify_password(old_password, user.sha_mdp):
+            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
+                                   message='Ancien mot de passe incorrect.', username=username)
+
+        # Hashage du nouveau mot de passe
+        user.sha_mdp = ph_acfc.hash_password(new_password)
+
+        # retrait de la nécessité de changer le mot de passe
+        user.is_chg_mdp = False
+        try:
+            db_session.commit()
+        except Exception as e:
+            db_session.rollback()
+            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context='500', message=str(e))
+
+        return redirect(url_for('login'))
+
+    return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context='400', message=INVALID)
 
 @acfc.route('/users', methods=['GET', 'POST'])
 def users() -> Any:

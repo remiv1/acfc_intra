@@ -30,6 +30,12 @@ services:
     environment:
       - FLASK_ENV=development                 # Mode développement (à changer en prod)
       - DATABASE_URL=mysql+pymysql://user:password@acfc-db/acfc  # Connexion BDD
+      # Variables DB passées au conteneur pour que l'application se connecte au service acfc-db
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
     networks:
       - acfc-network                          # Réseau privé inter-services
     depends_on:
