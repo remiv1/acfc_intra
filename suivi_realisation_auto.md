@@ -2,17 +2,17 @@
 
 **Date du rapport :** 21 August 2025  
 **Période analysée :** 14 August 2025 - 21 August 2025 (7 jours)  
-**Nombre de commits :** 14  
+**Nombre de commits :** 16  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 14 commits sur 7 jours  
-**Volume de code :** 4692 lignes ajoutées, 718 lignes supprimées  
-**Fichiers impactés :** 247 fichiers modifiés  
-**Productivité moyenne :** 670 lignes/jour
+**Activité de développement :** 16 commits sur 7 jours  
+**Volume de code :** 4878 lignes ajoutées, 805 lignes supprimées  
+**Fichiers impactés :** 265 fichiers modifiés  
+**Productivité moyenne :** 696 lignes/jour
 
 ---
 
@@ -173,6 +173,28 @@
 
 ### 21 August 2025
 
+#### 19:43 - a9db200 - feat: Ajout de la gestion des logs, mise à jour des modèles et amélioration de la gestion des mots de passe
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +142 -68 lignes, 14 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Thu Aug 21 19:43:07 2025 +0200`
+- `    feat: Ajout de la gestion des logs, mise à jour des modèles et amélioration de la gestion des mots de passe`
+- ... et 11 autres fichiers
+
+#### 13:27 - 73afa77 - 📊 Mise à jour automatique du rapport de suivi (21/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +44 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Thu Aug 21 13:27:21 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (21/08/2025)`
+- ... et 1 autres fichiers
+
 #### 15:26 - 7d500b6 - feat(security): Enhance password management with Argon2 and secure session handling
 
 **Catégorie :** Développement de fonctionnalités  
@@ -189,35 +211,35 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 10 commits (71.4%)
-- **Interface utilisateur** : 4 commits (28.6%)
+- **Développement de fonctionnalités** : 11 commits (68.8%)
+- **Interface utilisateur** : 5 commits (31.2%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **HTML** : 36 fichiers modifiés
-- **Python** : 30 fichiers modifiés
-- **Documentation** : 13 fichiers modifiés
+- **HTML** : 38 fichiers modifiés
+- **Python** : 33 fichiers modifiés
+- **Documentation** : 14 fichiers modifiés
 - **CSS** : 12 fichiers modifiés
-- **JavaScript** : 10 fichiers modifiés
-- **Docker** : 5 fichiers modifiés
-- **YAML/Config** : 5 fichiers modifiés
+- **JavaScript** : 11 fichiers modifiés
+- **Docker** : 7 fichiers modifiés
+- **YAML/Config** : 6 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 2.0 commits/jour
-- **Volume de code :** 5410 modifications totales
-- **Ratio ajouts/suppressions :** 6.53
-- **Moyenne lignes par commit :** 386
+- **Fréquence de commit :** 2.3 commits/jour
+- **Volume de code :** 5683 modifications totales
+- **Ratio ajouts/suppressions :** 6.06
+- **Moyenne lignes par commit :** 355
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 4692 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 4878 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 21 August 2025*
