@@ -1,86 +1,144 @@
+# ====================================================================
+# DOCKER COMPOSE - INFRASTRUCTURE ACFC
+# ====================================================================
+# Configuration de l'architecture micro-services pour l'application ACFC
+# 
+# Services déployés :
+# - acfc-app     : Application web Flask (port 5000)
+# - acfc-nginx   : Reverse proxy et serveur statique (port 80)
+# - acfc-db      : Base de données MariaDB (port 3306)
+# - acfc-logs    : Base NoSQL MongoDB pour logging des traces (port 27017)
+# 
+# Réseau : acfc-network (isolé, communication inter-services)
+# Volumes : Persistance des données (base, logs, documents --factures, commandes, remises de chèques--)
+# 
+# Environnement : Development/Production (configurable via .env)
+# Maintenu par : Rémi Verschuur
+# Version : 1.0
+
 services:
+  # ================================================================
+  # SERVICE APPLICATION WEB FLASK
+  # ================================================================
   acfc-app:
     container_name: acfc-app
     build:
-      context: .
-      dockerfile: app_acfc/dockerfile.app
+      context: .                              # Build depuis la racine du projet
+      dockerfile: app_acfc/dockerfile.app     # Dockerfile spécialisé application
     ports:
-      - "5000:5000"
+      - "5000:5000"                           # Mapping port Flask (dev uniquement)
     environment:
-      - FLASK_ENV=development
-      - DATABASE_URL=mysql+pymysql://user:password@acfc-db/acfc
+      - FLASK_ENV=development                 # Mode développement (à changer en prod)
+      - DATABASE_URL=mysql+pymysql://user:password@acfc-db/acfc  # Connexion BDD
     networks:
-      - acfc-network
+      - acfc-network                          # Réseau privé inter-services
+    depends_on:
+      acfc-db:
+        condition: service_healthy            # Attendre que la BDD soit prête
+    restart: unless-stopped                   # Redémarrage automatique sauf arrêt manuel
   
+  # ================================================================
+  # SERVICE REVERSE PROXY NGINX
+  # ================================================================
   acfc-nginx:
     container_name: acfc-nginx
-    image: nginx:latest
+    image: nginx:latest                       # Image officielle Nginx
     ports:
-      - "80:80"
+      - "80:80"                              # Port HTTP standard
+      - "443:443"                            # Port HTTPS (certificats à configurer)
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro  # Configuration personnalisée
+      - ./app_acfc/statics:/var/www/static:ro        # Fichiers statiques (CSS, JS, images)
     networks:
       - acfc-network
+    depends_on:
+      - acfc-app                             # Démarre après l'application
+    restart: unless-stopped
 
+  # ================================================================
+  # SERVICE BASE DE DONNÉES MARIADB
+  # ================================================================
   acfc-db:
     container_name: acfc-db
     build:
-      context: ./mariadb
-      dockerfile: dockerfile.mariadb
-    restart: always
+      context: ./mariadb                     # Dossier contenant Dockerfile et scripts
+      dockerfile: dockerfile.mariadb         # Dockerfile spécialisé MariaDB
+    restart: always                          # Redémarrage permanent (service critique)
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      # Variables d'environnement sécurisées via fichier .env
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}  # Mot de passe administrateur
+      MYSQL_DATABASE: ${DB_NAME}                # Base de données application
+      MYSQL_USER: ${DB_USER}                    # Utilisateur application
+      MYSQL_PASSWORD: ${DB_PASSWORD}            # Mot de passe utilisateur
     ports:
-      - "3306:3306"
+      - "3306:3306"                          # Port MySQL/MariaDB (dev uniquement)
     volumes:
-      - acfc-db-data:/var/lib/mysql
+      - acfc-db-data:/var/lib/mysql          # Persistance des données
+      - ./mariadb/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro  # Script d'initialisation
     healthcheck:
+      # Vérification de santé pour démarrage ordonné des services
       test: ["CMD", "mariadb", "-u", "root", "-p${DB_ROOT_PASSWORD}", "-e", "SELECT 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      interval: 10s                          # Vérification toutes les 10 secondes
+      timeout: 5s                            # Timeout par tentative
+      retries: 10                            # 10 tentatives max
     networks:
       - acfc-network
 
+  # ================================================================
+  # SERVICE LOGGING MONGODB
+  # ================================================================
   acfc-logs:
     container_name: acfc-logs
-    image: mongo:latest
+    image: mongo:latest                      # Image officielle MongoDB
     volumes:
-      - acfc-logs-data:/data/db
-      - ./mongo/mongod.conf:/etc/mongod.conf
-      - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+      - acfc-logs-data:/data/db              # Persistance des logs
+      - ./mongo/mongod.conf:/etc/mongod.conf:ro           # Configuration MongoDB
+      - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro  # Script d'initialisation
     networks:
       - acfc-network
     restart: always
     ports:
-      - "27017:27017"
-    command: ['mongod', '--config', '/etc/mongod.conf']
+      - "27017:27017"                        # Port MongoDB (dev uniquement)
+    command: ['mongod', '--config', '/etc/mongod.conf']  # Démarrage avec config personnalisée
     environment:
+      # Configuration d'authentification MongoDB
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
       MONGO_HOST: ${MONGO_HOST}
       MONGO_PORT: ${MONGO_PORT}
     healthcheck:
+      # Test de connectivité MongoDB
       test: ["CMD-SHELL", "echo 'db.runCommand({ ping: 1 })' | mongosh localhost:27017/logs --quiet"]
       interval: 10s
       timeout: 5s
       retries: 10
-
-
+# ================================================================
+# VOLUMES PERSISTANTS
+# ================================================================
+# Stockage persistant des données pour survie aux redémarrages
 volumes:
   acfc-db-data:
-    driver: local
+    driver: local                            # Stockage local pour données MariaDB
+    name: acfc_database_data
   acfc-logs-data:
-    driver: local
+    driver: local                            # Stockage local pour logs MongoDB
+    name: acfc_logs_data
   acfc-factures:
-    driver: local
+    driver: local                            # Stockage pour documents PDF de facturation
+    name: acfc_invoices_storage
   acfc-rch:
-    driver: local
+    driver: local                            # Stockage pour documents de remises de chèques
+    name: acfc_research_storage
   
+# ================================================================
+# RÉSEAUX
+# ================================================================
+# Réseau privé pour communication sécurisée inter-services
 networks:
   acfc-network:
-    driver: bridge
+    driver: bridge                           # Driver bridge pour isolation réseau
+    name: acfc_internal_network
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16             # Sous-réseau privé dédié
