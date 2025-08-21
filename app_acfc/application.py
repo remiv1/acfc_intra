@@ -19,13 +19,15 @@ Auteur : ACFC Development Team
 Version : 1.0
 '''
 
-from flask import Flask, Response, render_template, request, Blueprint, session, url_for, redirect
+from flask import Flask, Response, render_template, request, Blueprint, session, url_for, redirect, jsonify
 from flask_session import Session
 from waitress import serve
 from typing import Any, Dict, Tuple
 from werkzeug.exceptions import HTTPException
 from services import PasswordService, SecureSessionService
 from modeles import SessionBdD, User
+from datetime import datetime
+from sqlalchemy import text
 #TODO: modifier les systèmes de logs
 import logging
 import sys
@@ -272,6 +274,46 @@ def logout() -> Any:
     """
     session.clear()
     return url_for('login')
+
+@acfc.route('/health')
+def health() -> Any:
+    """
+    Endpoint de santé pour les vérifications CI/CD et monitoring.
+    
+    Retourne l'état de l'application et de ses services dépendants.
+    Utilisé par Docker Compose CI pour valider le bon fonctionnement.
+    
+    Returns:
+        JSON: Statut de l'application et de ses dépendances
+    """
+    try:
+        # Vérification de la base de données
+        db_status = "ok"
+        try:
+            db_session = SessionBdD()
+            db_session.execute(text("SELECT 1"))
+            db_session.close()
+        except Exception as e:
+            db_status = f"error: {str(e)}"
+        
+        health_data = {
+            "status": "healthy" if db_status == "ok" else "degraded",
+            "timestamp": datetime.now().isoformat(),
+            "services": {
+                "database": db_status,
+                "application": "ok"
+            },
+            "version": "1.0"
+        }
+        
+        return jsonify(health_data), 200 if db_status == "ok" else 503
+        
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }), 500
 
 @acfc.route('/chg_pwd', methods=['POST'])
 def chg_pwd() -> Any:
