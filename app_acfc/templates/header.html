@@ -21,6 +21,7 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="clientsDropdown">
                         <li><a class="dropdown-item" href="/clients/rechercher">Rechercher</a></li>
                         <li><a class="dropdown-item" href="/clients">Liste</a></li>
+                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/clients">Traiter une commande</a></li>
                         <li><a class="dropdown-item" href="/clients">Commandes en cours</a></li>
                     </ul>
@@ -33,9 +34,11 @@
                         <li><a class="dropdown-item" href="/comptabilite">Livre-Journal</a></li>
                         <li><a class="dropdown-item" href="/comptabilite">Grand-Livre</a></li>
                         <li><a class="dropdown-item" href="/comptabilite">Export comptable</a></li>
-                        <li><a class="dropdown-item" href="/comptabilite">Paiement chèque</a></li>
-                        <li><a class="dropdown-item" href="/comptabilite">Paiement virement</a></li>
-                        <li><a class="dropdown-item" href="/comptabilite">Paiement espèces</a></li>
+                        <li><hr class="dropdown-divider"> Paiements...</li>
+                        <li><a class="dropdown-item" href="/comptabilite">... chèque</a></li>
+                        <li><a class="dropdown-item" href="/comptabilite">... virement</a></li>
+                        <li><a class="dropdown-item" href="/comptabilite">... espèces</a></li>
+                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/comptabilite">Suivi impayés</a></li>
                         <li><a class="dropdown-item" href="/comptabilite">Vérifier une facture</a></li>
                         <li><a class="dropdown-item" href="/comptabilite">Trouver une remise de chèques</a></li>
@@ -47,6 +50,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="catalogueDropdown">
                         <li><a class="dropdown-item" href="/catalogue">Vue catalogue</a></li>
+                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/catalogue">Gestion des produits</a></li>
                         <li><a class="dropdown-item" href="/catalogue">Gestion des combinaisons</a></li>
                     </ul>
@@ -65,16 +69,27 @@
                         Stocks
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="stocksDropdown">
-                        <li><a class="dropdown-item" href="/stocks">Ouverture du stock</a></li>
+                        <li><a class="dropdown-item" href="/stocks">Visualiser le stock</a></li>
+                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/stocks">Utiliser des timbres</a></li>
                         <li><a class="dropdown-item" href="/stocks">Rentrer des timbres</a></li>
                         <li><a class="dropdown-item" href="/stocks">Inventorier une valeur</a></li>
-                        <li><a class="dropdown-item" href="/stocks">Visualiser les stocks</a></li>
                     </ul>
-                </li>
+                </li>{% if 'user_id' not in session -%}
                 <li class="nav-item">
-                    <button class="btn btn-primary ms-2" type="button">Se connecter</button>
-                </li>
+                    <button class="btn btn-primary ms-2" type="button" onclick="location.href='/login'">Se connecter</button>
+                </li>{% else -%}
+                <li class="nav-item">
+                    <button class="nav-link dropdown-toggle btn btn-link" id="myAccountDropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Mon Compte
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="myAccountDropdown">
+                        <li><a class="dropdown-item" href="/user/{{ session.pseudo }}">Profil</a></li>
+                        <li><a class="dropdown-item" href="/user/{{ session.pseudo }}/parameters">Paramètres</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">Se déconnecter</a></li>
+                    </ul>
+                </li>{% endif -%}
             </ul>
         </div>
     </div>

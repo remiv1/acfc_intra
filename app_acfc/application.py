@@ -23,7 +23,7 @@ from flask import Flask, Response, render_template, request, Blueprint, session,
 from flask_session import Session
 from waitress import serve
 from typing import Any, Dict, Tuple
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import HTTPException, Forbidden, Unauthorized
 from services import PasswordService, SecureSessionService
 from modeles import SessionBdD, User
 from datetime import datetime
@@ -105,15 +105,23 @@ CLIENT: Dict[str, str] = {
 }
 
 # Configuration administration utilisateurs
-USER: Dict[str, str] = {
+USERS: Dict[str, str] = {
     'title': 'ACFC - Administration Utilisateurs',
     'context': 'user',
     'page': BASE
 }
+
 # Configuration changement de mot de passe
 CHG_PWD: Dict[str, str] = {
     'title': 'ACFC - Changement de Mot de Passe',
     'context': 'change_password',
+    'page': BASE
+}
+
+# Configuration changement de mot de passe
+USER: Dict[str, str] = {
+    'title': 'ACFC - Mon Compte',
+    'context': 'user_account',
     'page': BASE
 }
 
@@ -129,7 +137,7 @@ ph_acfc = PasswordService()
 # ====================================================================
 
 @acfc.before_request
-def before_request() -> str | None:
+def before_request() -> Any:
     '''
     Middleware exécuté avant chaque requête.
     
@@ -139,8 +147,21 @@ def before_request() -> str | None:
     Returns:
         str | None: Template de connexion si pas de session, None sinon
     '''
-    if 'user_id' not in session and request.endpoint != 'login':
-        return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'])
+    # Si l'utilisateur est déjà connecté
+    if 'user_id' in session:
+        return None
+    
+    # Autoriser la page de login
+    if request.endpoint == 'login':
+        return None
+    
+    # Autoriser les statiques (app + blueprints)
+    static_url = acfc.static_url_path or '/static'
+    if request.path.startswith(static_url) or (request.endpoint and request.endpoint.endswith('.static')):
+        return None
+
+    # Si l'utilisateur n'est pas connecté, rediriger vers la page de login
+    return redirect(url_for('login'))
 
 @acfc.after_request
 def after_request(response: Response) -> Response:
@@ -193,10 +214,6 @@ def login() -> Any:
         """Extraction sécurisée des identifiants depuis le formulaire."""
         return request.form.get('username', ''), request.form.get('password', '')
 
-    def _render_login() -> str:
-        """Rendu standardisé de la page de connexion."""
-        return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'])
-
     def _apply_successful_login(user: User) -> None:
         """
         Application des données de session après authentification réussie.
@@ -214,8 +231,8 @@ def login() -> Any:
 
     # === TRAITEMENT GET : Affichage du formulaire de connexion ===
     if request.method == 'GET':
-        logging.debug("GET request for login")
-        return _render_login()
+        logging.info("GET request for login")
+        return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'])
     elif request.method != 'POST':
         logging.warning("Invalid request method")
         return render_template(BASE, title=LOGIN['title'], context='400', message=WRONG_ROAD)
@@ -273,7 +290,7 @@ def logout() -> Any:
     Déconnexion de l'utilisateur.
     """
     session.clear()
-    return url_for('login')
+    return redirect(url_for('login'))
 
 @acfc.route('/health')
 def health() -> Any:
@@ -296,7 +313,7 @@ def health() -> Any:
         except Exception as e:
             db_status = f"error: {str(e)}"
         
-        health_data = {
+        health_data: Dict[str, Any] = {
             "status": "healthy" if db_status == "ok" else "degraded",
             "timestamp": datetime.now().isoformat(),
             "services": {
@@ -362,6 +379,10 @@ def chg_pwd() -> Any:
 
     return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context='400', message=INVALID)
 
+# ====================================================================
+# GESTIONNAIRES UTILISATEURS/UTILISATEUR
+# ====================================================================
+
 @acfc.route('/users', methods=['GET', 'POST'])
 def users() -> Any:
     """
@@ -396,6 +417,126 @@ def users() -> Any:
     else:
         return render_template(BASE, title='ACFC - Erreur', context='400')
 
+@acfc.route('/user/<pseudo>', methods=['GET', 'POST'])
+def my_account(pseudo: str) -> Any:
+    """
+    Affichage de la page "Mon Compte" pour l'utilisateur connecté.
+    
+    Returns:
+        Any: Template de la page "Mon Compte"
+    """
+    
+    #=== Gestion de la requête GET ===
+    if request.method == 'GET':
+        db_session = SessionBdD()
+        # Vérification de l'utilisateur connecté == au compte recherché
+        if session.get('pseudo') != pseudo: raise Forbidden("Vous n'êtes pas autorisé à accéder à ce compte.")
+
+        # Recherche de l'utilisateur en base de données
+        user = db_session.query(User).filter_by(pseudo=pseudo).first()
+
+        # Retour si l'utilisateur n'est pas trouvé (route appelée hors lien)
+        if not user: return render_template(BASE, title='ACFC - Erreur', context='400')
+
+        return render_template(USER['page'], title=USER['title'], context=USER['context'], objects=[user])
+    
+    #=== Gestion de la requête POST ===
+    elif request.method == 'POST':
+        db_session = SessionBdD()
+        try:
+            # Vérification de l'utilisateur connecté == au compte recherché
+            if session.get('pseudo') != pseudo:
+                raise Forbidden("Vous n'êtes pas autorisé à modifier ce compte.")
+
+            # Recherche de l'utilisateur en base de données
+            user = db_session.query(User).filter_by(pseudo=pseudo).first()
+            if not user:
+                return render_template(BASE, title='ACFC - Erreur', context='400', 
+                                     message="Utilisateur non trouvé.")
+
+            # Récupération des données du formulaire
+            new_prenom = request.form.get('prenom', '').strip()
+            new_nom = request.form.get('nom', '').strip()
+            new_email = request.form.get('email', '').strip()
+            new_telephone = request.form.get('telephone', '').strip()
+
+            # Validation des données obligatoires
+            if not all([new_prenom, new_nom, new_email, new_telephone]):
+                return render_template(USER['page'], title=USER['title'], context=USER['context'], 
+                                     subcontext='parameters', objects=[user], 
+                                     message="Tous les champs sont obligatoires.")
+
+            # Validation de l'email (format basique)
+            import re
+            email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+            if not re.match(email_pattern, new_email):
+                return render_template(USER['page'], title=USER['title'], context=USER['context'], 
+                                     subcontext='parameters', objects=[user], 
+                                     message="Le format de l'adresse email n'est pas valide.")
+
+            # Vérification de l'unicité de l'email (si modifié)
+            if new_email != user.email:
+                existing_user = db_session.query(User).filter_by(email=new_email).first()
+                if existing_user:
+                    return render_template(USER['page'], title=USER['title'], context=USER['context'], 
+                                         subcontext='parameters', objects=[user], 
+                                         message="Cette adresse email est déjà utilisée par un autre compte.")
+
+            # Mise à jour des données utilisateur
+            user.prenom = new_prenom
+            user.nom = new_nom
+            user.email = new_email
+            user.telephone = new_telephone
+
+            # Mise à jour de la session si les données affichées changent
+            session['first_name'] = new_prenom
+            session['last_name'] = new_nom
+            session['email'] = new_email
+
+            # Sauvegarde en base de données
+            db_session.commit()
+
+            # Redirection vers la page de consultation avec message de succès
+            return render_template(USER['page'], title=USER['title'], context=USER['context'], 
+                                 objects=[user], success_message="Vos informations ont été mises à jour avec succès.")
+
+        except Exception as e:
+            db_session.rollback()
+            # Si user n'a pas pu être récupéré, on crée un objet vide pour le template
+            if 'user' not in locals():
+                user = User()
+                user.pseudo = pseudo  # Au moins le pseudo pour le template
+            return render_template(USER['page'], title=USER['title'], context=USER['context'], 
+                                 subcontext='parameters', objects=[user], 
+                                 message=f"Erreur lors de la mise à jour : {str(e)}")
+        finally:
+            db_session.close()
+    
+    #=== Gestion de toutes les autres méthodes ===
+    else: raise Unauthorized("Méthode non autorisée.")
+
+@acfc.route('/user/<pseudo>/parameters', methods=['GET', 'POST'])
+def user_parameters(pseudo: str) -> Any:
+    """
+    Affichage de la page "Paramètres" pour l'utilisateur connecté. (GET)
+    Enregistrement des paramètres de l'utilisateur connecté. (POST)
+
+    Returns:
+        Any: Template de la page "Paramètres"
+    """
+    # === Gestion de la requête GET ===
+    if request.method == 'GET':
+        db_session = SessionBdD()
+        user = db_session.query(User).filter_by(pseudo=pseudo).first()
+        if not user: return render_template(BASE, title='ACFC - Erreur', context='400')
+        return render_template(USER['page'], title=USER['title'], context=USER['context'], subcontext='parameters', objects=[user])
+    elif request.method == 'POST':
+        # Redirection vers my_account qui gère la logique POST
+        # car le formulaire pointe vers my_account, pas vers user_parameters
+        return redirect(url_for('my_account', pseudo=pseudo))
+    else:
+        return render_template(BASE, title='ACFC - Erreur', context='400')
+
 # ====================================================================
 # GESTIONNAIRES D'ERREURS HTTP
 # ====================================================================
@@ -420,8 +561,20 @@ def handle_4xx_errors(error: HTTPException) -> str:
     Returns:
         str: Template d'erreur personnalisé avec code et message
     """
+    match error.code:
+        case 400:
+            message_error = f'Votre requête est mal formée.\n{error.name}'
+        case 401:
+            message_error = f'Authentification requise.\n{error.name}'
+        case 403:
+            message_error = f'Accès interdit.\n{error.name}'
+        case 404:
+            message_error = f'Ressource non trouvée.\n{error.name}'
+        case _:
+            message_error = f'Erreur inconnue, {error.name}'
+
     return render_template(BASE, title='ACFC - Erreur Client', context='400', 
-                         status_code=error.code, status_message=error.name)
+                         status_code=error.code, status_message=message_error)
 
 @acfc.errorhandler(500)
 @acfc.errorhandler(502)
@@ -443,8 +596,20 @@ def handle_5xx_errors(error: HTTPException) -> str:
     Returns:
         str: Template d'erreur personnalisé avec code et message
     """
+    match error.code:
+        case 500:
+            message_error = f'Erreur interne du serveur.\n{error.name}'
+        case 502:
+            message_error = f'Erreur de passerelle.\n{error.name}'
+        case 503:
+            message_error = f'Service indisponible.\n{error.name}'
+        case 504:
+            message_error = f'Timeout de passerelle.\n{error.name}'
+        case _:
+            message_error = f'Erreur inconnue, {error.name}'
+
     return render_template(BASE, title='ACFC - Erreur Serveur', context='500', 
-                         status_code=error.code, status_message=error.name)
+                         status_code=error.code, status_message=message_error)
 
 # ====================================================================
 # ENREGISTREMENT DES MODULES MÉTIERS

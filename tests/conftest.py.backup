@@ -1,0 +1,459 @@
+"""
+Configuration et fixtures globales pour les tests ACFC
+=====================================================
+
+Ce fichier centralise toutes les fixtures communes utilisées
+dans les différents modules de test.
+"""
+
+import pytest
+import tempfile
+import os
+from unittest.mock import Mock, patch, MagicMock
+from datetime import datetime, timedelta
+import json
+
+# Configuration de l'environnement de test
+os.environ['TESTING'] = 'true'
+os.environ['FLASK_ENV'] = 'testing'
+os.environ['SECRET_KEY'] = 'test-secret-key-very-long-for-security'
+
+# Import de l'application après configuration de l'environnement
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'app_acfc'))
+
+# Import conditionnel pour éviter les erreurs de base de données
+app = None
+User = None
+
+try:
+    # Patch de la configuration avant import
+    from unittest.mock import patch
+    with patch.dict(os.environ, {
+        'DATABASE_URL': 'sqlite:///:memory:',
+        'DB_HOST': 'localhost',
+        'DB_USER': 'test',
+        'DB_PASSWORD': 'test',
+        'DB_NAME': 'test'
+    }):
+        from application import app
+        from modeles import User
+except ImportError as e:
+    print(f"Warning: Could not import application modules: {e}")
+    # Fallback pour les tests sans application complète
+    pass
+
+
+@pytest.fixture(scope='session')
+def app_instance():
+    """Fixture pour l'instance Flask de test"""
+    if app is None:
+        pytest.skip("Application Flask non disponible")
+    
+    # Configuration spécifique aux tests
+    app.config.update({
+        'TESTING': True,
+        'WTF_CSRF_ENABLED': False,
+        'SECRET_KEY': 'test-secret-key-very-long-for-security',
+        'DATABASE_URL': 'sqlite:///:memory:',
+        'SESSION_TYPE': 'filesystem',
+        'SESSION_PERMANENT': False
+    })
+    
+    return app
+
+
+@pytest.fixture
+def client(app_instance):
+    """Client de test Flask"""
+    with app_instance.test_client() as client:
+        with app_instance.app_context():
+            yield client
+
+
+@pytest.fixture
+def app_context(app_instance):
+    """Contexte d'application Flask"""
+    with app_instance.app_context():
+        yield app_instance
+
+
+@pytest.fixture
+def request_context(app_instance):
+    """Contexte de requête Flask"""
+    with app_instance.test_request_context():
+        yield
+
+
+# ============================================================================
+# FIXTURES D'AUTHENTIFICATION
+# ============================================================================
+
+@pytest.fixture
+def mock_user():
+    """Utilisateur de test mocké"""
+    user = Mock()
+    user.id = 1
+    user.nom = "Test"
+    user.prenom = "User"
+    user.login = "testuser"
+    user.email = "test@example.com"
+    user.mot_de_passe = "hashed_password"
+    user.is_admin = False
+    user.is_active = True
+    user.last_login = datetime.now()
+    user.created_at = datetime.now() - timedelta(days=30)
+    user.updated_at = datetime.now()
+    return user
+
+
+@pytest.fixture
+def mock_admin_user():
+    """Administrateur de test mocké"""
+    user = Mock()
+    user.id = 2
+    user.nom = "Admin"
+    user.prenom = "User"
+    user.login = "admin"
+    user.email = "admin@example.com"
+    user.mot_de_passe = "hashed_admin_password"
+    user.is_admin = True
+    user.is_active = True
+    user.last_login = datetime.now()
+    user.created_at = datetime.now() - timedelta(days=60)
+    user.updated_at = datetime.now()
+    return user
+
+
+@pytest.fixture
+def authenticated_session(client, mock_user):
+    """Session utilisateur authentifiée"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = mock_user.id
+        sess['username'] = mock_user.login
+        sess['is_admin'] = mock_user.is_admin
+        sess['logged_in'] = True
+    return client
+
+
+@pytest.fixture
+def admin_session(client, mock_admin_user):
+    """Session administrateur authentifiée"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = mock_admin_user.id
+        sess['username'] = mock_admin_user.login
+        sess['is_admin'] = mock_admin_user.is_admin
+        sess['logged_in'] = True
+    return client
+
+
+# ============================================================================
+# FIXTURES DE DONNÉES DE TEST
+# ============================================================================
+
+@pytest.fixture
+def sample_user_data():
+    """Données d'utilisateur pour les tests"""
+    return {
+        'nom': 'Nouveau',
+        'prenom': 'Utilisateur',
+        'login': 'nouveauuser',
+        'email': 'nouveau@example.com',
+        'mot_de_passe': 'MotDePasseSecurise123!',
+        'confirm_password': 'MotDePasseSecurise123!'
+    }
+
+
+@pytest.fixture
+def sample_login_data():
+    """Données de connexion pour les tests"""
+    return {
+        'login': 'testuser',
+        'mot_de_passe': 'password123'
+    }
+
+
+@pytest.fixture
+def sample_password_change_data():
+    """Données de changement de mot de passe"""
+    return {
+        'current_password': 'ancien_mot_de_passe',
+        'new_password': 'NouveauMotDePasse123!',
+        'confirm_password': 'NouveauMotDePasse123!'
+    }
+
+
+# ============================================================================
+# FIXTURES DE MOCK POUR LES SERVICES
+# ============================================================================
+
+@pytest.fixture
+def mock_database():
+    """Mock de la base de données"""
+    with patch('modeles.db') as mock_db:
+        mock_db.session.add = Mock()
+        mock_db.session.commit = Mock()
+        mock_db.session.rollback = Mock()
+        mock_db.session.query = Mock()
+        yield mock_db
+
+
+@pytest.fixture
+def mock_user_service():
+    """Mock du service utilisateur"""
+    with patch('services.UserService') as mock_service:
+        service_instance = Mock()
+        mock_service.return_value = service_instance
+        
+        # Configuration des méthodes mockées
+        service_instance.authenticate = Mock(return_value=True)
+        service_instance.create_user = Mock(return_value=True)
+        service_instance.update_user = Mock(return_value=True)
+        service_instance.delete_user = Mock(return_value=True)
+        service_instance.get_user_by_id = Mock()
+        service_instance.get_user_by_login = Mock()
+        service_instance.change_password = Mock(return_value=True)
+        
+        yield service_instance
+
+
+@pytest.fixture
+def mock_session():
+    """Mock de la session Flask"""
+    session_data = {}
+    
+    def session_get(key, default=None):
+        return session_data.get(key, default)
+    
+    def session_set(key, value):
+        session_data[key] = value
+    
+    def session_pop(key, default=None):
+        return session_data.pop(key, default)
+    
+    def session_clear():
+        session_data.clear()
+    
+    with patch('flask.session') as mock_sess:
+        mock_sess.get = session_get
+        mock_sess.__setitem__ = session_set
+        mock_sess.__getitem__ = lambda key: session_data[key]
+        mock_sess.pop = session_pop
+        mock_sess.clear = session_clear
+        mock_sess.__contains__ = lambda key: key in session_data
+        yield mock_sess
+
+
+# ============================================================================
+# FIXTURES POUR LES MODULES MÉTIERS
+# ============================================================================
+
+@pytest.fixture
+def sample_client_data():
+    """Données de client pour les tests"""
+    return {
+        'nom': 'Entreprise Test',
+        'contact': 'Jean Dupont',
+        'email': 'contact@entreprise-test.com',
+        'telephone': '01.23.45.67.89',
+        'adresse': '123 Rue de Test, 75001 Paris'
+    }
+
+
+@pytest.fixture
+def sample_product_data():
+    """Données de produit pour les tests"""
+    return {
+        'nom': 'Produit Test',
+        'reference': 'PT001',
+        'description': 'Description du produit test',
+        'prix': 99.99,
+        'stock': 100,
+        'categorie': 'Test'
+    }
+
+
+@pytest.fixture
+def sample_order_data():
+    """Données de commande pour les tests"""
+    return {
+        'client_id': 1,
+        'produits': [
+            {'id': 1, 'quantite': 2, 'prix': 50.00},
+            {'id': 2, 'quantite': 1, 'prix': 75.00}
+        ],
+        'total': 175.00,
+        'statut': 'en_attente'
+    }
+
+
+# ============================================================================
+# FIXTURES UTILITAIRES
+# ============================================================================
+
+@pytest.fixture
+def temp_directory():
+    """Répertoire temporaire pour les tests"""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        yield temp_dir
+
+
+@pytest.fixture
+def temp_file():
+    """Fichier temporaire pour les tests"""
+    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp_file:
+        yield temp_file.name
+    # Nettoyage
+    try:
+        os.unlink(temp_file.name)
+    except FileNotFoundError:
+        pass
+
+
+@pytest.fixture
+def mock_datetime():
+    """Mock de datetime pour les tests"""
+    fixed_time = datetime(2024, 1, 15, 10, 30, 0)
+    with patch('datetime.datetime') as mock_dt:
+        mock_dt.now.return_value = fixed_time
+        mock_dt.utcnow.return_value = fixed_time
+        mock_dt.side_effect = lambda *args, **kw: datetime(*args, **kw)
+        yield mock_dt
+
+
+# ============================================================================
+# FIXTURES DE CONFIGURATION
+# ============================================================================
+
+@pytest.fixture(autouse=True)
+def cleanup_after_test():
+    """Nettoyage automatique après chaque test"""
+    yield
+    # Nettoyage des mocks globaux
+    patch.stopall()
+
+
+@pytest.fixture
+def mock_config():
+    """Configuration mockée pour les tests"""
+    config = {
+        'SECRET_KEY': 'test-key',
+        'DATABASE_URL': 'sqlite:///:memory:',
+        'TESTING': True,
+        'DEBUG': False,
+        'SESSION_TIMEOUT': 3600,
+        'MAX_LOGIN_ATTEMPTS': 3,
+        'PASSWORD_MIN_LENGTH': 8
+    }
+    return config
+
+
+@pytest.fixture
+def capture_logs(caplog):
+    """Capture des logs pour les tests"""
+    import logging
+    caplog.set_level(logging.DEBUG)
+    return caplog
+
+
+# ============================================================================
+# FIXTURES POUR LES TESTS DE PERFORMANCE
+# ============================================================================
+
+@pytest.fixture
+def benchmark_timer():
+    """Timer pour les tests de performance"""
+    import time
+    
+    class Timer:
+        def __init__(self):
+            self.start_time = None
+            self.end_time = None
+        
+        def start(self):
+            self.start_time = time.time()
+        
+        def stop(self):
+            self.end_time = time.time()
+        
+        @property
+        def elapsed(self):
+            if self.start_time and self.end_time:
+                return self.end_time - self.start_time
+            return None
+    
+    return Timer()
+
+
+# ============================================================================
+# MARKERS ET HELPERS
+# ============================================================================
+
+def pytest_configure(config):
+    """Configuration globale de pytest"""
+    # Enregistrement des marqueurs personnalisés
+    config.addinivalue_line(
+        "markers", "slow: marque les tests comme lents"
+    )
+    config.addinivalue_line(
+        "markers", "integration: tests d'intégration"
+    )
+    config.addinivalue_line(
+        "markers", "unit: tests unitaires"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """Modification de la collection de tests"""
+    # Ajout automatique du marqueur 'slow' pour les tests longs
+    for item in items:
+        if "slow" in item.keywords:
+            item.add_marker(pytest.mark.slow)
+
+
+# ============================================================================
+# HELPERS POUR LES TESTS
+# ============================================================================
+
+def assert_response_ok(response, expected_status=200):
+    """Helper pour vérifier une réponse HTTP"""
+    assert response.status_code == expected_status, \
+        f"Expected status {expected_status}, got {response.status_code}. Response: {response.data}"
+
+
+def assert_json_response(response, expected_keys=None):
+    """Helper pour vérifier une réponse JSON"""
+    assert response.content_type == 'application/json'
+    data = json.loads(response.data)
+    if expected_keys:
+        for key in expected_keys:
+            assert key in data, f"Key '{key}' not found in response: {data}"
+    return data
+
+
+def assert_redirect(response, expected_location=None):
+    """Helper pour vérifier une redirection"""
+    assert 300 <= response.status_code < 400, \
+        f"Expected redirect status, got {response.status_code}"
+    if expected_location:
+        assert response.location.endswith(expected_location), \
+            f"Expected redirect to '{expected_location}', got '{response.location}'"
+
+
+def assert_template_used(response, template_name):
+    """Helper pour vérifier qu'un template a été utilisé"""
+    # Note: Nécessite flask-testing ou une implémentation custom
+    pass  # Implémentation dépendante du setup de test
+
+
+def create_mock_response(status_code=200, json_data=None, text_data=None):
+    """Helper pour créer une réponse mockée"""
+    response = Mock()
+    response.status_code = status_code
+    if json_data:
+        response.json.return_value = json_data
+        response.content_type = 'application/json'
+    if text_data:
+        response.text = text_data
+        response.content_type = 'text/html'
+    return response

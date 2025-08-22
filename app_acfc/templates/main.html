@@ -9,9 +9,9 @@
     {% include 'comptabilite/comptabilite.html' %}
 {% elif context == 'stocks' %}
     {% include 'stocks/stocks.html' %}
-{% elif context == 400 %}
+{% elif context == '400' %}
     {% include '400.html' %}
-{% elif context == 500 %}
+{% elif context == '500' %}
     {% include '500.html' %}
 {% elif context == 'login' %}
     {% include 'login.html' %}
@@ -19,6 +19,8 @@
     {% include 'admin/users.html' %}
 {% elif context == 'change_password' %}
     {% include 'admin/change_password.html' %}
+{% elif context == 'user_account' %}
+    {% include 'utilisateurs/account.html' %}
 {% else %}
     {# template par défaut si `context` absent ou inconnu #}
     {% include 'default.html' %}

@@ -1,0 +1,36 @@
+# Dépendances pour les tests ACFC
+# ===============================
+
+# Framework de test principal
+pytest==8.3.2
+
+# Extensions pytest utiles
+pytest-flask==1.3.0           # Intégration Flask avec pytest
+pytest-mock==3.14.0           # Mocking avancé avec pytest
+pytest-cov==5.0.0             # Coverage des tests
+pytest-html==4.1.1            # Rapports HTML des tests
+pytest-xdist==3.6.0           # Exécution parallèle des tests
+
+# Mocking et fixtures
+responses==0.25.3             # Mock des requêtes HTTP
+factory-boy==3.3.1            # Factories pour les données de test
+faker==26.0.0                 # Génération de données de test
+
+# Validation et assertions
+cerberus==1.3.5               # Validation de schémas
+jsonschema==4.23.0            # Validation JSON
+
+# Utilitaires de test
+freezegun==1.5.1              # Mock du temps/dates
+testfixtures==8.3.0           # Fixtures avancées
+
+# Test de performance (optionnel)
+pytest-benchmark==4.0.0      # Benchmarking des fonctions
+
+# Analyse de code (optionnel)
+pytest-flake8==1.1.1         # Vérification PEP8
+pytest-mypy==0.10.3          # Vérification des types
+
+# Base de données de test (optionnel - nécessite PostgreSQL)
+# pytest-postgresql==6.0.0     # PostgreSQL pour tests
+# sqlalchemy-utils==0.41.2     # Utilitaires SQLAlchemy pour tests

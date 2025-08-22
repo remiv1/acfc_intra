@@ -1,0 +1,787 @@
+<!-- ====================================================================
+     ACFC - Template "Mon Compte" Utilisateur
+     ====================================================================
+     
+     Interface de gestion du profil utilisateur avec design Bootstrap moderne.
+     Affiche les informations personnelles, paramètres de sécurité et métadonnées
+     du compte avec une présentation claire et professionnelle.
+     
+     Variables Jinja attendues :
+     - objects[0] : Objet User SQLAlchemy avec tous les attributs
+     - subcontext (optionnel) : 'parameters' pour afficher l'onglet paramètres
+     
+     Features :
+     - Design responsive Bootstrap 5
+     - Onglets pour organiser l'information
+     - Badges de statut interactifs
+     - Alertes de sécurité contextuelles
+     - Actions rapides (changement mot de passe, paramètres)
+==================================================================== -->
+
+{% set user = objects[0] %}
+
+<div class="container-fluid">
+    <!-- En-tête avec avatar et informations principales -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <!-- Avatar placeholder -->
+                        <div class="me-4">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold user-avatar">
+                                {{ user.prenom[0].upper() }}{{ user.nom[0].upper() }}
+                            </div>
+                        </div>
+                        
+                        <!-- Informations principales -->
+                        <div class="flex-grow-1">
+                            <h2 class="mb-1 text-dark">{{ user.prenom }} {{ user.nom }}</h2>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-person-badge me-1"></i>{{ user.pseudo }}
+                            </p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <!-- Badge statut compte -->
+                                {% if user.is_active %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle me-1"></i>Compte actif
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle me-1"></i>Compte inactif
+                                    </span>
+                                {% endif %}
+                                
+                                <!-- Badge sécurité -->
+                                {% if user.is_locked %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-lock me-1"></i>Compte verrouillé
+                                    </span>
+                                {% endif %}
+                                
+                                {% if user.is_chg_mdp %}
+                                    <span class="badge bg-info">
+                                        <i class="bi bi-key me-1"></i>Changement de mot de passe requis
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Actions rapides -->
+                        <div class="text-end">
+                            <nav aria-label="Actions du compte">
+                                <a href="{{ url_for('user_parameters', pseudo=user.pseudo) }}" 
+                                   class="btn btn-outline-secondary btn-sm me-2">
+                                    <i class="bi bi-gear me-1"></i>Paramètres
+                                </a>
+                                <button type="button" class="btn btn-outline-primary btn-sm" 
+                                        data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                    <i class="bi bi-shield-lock me-1"></i>Changer le mot de passe
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages de succès et d'erreur -->
+    {% if success_message %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                {{ success_message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if message %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Navigation par onglets -->
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-tabs nav-fill mb-4" id="accountTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" 
+                            data-bs-target="#profile" type="button" role="tab">
+                        <i class="bi bi-person me-2"></i>Profil
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="security-tab" data-bs-toggle="tab" 
+                            data-bs-target="#security" type="button" role="tab">
+                        <i class="bi bi-shield-check me-2"></i>Sécurité
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="activity-tab" data-bs-toggle="tab" 
+                            data-bs-target="#activity" type="button" role="tab">
+                        <i class="bi bi-clock-history me-2"></i>Activité
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Contenu des onglets -->
+    <div class="tab-content" id="accountTabsContent">
+        
+        <!-- Onglet Profil -->
+        <div class="tab-pane fade show active" id="profile" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-person-lines-fill me-2 text-primary"></i>Informations personnelles
+                                {% if subcontext == 'parameters' %}
+                                    <span class="badge bg-primary ms-2">Mode édition</span>
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if subcontext == 'parameters' %}
+                                <!-- Mode édition - Formulaire -->
+                                <form action="{{ url_for('my_account', pseudo=user.pseudo) }}" method="post" class="needs-validation" novalidate>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="prenom" class="form-label">Prénom</label>
+                                            <input type="text" class="form-control" id="prenom" name="prenom" 
+                                                   value="{{ user.prenom }}" required>
+                                            <div class="invalid-feedback">
+                                                Veuillez saisir votre prénom.
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="nom" class="form-label">Nom de famille</label>
+                                            <input type="text" class="form-control" id="nom" name="nom" 
+                                                   value="{{ user.nom }}" required>
+                                            <div class="invalid-feedback">
+                                                Veuillez saisir votre nom de famille.
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label for="email" class="form-label">Adresse email</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="bi bi-envelope"></i>
+                                                </span>
+                                                <input type="email" class="form-control" id="email" name="email" 
+                                                       value="{{ user.email }}" required>
+                                                <div class="invalid-feedback">
+                                                    Veuillez saisir une adresse email valide.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="telephone" class="form-label">Téléphone</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="bi bi-telephone"></i>
+                                                </span>
+                                                <input type="tel" class="form-control" id="telephone" name="telephone" 
+                                                       value="{{ user.telephone }}" required>
+                                                <div class="invalid-feedback">
+                                                    Veuillez saisir votre numéro de téléphone.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="pseudo" class="form-label">Nom d'utilisateur</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">@</span>
+                                                <input type="text" class="form-control" id="pseudo" name="pseudo" 
+                                                       value="{{ user.pseudo }}" readonly 
+                                                       title="Le nom d'utilisateur ne peut pas être modifié">
+                                            </div>
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                Le nom d'utilisateur ne peut pas être modifié pour des raisons de sécurité.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <hr class="my-4">
+                                    
+                                    <!-- Boutons d'action -->
+                                    <div class="d-flex justify-content-between">
+                                        <a href="{{ url_for('my_account', pseudo=user.pseudo) }}" 
+                                           class="btn btn-outline-secondary">
+                                            <i class="bi bi-x-lg me-2"></i>Annuler
+                                        </a>
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="bi bi-check-lg me-2"></i>Enregistrer les modifications
+                                        </button>
+                                    </div>
+                                </form>
+                            {% else %}
+                                <!-- Mode lecture seule -->
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="field-label">Prénom</div>
+                                        <div class="field-value">{{ user.prenom }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="field-label">Nom de famille</div>
+                                        <div class="field-value">{{ user.nom }}</div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="field-label">Adresse email</div>
+                                        <div class="field-value">
+                                            <i class="bi bi-envelope me-2 text-muted"></i>{{ user.email }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="field-label">Téléphone</div>
+                                        <div class="field-value">
+                                            <i class="bi bi-telephone me-2 text-muted"></i>{{ user.telephone }}
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="field-label">Nom d'utilisateur</div>
+                                        <div class="field-value">
+                                            <code class="bg-light px-2 py-1 rounded">{{ user.pseudo }}</code>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <!-- Bouton de modification -->
+                                <div class="text-end">
+                                    <a href="{{ url_for('user_parameters', pseudo=user.pseudo) }}" 
+                                       class="btn btn-primary">
+                                        <i class="bi bi-pencil me-2"></i>Modifier mes informations
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h6 class="card-title mb-0">
+                                <i class="bi bi-info-circle me-2 text-info"></i>Statut du compte
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted">État</span>
+                                {% if user.is_active %}
+                                    <span class="badge bg-success-subtle text-success">Actif</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger">Inactif</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted">Sécurité</span>
+                                {% if user.is_locked %}
+                                    <span class="badge bg-warning-subtle text-warning">Verrouillé</span>
+                                {% else %}
+                                    <span class="badge bg-success-subtle text-success">Normal</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Erreurs de connexion</span>
+                                {% if user.nb_errors > 0 %}
+                                    <span class="badge bg-warning-subtle text-warning">{{ user.nb_errors }}</span>
+                                {% else %}
+                                    <span class="badge bg-success-subtle text-success">0</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Sécurité -->
+        <div class="tab-pane fade" id="security" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-shield-lock me-2 text-primary"></i>Paramètres de sécurité
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            
+                            <!-- Alerte changement de mot de passe requis -->
+                            {% if user.is_chg_mdp %}
+                            <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-3"></i>
+                                <div>
+                                    <strong>Changement de mot de passe requis</strong><br>
+                                    Vous devez changer votre mot de passe avant de pouvoir continuer.
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Alerte compte verrouillé -->
+                            {% if user.is_locked %}
+                            <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                                <i class="bi bi-lock-fill me-3"></i>
+                                <div>
+                                    <strong>Compte verrouillé</strong><br>
+                                    Votre compte a été verrouillé suite à trop de tentatives de connexion échouées.
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="field-label">Dernier changement de mot de passe</div>
+                                    <div class="field-value">
+                                        <i class="bi bi-calendar3 me-2 text-muted"></i>
+                                        {{ user.date_chg_mdp.strftime('%d/%m/%Y') if user.date_chg_mdp else 'Jamais' }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="field-label">Tentatives de connexion échouées</div>
+                                    <div class="field-value">
+                                        {% if user.nb_errors > 0 %}
+                                            <span class="badge bg-warning text-dark fs-6">{{ user.nb_errors }}</span>
+                                        {% else %}
+                                            <span class="text-success fw-medium">Aucune</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="field-label">Statut de sécurité</div>
+                                    <div class="field-value">
+                                        {% if user.is_locked %}
+                                            <span class="badge bg-danger fs-6">Verrouillé</span>
+                                        {% elif user.nb_errors > 2 %}
+                                            <span class="badge bg-warning text-dark fs-6">Attention</span>
+                                        {% else %}
+                                            <span class="badge bg-success fs-6">Sécurisé</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr class="my-4">
+                            
+                            <!-- Actions de sécurité -->
+                            <div class="d-grid gap-2 d-md-flex">
+                                <button type="button" class="btn btn-primary" 
+                                        data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                    <i class="bi bi-key me-2"></i>Changer le mot de passe
+                                </button>
+                                {% if user.nb_errors > 0 %}
+                                <button type="button" class="btn btn-outline-warning">
+                                    <i class="bi bi-arrow-counterclockwise me-2"></i>Réinitialiser les erreurs
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h6 class="card-title mb-0">
+                                <i class="bi bi-shield-check me-2 text-success"></i>Bonnes pratiques
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="small text-muted">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        Utilisez un mot de passe fort
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        Changez régulièrement votre mot de passe
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        Ne partagez jamais vos identifiants
+                                    </li>
+                                    <li>
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        Déconnectez-vous après utilisation
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Activité -->
+        <div class="tab-pane fade" id="activity" role="tabpanel">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-clock-history me-2 text-primary"></i>Historique du compte
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="text-center p-3 border rounded">
+                                        <i class="bi bi-calendar-plus text-success fs-3 mb-2"></i>
+                                        <div class="small text-muted">Compte créé le</div>
+                                        <div class="fw-medium">{{ user.created_at.strftime('%d/%m/%Y') if user.created_at else 'Non renseigné' }}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="text-center p-3 border rounded">
+                                        <i class="bi bi-calendar-check text-primary fs-3 mb-2"></i>
+                                        <div class="small text-muted">Valide depuis</div>
+                                        <div class="fw-medium">{{ user.debut.strftime('%d/%m/%Y') if user.debut else 'Non renseigné' }}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="text-center p-3 border rounded">
+                                        {% if user.fin %}
+                                            <i class="bi bi-calendar-x text-danger fs-3 mb-2"></i>
+                                            <div class="small text-muted">Expire le</div>
+                                            <div class="fw-medium">{{ user.fin.strftime('%d/%m/%Y') }}</div>
+                                        {% else %}
+                                            <i class="bi bi-infinity text-success fs-3 mb-2"></i>
+                                            <div class="small text-muted">Validité</div>
+                                            <div class="fw-medium">Illimitée</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr class="my-4">
+                            
+                            <!-- Timeline d'activité (placeholder pour futures fonctionnalités) -->
+                            <div class="text-center text-muted py-4">
+                                <i class="bi bi-journal-text fs-3 mb-3"></i>
+                                <p class="mb-0">L'historique détaillé des connexions sera bientôt disponible.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Changement de mot de passe -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-key me-2"></i>Changer le mot de passe
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('chg_pwd') }}" method="post" id="changePasswordForm">
+                <div class="modal-body">
+                    <input type="hidden" name="username" value="{{ user.pseudo }}">
+                    
+                    <div class="mb-3">
+                        <label for="old_password_modal" class="form-label">Ancien mot de passe</label>
+                        <input type="password" class="form-control" id="old_password_modal" 
+                               name="old_password" placeholder="ancien..." required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="new_password_modal" class="form-label">Nouveau mot de passe</label>
+                        <input type="password" class="form-control" id="new_password_modal" 
+                               name="new_password" placeholder="nouveau..." required>
+                    </div>
+                    
+                    <!-- Conditions de validation du mot de passe -->
+                    <div class="mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body p-3">
+                                <h6 class="card-title mb-2">
+                                    <i class="bi bi-shield-check me-2"></i>Le mot de passe doit contenir au moins :
+                                </h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1">
+                                        <span class="cond1_modal me-2">❌</span>15 caractères
+                                    </li>
+                                    <li class="mb-1">
+                                        <span class="cond2_modal me-2">❌</span>1 majuscule
+                                    </li>
+                                    <li class="mb-1">
+                                        <span class="cond3_modal me-2">❌</span>1 minuscule
+                                    </li>
+                                    <li class="mb-1">
+                                        <span class="cond4_modal me-2">❌</span>1 chiffre
+                                    </li>
+                                    <li class="mb-1">
+                                        <span class="cond5_modal me-2">❌</span>1 caractère spécial
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirm_password_modal" class="form-label">Confirmer le nouveau mot de passe</label>
+                        <input type="password" class="form-control" id="confirm_password_modal" 
+                               name="confirm_password" placeholder="confirmer..." required>
+                    </div>
+                    
+                    <!-- Indicateur de correspondance des mots de passe -->
+                    <div id="password_match_modal" aria-live="polite" class="mb-3"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="submitPasswordChange" disabled>
+                        <i class="bi bi-check-lg me-2"></i>Changer le mot de passe
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Script pour activer l'onglet paramètres si demandé -->
+{% if subcontext == 'parameters' %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const securityTab = new bootstrap.Tab(document.getElementById('security-tab'));
+    securityTab.show();
+});
+</script>
+{% endif %}
+
+<!-- Script de validation du formulaire -->
+{% if subcontext == 'parameters' %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validation Bootstrap
+    const forms = document.querySelectorAll('.needs-validation');
+    
+    Array.prototype.slice.call(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+    
+    // Validation en temps réel pour l'email
+    const emailInput = document.getElementById('email');
+    if (emailInput) {
+        emailInput.addEventListener('input', function() {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(this.value)) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+    }
+    
+    // Validation en temps réel pour le téléphone
+    const telInput = document.getElementById('telephone');
+    if (telInput) {
+        telInput.addEventListener('input', function() {
+            // Regex simple pour les numéros français
+            const telRegex = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/;
+            if (telRegex.test(this.value) || this.value.length >= 10) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+    }
+    
+    // Confirmation avant annulation si des modifications ont été apportées
+    const form = document.querySelector('.needs-validation');
+    const cancelBtn = document.querySelector('.btn-outline-secondary');
+    let initialFormData = new FormData(form);
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
+            const currentFormData = new FormData(form);
+            let hasChanges = false;
+            
+            for (let [key, value] of currentFormData.entries()) {
+                if (initialFormData.get(key) !== value) {
+                    hasChanges = true;
+                    break;
+                }
+            }
+            
+            if (hasChanges) {
+                if (!confirm('Vous avez des modifications non sauvegardées. Êtes-vous sûr de vouloir annuler ?')) {
+                    e.preventDefault();
+                }
+            }
+        });
+    }
+});
+</script>
+{% endif %}
+
+<!-- Script de validation du mot de passe pour le modal -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables spécifiques au modal
+    const newPasswordInput = document.getElementById("new_password_modal");
+    const oldPasswordInput = document.getElementById("old_password_modal");
+    const confirmPasswordInput = document.getElementById("confirm_password_modal");
+    const matchIndicator = document.getElementById("password_match_modal");
+    const form = document.getElementById("changePasswordForm");
+    const submitButton = document.getElementById("submitPasswordChange");
+
+    // Conditions de validation du mot de passe (identiques à admin.js)
+    const conditions = {
+        cond1_modal: (password) => password.length >= 15,
+        cond2_modal: (password) => /[A-Z]/.test(password),
+        cond3_modal: (password) => /[a-z]/.test(password),
+        cond4_modal: (password) => /\d/.test(password),
+        cond5_modal: (password) => /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    };
+
+    // Mise à jour des indicateurs de conditions
+    const updateConditions = (password) => {
+        for (const [cond, check] of Object.entries(conditions)) {
+            const span = document.querySelector(`.${cond}`);
+            if (span) {
+                span.textContent = check(password) ? "✅" : "❌";
+                span.classList.toggle('text-success', check(password));
+                span.classList.toggle('text-danger', !check(password));
+            }
+        }
+    };
+
+    // Mise à jour de l'indicateur de correspondance des mots de passe
+    const updateMatchIndicator = () => {
+        if (!matchIndicator || !newPasswordInput || !confirmPasswordInput) return;
+        matchIndicator.innerHTML = "";
+        
+        if (newPasswordInput.value === "" && confirmPasswordInput.value === "") {
+            return; // Rien à afficher si les champs sont vides
+        }
+        
+        const alertDiv = document.createElement("div");
+        const isMatch = newPasswordInput.value === confirmPasswordInput.value;
+        
+        alertDiv.className = `alert ${isMatch ? 'alert-success' : 'alert-danger'} py-2 px-3 mb-0`;
+        alertDiv.innerHTML = `
+            <i class="bi ${isMatch ? 'bi-check-circle' : 'bi-x-circle'} me-2"></i>
+            ${isMatch ? 'Les mots de passe correspondent' : 'Les mots de passe ne correspondent pas'}
+        `;
+        
+        matchIndicator.appendChild(alertDiv);
+    };
+
+    // Activation/désactivation du bouton de soumission
+    const toggleSubmitButton = () => {
+        if (!submitButton) return;
+        
+        const isFormValid = (
+            oldPasswordInput && oldPasswordInput.value.trim() !== "" &&
+            newPasswordInput && newPasswordInput.value.trim() !== "" &&
+            confirmPasswordInput && confirmPasswordInput.value.trim() !== ""
+        );
+        
+        const allConditionsMet = newPasswordInput ? 
+            Object.values(conditions).every((check) => check(newPasswordInput.value)) : false;
+        
+        const passwordsMatch = (newPasswordInput && confirmPasswordInput) ? 
+            newPasswordInput.value === confirmPasswordInput.value : false;
+        
+        const isValid = isFormValid && allConditionsMet && passwordsMatch;
+        
+        submitButton.disabled = !isValid;
+        
+        // Visual feedback pour le bouton
+        if (isValid) {
+            submitButton.classList.remove('btn-outline-primary');
+            submitButton.classList.add('btn-primary');
+        } else {
+            submitButton.classList.remove('btn-primary');
+            submitButton.classList.add('btn-outline-primary');
+        }
+    };
+
+    // Événements pour le nouveau mot de passe
+    if (newPasswordInput) {
+        newPasswordInput.addEventListener("input", () => {
+            updateConditions(newPasswordInput.value);
+            updateMatchIndicator();
+            toggleSubmitButton();
+        });
+        // Mise à jour initiale
+        updateConditions(newPasswordInput.value);
+    }
+
+    // Événements pour la confirmation du mot de passe
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener("input", () => {
+            updateMatchIndicator();
+            toggleSubmitButton();
+        });
+    }
+
+    // Événements pour l'ancien mot de passe
+    if (oldPasswordInput) {
+        oldPasswordInput.addEventListener("input", toggleSubmitButton);
+    }
+
+    // Réinitialisation du formulaire quand le modal se ferme
+    const modal = document.getElementById('changePasswordModal');
+    if (modal) {
+        modal.addEventListener('hidden.bs.modal', function () {
+            // Reset du formulaire
+            if (form) form.reset();
+            
+            // Reset des indicateurs
+            updateConditions("");
+            if (matchIndicator) matchIndicator.innerHTML = "";
+            
+            // Reset du bouton
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.classList.remove('btn-primary');
+                submitButton.classList.add('btn-outline-primary');
+            }
+        });
+    }
+
+    // État initial du bouton (désactivé)
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.classList.add('btn-outline-primary');
+    }
+});
+</script>

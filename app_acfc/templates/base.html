@@ -10,6 +10,11 @@
 
     <!-- CSS propriétaire (charge après Bootstrap pour surcharger si besoin) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='common/css/base.css') }}">
+    
+    <!-- CSS spécifique au contexte -->
+    {% if context == 'user_account' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='common/css/user_account.css') }}">
+    {% endif %}
 </head>
 <body>
 
