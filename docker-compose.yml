@@ -119,6 +119,25 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+
+  # ================================================================
+  # SERVICE FAST API (BACK-OFFICE, INTERNE)
+  # ================================================================
+  acfc-api-back:
+    container_name: acfc-api-back
+    build:
+      context: .
+      dockerfile: api_acfc/dockerfile.api
+    volumes:
+      - ./api_acfc:/app
+    networks:
+      - acfc-network
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    restart: unless-stopped
+    # Aucun port exposé, usage interne uniquement (autres conteneurs ou cron)
+
 # ================================================================
 # VOLUMES PERSISTANTS
 # ================================================================

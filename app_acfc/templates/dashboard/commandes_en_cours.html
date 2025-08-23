@@ -1,0 +1,81 @@
+<!-- Template pour les commandes en cours -->
+<div class="commandes-en-cours h-100">
+    <div class="list-group list-group-flush">
+        <!-- Loading state -->
+        <div id="commandes-loading" class="text-center p-3">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2 text-muted">Chargement des commandes...</p>
+        </div>
+        
+        <!-- Container pour les commandes (sera rempli par l'API) -->
+        <div id="commandes-list" class="d-none">
+            <!-- Les commandes seront injectées ici par JavaScript/API -->
+        </div>
+        
+        <!-- État vide -->
+        <div id="commandes-empty" class="text-center p-4 d-none">
+            <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+            <p class="text-muted">Aucune commande en cours</p>
+        </div>
+    </div>
+    
+    <!-- Footer avec total -->
+    <div class="card-footer bg-light">
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">Total: <span id="commandes-count">0</span> commande(s)</small>
+            <a href="{{ url_for('commercial.commercial_index') }}" class="btn btn-sm btn-outline-primary">
+                Voir tout
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Script pour charger les données depuis l'API Fast -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadCommandesEnCours();
+});
+
+async function loadCommandesEnCours() {
+    try {
+        // URL de l'API Fast (à adapter selon votre configuration)
+        const response = await fetch('/api/fast/commandes-en-cours');
+        const data = await response.json();
+        
+        const loadingEl = document.getElementById('commandes-loading');
+        const listEl = document.getElementById('commandes-list');
+        const emptyEl = document.getElementById('commandes-empty');
+        const countEl = document.getElementById('commandes-count');
+        
+        loadingEl.classList.add('d-none');
+        
+        if (data.commandes && data.commandes.length > 0) {
+            listEl.innerHTML = data.commandes.map(commande => `
+                <div class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${commande.numero}</h6>
+                        <small class="text-success">${commande.montant}€</small>
+                    </div>
+                    <p class="mb-1 text-truncate">${commande.client}</p>
+                    <small class="text-muted">${commande.date}</small>
+                </div>
+            `).join('');
+            listEl.classList.remove('d-none');
+            countEl.textContent = data.commandes.length;
+        } else {
+            emptyEl.classList.remove('d-none');
+            countEl.textContent = '0';
+        }
+    } catch (error) {
+        console.error('Erreur lors du chargement des commandes:', error);
+        document.getElementById('commandes-loading').innerHTML = `
+            <div class="text-center p-3">
+                <i class="fas fa-exclamation-triangle text-warning"></i>
+                <p class="mt-2 text-muted">Erreur de chargement</p>
+            </div>
+        `;
+    }
+}
+</script>

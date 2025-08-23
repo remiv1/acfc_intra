@@ -62,6 +62,7 @@ try:
     from app_acfc.contextes_bp.commercial import commercial_bp   # Module Commercial - Devis, commandes
     from app_acfc.contextes_bp.comptabilite import comptabilite_bp # Module Comptabilité - Facturation
     from app_acfc.contextes_bp.stocks import stocks_bp          # Module Stocks - Inventaire
+    from app_acfc.contextes_bp.admin import admin_bp            # Module Administration - Utilisateurs
 except Exception:
     # Fallback vers les imports locaux en cas d'exécution directe des fichiers
     from contextes_bp.clients import clients_bp
@@ -69,9 +70,10 @@ except Exception:
     from contextes_bp.commercial import commercial_bp
     from contextes_bp.comptabilite import comptabilite_bp
     from contextes_bp.stocks import stocks_bp
+    from contextes_bp.admin import admin_bp
 
 # Regroupement des blueprints pour faciliter l'enregistrement en masse
-acfc_blueprints: Tuple[Blueprint, ...] = (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp, stocks_bp)
+acfc_blueprints: Tuple[Blueprint, ...] = (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp, stocks_bp, admin_bp)
 
 # ====================================================================
 # CONFIGURATION DES SERVICES DE SÉCURITÉ
@@ -122,6 +124,13 @@ CHG_PWD: Dict[str, str] = {
 USER: Dict[str, str] = {
     'title': 'ACFC - Mon Compte',
     'context': 'user_account',
+    'page': BASE
+}
+
+# Configuration de la page par défaut
+DEFAULT: Dict[str, str] = {
+    'title': 'ACFC - Accueil',
+    'context': 'default',
     'page': BASE
 }
 
@@ -282,7 +291,7 @@ def login() -> Any:
                              message="Veuillez changer votre mot de passe.", username=user.pseudo)
 
     # Redirection vers la page d'accueil (module Clients)
-    return render_template(CLIENT['page'], title=CLIENT['title'], context=CLIENT['context'])
+    return render_template(DEFAULT['page'], title=DEFAULT['title'], context=DEFAULT['context'])
 
 @acfc.route('/logout')
 def logout() -> Any:
@@ -503,7 +512,7 @@ def my_account(pseudo: str) -> Any:
         except Exception as e:
             db_session.rollback()
             # Si user n'a pas pu être récupéré, on crée un objet vide pour le template
-            if 'user' not in locals():
+            if ('user' not in locals()) or (not user):
                 user = User()
                 user.pseudo = pseudo  # Au moins le pseudo pour le template
             return render_template(USER['page'], title=USER['title'], context=USER['context'], 

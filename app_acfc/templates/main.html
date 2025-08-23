@@ -21,6 +21,8 @@
     {% include 'admin/change_password.html' %}
 {% elif context == 'user_account' %}
     {% include 'utilisateurs/account.html' %}
+{% elif context == 'default' %}
+    {% include 'default.html' %}
 {% else %}
     {# template par défaut si `context` absent ou inconnu #}
     {% include 'default.html' %}

@@ -1,0 +1,205 @@
+/* CSS pour la page d'accueil */
+
+/* Section d'accueil */
+.welcome-section {
+    min-height: 25vh;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+}
+
+.welcome-section h1 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+/* Section principale du dashboard */
+.main-dashboard {
+    min-height: 50vh;
+    padding: 2rem 0;
+}
+
+/* Logo */
+.logo-container {
+    padding: 2rem;
+}
+
+.logo-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.logo-main {
+    max-height: 300px;
+    max-width: 100%;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.logo-text h3 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Section liens rapides */
+.quick-links {
+    min-height: 25vh;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.quick-link-card {
+    transition: all 0.3s ease;
+    border: 1px solid #dee2e6;
+}
+
+.quick-link-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: #007bff;
+}
+
+.quick-link-card .card-body {
+    padding: 1.5rem 1rem;
+}
+
+.quick-link-card i {
+    transition: color 0.3s ease;
+}
+
+.quick-link-card:hover i {
+    transform: scale(1.1);
+}
+
+/* Cards du dashboard */
+.card {
+    border: none;
+    border-radius: 8px;
+}
+
+.card-header {
+    border-radius: 8px 8px 0 0 !important;
+    font-weight: 600;
+}
+
+.card-footer {
+    border-radius: 0 0 8px 8px !important;
+}
+
+/* Commandes en cours */
+.commandes-en-cours .list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 0.75rem 1rem;
+}
+
+.commandes-en-cours .list-group-item:first-child {
+    border-top: none;
+}
+
+.commandes-en-cours .list-group-item:last-child {
+    border-bottom: none;
+}
+
+.commandes-en-cours .list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Indicateurs commerciaux */
+.indicateurs-commerciaux .card {
+    margin-bottom: 0.5rem;
+}
+
+.indicateurs-commerciaux .card:last-child {
+    margin-bottom: 0;
+}
+
+/* Responsive design */
+@media (max-width: 991.98px) {
+    .main-dashboard {
+        min-height: auto;
+        padding: 1rem 0;
+    }
+    
+    .logo-main {
+        max-height: 200px;
+    }
+    
+    .welcome-section {
+        min-height: 20vh;
+        padding: 2rem 0;
+    }
+    
+    .quick-links {
+        min-height: auto;
+        padding: 2rem 0;
+    }
+    
+    .logo-container {
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .welcome-section h1 {
+        font-size: 2rem;
+    }
+    
+    .logo-main {
+        max-height: 150px;
+    }
+    
+    .quick-link-card .card-body {
+        padding: 1rem 0.5rem;
+    }
+    
+    .main-dashboard .card-body {
+        padding: 0.5rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.home-page > section {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.home-page > section:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.home-page > section:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+/* Amélioration des spinners */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* États de chargement */
+.loading-state {
+    padding: 2rem;
+    text-align: center;
+}
+
+.empty-state {
+    padding: 2rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+.error-state {
+    padding: 2rem;
+    text-align: center;
+    color: #dc3545;
+}

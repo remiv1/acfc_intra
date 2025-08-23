@@ -1,0 +1,204 @@
+<!-- Template de détails client avec onglets -->
+<div class="client-details-container" id="client-details">
+    <!-- En-tête du client -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-user me-2"></i>
+                    <span id="client-name">Détails du client</span>
+                    <span id="client-type-badge" class="badge bg-light text-dark ms-2"></span>
+                </h4>
+                <div>
+                    <button class="btn btn-outline-light btn-sm me-2" onclick="editClient()">
+                        <i class="fas fa-edit me-1"></i>
+                        Modifier
+                    </button>
+                    <button class="btn btn-outline-light btn-sm" onclick="backToSearch()">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        Retour
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>ID Client :</strong> <span id="client-id"></span></p>
+                    <p class="mb-1"><strong>Date de création :</strong> <span id="client-created"></span></p>
+                    <p class="mb-0"><strong>Statut :</strong> <span id="client-status"></span></p>
+                </div>
+                <div class="col-md-6">
+                    <div id="client-notes-container" class="d-none">
+                        <p class="mb-0"><strong>Notes :</strong></p>
+                        <div class="alert alert-info mt-2">
+                            <span id="client-notes"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onglets de navigation -->
+    <ul class="nav nav-tabs" id="client-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="infos-tab" data-bs-toggle="tab" data-bs-target="#infos" type="button" role="tab">
+                <i class="fas fa-info-circle me-1"></i>
+                Informations
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="addresses-tab" data-bs-toggle="tab" data-bs-target="#addresses" type="button" role="tab">
+                <i class="fas fa-map-marker-alt me-1"></i>
+                Adresses
+                <span id="addresses-count" class="badge bg-secondary ms-1">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="emails-tab" data-bs-toggle="tab" data-bs-target="#emails" type="button" role="tab">
+                <i class="fas fa-envelope me-1"></i>
+                Emails
+                <span id="emails-count" class="badge bg-secondary ms-1">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="phones-tab" data-bs-toggle="tab" data-bs-target="#phones" type="button" role="tab">
+                <i class="fas fa-phone me-1"></i>
+                Téléphones
+                <span id="phones-count" class="badge bg-secondary ms-1">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab">
+                <i class="fas fa-shopping-cart me-1"></i>
+                Commandes
+                <span id="orders-count" class="badge bg-secondary ms-1">0</span>
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenu des onglets -->
+    <div class="tab-content" id="client-tab-content">
+        <!-- Onglet Informations -->
+        <div class="tab-pane fade show active" id="infos" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <div id="client-particulier" class="d-none">
+                        <h5 class="card-title text-success">
+                            <i class="fas fa-user me-2"></i>
+                            Informations particulier
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Prénom :</strong> <span id="part-prenom"></span></p>
+                                <p><strong>Nom :</strong> <span id="part-nom"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Date de naissance :</strong> <span id="part-naissance"></span></p>
+                                <p><strong>Lieu de naissance :</strong> <span id="part-lieu"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="client-professionnel" class="d-none">
+                        <h5 class="card-title text-primary">
+                            <i class="fas fa-building me-2"></i>
+                            Informations professionnel
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Raison sociale :</strong> <span id="pro-raison"></span></p>
+                                <p><strong>Type :</strong> <span id="pro-type"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>SIREN :</strong> <span id="pro-siren"></span></p>
+                                <p><strong>RNA :</strong> <span id="pro-rna"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Adresses -->
+        <div class="tab-pane fade" id="addresses" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Adresses du client</h5>
+                    <button class="btn btn-sm btn-success" onclick="addAddress()">
+                        <i class="fas fa-plus me-1"></i>
+                        Ajouter
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="addresses-list">
+                        <!-- Les adresses seront injectées ici -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Emails -->
+        <div class="tab-pane fade" id="emails" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Adresses email</h5>
+                    <button class="btn btn-sm btn-success" onclick="addEmail()">
+                        <i class="fas fa-plus me-1"></i>
+                        Ajouter
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="emails-list">
+                        <!-- Les emails seront injectés ici -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Téléphones -->
+        <div class="tab-pane fade" id="phones" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Numéros de téléphone</h5>
+                    <button class="btn btn-sm btn-success" onclick="addPhone()">
+                        <i class="fas fa-plus me-1"></i>
+                        Ajouter
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="phones-list">
+                        <!-- Les téléphones seront injectés ici -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Commandes -->
+        <div class="tab-pane fade" id="orders" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Historique des commandes</h5>
+                    <button class="btn btn-sm btn-success" onclick="addOrder()">
+                        <i class="fas fa-plus me-1"></i>
+                        Nouvelle commande
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="orders-list">
+                        <!-- Les commandes seront injectées ici -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading state -->
+    <div id="details-loading" class="text-center p-5 d-none">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement des détails...</span>
+        </div>
+        <p class="mt-2 text-muted">Chargement des informations du client...</p>
+    </div>
+</div>
