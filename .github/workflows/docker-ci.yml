@@ -93,7 +93,7 @@ jobs:
           docker compose -f docker-compose.yml ps
           
           # Test database connection
-          docker compose -f docker-compose.yml exec -T acfc-db mariadb -u acfc_user -psecure_password -e "SELECT 1 as test;" acfc
+          docker compose -f docker-compose.yml exec -T acfc-db mariadb -u acfc_user -psecure_password -e "SELECT 1 as test;" acfc_db
           
           # Test MongoDB connection
           docker compose -f docker-compose.yml exec -T acfc-logs mongosh --eval "db.adminCommand('ping')"
