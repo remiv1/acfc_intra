@@ -30,14 +30,15 @@ Version : 1.0
 
 from flask import Blueprint, render_template, jsonify
 from sqlalchemy.orm import Session as SessionBdDType
+from sqlalchemy import or_
 #=================================================================
 # Dans un contexte conteneur, app_acfc s'appelle simplement app
 # ainsi on appellera les fonctions différemment suivant le contexte
 #=================================================================
-try:
-    from app_acfc.modeles import SessionBdD
-except ImportError:
-    from app.modeles import SessionBdD  # type: ignore
+#try:
+from app_acfc.modeles import SessionBdD, Client, Part, Pro
+#except ImportError:
+#    from app.modeles import SessionBdD
 from typing import Dict, List, Any
 
 # ================================================================
@@ -161,11 +162,22 @@ def get_clients():
 # ================================================================
 
 @clients_bp.route('/research/<client_string>')
-def hello_clients(client_string):
+def hello_clients(client_string: str):
     """
     Route de recherche de client par nom.
     La recherche s'effectue sur le nom complet du client, particulier ou professionnel.
     """
-    db_session: SessionBdDType = SessionBdD()   # type: ignore
-    clients = db_session.query(Client).filter(Client.nom_affichage.ilike(f'%{client_string}%')).all()
-    return render_template('base.html', context='clients', sub_context='research', clients=clients)
+    db_session: SessionBdDType = SessionBdD()
+    clients: List[Client] = (
+    db_session.query(Client)
+    .outerjoin(Client.part)
+    .outerjoin(Client.pro)
+    .filter(
+        or_(
+            Part.nom.ilike(f"%{client_string}%"),
+            Pro.raison_sociale.ilike(f"%{client_string}%")
+        )
+    )
+    .all()
+)
+    return jsonify([c.to_dict() for c in clients])
