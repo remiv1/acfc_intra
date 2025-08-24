@@ -2,17 +2,17 @@
 
 **Date du rapport :** 24 August 2025  
 **Période analysée :** 17 August 2025 - 24 August 2025 (7 jours)  
-**Nombre de commits :** 27  
+**Nombre de commits :** 28  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 27 commits sur 7 jours  
-**Volume de code :** 13865 lignes ajoutées, 1178 lignes supprimées  
-**Fichiers impactés :** 377 fichiers modifiés  
-**Productivité moyenne :** 1980 lignes/jour
+**Activité de développement :** 28 commits sur 7 jours  
+**Volume de code :** 13951 lignes ajoutées, 1216 lignes supprimées  
+**Fichiers impactés :** 381 fichiers modifiés  
+**Productivité moyenne :** 1993 lignes/jour
 
 ---
 
@@ -31,17 +31,6 @@
 - `Date:   Sun Aug 17 21:26:15 2025 +0200`
 - `    feat: Ajout de la structure de l'application Flask avec plusieurs blueprints et modèles de pages`
 - ... et 34 autres fichiers
-
-#### 20:01 - 2b562e1 - feat: Ajout du fichier de modèle de base HTML pour la structure du projet
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +1 -0 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Sun Aug 17 20:01:25 2025 +0200`
-- `    feat: Ajout du fichier de modèle de base HTML pour la structure du projet`
-- ... et 1 autres fichiers
 
 
 ### 18 August 2025
@@ -314,6 +303,28 @@
 
 ### 24 August 2025
 
+#### 20:36 - 927e751 - feat: Amélioration de la recherche de clients avec jointures sur Part et Pro
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +20 -8 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Sun Aug 24 20:36:48 2025 +0200`
+- `    feat: Amélioration de la recherche de clients avec jointures sur Part et Pro`
+- ... et 1 autres fichiers
+
+#### 17:28 - 6d51a02 - 📊 Mise à jour automatique du rapport de suivi (24/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +67 -30 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Sun Aug 24 17:28:50 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (24/08/2025)`
+- ... et 1 autres fichiers
+
 #### 19:28 - d1c2c9e - feat: Ajout de la journalisation détaillée et mise à jour des dépendances. Ajout de relations entre les modèles SQLAlchemy.
 
 **Catégorie :** Développement de fonctionnalités  
@@ -341,17 +352,17 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 16 commits (59.3%)
-- **Interface utilisateur** : 10 commits (37.0%)
-- **Correction de bugs** : 1 commits (3.7%)
+- **Développement de fonctionnalités** : 16 commits (57.1%)
+- **Interface utilisateur** : 11 commits (39.3%)
+- **Correction de bugs** : 1 commits (3.6%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 52 fichiers modifiés
-- **HTML** : 51 fichiers modifiés
-- **Documentation** : 23 fichiers modifiés
+- **Python** : 53 fichiers modifiés
+- **HTML** : 50 fichiers modifiés
+- **Documentation** : 24 fichiers modifiés
 - **CSS** : 15 fichiers modifiés
 - **JavaScript** : 14 fichiers modifiés
 - **YAML/Config** : 11 fichiers modifiés
@@ -361,16 +372,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 3.9 commits/jour
-- **Volume de code :** 15043 modifications totales
-- **Ratio ajouts/suppressions :** 11.77
-- **Moyenne lignes par commit :** 557
+- **Fréquence de commit :** 4.0 commits/jour
+- **Volume de code :** 15167 modifications totales
+- **Ratio ajouts/suppressions :** 11.47
+- **Moyenne lignes par commit :** 542
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 13865 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 13951 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 24 August 2025*
