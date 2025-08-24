@@ -2,35 +2,21 @@
 
 **Date du rapport :** 24 August 2025  
 **Période analysée :** 17 August 2025 - 24 August 2025 (7 jours)  
-**Nombre de commits :** 28  
+**Nombre de commits :** 29  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 28 commits sur 7 jours  
-**Volume de code :** 13951 lignes ajoutées, 1216 lignes supprimées  
-**Fichiers impactés :** 381 fichiers modifiés  
-**Productivité moyenne :** 1993 lignes/jour
+**Activité de développement :** 29 commits sur 7 jours  
+**Volume de code :** 14034 lignes ajoutées, 1445 lignes supprimées  
+**Fichiers impactés :** 362 fichiers modifiés  
+**Productivité moyenne :** 2004 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 17 August 2025
-
-#### 21:26 - 755e313 - feat: Ajout de la structure de l'application Flask avec plusieurs blueprints et modèles de pages
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +190 -1 lignes, 37 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Sun Aug 17 21:26:15 2025 +0200`
-- `    feat: Ajout de la structure de l'application Flask avec plusieurs blueprints et modèles de pages`
-- ... et 34 autres fichiers
 
 
 ### 18 August 2025
@@ -303,6 +289,28 @@
 
 ### 24 August 2025
 
+#### 22:05 - 0fffba1 - fix: Enhance Docker Compose and Test Suite
+
+**Catégorie :** Correction de bugs  
+**Impact :** +235 -203 lignes, 14 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Sun Aug 24 22:05:58 2025 +0200`
+- `    fix: Enhance Docker Compose and Test Suite`
+- ... et 12 autres fichiers
+
+#### 18:37 - 78ec0d0 - 📊 Mise à jour automatique du rapport de suivi (24/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +38 -27 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Sun Aug 24 18:37:04 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (24/08/2025)`
+- ... et 1 autres fichiers
+
 #### 20:36 - 927e751 - feat: Amélioration de la recherche de clients avec jointures sur Part et Pro
 
 **Catégorie :** Développement de fonctionnalités  
@@ -352,36 +360,36 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 16 commits (57.1%)
-- **Interface utilisateur** : 11 commits (39.3%)
-- **Correction de bugs** : 1 commits (3.6%)
+- **Développement de fonctionnalités** : 15 commits (51.7%)
+- **Interface utilisateur** : 12 commits (41.4%)
+- **Correction de bugs** : 2 commits (6.9%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 53 fichiers modifiés
-- **HTML** : 50 fichiers modifiés
-- **Documentation** : 24 fichiers modifiés
-- **CSS** : 15 fichiers modifiés
-- **JavaScript** : 14 fichiers modifiés
-- **YAML/Config** : 11 fichiers modifiés
+- **Python** : 50 fichiers modifiés
+- **HTML** : 42 fichiers modifiés
+- **Documentation** : 25 fichiers modifiés
+- **YAML/Config** : 13 fichiers modifiés
 - **Docker** : 8 fichiers modifiés
+- **CSS** : 8 fichiers modifiés
+- **JavaScript** : 8 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 4.0 commits/jour
-- **Volume de code :** 15167 modifications totales
-- **Ratio ajouts/suppressions :** 11.47
-- **Moyenne lignes par commit :** 542
+- **Fréquence de commit :** 4.1 commits/jour
+- **Volume de code :** 15479 modifications totales
+- **Ratio ajouts/suppressions :** 9.71
+- **Moyenne lignes par commit :** 534
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 13951 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 14034 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 24 August 2025*
