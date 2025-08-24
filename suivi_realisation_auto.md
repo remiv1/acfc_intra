@@ -2,17 +2,17 @@
 
 **Date du rapport :** 24 August 2025  
 **Période analysée :** 17 August 2025 - 24 August 2025 (7 jours)  
-**Nombre de commits :** 29  
+**Nombre de commits :** 31  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 29 commits sur 7 jours  
-**Volume de code :** 14034 lignes ajoutées, 1445 lignes supprimées  
-**Fichiers impactés :** 362 fichiers modifiés  
-**Productivité moyenne :** 2004 lignes/jour
+**Activité de développement :** 31 commits sur 7 jours  
+**Volume de code :** 14085 lignes ajoutées, 1489 lignes supprimées  
+**Fichiers impactés :** 373 fichiers modifiés  
+**Productivité moyenne :** 2012 lignes/jour
 
 ---
 
@@ -289,6 +289,28 @@
 
 ### 24 August 2025
 
+#### 22:34 - f539e15 - feat: Ajout de la persistance des logs et mise à jour de la configuration Docker
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +10 -11 lignes, 7 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Sun Aug 24 22:34:36 2025 +0200`
+- `    feat: Ajout de la persistance des logs et mise à jour de la configuration Docker`
+- ... et 5 autres fichiers
+
+#### 20:06 - 78639e4 - 📊 Mise à jour automatique du rapport de suivi (24/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +41 -33 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Sun Aug 24 20:06:29 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (24/08/2025)`
+- ... et 1 autres fichiers
+
 #### 22:05 - 0fffba1 - fix: Enhance Docker Compose and Test Suite
 
 **Catégorie :** Correction de bugs  
@@ -360,19 +382,19 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 15 commits (51.7%)
-- **Interface utilisateur** : 12 commits (41.4%)
-- **Correction de bugs** : 2 commits (6.9%)
+- **Développement de fonctionnalités** : 16 commits (51.6%)
+- **Interface utilisateur** : 13 commits (41.9%)
+- **Correction de bugs** : 2 commits (6.5%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 50 fichiers modifiés
+- **Python** : 51 fichiers modifiés
 - **HTML** : 42 fichiers modifiés
-- **Documentation** : 25 fichiers modifiés
-- **YAML/Config** : 13 fichiers modifiés
-- **Docker** : 8 fichiers modifiés
+- **Documentation** : 26 fichiers modifiés
+- **YAML/Config** : 14 fichiers modifiés
+- **Docker** : 9 fichiers modifiés
 - **CSS** : 8 fichiers modifiés
 - **JavaScript** : 8 fichiers modifiés
 
@@ -380,16 +402,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 4.1 commits/jour
-- **Volume de code :** 15479 modifications totales
-- **Ratio ajouts/suppressions :** 9.71
-- **Moyenne lignes par commit :** 534
+- **Fréquence de commit :** 4.4 commits/jour
+- **Volume de code :** 15574 modifications totales
+- **Ratio ajouts/suppressions :** 9.46
+- **Moyenne lignes par commit :** 502
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 14034 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 14085 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 24 August 2025*
