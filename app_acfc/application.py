@@ -37,7 +37,7 @@ acfc = Flask(__name__,
              template_folder='templates') # Templates HTML Jinja2
 
 # Création du logger personnalisé
-logger = CustomLogger(
+acfc_log = CustomLogger(
     db_uri="mongodb://acfc-logs:27017/",
     db_name="logDB",
     collection_name="traces"
@@ -248,22 +248,26 @@ def login() -> Any:
 
     # === TRAITEMENT GET : Affichage du formulaire de connexion ===
     if request.method == 'GET':
-        logging.info("GET request for login")
         return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'])
     elif request.method != 'POST':
-        logging.warning("Invalid request method")
+        acfc_log.log_to_file(level=30,
+                             message=f'{request.method} sur route Login par utilisateur {session.get("user_id", "inconnu")}',
+                             specific_logger="login", zone_log='login', db_log=True)
         return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=WRONG_ROAD)
 
     # === TRAITEMENT POST : Validation des identifiants ===
     username, password = _get_credentials()
-    logging.debug(f"Attempting login for user: {username}")
     db_session = SessionBdD()
     user = db_session.query(User).filter_by(pseudo=username).first()
-    logging.debug(f"User found: {user is not None}")
+    acfc_log.log_to_file(level=20,
+                         message=f'début de session pour l\'utilisateur: {user is not None}',
+                         specific_logger="login", zone_log='login', db_log=True)
 
     # Vérification de l'existence de l'utilisateur
     if not user:
-        logging.warning("User not found")
+        acfc_log.log_to_file(level=30,
+                             message=f'Utilisateur non trouvé: {username}',
+                             specific_logger="login", zone_log='login', db_log=True)
         return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
 
     # Vérification du mot de passe avec Argon2... si mot de passe faux
@@ -271,8 +275,14 @@ def login() -> Any:
         user.nb_errors += 1  # Incrémentation du compteur d'erreurs (sécurité)
         try:
             db_session.commit()
+            acfc_log.log_to_file(level=30,
+                                 message=f'Tentative de connexion, mot de passe invalide pour l\'utilisateur: {username}. Reste {3 - user.nb_errors} tentatives.',
+                                 specific_logger="login", zone_log='login', db_log=True)
             return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
         except Exception as e:
+            acfc_log.log_to_file(level=40,
+                                 message=f'Erreur {e} lors de la validation du mot de passe pour l\'utilisateur: {username}',
+                                 specific_logger="login", zone_log='login', db_log=True)
             db_session.rollback()
             return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=str(e))
 
@@ -282,6 +292,9 @@ def login() -> Any:
         db_session.commit()
     except Exception as e:
         db_session.rollback()
+        acfc_log.log_to_file(level=40,
+                             message=f'Erreur lors de la connexion pour l\'utilisateur: {username}, {e}.',
+                             specific_logger="login", zone_log='login', db_log=True)
         return render_template(LOGIN['page'], title=LOGIN['title'], context='500', message=str(e))
     
     # Vérification de la nécessité de re-hashage de mot de passe

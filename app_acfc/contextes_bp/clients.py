@@ -29,6 +29,15 @@ Version : 1.0
 """
 
 from flask import Blueprint, render_template, jsonify
+from sqlalchemy.orm import Session as SessionBdDType
+#=================================================================
+# Dans un contexte conteneur, app_acfc s'appelle simplement app
+# ainsi on appellera les fonctions différemment suivant le contexte
+#=================================================================
+try:
+    from app_acfc.modeles import SessionBdD
+except ImportError:
+    from app.modeles import SessionBdD  # type: ignore
 from typing import Dict, List, Any
 
 # ================================================================
@@ -43,7 +52,7 @@ clients_bp = Blueprint(
 )
 
 # ================================================================
-# ROUTES - INTERFACE DE RECHERCHE CLIENT
+# ROUTES - INTERFACE DE RECHERCHE CLIENTS
 # ================================================================
 
 @clients_bp.route('/rechercher', methods=['GET'])
@@ -148,20 +157,15 @@ def get_clients():
     })
 
 # ================================================================
-# ROUTES DE DÉVELOPPEMENT ET TESTS
+# ROUTES DE DÉVELOPPEMENT
 # ================================================================
 
-@clients_bp.route('/hello')
-def hello_clients():
+@clients_bp.route('/research/<client_string>')
+def hello_clients(client_string):
     """
-    Route de test pour vérifier le fonctionnement du blueprint.
-    
-    Utilisée pendant le développement pour valider le routing et
-    la configuration du module clients.
-    
-    Returns:
-        str: Message de confirmation du blueprint
-        
-    Note: À supprimer en production
+    Route de recherche de client par nom.
+    La recherche s'effectue sur le nom complet du client, particulier ou professionnel.
     """
-    return 'Module CRM Clients : Fonctionnel ✓'
+    db_session: SessionBdDType = SessionBdD()   # type: ignore
+    clients = db_session.query(Client).filter(Client.nom_affichage.ilike(f'%{client_string}%')).all()
+    return render_template('base.html', context='clients', sub_context='research', clients=clients)

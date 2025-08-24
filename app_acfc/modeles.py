@@ -274,14 +274,27 @@ class Client(Base):
     id = mapped_column(Integer, primary_key=True, autoincrement=True, comment="Identifiant unique du client")
     type_client = mapped_column(Integer, nullable=False, comment="Type: 1=Particulier, 2=Professionnel")
     
-    # === RÉFÉRENCES POLYMORPHIQUES ===
-    id_part = mapped_column(Integer, nullable=True, comment="Référence vers la table particuliers")
-    id_pro = mapped_column(Integer, nullable=True, comment="Référence vers la table professionnels")
-    
     # === MÉTADONNÉES ===
     created_at = mapped_column(Date, default=func.now(), nullable=False, comment="Date de création du client")
     is_active = mapped_column(Boolean, default=True, nullable=False, comment="Client actif/inactif")
     notes = mapped_column(Text, nullable=True, comment="Notes libres sur le client")
+
+    # === JONCTION CLIENT ===
+    part = relationship("Part", uselist=False, back_populates="01_clients")
+    pro = relationship("Pro", uselist=False, back_populates="01_clients")
+    tels = relationship("Telephone", back_populates="01_clients")
+    mails = relationship("Mail", back_populates="01_clients")
+    adresses = relationship("Adresse", back_populates="01_clients")
+    commandes = relationship("Commande", back_populates="01_clients")
+    factures = relationship("Facture", back_populates="01_clients")
+
+    @property
+    def nom_affichage(self) -> str:
+        if self.type_client == 1 and self.part:
+            return f"{self.part.prenom} {self.part.nom}"
+        elif self.type_client == 2 and self.pro:
+            return self.pro.raison_sociale
+        return ""
     
     def __repr__(self) -> str:
         client_type = "Particulier" if self.type_client == 1 else "Professionnel"
@@ -303,6 +316,7 @@ class Part(Base):
 
     # === IDENTIFIANT ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True, comment=UNIQUE_ID)
+    id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False, comment="Ref vers le client propriétaire")
     
     # === INFORMATIONS PERSONNELLES ===
     prenom = mapped_column(String(255), nullable=False, comment="Prénom")
@@ -332,6 +346,7 @@ class Pro(Base):
 
     # === IDENTIFIANT ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True, comment=UNIQUE_ID)
+    id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False, comment="Ref vers le client propriétaire")
     
     # === INFORMATIONS LÉGALES ===
     raison_sociale = mapped_column(String(255), nullable=False, comment="Dénomination sociale complète")
@@ -371,7 +386,7 @@ class Mail(Base):
 
     # === IDENTIFIANT ET LIAISON CLIENT ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True, comment="Identifiant unique de l'email")
-    id_client = mapped_column(Integer, nullable=False, comment="Référence vers le client propriétaire")
+    id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False, comment="Référence vers le client propriétaire")
     
     # === CLASSIFICATION ET DONNÉES ===
     type_mail = mapped_column(String(100), nullable=False, comment="Type: professionnel/personnel/facturation/marketing")
@@ -418,11 +433,11 @@ class Telephone(Base):
     # === DONNÉES TÉLÉPHONIQUES ===
     indicatif = mapped_column(String(5), nullable=True, comment="Indicatif pays (ex: +33, +1, +49)")
     telephone = mapped_column(String(255), nullable=False, comment="Numéro de téléphone local")
+    is_principal = mapped_column(Boolean, default=False, nullable=False)
     
     def __repr__(self) -> str:
         numero_complet = f"{self.indicatif}{self.telephone}" if self.indicatif else self.telephone
         return f"<Telephone(id={self.id}, client_id={self.id_client}, numero='{numero_complet}', type='{self.type_telephone}')>"
-    is_principal = mapped_column(Boolean, default=False, nullable=False)
 
 class Adresse(Base):
     '''Représente une adresse associée à un client.'''
@@ -488,7 +503,10 @@ class Facture(Base):
     is_imprime = mapped_column(Boolean, default=False, nullable=False)
     date_impression = mapped_column(Date, nullable=True)
     is_prestation_facturee = mapped_column(Boolean, default=False, nullable=False)
+    composantes_factures = relationship("DevisesFactures", primaryjoin="Facture.id==DevisesFactures.id_facture",
+                                        back_populates="13_factures")
 
+    # --- Méthodes de la classe Facture
     def generate_fiscal_id(self) -> str:
         """
         Génère un identifiant fiscal au format YYYY-MM-DD-XXXXXX-C.
@@ -548,6 +566,7 @@ class Catalogue(Base):
     created_at = mapped_column(Date, default=func.now(), nullable=False)
     updated_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False)
 
+    # --- Méthodes de la classe Catalogue ---
     def calculate_ref_auto(self) -> str:
         """
         Calcule la référence automatique du produit au format AATYPE:4ID:2.
@@ -599,6 +618,10 @@ class Operations(Base):
     montant_operation = mapped_column(Numeric(10, 2), nullable=False)
     annee_comptable = mapped_column(Integer, nullable=False)
 
+    # Gestion des ventilations de l'opération
+    ventilations = relationship("Ventilations", back_populates="31_operations")
+    documents = relationship("Documents", back_populates="31_operations")
+
 class Ventilations(Base):
     """Classe représentant les ventilations comptables."""
     __tablename__ = '32_ventilations'
@@ -634,24 +657,27 @@ class Stock(Base):
     __tablename__ = '40_stock'
 
     type_code = mapped_column(Integer, primary_key=True, nullable=False)     # 1: Francs (FR), 2: Euros (EU), 3: Valeur Permanente France (VPF), 4: Valeur Permanente Europe (VPE), 5: Valeur Permanente Monde (VPM)
-    type_valeur = mapped_column(String(3), Computed('get_type_valeur()'), nullable=False)
-    val_code = mapped_column(String(4), Computed('calculate_val_code()'), nullable=False)
-    code_produit = mapped_column(String(6), Computed('calculate_code_produit()'), nullable=False)
+    type_valeur = mapped_column(String(3), Computed('_get_type_valeur()'), nullable=False)
+    val_code = mapped_column(String(4), Computed('_calculate_val_code()'), nullable=False)
+    code_produit = mapped_column(String(6), Computed('_calculate_code_produit()'), nullable=False)
     val_valeur = mapped_column(Numeric(5, 2), primary_key=True, nullable=False, default=0.00)
     qte = mapped_column(Integer, nullable=False, default=0)
     tvp_valeur = mapped_column(Numeric(5, 2), nullable=True)
     tvp_poids = mapped_column(String(4), nullable=True)
-    pu_ht = mapped_column(Numeric(8, 4), Computed('calculate_pu_ht()'), nullable=False, default=0.00)
-    pt_fr = mapped_column(Numeric(5, 2), Computed('calculate_pt_fr()'), nullable=False, default=0.00)
-    pt_eu = mapped_column(Numeric(5, 2), Computed('calculate_pt_eu()'), nullable=False, default=0.00)
+    pu_ht = mapped_column(Numeric(8, 4), Computed('_calculate_pu_ht()'), nullable=False, default=0.00)
+    pt_fr = mapped_column(Numeric(5, 2), Computed('_calculate_pt_fr()'), nullable=False, default=0.00)
+    pt_eu = mapped_column(Numeric(5, 2), Computed('_calculate_pt_eu()'), nullable=False, default=0.00)
 
-    def calculate_code_produit(self) -> str:
+
+    # --- Méthodes de la classe Stock ---
+    def _calculate_code_produit(self) -> str:
         """
         Calcule le code produit au format TYPE:4VAL:2.
         """
         return f'{self.type_valeur}{self.val_code}'
-    
-    def get_type_valeur(self) -> str:
+
+
+    def _get_type_valeur(self) -> str:
         """
         Retourne le code type de valeur au format TYPE:3.
         """
@@ -663,7 +689,8 @@ class Stock(Base):
             case 5: return "VPM"
             case _: return "NAN"
 
-    def calculate_val_code(self) -> str:
+
+    def _calculate_val_code(self) -> str:
         """
         Calcule la val_code au format VAL:4.
         """
@@ -671,8 +698,9 @@ class Stock(Base):
             return f'{(self.val_valeur*100).zfill(4)}'
         else:
             return f'{str(self.tvp_poids)[:-1].zfill(3)}'
-        
-    def calculate_pu_ht(self) -> float:
+
+
+    def _calculate_pu_ht(self) -> float:
         """
         Calcule le prix unitaire hors taxes (PU HT).
         """
@@ -683,7 +711,7 @@ class Stock(Base):
         else:
             return float(self.val_valeur / 6.55957)
 
-    def calculate_pt_fr(self) -> float:
+    def _calculate_pt_fr(self) -> float:
         """
         Calcule le prix total en francs (PT FR).
         """
@@ -691,8 +719,9 @@ class Stock(Base):
             return float(self.val_valeur * self.qte)
         else:
             return 0.0
-        
-    def calculate_pt_eu(self) -> float:
+
+
+    def _calculate_pt_eu(self) -> float:
         """
         Calcule le prix total en euros (PT EU).
         """
