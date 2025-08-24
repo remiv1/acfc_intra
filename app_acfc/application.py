@@ -19,7 +19,7 @@ Auteur : ACFC Development Team
 Version : 1.0
 '''
 
-from flask import Flask, Response, render_template, request, Blueprint, session, url_for, redirect, jsonify
+from flask import Flask, Response, render_template, request, Request, Blueprint, session, url_for, redirect, jsonify
 from flask_session import Session
 from waitress import serve
 from typing import Any, Dict, Tuple
@@ -28,26 +28,20 @@ from services import PasswordService, SecureSessionService
 from modeles import SessionBdD, User
 from datetime import datetime
 from sqlalchemy import text
-#TODO: modifier les systèmes de logs
-import logging
-import sys
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout)  # Écrit dans stdout
-    ]
-)
-
-logging.debug("Ceci est un message de débogage")
-logging.info("Ceci est un message d'information")
-logging.error("Ceci est un message d'erreur")
+from sqlalchemy.orm import Session as SessionBdDType
+from logs.logger import CustomLogger
 
 # Création de l'instance Flask principale avec configuration des dossiers statiques et templates
 acfc = Flask(__name__,
              static_folder='statics',     # Ressources CSS, JS, images par module
              template_folder='templates') # Templates HTML Jinja2
+
+# Création du logger personnalisé
+logger = CustomLogger(
+    db_uri="mongodb://acfc-logs:27017/",
+    db_name="logDB",
+    collection_name="traces"
+)
 
 # ====================================================================
 # IMPORTS ET ENREGISTREMENT DES BLUEPRINTS (MODULES MÉTIERS)
@@ -131,6 +125,20 @@ USER: Dict[str, str] = {
 DEFAULT: Dict[str, str] = {
     'title': 'ACFC - Accueil',
     'context': 'default',
+    'page': BASE
+}
+
+# Configuration erreur 400
+ERROR400: Dict[str, str] = {
+    'title': 'ACFC - Erreur chez vous',
+    'context': '400',
+    'page': BASE
+}
+
+# Configuration erreur 500
+ERROR500: Dict[str, str] = {
+    'title': 'ACFC - Erreur chez nous',
+    'context': '500',
     'page': BASE
 }
 
@@ -244,7 +252,7 @@ def login() -> Any:
         return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'])
     elif request.method != 'POST':
         logging.warning("Invalid request method")
-        return render_template(BASE, title=LOGIN['title'], context='400', message=WRONG_ROAD)
+        return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=WRONG_ROAD)
 
     # === TRAITEMENT POST : Validation des identifiants ===
     username, password = _get_credentials()
@@ -386,7 +394,7 @@ def chg_pwd() -> Any:
 
         return redirect(url_for('login'))
 
-    return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context='400', message=INVALID)
+    return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=INVALID)
 
 # ====================================================================
 # GESTIONNAIRES UTILISATEURS/UTILISATEUR
@@ -424,7 +432,51 @@ def users() -> Any:
         # Devra inclure: pagination, filtrage, contrôle des autorisations
         return render_template(BASE, title='ACFC - Gestion Utilisateurs', context='users')
     else:
-        return render_template(BASE, title='ACFC - Erreur', context='400')
+        return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=WRONG_ROAD)
+
+class MyAccount:
+    """
+    Classe de gestion du compte utilisateur.
+    """
+    @staticmethod
+    def get_user_or_error(db_session: SessionBdDType, pseudo: str) -> Any:
+        user: User = db_session.query(User).filter_by(pseudo=pseudo).first()
+        if not user:
+            return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'])
+        return user
+
+    @staticmethod
+    def check_user_permission(pseudo: str) -> Any:
+        if session.get('pseudo') != pseudo:
+            raise Forbidden("Vous n'êtes pas autorisé à accéder à ce compte.")
+
+    @staticmethod
+    def get_request_form(request: Request):
+        new_prenom = request.form.get('prenom', '').strip()
+        new_nom = request.form.get('nom', '').strip()
+        new_email = request.form.get('email', '').strip()
+        new_telephone = request.form.get('telephone', '').strip()
+        return [new_prenom, new_nom, new_email, new_telephone]
+
+    @staticmethod
+    def valid_mail(mail: str, user:User, db_session: SessionBdDType) -> Any:
+        """
+        Validation de l'adresse email. Retour de la page de paramètre avec un message si invalide.
+        Validation que l'email n'est pas déjà utilisé par un autre compte.
+        """
+        import re
+        email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+        if not re.match(email_pattern, mail): return render_template(USER['page'], title=USER['title'],
+                                                                        context=USER['context'],
+                                                                        subcontext='parameters',
+                                                                        objects=[user], 
+                                                                        message="Le format de l'adresse email n'est pas valide.")
+        elif mail != user.email:
+            existing_user = db_session.query(User).filter_by(email=mail).first()
+            if existing_user: return render_template(USER['page'], title=USER['title'], context=USER['context'],
+                                                        subcontext='parameters', objects=[user],
+                                                        message="Cette adresse email est déjà utilisée par un autre compte.")
+        return re.match(email_pattern, mail) is not None
 
 @acfc.route('/user/<pseudo>', methods=['GET', 'POST'])
 def my_account(pseudo: str) -> Any:
@@ -434,73 +486,43 @@ def my_account(pseudo: str) -> Any:
     Returns:
         Any: Template de la page "Mon Compte"
     """
-    
+    db_session = SessionBdD()
+
+    # Vérification des autorisations
+    MyAccount.check_user_permission(pseudo)
+
+    # Recherche de l'utilisateur ou gestion de l'erreur 
+    user = MyAccount.get_user_or_error(db_session, pseudo)
+
     #=== Gestion de la requête GET ===
     if request.method == 'GET':
-        db_session = SessionBdD()
-        # Vérification de l'utilisateur connecté == au compte recherché
-        if session.get('pseudo') != pseudo: raise Forbidden("Vous n'êtes pas autorisé à accéder à ce compte.")
-
-        # Recherche de l'utilisateur en base de données
-        user = db_session.query(User).filter_by(pseudo=pseudo).first()
-
-        # Retour si l'utilisateur n'est pas trouvé (route appelée hors lien)
-        if not user: return render_template(BASE, title='ACFC - Erreur', context='400')
-
         return render_template(USER['page'], title=USER['title'], context=USER['context'], objects=[user])
     
     #=== Gestion de la requête POST ===
     elif request.method == 'POST':
-        db_session = SessionBdD()
         try:
-            # Vérification de l'utilisateur connecté == au compte recherché
-            if session.get('pseudo') != pseudo:
-                raise Forbidden("Vous n'êtes pas autorisé à modifier ce compte.")
-
-            # Recherche de l'utilisateur en base de données
-            user = db_session.query(User).filter_by(pseudo=pseudo).first()
-            if not user:
-                return render_template(BASE, title='ACFC - Erreur', context='400', 
-                                     message="Utilisateur non trouvé.")
-
             # Récupération des données du formulaire
-            new_prenom = request.form.get('prenom', '').strip()
-            new_nom = request.form.get('nom', '').strip()
-            new_email = request.form.get('email', '').strip()
-            new_telephone = request.form.get('telephone', '').strip()
+            _form_return = MyAccount.get_request_form(request)
 
             # Validation des données obligatoires
-            if not all([new_prenom, new_nom, new_email, new_telephone]):
-                return render_template(USER['page'], title=USER['title'], context=USER['context'], 
-                                     subcontext='parameters', objects=[user], 
-                                     message="Tous les champs sont obligatoires.")
+            if '' in _form_return: return render_template(USER['page'], title=USER['title'],
+                                                                                                context=USER['context'], subcontext='parameters',
+                                                                                                objects=[user], message="Tous les champs sont obligatoires.")
 
             # Validation de l'email (format basique)
-            import re
-            email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
-            if not re.match(email_pattern, new_email):
-                return render_template(USER['page'], title=USER['title'], context=USER['context'], 
-                                     subcontext='parameters', objects=[user], 
-                                     message="Le format de l'adresse email n'est pas valide.")
-
-            # Vérification de l'unicité de l'email (si modifié)
-            if new_email != user.email:
-                existing_user = db_session.query(User).filter_by(email=new_email).first()
-                if existing_user:
-                    return render_template(USER['page'], title=USER['title'], context=USER['context'], 
-                                         subcontext='parameters', objects=[user], 
-                                         message="Cette adresse email est déjà utilisée par un autre compte.")
+            MyAccount.valid_mail(_form_return[2], user, db_session)
 
             # Mise à jour des données utilisateur
-            user.prenom = new_prenom
-            user.nom = new_nom
-            user.email = new_email
-            user.telephone = new_telephone
+            user.prenom = _form_return[0]
+            user.nom = _form_return[1]
+            user.email = _form_return[2]
+            user.telephone = _form_return[3]
 
             # Mise à jour de la session si les données affichées changent
-            session['first_name'] = new_prenom
-            session['last_name'] = new_nom
-            session['email'] = new_email
+            session['first_name'] = _form_return[0]
+            session['last_name'] = _form_return[1]
+            session['email'] = _form_return[2]
+            session['telephone'] = _form_return[3]
 
             # Sauvegarde en base de données
             db_session.commit()
@@ -508,7 +530,6 @@ def my_account(pseudo: str) -> Any:
             # Redirection vers la page de consultation avec message de succès
             return render_template(USER['page'], title=USER['title'], context=USER['context'], 
                                  objects=[user], success_message="Vos informations ont été mises à jour avec succès.")
-
         except Exception as e:
             db_session.rollback()
             # Si user n'a pas pu être récupéré, on crée un objet vide pour le template
@@ -537,14 +558,14 @@ def user_parameters(pseudo: str) -> Any:
     if request.method == 'GET':
         db_session = SessionBdD()
         user = db_session.query(User).filter_by(pseudo=pseudo).first()
-        if not user: return render_template(BASE, title='ACFC - Erreur', context='400')
+        if not user: return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'])
         return render_template(USER['page'], title=USER['title'], context=USER['context'], subcontext='parameters', objects=[user])
     elif request.method == 'POST':
         # Redirection vers my_account qui gère la logique POST
         # car le formulaire pointe vers my_account, pas vers user_parameters
         return redirect(url_for('my_account', pseudo=pseudo))
     else:
-        return render_template(BASE, title='ACFC - Erreur', context='400')
+        return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'])
 
 # ====================================================================
 # GESTIONNAIRES D'ERREURS HTTP
@@ -582,7 +603,7 @@ def handle_4xx_errors(error: HTTPException) -> str:
         case _:
             message_error = f'Erreur inconnue, {error.name}'
 
-    return render_template(BASE, title='ACFC - Erreur Client', context='400', 
+    return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], 
                          status_code=error.code, status_message=message_error)
 
 @acfc.errorhandler(500)
