@@ -19,13 +19,14 @@ Auteur : ACFC Development Team
 import pytest
 import sys
 import os
-from unittest.mock import Mock, patch
+from typing import Any
+from flask.testing import FlaskClient
 
 # Configuration des chemins d'import
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'app_acfc'))
 
 try:
-    from application import acfc
+    from app_acfc.application import acfc
 except ImportError as e:
     pytest.skip(f"Impossible d'importer l'application: {e}", allow_module_level=True)
 
@@ -39,7 +40,7 @@ def client():
         yield client
 
 @pytest.fixture
-def authenticated_session(client):
+def authenticated_session(client: FlaskClient) -> Any:
     """Session utilisateur authentifiée pour les tests."""
     with client.session_transaction() as sess:
         sess['user_id'] = 1
@@ -78,26 +79,26 @@ class TestBlueprintRegistration:
             'stocks_bp': '/stocks'
         }
         
-        for bp_name, expected_prefix in expected_prefixes.items():
+        for bp_name, _ in expected_prefixes.items():
             if bp_name in [bp.name for bp in acfc.blueprints.values()]:
-                bp = next(bp for bp in acfc.blueprints.values() if bp.name == bp_name)
+                _ = next(bp for bp in acfc.blueprints.values() if bp.name == bp_name)
                 # Note: Flask peut stocker les préfixes différemment selon la version
 
 class TestClientsBlueprint:
     """Tests pour le module Clients (CRM)."""
-    
-    def test_clients_route_requires_auth(self, client):
+
+    def test_clients_route_requires_auth(self, client: FlaskClient) -> None:
         """Test que la route clients nécessite une authentification."""
         response = client.get('/clients')
         assert response.status_code == 302  # Redirect vers login
-    
-    def test_clients_route_with_auth(self, client, authenticated_session):
+
+    def test_clients_route_with_auth(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test accès à la route clients avec authentification."""
         response = client.get('/clients')
         # Peut être 200 (succès) ou 404 (route non encore implémentée)
         assert response.status_code in [200, 404, 500]
-    
-    def test_clients_post_with_auth(self, client, authenticated_session):
+
+    def test_clients_post_with_auth(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test création d'un client via POST."""
         client_data = {
             'type_client': '1',  # Particulier
@@ -112,18 +113,18 @@ class TestClientsBlueprint:
 
 class TestCatalogueBlueprint:
     """Tests pour le module Catalogue."""
-    
-    def test_catalogue_route_requires_auth(self, client):
+
+    def test_catalogue_route_requires_auth(self, client: FlaskClient) -> None:
         """Test que la route catalogue nécessite une authentification."""
         response = client.get('/catalogue')
         assert response.status_code == 302  # Redirect vers login
-    
-    def test_catalogue_route_with_auth(self, client, authenticated_session):
+
+    def test_catalogue_route_with_auth(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test accès à la route catalogue avec authentification."""
         response = client.get('/catalogue')
         assert response.status_code in [200, 404, 500]
-    
-    def test_catalogue_product_creation(self, client, authenticated_session):
+
+    def test_catalogue_product_creation(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test création d'un produit dans le catalogue."""
         product_data = {
             'nom': 'Produit Test',
@@ -137,18 +138,18 @@ class TestCatalogueBlueprint:
 
 class TestCommercialBlueprint:
     """Tests pour le module Commercial."""
-    
-    def test_commercial_route_requires_auth(self, client):
+
+    def test_commercial_route_requires_auth(self, client: FlaskClient) -> None:
         """Test que la route commercial nécessite une authentification."""
         response = client.get('/commercial')
         assert response.status_code == 302
-    
-    def test_commercial_route_with_auth(self, client, authenticated_session):
+
+    def test_commercial_route_with_auth(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test accès à la route commercial avec authentification."""
         response = client.get('/commercial')
         assert response.status_code in [200, 404, 500]
-    
-    def test_devis_creation(self, client, authenticated_session):
+
+    def test_devis_creation(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test création d'un devis."""
         devis_data = {
             'client_id': '1',
@@ -159,8 +160,8 @@ class TestCommercialBlueprint:
         
         response = client.post('/commercial/devis', data=devis_data)
         assert response.status_code in [200, 201, 404, 405, 500]
-    
-    def test_commande_creation(self, client, authenticated_session):
+
+    def test_commande_creation(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test création d'une commande."""
         commande_data = {
             'client_id': '1',
@@ -173,18 +174,18 @@ class TestCommercialBlueprint:
 
 class TestComptabiliteBlueprint:
     """Tests pour le module Comptabilité."""
-    
-    def test_comptabilite_route_requires_auth(self, client):
+
+    def test_comptabilite_route_requires_auth(self, client: FlaskClient) -> None:
         """Test que la route comptabilité nécessite une authentification."""
         response = client.get('/comptabilite')
         assert response.status_code == 302
-    
-    def test_comptabilite_route_with_auth(self, client, authenticated_session):
+
+    def test_comptabilite_route_with_auth(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test accès à la route comptabilité avec authentification."""
         response = client.get('/comptabilite')
         assert response.status_code in [200, 404, 500]
-    
-    def test_facture_creation(self, client, authenticated_session):
+
+    def test_facture_creation(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test création d'une facture."""
         facture_data = {
             'commande_id': '1',
@@ -195,8 +196,8 @@ class TestComptabiliteBlueprint:
         
         response = client.post('/comptabilite/factures', data=facture_data)
         assert response.status_code in [200, 201, 404, 405, 500]
-    
-    def test_operation_comptable(self, client, authenticated_session):
+
+    def test_operation_comptable(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test création d'une opération comptable."""
         operation_data = {
             'compte_debit': '411000',
@@ -210,18 +211,18 @@ class TestComptabiliteBlueprint:
 
 class TestStocksBlueprint:
     """Tests pour le module Stocks."""
-    
-    def test_stocks_route_requires_auth(self, client):
-        """Test que la route stocks nécessite une authentification.""" 
+
+    def test_stocks_route_requires_auth(self, client: FlaskClient) -> None:
+        """Test que la route stocks nécessite une authentification."""
         response = client.get('/stocks')
         assert response.status_code == 302
-    
-    def test_stocks_route_with_auth(self, client, authenticated_session):
+
+    def test_stocks_route_with_auth(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test accès à la route stocks avec authentification."""
         response = client.get('/stocks')
         assert response.status_code in [200, 404, 500]
-    
-    def test_stock_movement(self, client, authenticated_session):
+
+    def test_stock_movement(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test mouvement de stock."""
         movement_data = {
             'produit_id': '1',
@@ -232,16 +233,16 @@ class TestStocksBlueprint:
         
         response = client.post('/stocks/mouvements', data=movement_data)
         assert response.status_code in [200, 201, 404, 405, 500]
-    
-    def test_stock_inventory(self, client, authenticated_session):
+
+    def test_stock_inventory(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test inventaire des stocks."""
         response = client.get('/stocks/inventaire')
         assert response.status_code in [200, 404, 500]
 
 class TestBlueprintIntegration:
     """Tests d'intégration entre les blueprints."""
-    
-    def test_client_to_commercial_workflow(self, client, authenticated_session):
+
+    def test_client_to_commercial_workflow(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test workflow Client -> Commercial (création client puis commande)."""
         # 1. Création d'un client
         client_data = {
@@ -261,8 +262,8 @@ class TestBlueprintIntegration:
             
             commande_response = client.post('/commercial/commandes', data=commande_data)
             assert commande_response.status_code in [200, 201, 404, 405, 500]
-    
-    def test_catalogue_to_stocks_workflow(self, client, authenticated_session):
+
+    def test_catalogue_to_stocks_workflow(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test workflow Catalogue -> Stocks (création produit puis gestion stock)."""
         # 1. Création d'un produit
         product_data = {
@@ -281,8 +282,8 @@ class TestBlueprintIntegration:
             
             stock_response = client.post('/stocks', data=stock_data)
             assert stock_response.status_code in [200, 201, 404, 405, 500]
-    
-    def test_commercial_to_comptabilite_workflow(self, client, authenticated_session):
+
+    def test_commercial_to_comptabilite_workflow(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test workflow Commercial -> Comptabilité (commande puis facturation)."""
         # 1. Création d'une commande
         commande_data = {
@@ -305,8 +306,8 @@ class TestBlueprintIntegration:
 
 class TestBlueprintErrorHandling:
     """Tests de gestion d'erreur pour les blueprints."""
-    
-    def test_invalid_blueprint_routes(self, client, authenticated_session):
+
+    def test_invalid_blueprint_routes(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test accès à des routes invalides dans les blueprints."""
         invalid_routes = [
             '/clients/nonexistent',
@@ -319,8 +320,8 @@ class TestBlueprintErrorHandling:
         for route in invalid_routes:
             response = client.get(route)
             assert response.status_code in [404, 500]
-    
-    def test_blueprint_methods_not_allowed(self, client, authenticated_session):
+
+    def test_blueprint_methods_not_allowed(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test méthodes HTTP non autorisées sur les blueprints."""
         routes_to_test = [
             '/clients',
@@ -337,8 +338,8 @@ class TestBlueprintErrorHandling:
 
 class TestBlueprintStaticFiles:
     """Tests pour les fichiers statiques des blueprints."""
-    
-    def test_blueprint_css_files_accessible(self, client):
+
+    def test_blueprint_css_files_accessible(self, client: FlaskClient) -> None:
         """Test que les fichiers CSS des blueprints sont accessibles."""
         css_files = [
             '/static/clients/css/clients.css',
@@ -352,8 +353,8 @@ class TestBlueprintStaticFiles:
             response = client.get(css_file)
             # Soit le fichier existe (200), soit il n'existe pas (404)
             assert response.status_code in [200, 404]
-    
-    def test_blueprint_js_files_accessible(self, client):
+
+    def test_blueprint_js_files_accessible(self, client: FlaskClient) -> None:
         """Test que les fichiers JS des blueprints sont accessibles."""
         js_files = [
             '/static/clients/js/clients.js',

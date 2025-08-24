@@ -24,20 +24,21 @@ Auteur : ACFC Development Team
 Version : 1.0
 """
 
+from typing import Generator, Any
 import pytest
 import sys
 import os
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from werkzeug.security import generate_password_hash
+from flask.testing import FlaskClient
 
 # Ajout du chemin de l'application pour les imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'app_acfc'))
 
 # Import conditionnel pour éviter les erreurs de dépendances
 try:
-    from application import acfc
-    from modeles import User
-    from services import PasswordService
+    from app_acfc.application import acfc
+    from app_acfc.modeles import User
 except ImportError as e:
     pytest.skip(f"Impossible d'importer les modules application: {e}", allow_module_level=True)
 
@@ -46,7 +47,7 @@ except ImportError as e:
 # ====================================================================
 
 @pytest.fixture
-def client():
+def client() -> Generator[FlaskClient, None, None]:
     """Fixture Flask test client pour simuler les requêtes HTTP."""
     acfc.config['TESTING'] = True
     acfc.config['WTF_CSRF_ENABLED'] = False  # Désactiver CSRF pour les tests
@@ -57,7 +58,7 @@ def client():
             yield client
 
 @pytest.fixture
-def mock_user():
+def mock_user() -> Mock:
     """Fixture pour un utilisateur de test."""
     user = Mock(spec=User)
     user.id = 1
@@ -78,7 +79,7 @@ def mock_user():
     return user
 
 @pytest.fixture
-def authenticated_session(client, mock_user):
+def authenticated_session(client: FlaskClient, mock_user: Mock) -> Any:
     """Fixture pour une session utilisateur authentifiée."""
     with client.session_transaction() as sess:
         sess['user_id'] = mock_user.id
@@ -95,16 +96,16 @@ def authenticated_session(client, mock_user):
 class TestAuthenticationRoutes:
     """Tests pour les routes d'authentification (login, logout)."""
 
-    def test_login_get_displays_form(self, client):
+    def test_login_get_displays_form(self, client: FlaskClient) -> None:
         """Test affichage du formulaire de connexion (GET /login)."""
         response = client.get('/login')
         
         assert response.status_code == 200
         assert b'Authentification' in response.data or b'login' in response.data.lower()
 
-    @patch('application.SessionBdD')
-    @patch('application.ph_acfc')
-    def test_login_post_success(self, mock_ph, mock_session_class, client, mock_user):
+    @patch('app_acfc.application.SessionBdD')
+    @patch('app_acfc.application.ph_acfc')
+    def test_login_post_success(self, mock_ph: Mock, mock_session_class: Mock, client: FlaskClient, mock_user: Mock) -> None:
         """Test connexion réussie (POST /login)."""
         # Configuration des mocks
         mock_session = Mock()
@@ -126,8 +127,8 @@ class TestAuthenticationRoutes:
         mock_session.query.assert_called_once()
         mock_ph.verify_password.assert_called_once()
 
-    @patch('application.SessionBdD')
-    def test_login_post_invalid_user(self, mock_session_class, client):
+    @patch('app_acfc.application.SessionBdD')
+    def test_login_post_invalid_user(self, mock_session_class: Mock, client: FlaskClient) -> None:
         """Test connexion avec utilisateur inexistant."""
         mock_session = Mock()
         mock_session_class.return_value = mock_session
@@ -143,9 +144,9 @@ class TestAuthenticationRoutes:
         assert response.status_code == 200
         assert b'Identifiants invalides' in response.data or b'invalid' in response.data.lower()
 
-    @patch('application.SessionBdD')
-    @patch('application.ph_acfc')
-    def test_login_post_wrong_password(self, mock_ph, mock_session_class, client, mock_user):
+    @patch('app_acfc.application.SessionBdD')
+    @patch('app_acfc.application.ph_acfc')
+    def test_login_post_wrong_password(self, mock_ph: Mock, mock_session_class: Mock, client: FlaskClient, mock_user: Mock) -> None:
         """Test connexion avec mot de passe incorrect."""
         mock_session = Mock()
         mock_session_class.return_value = mock_session
@@ -162,7 +163,7 @@ class TestAuthenticationRoutes:
         assert response.status_code == 200
         assert mock_user.nb_errors == 1
 
-    def test_login_post_missing_data(self, client):
+    def test_login_post_missing_data(self, client: FlaskClient) -> None:
         """Test connexion avec données manquantes."""
         data = {
             'username': '',
@@ -173,19 +174,19 @@ class TestAuthenticationRoutes:
         
         assert response.status_code == 200
 
-    def test_login_invalid_method(self, client):
+    def test_login_invalid_method(self, client: FlaskClient) -> None:
         """Test méthode HTTP non autorisée sur /login."""
         response = client.put('/login')
         assert response.status_code == 405  # Method Not Allowed
 
-    def test_logout_clears_session(self, client, authenticated_session):
+    def test_logout_clears_session(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test déconnexion (GET /logout)."""
         response = client.get('/logout')
         
         assert response.status_code == 302  # Redirect
         assert response.location.endswith('/login')
 
-    def test_logout_without_session(self, client):
+    def test_logout_without_session(self, client: FlaskClient) -> None:
         """Test déconnexion sans session active."""
         response = client.get('/logout')
         
@@ -198,22 +199,22 @@ class TestAuthenticationRoutes:
 class TestMainRoutes:
     """Tests pour les routes principales de l'application."""
 
-    def test_index_without_authentication_redirects(self, client):
+    def test_index_without_authentication_redirects(self, client: FlaskClient) -> None:
         """Test accès à l'index sans authentification."""
         response = client.get('/')
         
         assert response.status_code == 302  # Redirect vers login
         assert '/login' in response.location
 
-    def test_index_with_authentication(self, client, authenticated_session):
+    def test_index_with_authentication(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test accès à l'index avec authentification."""
         response = client.get('/')
         
         assert response.status_code == 200
 
-    def test_health_check(self, client):
+    def test_health_check(self, client: FlaskClient) -> None:
         """Test de l'endpoint de santé (/health)."""
-        with patch('application.SessionBdD') as mock_session_class:
+        with patch('app_acfc.application.SessionBdD') as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
             mock_session.execute.return_value = None
@@ -228,9 +229,9 @@ class TestMainRoutes:
             assert 'timestamp' in json_data
             assert 'services' in json_data
 
-    def test_health_check_database_error(self, client):
+    def test_health_check_database_error(self, client: FlaskClient) -> None:
         """Test de l'endpoint de santé avec erreur base de données."""
-        with patch('application.SessionBdD') as mock_session_class:
+        with patch('app_acfc.application.SessionBdD') as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
             mock_session.execute.side_effect = Exception("Database connection failed")
@@ -248,14 +249,14 @@ class TestMainRoutes:
 class TestUserRoutes:
     """Tests pour les routes de gestion utilisateur."""
 
-    def test_my_account_get_without_auth(self, client):
+    def test_my_account_get_without_auth(self, client: FlaskClient) -> None:
         """Test accès à mon compte sans authentification."""
         response = client.get('/user/testuser')
         
         assert response.status_code == 302  # Redirect vers login
 
-    @patch('application.SessionBdD')
-    def test_my_account_get_success(self, mock_session_class, client, authenticated_session, mock_user):
+    @patch('app_acfc.application.SessionBdD')
+    def test_my_account_get_success(self, mock_session_class: Mock, client: FlaskClient, authenticated_session: Any, mock_user: Mock) -> None:
         """Test affichage de mon compte (GET /user/<pseudo>)."""
         mock_session = Mock()
         mock_session_class.return_value = mock_session
@@ -265,8 +266,8 @@ class TestUserRoutes:
         
         assert response.status_code == 200
 
-    @patch('application.SessionBdD')
-    def test_my_account_get_user_not_found(self, mock_session_class, client, authenticated_session):
+    @patch('app_acfc.application.SessionBdD')
+    def test_my_account_get_user_not_found(self, mock_session_class: Mock, client: FlaskClient, authenticated_session: Any) -> None:
         """Test affichage compte utilisateur inexistant."""
         mock_session = Mock()
         mock_session_class.return_value = mock_session
@@ -277,14 +278,14 @@ class TestUserRoutes:
         assert response.status_code == 200
         assert b'Erreur' in response.data
 
-    def test_my_account_get_forbidden_access(self, client, authenticated_session):
+    def test_my_account_get_forbidden_access(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test accès au compte d'un autre utilisateur."""
         response = client.get('/user/otheruser')
         
         assert response.status_code == 403  # Forbidden
 
-    @patch('application.SessionBdD')
-    def test_my_account_post_success(self, mock_session_class, client, authenticated_session, mock_user):
+    @patch('app_acfc.application.SessionBdD')
+    def test_my_account_post_success(self, mock_session_class: Mock, client: FlaskClient, authenticated_session: Any, mock_user: Mock) -> None:
         """Test mise à jour des informations utilisateur (POST /user/<pseudo>)."""
         mock_session = Mock()
         mock_session_class.return_value = mock_session
@@ -304,8 +305,8 @@ class TestUserRoutes:
         assert mock_user.nom == 'Dupont-Updated'
         mock_session.commit.assert_called_once()
 
-    @patch('application.SessionBdD')
-    def test_my_account_post_invalid_email(self, mock_session_class, client, authenticated_session, mock_user):
+    @patch('app_acfc.application.SessionBdD')
+    def test_my_account_post_invalid_email(self, mock_session_class: Mock, client: FlaskClient, authenticated_session: Any, mock_user: Mock) -> None:
         """Test mise à jour avec email invalide."""
         mock_session = Mock()
         mock_session_class.return_value = mock_session
@@ -323,8 +324,8 @@ class TestUserRoutes:
         assert response.status_code == 200
         assert b'email' in response.data.lower() and b'valide' in response.data.lower()
 
-    @patch('application.SessionBdD')
-    def test_my_account_post_duplicate_email(self, mock_session_class, client, authenticated_session, mock_user):
+    @patch('app_acfc.application.SessionBdD')
+    def test_my_account_post_duplicate_email(self, mock_session_class: Mock, client: FlaskClient, authenticated_session: Any, mock_user: Mock) -> None:
         """Test mise à jour avec email déjà utilisé."""
         mock_session = Mock()
         mock_session_class.return_value = mock_session
@@ -342,8 +343,8 @@ class TestUserRoutes:
         assert response.status_code == 200
         assert b'email' in response.data.lower() and b'utilis' in response.data.lower()
 
-    @patch('application.SessionBdD')
-    def test_my_account_post_missing_fields(self, mock_session_class, client, authenticated_session, mock_user):
+    @patch('app_acfc.application.SessionBdD')
+    def test_my_account_post_missing_fields(self, mock_session_class: Mock, client: FlaskClient, authenticated_session: Any, mock_user: Mock) -> None:
         """Test mise à jour avec champs manquants."""
         mock_session = Mock()
         mock_session_class.return_value = mock_session
@@ -361,8 +362,8 @@ class TestUserRoutes:
         assert response.status_code == 200
         assert b'obligatoires' in response.data.lower()
 
-    @patch('application.SessionBdD')
-    def test_user_parameters_get(self, mock_session_class, client, authenticated_session, mock_user):
+    @patch('app_acfc.application.SessionBdD')
+    def test_user_parameters_get(self, mock_session_class: Mock, client: FlaskClient, authenticated_session: Any, mock_user: Mock) -> None:
         """Test affichage des paramètres utilisateur (GET /user/<pseudo>/parameters)."""
         mock_session = Mock()
         mock_session_class.return_value = mock_session
@@ -372,7 +373,7 @@ class TestUserRoutes:
         
         assert response.status_code == 200
 
-    def test_user_parameters_post_redirects(self, client, authenticated_session):
+    def test_user_parameters_post_redirects(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test redirection POST des paramètres vers my_account."""
         response = client.post('/user/testuser/parameters', data={})
         
@@ -386,19 +387,19 @@ class TestUserRoutes:
 class TestAdminRoutes:
     """Tests pour les routes d'administration."""
 
-    def test_users_get_without_auth(self, client):
+    def test_users_get_without_auth(self, client: FlaskClient) -> None:
         """Test accès à la gestion des utilisateurs sans authentification."""
         response = client.get('/users')
         
         assert response.status_code == 302  # Redirect vers login
 
-    def test_users_get_with_auth(self, client, authenticated_session):
+    def test_users_get_with_auth(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test affichage de la gestion des utilisateurs (GET /users)."""
         response = client.get('/users')
         
         assert response.status_code == 200
 
-    def test_users_post_with_auth(self, client, authenticated_session):
+    def test_users_post_with_auth(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test création d'utilisateur (POST /users)."""
         data = {
             'username': 'newuser',
@@ -409,7 +410,7 @@ class TestAdminRoutes:
         
         assert response.status_code == 200
 
-    def test_users_invalid_method(self, client, authenticated_session):
+    def test_users_invalid_method(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test méthode HTTP non autorisée sur /users."""
         response = client.put('/users')
         
@@ -422,9 +423,9 @@ class TestAdminRoutes:
 class TestUtilityRoutes:
     """Tests pour les routes utilitaires."""
 
-    @patch('application.SessionBdD')
-    @patch('application.ph_acfc')
-    def test_chg_pwd_success(self, mock_ph, mock_session_class, client, mock_user):
+    @patch('app_acfc.application.SessionBdD')
+    @patch('app_acfc.application.ph_acfc')
+    def test_chg_pwd_success(self, mock_ph: Mock, mock_session_class: Mock, client: FlaskClient, mock_user: Mock) -> None:
         """Test changement de mot de passe réussi (POST /chg_pwd)."""
         mock_session = Mock()
         mock_session_class.return_value = mock_session
@@ -445,7 +446,7 @@ class TestUtilityRoutes:
         mock_ph.verify_password.assert_called_once()
         mock_ph.hash_password.assert_called_once()
 
-    def test_chg_pwd_missing_data(self, client):
+    def test_chg_pwd_missing_data(self, client: FlaskClient) -> None:
         """Test changement de mot de passe avec données manquantes."""
         data = {
             'username': 'testuser',
@@ -458,7 +459,7 @@ class TestUtilityRoutes:
         
         assert response.status_code == 200
 
-    def test_chg_pwd_passwords_dont_match(self, client):
+    def test_chg_pwd_passwords_dont_match(self, client: FlaskClient) -> None:
         """Test changement de mot de passe avec mots de passe non correspondants."""
         data = {
             'username': 'testuser',
@@ -471,7 +472,7 @@ class TestUtilityRoutes:
         
         assert response.status_code == 200
 
-    def test_chg_pwd_same_password(self, client):
+    def test_chg_pwd_same_password(self, client: FlaskClient) -> None:
         """Test changement de mot de passe identique à l'ancien."""
         data = {
             'username': 'testuser',
@@ -484,8 +485,8 @@ class TestUtilityRoutes:
         
         assert response.status_code == 200
 
-    @patch('application.SessionBdD')
-    def test_chg_pwd_wrong_old_password(self, mock_session_class, client, mock_user):
+    @patch('app_acfc.application.SessionBdD')
+    def test_chg_pwd_wrong_old_password(self, mock_session_class: Mock, client: FlaskClient, mock_user: Mock) -> None:
         """Test changement de mot de passe avec ancien mot de passe incorrect."""
         mock_session = Mock()
         mock_session_class.return_value = mock_session
@@ -505,7 +506,7 @@ class TestUtilityRoutes:
             
             assert response.status_code == 200
 
-    def test_chg_pwd_get_method_not_allowed(self, client):
+    def test_chg_pwd_get_method_not_allowed(self, client: FlaskClient) -> None:
         """Test méthode GET non autorisée sur /chg_pwd."""
         response = client.get('/chg_pwd')
         
@@ -518,23 +519,23 @@ class TestUtilityRoutes:
 class TestErrorHandlers:
     """Tests pour les gestionnaires d'erreurs HTTP."""
 
-    def test_404_error_handler(self, client, authenticated_session):
+    def test_404_error_handler(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test gestionnaire d'erreur 404."""
         response = client.get('/nonexistent-route')
         
         assert response.status_code == 404
 
-    def test_403_error_handler(self, client, authenticated_session):
+    def test_403_error_handler(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test gestionnaire d'erreur 403 (accès interdit)."""
         # Tentative d'accès au compte d'un autre utilisateur
         response = client.get('/user/otheruseraccount')
         
         assert response.status_code == 403
 
-    def test_500_error_handler(self, client):
+    def test_500_error_handler(self, client: FlaskClient) -> None:
         """Test gestionnaire d'erreur 500."""
         # Nous pouvons simuler une erreur 500 en causant une exception interne
-        with patch('application.render_template') as mock_render:
+        with patch('app_acfc.application.render_template') as mock_render:
             mock_render.side_effect = Exception("Internal server error")
             
             response = client.get('/login')
@@ -549,9 +550,9 @@ class TestErrorHandlers:
 class TestIntegration:
     """Tests d'intégration end-to-end."""
 
-    @patch('application.SessionBdD')
-    @patch('application.ph_acfc')
-    def test_complete_user_flow(self, mock_ph, mock_session_class, client, mock_user):
+    @patch('app_acfc.application.SessionBdD')
+    @patch('app_acfc.application.ph_acfc')
+    def test_complete_user_flow(self, mock_ph: Mock, mock_session_class: Mock, client: FlaskClient, mock_user: Mock) -> None:
         """Test complet : login -> consultation profil -> modification -> logout."""
         # Configuration des mocks
         mock_session = Mock()
@@ -586,10 +587,10 @@ class TestIntegration:
         response = client.get('/logout')
         assert response.status_code == 302
 
-    def test_security_flow_password_change(self, client, authenticated_session):
+    def test_security_flow_password_change(self, client: FlaskClient, authenticated_session: Any) -> None:
         """Test du flow de sécurité : changement de mot de passe."""
-        with patch('application.SessionBdD') as mock_session_class:
-            with patch('application.ph_acfc') as mock_ph:
+        with patch('app_acfc.application.SessionBdD') as mock_session_class:
+            with patch('app_acfc.application.ph_acfc') as mock_ph:
                 mock_session = Mock()
                 mock_session_class.return_value = mock_session
                 mock_user = Mock()

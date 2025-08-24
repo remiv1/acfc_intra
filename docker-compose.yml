@@ -41,6 +41,8 @@ services:
     depends_on:
       acfc-db:
         condition: service_healthy            # Attendre que la BDD soit prête
+      acfc-logs:
+        condition: service_healthy            # Attendre que MongoDB soit prêt
     restart: unless-stopped                   # Redémarrage automatique sauf arrêt manuel
   
   # ================================================================
@@ -114,11 +116,12 @@ services:
       MONGO_HOST: ${MONGO_HOST}
       MONGO_PORT: ${MONGO_PORT}
     healthcheck:
-      # Test de connectivité MongoDB
-      test: ["CMD-SHELL", "echo 'db.runCommand({ ping: 1 })' | mongosh localhost:27017/logs --quiet"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      # Test de connectivité MongoDB (compatible avec différentes versions)
+      test: ["CMD-SHELL", "mongo --eval 'db.adminCommand({ping: 1})' --quiet || mongosh --eval 'db.adminCommand({ping: 1})' --quiet"]
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
 
   # ================================================================
   # SERVICE FAST API (BACK-OFFICE, INTERNE)

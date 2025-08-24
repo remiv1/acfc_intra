@@ -21,7 +21,7 @@ jobs:
   docker-validation:
     name: Docker Compose Validation & Testing
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     
     steps:
       - name: Checkout repository
@@ -74,14 +74,20 @@ jobs:
           
           echo "⏳ Waiting for services to be ready..."
           
-          # Wait for database to be healthy
-          timeout 120s bash -c 'until docker compose -f docker-compose.yml ps acfc-db | grep -q "healthy"; do sleep 2; done'
+          # Wait for database to be healthy (longer timeout for CI)
+          echo "Waiting for MariaDB to be healthy..."
+          timeout 180s bash -c 'until docker compose -f docker-compose.yml ps acfc-db | grep -q "healthy"; do echo "Waiting for DB..."; sleep 5; done'
+          echo "✅ MariaDB is healthy"
           
-          # Wait for MongoDB to be ready
-          timeout 60s bash -c 'until docker compose -f docker-compose.yml exec -T acfc-logs mongosh --eval "db.adminCommand(\"ping\")" > /dev/null 2>&1; do sleep 2; done'
+          # Wait for MongoDB to be ready (using mongo client instead of mongosh)
+          echo "Waiting for MongoDB to be ready..."
+          timeout 120s bash -c 'until docker compose -f docker-compose.yml exec -T acfc-logs mongo --eval "db.adminCommand(\"ping\")" > /dev/null 2>&1 || docker compose -f docker-compose.yml exec -T acfc-logs mongosh --eval "db.adminCommand(\"ping\")" > /dev/null 2>&1; do echo "Waiting for MongoDB..."; sleep 5; done'
+          echo "✅ MongoDB is ready"
           
-          # Wait for Flask app to respond
-          timeout 60s bash -c 'until curl -f http://localhost:5000/health > /dev/null 2>&1 || curl -f http://localhost:5000/ > /dev/null 2>&1; do sleep 2; done'
+          # Wait for Flask app to respond (try health endpoint first, then root)
+          echo "Waiting for Flask app to respond..."
+          timeout 90s bash -c 'until curl -f http://localhost:5000/health > /dev/null 2>&1; do echo "Waiting for Flask app..."; sleep 3; done'
+          echo "✅ Flask app is responding"
           
           echo "✅ All services are ready"
 
@@ -90,19 +96,36 @@ jobs:
           echo "🔍 Running health checks..."
           
           # Check container status
+          echo "Container status:"
           docker compose -f docker-compose.yml ps
           
           # Test database connection
-          docker compose -f docker-compose.yml exec -T acfc-db mariadb -u acfc_user -psecure_password -e "SELECT 1 as test;" acfc_db
-          
-          # Test MongoDB connection
-          docker compose -f docker-compose.yml exec -T acfc-logs mongosh --eval "db.adminCommand('ping')"
-          
-          # Test Flask app endpoint
-          curl -f http://localhost:5000/ || curl -f http://localhost:5000/health || {
-            echo "❌ Flask app is not responding"
+          echo "Testing MariaDB connection..."
+          docker compose -f docker-compose.yml exec -T acfc-db mariadb -u acfc_user -psecure_password -e "SELECT 1 as test;" acfc_db || {
+            echo "❌ MariaDB connection failed"
             exit 1
           }
+          echo "✅ MariaDB connection successful"
+          
+          # Test MongoDB connection (try both mongo and mongosh)
+          echo "Testing MongoDB connection..."
+          docker compose -f docker-compose.yml exec -T acfc-logs mongo --eval "db.adminCommand('ping')" || \
+          docker compose -f docker-compose.yml exec -T acfc-logs mongosh --eval "db.adminCommand('ping')" || {
+            echo "❌ MongoDB connection failed"
+            exit 1
+          }
+          echo "✅ MongoDB connection successful"
+          
+          # Test Flask app endpoint
+          echo "Testing Flask app endpoints..."
+          if curl -f http://localhost:5000/health > /dev/null 2>&1; then
+            echo "✅ Flask health endpoint OK"
+          elif curl -f http://localhost:5000/ > /dev/null 2>&1; then
+            echo "✅ Flask root endpoint OK"
+          else
+            echo "❌ Flask app is not responding"
+            exit 1
+          fi
           
           echo "✅ All health checks passed"
 
