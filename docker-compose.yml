@@ -27,6 +27,8 @@ services:
       dockerfile: app_acfc/dockerfile.app     # Dockerfile spécialisé application
     ports:
       - "5000:5000"                           # Mapping port Flask (dev uniquement)
+    volumes:
+      - ./logs:/app_acfc/logs                      # Volume pour logs (persistance)
     environment:
       - FLASK_ENV=development                 # Mode développement (à changer en prod)
       - DATABASE_URL=mysql+pymysql://user:password@acfc-db/acfc  # Connexion BDD
@@ -79,7 +81,7 @@ services:
       MYSQL_USER: ${DB_USER}                    # Utilisateur application
       MYSQL_PASSWORD: ${DB_PASSWORD}            # Mot de passe utilisateur
     ports:
-      - "3306:3306"                          # Port MySQL/MariaDB (dev uniquement)
+      - "3307:3306"                          # Port MySQL/MariaDB (dev uniquement)
     volumes:
       - acfc-db-data:/var/lib/mysql          # Persistance des données
       - ./mariadb/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro  # Script d'initialisation

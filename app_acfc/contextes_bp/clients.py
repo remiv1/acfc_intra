@@ -31,14 +31,7 @@ Version : 1.0
 from flask import Blueprint, render_template, jsonify
 from sqlalchemy.orm import Session as SessionBdDType
 from sqlalchemy import or_
-#=================================================================
-# Dans un contexte conteneur, app_acfc s'appelle simplement app
-# ainsi on appellera les fonctions différemment suivant le contexte
-#=================================================================
-#try:
 from app_acfc.modeles import SessionBdD, Client, Part, Pro
-#except ImportError:
-#    from app.modeles import SessionBdD
 from typing import Dict, List, Any
 
 # ================================================================

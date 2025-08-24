@@ -34,6 +34,7 @@ WORKDIR /app
 # Si requirements-app.txt ne change pas, cette couche sera réutilisée
 COPY requirements-app.txt /app/requirements.txt
 COPY .env /app/.env
+COPY logs /app/logs
 
 # Installation des dépendances Python avec optimisations
 # --no-cache-dir : Évite le stockage du cache pip (réduit la taille de l'image)
@@ -43,8 +44,11 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # === PHASE 2: COPIE DU CODE APPLICATION ===
 # Copie de tous les fichiers de l'application vers le conteneur
-# Exécuté après l'installation des dépendances pour optimiser le rebuild
-COPY app_acfc/ /app
+# Maintien de la structure app_acfc/ pour les imports Python
+COPY app_acfc/ /app/app_acfc/
+
+# Ajout du répertoire de travail au PYTHONPATH pour les imports
+ENV PYTHONPATH=/app
 
 # === PHASE 3: CONFIGURATION RÉSEAU ===
 # Exposition du port 5000 pour l'application Flask/Waitress
@@ -54,4 +58,4 @@ EXPOSE 5000
 # === PHASE 4: COMMANDE DE DÉMARRAGE ===
 # Lancement de l'application via le serveur WSGI Waitress (production-ready)
 # Alternative plus robuste au serveur de développement Flask intégré
-CMD ["python", "application.py"]
+CMD ["python", "app_acfc/application.py"]
