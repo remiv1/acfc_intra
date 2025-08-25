@@ -24,6 +24,8 @@ Version : 1.0
 from functools import wraps
 from typing import Callable, Any
 from flask import session
+from logs.logger import acfc_log, ERROR, WARNING, INFO, DEBUG
+from werkzeug.exceptions import Forbidden
 
 # Définition des niveaux d'habilitation
 ADMINISTRATEUR = '1'
@@ -50,7 +52,12 @@ def validate_habilitation(required_habilitation: str) -> Callable[[Callable[...,
             # Vérifie si l'utilisateur est connecté et possède une habilitation
             habilitations = session.get('habilitations', '')  # Exemple : '1,2,3'
             if required_habilitation not in habilitations:
-                raise PermissionError("Accès refusé. Habilitation insuffisante.")
+                acfc_log.log_to_file(level=WARNING,
+                                     message=f'{session.get("username", "Anonyme")} a tenté d\'accéder à une ressource sans avoir l\'habilitation requise : {required_habilitation} (actuellement {session.get('habilitation', 'inconnu')})',
+                                     zone_log='habilitation',
+                                     db_log=True
+                                     )
+                raise Forbidden("Accès refusé. Habilitation insuffisante.")
             return function(*args, **kwargs)
         return wrapper
     return decorator

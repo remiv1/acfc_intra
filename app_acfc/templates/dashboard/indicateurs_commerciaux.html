@@ -1,23 +1,28 @@
 <!-- Template pour les indicateurs commerciaux -->
 <div class="indicateurs-commerciaux h-100">
     <div class="p-3">
-        <!-- Loading state -->
-        <div id="indicateurs-loading" class="text-center">
-            <div class="spinner-border spinner-border-sm text-success" role="status">
-                <span class="visually-hidden">Chargement...</span>
+        <!-- Liste des indicateurs -->
+        <div id="indicateurs-list">
+            <div class="row g-2">
+                {% set indicators = objects[1] %}
+                {% if indicators and indicators|length > 0 %}
+                    {% for key, value in indicators.items() %}
+                        <div class="col-12">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body p-2 text-center">
+                                    <h6 class="card-title text-success mb-1">{{ value[0] }}€</h6>
+                                    <small class="text-muted">{{ value[1] }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center p-4">
+                        <i class="fas fa-handshake fa-2x text-warning mb-2"></i>
+                        <p class="text-muted">Aucun indicateur disponible</p>
+                    </div>
+                {% endif %}
             </div>
-            <p class="mt-2 text-muted small">Chargement...</p>
-        </div>
-        
-        <!-- Container pour les indicateurs (sera rempli par l'API) -->
-        <div id="indicateurs-list" class="d-none">
-            <!-- Les indicateurs seront injectés ici par JavaScript/API -->
-        </div>
-        
-        <!-- État d'erreur -->
-        <div id="indicateurs-error" class="text-center d-none">
-            <i class="fas fa-exclamation-triangle text-warning"></i>
-            <p class="mt-2 text-muted small">Données indisponibles</p>
         </div>
     </div>
     
@@ -30,70 +35,3 @@
         </div>
     </div>
 </div>
-
-<!-- Script pour charger les données depuis l'API Fast -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    loadIndicateursCommerciaux();
-});
-
-async function loadIndicateursCommerciaux() {
-    try {
-        // URL de l'API Fast (à adapter selon votre configuration)
-        const response = await fetch('/api/fast/indicateurs-commerciaux');
-        const data = await response.json();
-        
-        const loadingEl = document.getElementById('indicateurs-loading');
-        const listEl = document.getElementById('indicateurs-list');
-        const errorEl = document.getElementById('indicateurs-error');
-        
-        loadingEl.classList.add('d-none');
-        
-        if (data.indicateurs) {
-            listEl.innerHTML = `
-                <div class="row g-2">
-                    <div class="col-12">
-                        <div class="card border-0 bg-light">
-                            <div class="card-body p-2 text-center">
-                                <h6 class="card-title text-success mb-1">${data.indicateurs.ca_mensuel || '0'}€</h6>
-                                <small class="text-muted">CA du mois</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="card border-0 bg-light">
-                            <div class="card-body p-2 text-center">
-                                <h6 class="card-title text-info mb-1">${data.indicateurs.nb_commandes || '0'}</h6>
-                                <small class="text-muted">Commandes</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="card border-0 bg-light">
-                            <div class="card-body p-2 text-center">
-                                <h6 class="card-title text-warning mb-1">${data.indicateurs.nb_devis || '0'}</h6>
-                                <small class="text-muted">Devis en cours</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="card border-0 bg-light">
-                            <div class="card-body p-2 text-center">
-                                <h6 class="card-title text-primary mb-1">${data.indicateurs.nb_clients || '0'}</h6>
-                                <small class="text-muted">Clients actifs</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            listEl.classList.remove('d-none');
-        } else {
-            errorEl.classList.remove('d-none');
-        }
-    } catch (error) {
-        console.error('Erreur lors du chargement des indicateurs:', error);
-        document.getElementById('indicateurs-loading').classList.add('d-none');
-        document.getElementById('indicateurs-error').classList.remove('d-none');
-    }
-}
-</script>

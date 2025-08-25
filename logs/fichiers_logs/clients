@@ -1,0 +1,11 @@
+[2025-08-25 16:58:58,135] --INFO-- Nouveau client créé : ID 2
+[2025-08-25 16:58:58,141] --ERROR-- Erreur lors de la création du client : Could not build url for endpoint 'clients.get_client_context' with values ['client_id']. Did you mean 'clients.get_client' instead?
+[2025-08-25 16:58:58,141] --ERROR-- Erreur lors de la création du client : Could not build url for endpoint 'clients.get_client_context' with values ['client_id']. Did you mean 'clients.get_client' instead?
+[2025-08-25 17:10:04,411] --ERROR-- Erreur lors de la création du client : (mysql.connector.errors.IntegrityError) 1048 (23000): Column 'date_naissance' cannot be null
+[SQL: INSERT INTO `011_part` (id_client, prenom, nom, date_naissance, lieu_naissance) VALUES (%(id_client)s, %(prenom)s, %(nom)s, %(date_naissance)s, %(lieu_naissance)s)]
+[parameters: {'id_client': 3, 'prenom': 'Rémi', 'nom': 'Verschuur', 'date_naissance': None, 'lieu_naissance': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+[2025-08-25 17:11:53,424] --INFO-- Nouveau client créé : ID 1
+[2025-08-25 17:11:53,431] --ERROR-- Erreur lors de la création du client : Could not build url for endpoint 'clients.get_client_context' with values ['id_client']. Did you mean 'clients.get_client' instead?
+[2025-08-25 17:11:53,431] --ERROR-- Erreur lors de la création du client : Could not build url for endpoint 'clients.get_client_context' with values ['id_client']. Did you mean 'clients.get_client' instead?
+[2025-08-25 17:17:48,912] --INFO-- Nouveau client créé : ID 2

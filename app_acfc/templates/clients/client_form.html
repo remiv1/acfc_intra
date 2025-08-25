@@ -1,0 +1,391 @@
+<!-- ====================================================================
+     ACFC - Template "Formulaire Client"
+     ====================================================================
+     
+     Formulaire de création et modification de clients avec design Bootstrap moderne.
+     Support des clients particuliers et professionnels avec validation côté client.
+     
+     Variables Jinja attendues :
+     - sub_context : 'create' ou 'edit'
+     - client (optionnel) : Objet Client SQLAlchemy pour modification
+     - error_message (optionnel) : Message d'erreur à afficher
+     - success_message (optionnel) : Message de succès à afficher
+     
+     Features :
+     - Formulaire dynamique selon le type de client
+     - Validation HTML5 et JavaScript
+     - Design responsive Bootstrap 5
+     - Basculement automatique entre particulier/professionnel
+==================================================================== -->
+
+<!-- CSS spécifique aux clients -->
+<link rel="stylesheet" href="{{ url_for('static', filename='clients/css/clients.css') }}">
+
+<div class="container-fluid">
+    <!-- En-tête du formulaire -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="mb-1 text-dark">
+                                {% if sub_context == 'create' %}
+                                    <i class="bi bi-person-plus me-2"></i>Nouveau Client
+                                {% else %}
+                                    <i class="bi bi-pencil me-2"></i>Modifier {{ client.nom_affichage }}
+                                {% endif %}
+                            </h2>
+                            <p class="text-muted mb-0">
+                                {% if sub_context == 'create' %}
+                                    Créer une nouvelle fiche client
+                                {% else %}
+                                    Modification des informations client
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('clients.client_list') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Retour à la liste
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages d'erreur et de succès -->
+    {% if error_message %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {{ error_message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if success_message %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                {{ success_message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Formulaire principal -->
+    <div class="row">
+        <div class="col-12">
+            <form action="{% if sub_context == 'create' %}{{ url_for('clients.create_client') }}{% else %}{{ url_for('clients.update_client', id_client=client.id) }}{% endif %}" 
+                  method="post" class="needs-validation" novalidate id="clientForm">
+                
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-info-circle me-2 text-primary"></i>Informations générales
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Sélection du type de client -->
+                        {% if sub_context == 'create' %}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="form-label">Type de client <span class="text-danger">*</span></label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="type_client" 
+                                               id="type_particulier" value="1" checked required>
+                                        <label class="form-check-label" for="type_particulier">
+                                            <i class="bi bi-person me-1"></i>Particulier
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="type_client" 
+                                               id="type_professionnel" value="2" required>
+                                        <label class="form-check-label" for="type_professionnel">
+                                            <i class="bi bi-building me-1"></i>Professionnel
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <!-- Client existant - affichage du type -->
+                        <input type="hidden" name="type_client" value="{{ client.type_client }}">
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="form-label">Type de client</label>
+                                <p class="form-control-plaintext">
+                                    {% if client.type_client == 1 %}
+                                        <i class="bi bi-person me-1"></i>Particulier
+                                    {% else %}
+                                        <i class="bi bi-building me-1"></i>Professionnel
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Notes générales -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="notes" class="form-label">Notes (optionnel)</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                          placeholder="Notes ou commentaires sur ce client...">{% if client %}{{ client.notes }}{% endif %}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulaire spécifique Particulier -->
+                <div class="card border-0 shadow-sm mt-4" id="form-particulier" 
+                     {% if sub_context == 'edit' and client.type_client != 1 %}style="display: none;"{% endif %}>
+                    <div class="card-header bg-white border-bottom">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-person-lines-fill me-2 text-success"></i>Informations particulier
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="prenom" class="form-label">Prénom <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="prenom" name="prenom" 
+                                           value="{% if client and client.part %}{{ client.part.prenom }}{% endif %}" 
+                                           placeholder="Prénom" required>
+                                    <div class="invalid-feedback">Le prénom est obligatoire.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nom" class="form-label">Nom <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="nom" name="nom" 
+                                           value="{% if client and client.part %}{{ client.part.nom }}{% endif %}" 
+                                           placeholder="Nom de famille" required>
+                                    <div class="invalid-feedback">Le nom est obligatoire.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="date_naissance" class="form-label">Date de naissance</label>
+                                    <input type="date" class="form-control" id="date_naissance" name="date_naissance" 
+                                           value="{% if client and client.part %}{{ client.part.date_naissance }}{% endif %}" 
+                                           >
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="lieu_naissance" class="form-label">Lieu de naissance</label>
+                                    <input type="text" class="form-control" id="lieu_naissance" name="lieu_naissance" 
+                                           value="{% if client and client.part %}{{ client.part.lieu_naissance }}{% endif %}" 
+                                           placeholder="Ville de naissance">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulaire spécifique Professionnel -->
+                <div class="card border-0 shadow-sm mt-4" id="form-professionnel" 
+                     {% if sub_context == 'create' or (sub_context == 'edit' and client.type_client == 1) %}style="display: none;"{% endif %}>
+                    <div class="card-header bg-white border-bottom">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-building me-2 text-primary"></i>Informations professionnel
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="raison_sociale" class="form-label">Raison sociale <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="raison_sociale" name="raison_sociale" 
+                                           value="{% if client and client.pro %}{{ client.pro.raison_sociale }}{% endif %}" 
+                                           placeholder="Nom de l'entreprise ou organisation" required>
+                                    <div class="invalid-feedback">La raison sociale est obligatoire.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="type_pro" class="form-label">Type <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="type_pro" name="type_pro" required>
+                                        <option value="">Choisir...</option>
+                                        <option value="1" {% if client and client.pro and client.pro.type_pro == 1 %}selected{% endif %}>Entreprise</option>
+                                        <option value="2" {% if client and client.pro and client.pro.type_pro == 2 %}selected{% endif %}>Association</option>
+                                        <option value="3" {% if client and client.pro and client.pro.type_pro == 3 %}selected{% endif %}>Administration</option>
+                                    </select>
+                                    <div class="invalid-feedback">Le type d'organisation est obligatoire.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="siren" class="form-label">SIREN</label>
+                                    <input type="text" class="form-control" id="siren" name="siren" 
+                                           value="{% if client and client.pro %}{{ client.pro.siren }}{% endif %}" 
+                                           placeholder="123456789" maxlength="9" pattern="[0-9]{9}">
+                                    <div class="form-text">9 chiffres (obligatoire pour les entreprises)</div>
+                                    <div class="invalid-feedback">Le SIREN doit contenir exactement 9 chiffres.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="rna" class="form-label">RNA</label>
+                                    <input type="text" class="form-control" id="rna" name="rna" 
+                                           value="{% if client and client.pro %}{{ client.pro.rna }}{% endif %}" 
+                                           placeholder="W123456789" maxlength="10" pattern="W[0-9]{9}">
+                                    <div class="form-text">Numéro RNA pour les associations (W + 9 chiffres)</div>
+                                    <div class="invalid-feedback">Le RNA doit commencer par W suivi de 9 chiffres.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('clients.client_list') }}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left me-1"></i>Annuler
+                                    </a>
+                                    <button type="submit" class="btn btn-success">
+                                        {% if sub_context == 'create' %}
+                                            <i class="bi bi-check-lg me-1"></i>Créer le client
+                                        {% else %}
+                                            <i class="bi bi-save me-1"></i>Enregistrer les modifications
+                                        {% endif %}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript spécifique aux clients -->
+<script src="{{ url_for('static', filename='clients/js/clients.js') }}"></script>
+
+<!-- Script spécifique au formulaire -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeParticulier = document.getElementById('type_particulier');
+    const typeProfessionnel = document.getElementById('type_professionnel');
+    const formParticulier = document.getElementById('form-particulier');
+    const formProfessionnel = document.getElementById('form-professionnel');
+    
+    // Fonction pour basculer entre les types de formulaires
+    function toggleClientType() {
+        if (typeParticulier && typeParticulier.checked) {
+            formParticulier.style.display = 'block';
+            formProfessionnel.style.display = 'none';
+            
+            // Activer la validation pour les champs particulier
+            setRequiredFields('particulier', true);
+            setRequiredFields('professionnel', false);
+        } else if (typeProfessionnel && typeProfessionnel.checked) {
+            formParticulier.style.display = 'none';
+            formProfessionnel.style.display = 'block';
+            
+            // Activer la validation pour les champs professionnel
+            setRequiredFields('particulier', false);
+            setRequiredFields('professionnel', true);
+        }
+    }
+    
+    // Fonction pour activer/désactiver les champs obligatoires
+    function setRequiredFields(type, required) {
+        const prefix = type === 'particulier' ? ['prenom', 'nom'] : 
+                                                ['raison_sociale', 'type_pro'];
+        
+        prefix.forEach(fieldName => {
+            const field = document.getElementById(fieldName);
+            if (field) {
+                field.required = required;
+                if (!required) {
+                    field.classList.remove('is-invalid');
+                }
+            }
+        });
+    }
+    
+    // Écouteurs d'événements pour le changement de type
+    if (typeParticulier) {
+        typeParticulier.addEventListener('change', toggleClientType);
+    }
+    if (typeProfessionnel) {
+        typeProfessionnel.addEventListener('change', toggleClientType);
+    }
+    
+    // Initialisation
+    toggleClientType();
+    
+    // Validation du formulaire
+    const form = document.getElementById('clientForm');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    }, false);
+    
+    // Validation SIREN en temps réel
+    const sirenField = document.getElementById('siren');
+    if (sirenField) {
+        sirenField.addEventListener('input', function() {
+            // Supprime tout ce qui n'est pas un chiffre
+            this.value = this.value.replace(/\D/g, '');
+            
+            // Validation de la longueur
+            if (this.value.length === 9 || this.value.length === 0) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+    }
+    
+    // Validation RNA en temps réel
+    const rnaField = document.getElementById('rna');
+    if (rnaField) {
+        rnaField.addEventListener('input', function() {
+            // Format automatique RNA
+            let value = this.value.toUpperCase();
+            if (value.length > 0 && !value.startsWith('W')) {
+                value = 'W' + value.replace(/\D/g, '');
+            } else {
+                value = value.replace(/[^W0-9]/g, '');
+            }
+            this.value = value;
+            
+            // Validation du format
+            const rnaPattern = /^W[0-9]{9}$/;
+            if (rnaPattern.test(this.value) || this.value.length === 0) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+    }
+});
+</script>

@@ -220,3 +220,10 @@ class CustomLogger:
         # Log additionnel dans un fichier spécifique si demandé
         if specific_logger:
             self._create_specific_logger(specific_logger).log(level, message)
+
+# Création du logger personnalisé
+acfc_log = CustomLogger(
+    db_uri="mongodb://acfc-logs:27017/",
+    db_name="logDB",
+    collection_name="traces"
+)

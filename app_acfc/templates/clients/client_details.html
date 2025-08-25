@@ -1,38 +1,112 @@
-<!-- Template de détails client avec onglets -->
-<div class="client-details-container" id="client-details">
-    <!-- En-tête du client -->
-    <div class="card mb-4">
-        <div class="card-header bg-success text-white">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="card-title mb-0">
-                    <i class="fas fa-user me-2"></i>
-                    <span id="client-name">Détails du client</span>
-                    <span id="client-type-badge" class="badge bg-light text-dark ms-2"></span>
-                </h4>
-                <div>
-                    <button class="btn btn-outline-light btn-sm me-2" onclick="editClient()">
-                        <i class="fas fa-edit me-1"></i>
-                        Modifier
-                    </button>
-                    <button class="btn btn-outline-light btn-sm" onclick="backToSearch()">
-                        <i class="fas fa-arrow-left me-1"></i>
-                        Retour
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="mb-1"><strong>ID Client :</strong> <span id="client-id"></span></p>
-                    <p class="mb-1"><strong>Date de création :</strong> <span id="client-created"></span></p>
-                    <p class="mb-0"><strong>Statut :</strong> <span id="client-status"></span></p>
-                </div>
-                <div class="col-md-6">
-                    <div id="client-notes-container" class="d-none">
-                        <p class="mb-0"><strong>Notes :</strong></p>
-                        <div class="alert alert-info mt-2">
-                            <span id="client-notes"></span>
+<!-- ====================================================================
+     ACFC - Template "Détails Client"
+     ====================================================================
+     
+     Interface de gestion des détails client avec design Bootstrap moderne.
+     Affiche les informations complètes d'un client avec onglets organisés
+     pour les différents types de données (contact, commandes, factures).
+     
+     Variables Jinja attendues :
+     - client : Objet Client SQLAlchemy avec toutes les relations
+     - success_message (optionnel) : Message de succès à afficher
+     - message (optionnel) : Message d'erreur à afficher
+     
+     Features :
+     - Design responsive Bootstrap 5
+     - Onglets pour organiser l'information par type
+     - Modals pour créer téléphones, emails et adresses
+     - Actions rapides et navigation intuitive
+     
+     CSS et JS externes :
+     - CSS : statics/clients/css/clients.css
+     - JS : statics/clients/js/clients.js
+==================================================================== -->
+
+<!-- CSS spécifique aux clients (si pas déjà inclus) -->
+{% if not request.endpoint.startswith('static') %}
+<link rel="stylesheet" href="{{ url_for('static', filename='clients/css/clients.css') }}">
+{% endif %}
+{% set client = objects[0] %}
+{% set part = objects[1] %}
+{% set pro = objects[2] %}
+{% set addresses = objects[3] %}
+{% set phones = objects[4] %}
+{% set mails = objects[5] %}
+{% set orders = objects[6] %}
+{% set bills = objects[7] %}
+{% set nom_affichage = objects[8] %}
+<!-- Champs cachés pour les identifiants -->
+<input type="hidden" id="client-id" value="{{ client.id }}">
+<input type="hidden" id="client-type" value="{{ client.type_client }}">
+{% if part %}
+<input type="hidden" id="part-id" value="{{ part.id }}">
+{% endif %}
+{% if pro %}
+<input type="hidden" id="pro-id" value="{{ pro.id }}">
+{% endif %}
+
+<div class="container-fluid">
+    <!-- En-tête avec informations principales du client -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <!-- Avatar placeholder -->
+                        <div class="me-4">
+                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white fw-bold client-avatar">
+                                {% if client.type_client == 1 and part %}
+                                    {{ part.prenom[0].upper() }}{{ part.nom[0].upper() }}
+                                {% elif client.type_client == 2 and pro %}
+                                    {{ pro.raison_sociale[0].upper() }}
+                                {% else %}
+                                    C
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Informations principales -->
+                        <div class="flex-grow-1">
+                            <h2 class="mb-1 text-dark">{{ nom_affichage }}</h2>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-hash me-1"></i>Client #{{ client.id }}
+                                {% if client.type_client == 1 %}
+                                    <span class="badge bg-info ms-2">Particulier</span>
+                                {% else %}
+                                    <span class="badge bg-primary ms-2">Professionnel</span>
+                                {% endif %}
+                            </p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <!-- Badge statut client -->
+                                {% if client.is_active %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle me-1"></i>Actif
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle me-1"></i>Inactif
+                                    </span>
+                                {% endif %}
+                                
+                                <!-- Badge création -->
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-calendar me-1"></i>Créé le {{ client.created_at.strftime('%d/%m/%Y') }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions rapides -->
+                        <div class="text-end">
+                            <nav aria-label="Actions du client">
+                                <a href="{{ url_for('clients.edit_client', id_client=client.id) }}" 
+                                   class="btn btn-outline-secondary btn-sm me-2">
+                                    <i class="bi bi-pencil me-1"></i>Modifier
+                                </a>
+                                <a href="{{ url_for('clients.client_list') }}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-arrow-left me-1"></i>Retour à la liste
+                                </a>
+                            </nav>
                         </div>
                     </div>
                 </div>
@@ -40,118 +114,195 @@
         </div>
     </div>
 
-    <!-- Onglets de navigation -->
-    <ul class="nav nav-tabs" id="client-tabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="infos-tab" data-bs-toggle="tab" data-bs-target="#infos" type="button" role="tab">
-                <i class="fas fa-info-circle me-1"></i>
-                Informations
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="addresses-tab" data-bs-toggle="tab" data-bs-target="#addresses" type="button" role="tab">
-                <i class="fas fa-map-marker-alt me-1"></i>
-                Adresses
-                <span id="addresses-count" class="badge bg-secondary ms-1">0</span>
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="emails-tab" data-bs-toggle="tab" data-bs-target="#emails" type="button" role="tab">
-                <i class="fas fa-envelope me-1"></i>
-                Emails
-                <span id="emails-count" class="badge bg-secondary ms-1">0</span>
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="phones-tab" data-bs-toggle="tab" data-bs-target="#phones" type="button" role="tab">
-                <i class="fas fa-phone me-1"></i>
-                Téléphones
-                <span id="phones-count" class="badge bg-secondary ms-1">0</span>
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab">
-                <i class="fas fa-shopping-cart me-1"></i>
-                Commandes
-                <span id="orders-count" class="badge bg-secondary ms-1">0</span>
-            </button>
-        </li>
-    </ul>
+    <!-- Messages de succès et d'erreur -->
+    {% if success_message %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                {{ success_message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if message %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Navigation par onglets -->
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-tabs nav-fill mb-4" id="clientTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="infos-tab" data-bs-toggle="tab" 
+                            data-bs-target="#infos" type="button" role="tab">
+                        <i class="bi bi-person me-2"></i>Informations
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="phones-tab" data-bs-toggle="tab" 
+                            data-bs-target="#phones" type="button" role="tab">
+                        <i class="bi bi-telephone me-2"></i>Téléphones
+                        <span id="phones-count" class="badge bg-secondary ms-1">{{ phones|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="emails-tab" data-bs-toggle="tab" 
+                            data-bs-target="#emails" type="button" role="tab">
+                        <i class="bi bi-envelope me-2"></i>Emails
+                        <span id="emails-count" class="badge bg-secondary ms-1">{{ mails|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="addresses-tab" data-bs-toggle="tab" 
+                            data-bs-target="#addresses" type="button" role="tab">
+                        <i class="bi bi-geo-alt me-2"></i>Adresses
+                        <span id="addresses-count" class="badge bg-secondary ms-1">{{ addresses|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="orders-tab" data-bs-toggle="tab" 
+                            data-bs-target="#orders" type="button" role="tab">
+                        <i class="bi bi-cart me-2"></i>Commandes
+                        <span id="orders-count" class="badge bg-secondary ms-1">{{ orders|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="invoices-tab" data-bs-toggle="tab" 
+                            data-bs-target="#invoices" type="button" role="tab">
+                        <i class="bi bi-receipt me-2"></i>Factures
+                        <span id="invoices-count" class="badge bg-secondary ms-1">{{ bills|length }}</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
 
     <!-- Contenu des onglets -->
-    <div class="tab-content" id="client-tab-content">
+    <div class="tab-content" id="clientTabsContent">
+        
         <!-- Onglet Informations -->
         <div class="tab-pane fade show active" id="infos" role="tabpanel">
-            <div class="card">
-                <div class="card-body">
-                    <div id="client-particulier" class="d-none">
-                        <h5 class="card-title text-success">
-                            <i class="fas fa-user me-2"></i>
-                            Informations particulier
-                        </h5>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>Prénom :</strong> <span id="part-prenom"></span></p>
-                                <p><strong>Nom :</strong> <span id="part-nom"></span></p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>Date de naissance :</strong> <span id="part-naissance"></span></p>
-                                <p><strong>Lieu de naissance :</strong> <span id="part-lieu"></span></p>
-                            </div>
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="card-title mb-0">
+                                {% if client.type_client == 1 %}
+                                    <i class="bi bi-person-lines-fill me-2 text-success"></i>Informations particulier
+                                {% else %}
+                                    <i class="bi bi-building me-2 text-primary"></i>Informations professionnel
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if client.type_client == 1 and part %}
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted">Prénom</label>
+                                        <p class="fw-semibold">{{ part.prenom }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted">Nom</label>
+                                        <p class="fw-semibold">{{ part.nom }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted">Date de naissance</label>
+                                        <p class="fw-semibold">{{ part.date_naissance.strftime('%d/%m/%Y') if part.date_naissance else '' }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted">Lieu de naissance</label>
+                                        <p class="fw-semibold">{{ part.lieu_naissance if part.lieu_naissance else '' }}</p>
+                                    </div>
+                                </div>
+                            {% elif client.type_client == 2 and pro %}
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <label class="form-label text-muted">Raison sociale</label>
+                                        <p class="fw-semibold">{{ pro.raison_sociale }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label text-muted">Type</label>
+                                        <p class="fw-semibold">
+                                            {% if pro.type_pro == 1 %}
+                                                Entreprise
+                                            {% elif pro.type_pro == 2 %}
+                                                Association
+                                            {% elif pro.type_pro == 3 %}
+                                                Administration
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    {% if pro.siren %}
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted">SIREN</label>
+                                        <p class="fw-semibold">{{ pro.siren }}</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if pro.rna %}
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted">RNA</label>
+                                        <p class="fw-semibold">{{ pro.rna }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    {% if client.notes %}
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-white border-bottom">
+                            <h6 class="card-title mb-0">
+                                <i class="bi bi-sticky me-2 text-warning"></i>Notes
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">{{ client.notes }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
                     
-                    <div id="client-professionnel" class="d-none">
-                        <h5 class="card-title text-primary">
-                            <i class="fas fa-building me-2"></i>
-                            Informations professionnel
-                        </h5>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>Raison sociale :</strong> <span id="pro-raison"></span></p>
-                                <p><strong>Type :</strong> <span id="pro-type"></span></p>
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h6 class="card-title mb-0">
+                                <i class="bi bi-info-circle me-2 text-info"></i>Résumé du client
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted">Téléphones</span>
+                                <span class="badge bg-primary-subtle text-primary">{{ client.tels|length }}</span>
                             </div>
-                            <div class="col-md-6">
-                                <p><strong>SIREN :</strong> <span id="pro-siren"></span></p>
-                                <p><strong>RNA :</strong> <span id="pro-rna"></span></p>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted">Emails</span>
+                                <span class="badge bg-primary-subtle text-primary">{{ mail|length }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted">Adresses</span>
+                                <span class="badge bg-primary-subtle text-primary">{{ addresses|length }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted">Commandes</span>
+                                <span class="badge bg-success-subtle text-success">{{ orders|length }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Factures</span>
+                                <span class="badge bg-warning-subtle text-warning">{{ bills|length }}</span>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Onglet Adresses -->
-        <div class="tab-pane fade" id="addresses" role="tabpanel">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Adresses du client</h5>
-                    <button class="btn btn-sm btn-success" onclick="addAddress()">
-                        <i class="fas fa-plus me-1"></i>
-                        Ajouter
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div id="addresses-list">
-                        <!-- Les adresses seront injectées ici -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Onglet Emails -->
-        <div class="tab-pane fade" id="emails" role="tabpanel">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Adresses email</h5>
-                    <button class="btn btn-sm btn-success" onclick="addEmail()">
-                        <i class="fas fa-plus me-1"></i>
-                        Ajouter
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div id="emails-list">
-                        <!-- Les emails seront injectés ici -->
                     </div>
                 </div>
             </div>
@@ -159,46 +310,493 @@
 
         <!-- Onglet Téléphones -->
         <div class="tab-pane fade" id="phones" role="tabpanel">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Numéros de téléphone</h5>
-                    <button class="btn btn-sm btn-success" onclick="addPhone()">
-                        <i class="fas fa-plus me-1"></i>
-                        Ajouter
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-telephone me-2 text-primary"></i>Numéros de téléphone
+                    </h5>
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addPhoneModal">
+                        <i class="bi bi-plus me-1"></i>Ajouter
                     </button>
                 </div>
                 <div class="card-body">
-                    <div id="phones-list">
-                        <!-- Les téléphones seront injectés ici -->
-                    </div>
+                    {% if client.tels %}
+                        <div class="row g-3">
+                            {% for telephone in client.tels %}
+                            <div class="col-md-6">
+                                <div class="card border">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="card-title mb-1">
+                                                    {% if telephone.is_principal %}
+                                                        <i class="bi bi-star-fill text-warning me-1"></i>
+                                                    {% endif %}
+                                                    {{ telephone.type_telephone|title }}
+                                                </h6>
+                                                <p class="card-text fw-bold mb-1">
+                                                    {% if telephone.indicatif %}{{ telephone.indicatif }} {% endif %}{{ telephone.telephone }}
+                                                </p>
+                                                {% if telephone.detail %}
+                                                <p class="card-text small text-muted mb-0">{{ telephone.detail }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#" onclick="editPhone({{ telephone.id }})">
+                                                        <i class="bi bi-pencil me-2"></i>Modifier
+                                                    </a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#" onclick="deletePhone({{ telephone.id }})">
+                                                        <i class="bi bi-trash me-2"></i>Supprimer
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-telephone fs-3 text-muted mb-3"></i>
+                            <p class="text-muted mb-3">Aucun numéro de téléphone enregistré</p>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPhoneModal">
+                                <i class="bi bi-plus me-1"></i>Ajouter le premier numéro
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Emails -->
+        <div class="tab-pane fade" id="emails" role="tabpanel">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-envelope me-2 text-primary"></i>Adresses email
+                    </h5>
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addEmailModal">
+                        <i class="bi bi-plus me-1"></i>Ajouter
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if mail %}
+                        <div class="row g-3">
+                            {% for email in mail %}
+                            <div class="col-md-6">
+                                <div class="card border">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="card-title mb-1">
+                                                    {% if email.is_principal %}
+                                                        <i class="bi bi-star-fill text-warning me-1"></i>
+                                                    {% endif %}
+                                                    {{ email.type_mail|title }}
+                                                </h6>
+                                                <p class="card-text fw-bold mb-1">{{ email.mail }}</p>
+                                                {% if email.detail %}
+                                                <p class="card-text small text-muted mb-0">{{ email.detail }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" title="Actions">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><button class="dropdown-item" type="button" onclick="editEmail({{ email.id }})">
+                                                        <i class="bi bi-pencil me-2"></i>Modifier
+                                                    </button></li>
+                                                    <li><button class="dropdown-item text-danger" type="button" onclick="deleteEmail({{ email.id }})">
+                                                        <i class="bi bi-trash me-2"></i>Supprimer
+                                                    </button></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-envelope fs-3 text-muted mb-3"></i>
+                            <p class="text-muted mb-3">Aucune adresse email enregistrée</p>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmailModal">
+                                <i class="bi bi-plus me-1"></i>Ajouter la première adresse
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Adresses -->
+        <div class="tab-pane fade" id="addresses" role="tabpanel">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-geo-alt me-2 text-primary"></i>Adresses
+                    </h5>
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                        <i class="bi bi-plus me-1"></i>Ajouter
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if addresses %}
+                        <div class="row g-3">
+                            {% for adresse in addresses %}
+                            <div class="col-md-6">
+                                <div class="card border">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="card-title mb-2">
+                                                    <i class="bi bi-house me-1"></i>Adresse {{ loop.index }}
+                                                </h6>
+                                                <p class="card-text mb-1">{{ adresse.adresse_l1 }}</p>
+                                                {% if adresse.adresse_l2 %}
+                                                <p class="card-text mb-1">{{ adresse.adresse_l2 }}</p>
+                                                {% endif %}
+                                                <p class="card-text mb-0"><strong>{{ adresse.code_postal }} {{ adresse.ville }}</strong></p>
+                                                <small class="text-muted">Créée le {{ adresse.created_at.strftime('%d/%m/%Y') }}</small>
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" title="Actions">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><button class="dropdown-item" type="button" onclick="editAddress({{ adresse.id }})">
+                                                        <i class="bi bi-pencil me-2"></i>Modifier
+                                                    </button></li>
+                                                    <li><button class="dropdown-item text-danger" type="button" onclick="deleteAddress({{ adresse.id }})">
+                                                        <i class="bi bi-trash me-2"></i>Supprimer
+                                                    </button></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-geo-alt fs-3 text-muted mb-3"></i>
+                            <p class="text-muted mb-3">Aucune adresse enregistrée</p>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                                <i class="bi bi-plus me-1"></i>Ajouter la première adresse
+                            </button>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
         <!-- Onglet Commandes -->
         <div class="tab-pane fade" id="orders" role="tabpanel">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Historique des commandes</h5>
-                    <button class="btn btn-sm btn-success" onclick="addOrder()">
-                        <i class="fas fa-plus me-1"></i>
-                        Nouvelle commande
-                    </button>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-cart me-2 text-primary"></i>Commandes
+                    </h5>
+                    <a href="{{ url_for('commercial.create_commande', client_id=client.id) }}" class="btn btn-success btn-sm">
+                        <i class="bi bi-plus me-1"></i>Nouvelle commande
+                    </a>
                 </div>
                 <div class="card-body">
-                    <div id="orders-list">
-                        <!-- Les commandes seront injectées ici -->
-                    </div>
+                    {% if orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>N° Commande</th>
+                                        <th>Date</th>
+                                        <th>Montant</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for commande in orders %}
+                                    <tr>
+                                        <td><strong>#{{ commande.id }}</strong></td>
+                                        <td>{{ commande.date_commande.strftime('%d/%m/%Y') }}</td>
+                                        <td><strong>{{ "%.2f"|format(commande.montant) }} €</strong></td>
+                                        <td>
+                                            {% if commande.is_expedie %}
+                                                <span class="badge bg-success">Expédiée</span>
+                                            {% elif commande.is_facture %}
+                                                <span class="badge bg-info">Facturée</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">En cours</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('commercial.commandes_details', id_commande=commande.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye me-1"></i>Voir
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-cart fs-3 text-muted mb-3"></i>
+                            <p class="text-muted mb-3">Aucune commande enregistrée</p>
+                            <a href="{{ url_for('commercial.create_commande', client_id=client.id) }}" class="btn btn-primary">
+                                <i class="bi bi-plus me-1"></i>Créer la première commande
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Factures -->
+        <div class="tab-pane fade" id="invoices" role="tabpanel">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-receipt me-2 text-primary"></i>Factures
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if bills %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>N° Facture</th>
+                                        <th>ID Fiscal</th>
+                                        <th>Date</th>
+                                        <th>Montant</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for facture in bills %}
+                                    <tr>
+                                        <td><strong>#{{ facture.id }}</strong></td>
+                                        <td><code>{{ facture.id_fiscal }}</code></td>
+                                        <td>{{ facture.date_facturation.strftime('%d/%m/%Y') }}</td>
+                                        <td><strong>{{ "%.2f"|format(facture.montant_facture) }} €</strong></td>
+                                        <td>
+                                            {% if facture.is_imprime %}
+                                                <span class="badge bg-success">Imprimée</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">En attente</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('commercial.factures_details', id_facture=facture.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye me-1"></i>Voir
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-receipt fs-3 text-muted mb-3"></i>
+                            <p class="text-muted mb-3">Aucune facture émise</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Loading state -->
-    <div id="details-loading" class="text-center p-5 d-none">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Chargement des détails...</span>
+<!-- Modal Ajout Téléphone -->
+<div class="modal fade" id="addPhoneModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-telephone me-2"></i>Ajouter un numéro de téléphone
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('clients.clients_add_phone') }}" method="post" id="addPhoneForm">
+                <div class="modal-body">
+                    <input type="hidden" name="client_id" value="{{ client.id }}">
+                    
+                    <div class="mb-3">
+                        <label for="type_telephone" class="form-label">Type de téléphone</label>
+                        <select class="form-select" id="type_telephone" name="type_telephone" required>
+                            <option value="">Choisir un type...</option>
+                            <option value="fixe_pro">Fixe professionnel</option>
+                            <option value="mobile_pro">Mobile professionnel</option>
+                            <option value="fixe_perso">Fixe personnel</option>
+                            <option value="mobile_perso">Mobile personnel</option>
+                            <option value="fax">Fax</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="indicatif" class="form-label">Indicatif</label>
+                                <input type="text" class="form-control" id="indicatif" 
+                                       name="indicatif" placeholder="+33" value="+33">
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="telephone" class="form-label">Numéro</label>
+                                <input type="text" class="form-control" id="telephone" 
+                                       name="telephone" placeholder="0123456789" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="detail_phone" class="form-label">Détail (optionnel)</label>
+                        <input type="text" class="form-control" id="detail_phone" 
+                               name="detail" placeholder="Heures de contact, précisions...">
+                    </div>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="is_principal_phone" 
+                               name="is_principal" value="1">
+                        <label class="form-check-label" for="is_principal_phone">
+                            Téléphone principal
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg me-2"></i>Ajouter
+                    </button>
+                </div>
+            </form>
         </div>
-        <p class="mt-2 text-muted">Chargement des informations du client...</p>
     </div>
 </div>
+
+<!-- Modal Ajout Email -->
+<div class="modal fade" id="addEmailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-envelope me-2"></i>Ajouter une adresse email
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('clients.clients_add_email') }}" method="post" id="addEmailForm">
+                <div class="modal-body">
+                    <input type="hidden" name="client_id" value="{{ client.id }}">
+                    
+                    <div class="mb-3">
+                        <label for="type_mail" class="form-label">Type d'email</label>
+                        <select class="form-select" id="type_mail" name="type_mail" required>
+                            <option value="">Choisir un type...</option>
+                            <option value="professionnel">Professionnel</option>
+                            <option value="personnel">Personnel</option>
+                            <option value="facturation">Facturation</option>
+                            <option value="marketing">Marketing</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="mail" class="form-label">Adresse email</label>
+                        <input type="email" class="form-control" id="mail" 
+                               name="mail" placeholder="exemple@domaine.com" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="detail_email" class="form-label">Détail (optionnel)</label>
+                        <input type="text" class="form-control" id="detail_email" 
+                               name="detail" placeholder="Précisions sur l'usage...">
+                    </div>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="is_principal_email" 
+                               name="is_principal" value="1">
+                        <label class="form-check-label" for="is_principal_email">
+                            Email principal
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg me-2"></i>Ajouter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Adresse -->
+<div class="modal fade" id="addAddressModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-geo-alt me-2"></i>Ajouter une adresse
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('clients.clients_add_address') }}" method="post" id="addAddressForm">
+                <div class="modal-body">
+                    <input type="hidden" name="client_id" value="{{ client.id }}">
+                    
+                    <div class="mb-3">
+                        <label for="adresse_l1" class="form-label">Adresse ligne 1</label>
+                        <input type="text" class="form-control" id="adresse_l1" 
+                               name="adresse_l1" placeholder="Numéro et nom de rue" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="adresse_l2" class="form-label">Adresse ligne 2 (optionnel)</label>
+                        <input type="text" class="form-control" id="adresse_l2" 
+                               name="adresse_l2" placeholder="Complément d'adresse, bâtiment...">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="code_postal" class="form-label">Code postal</label>
+                                <input type="text" class="form-control" id="code_postal" 
+                                       name="code_postal" placeholder="75001" required>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="ville" class="form-label">Ville</label>
+                                <input type="text" class="form-control" id="ville" 
+                                       name="ville" placeholder="Paris" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg me-2"></i>Ajouter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript spécifique aux clients (si pas déjà inclus) -->
+{% if not request.endpoint.startswith('static') %}
+<script src="{{ url_for('static', filename='clients/js/clients.js') }}"></script>
+{% endif %}

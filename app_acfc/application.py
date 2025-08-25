@@ -22,70 +22,47 @@ Version : 1.0
 from flask import Flask, Response, render_template, request, Request, Blueprint, session, url_for, redirect, jsonify
 from flask_session import Session
 from waitress import serve
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, List
 from werkzeug.exceptions import HTTPException, Forbidden, Unauthorized
 from services import PasswordService, SecureSessionService
-from modeles import SessionBdD, User
-from datetime import datetime
-from sqlalchemy import text
+from modeles import SessionBdD, User, Commande
+from datetime import datetime, date
+from sqlalchemy import text, and_, or_
 from sqlalchemy.orm import Session as SessionBdDType
-from logs.logger import CustomLogger, INFO, WARNING, ERROR 
+from sqlalchemy.sql.functions import func
+from logs.logger import acfc_log, INFO, WARNING, ERROR
+from app_acfc.contextes_bp.clients import clients_bp         # Module CRM - Gestion clients
+from app_acfc.contextes_bp.catalogue import catalogue_bp     # Module Catalogue produits
+from app_acfc.contextes_bp.commercial import commercial_bp   # Module Commercial - Devis, commandes
+from app_acfc.contextes_bp.comptabilite import comptabilite_bp # Module Comptabilité - Facturation
+from app_acfc.contextes_bp.stocks import stocks_bp          # Module Stocks - Inventaire
+from app_acfc.contextes_bp.admin import admin_bp            # Module Administration - Utilisateurs
 
 # Création de l'instance Flask principale avec configuration des dossiers statiques et templates
 acfc = Flask(__name__,
              static_folder='statics',     # Ressources CSS, JS, images par module
              template_folder='templates') # Templates HTML Jinja2
 
-# Création du logger personnalisé
-acfc_log = CustomLogger(
-    db_uri="mongodb://acfc-logs:27017/",
-    db_name="logDB",
-    collection_name="traces"
-)
-
 # ====================================================================
-# IMPORTS ET ENREGISTREMENT DES BLUEPRINTS (MODULES MÉTIERS)
-# ====================================================================
-
-# Importer et enregistrer les blueprints des différents modules métiers
-# Gestion de l'import avec fallback pour compatibilité développement/production
-try:
-    # Import absolu privilégié quand le package est installé ou exécuté comme module
-    from app_acfc.contextes_bp.clients import clients_bp         # Module CRM - Gestion clients
-    from app_acfc.contextes_bp.catalogue import catalogue_bp     # Module Catalogue produits
-    from app_acfc.contextes_bp.commercial import commercial_bp   # Module Commercial - Devis, commandes
-    from app_acfc.contextes_bp.comptabilite import comptabilite_bp # Module Comptabilité - Facturation
-    from app_acfc.contextes_bp.stocks import stocks_bp          # Module Stocks - Inventaire
-    from app_acfc.contextes_bp.admin import admin_bp            # Module Administration - Utilisateurs
-except Exception:
-    # Fallback vers les imports locaux en cas d'exécution directe des fichiers
-    from contextes_bp.clients import clients_bp
-    from contextes_bp.catalogue import catalogue_bp
-    from contextes_bp.commercial import commercial_bp
-    from contextes_bp.comptabilite import comptabilite_bp
-    from contextes_bp.stocks import stocks_bp
-    from contextes_bp.admin import admin_bp
-
-# Regroupement des blueprints pour faciliter l'enregistrement en masse
-acfc_blueprints: Tuple[Blueprint, ...] = (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp, stocks_bp, admin_bp)
-
-# ====================================================================
-# CONFIGURATION DES SERVICES DE SÉCURITÉ
+# CONFIGURATION DES SERVICES YC DE LA SÉCURITÉ
 # ====================================================================
 
 # Initialisation du service de sessions sécurisées (chiffrement, cookies HTTPOnly)
 SecureSessionService(acfc)
+
 # Activation du gestionnaire de sessions Flask-Session (stockage filesystem)
 Session(acfc)
 
 # ====================================================================
 # CONSTANTES DE CONFIGURATION DES PAGES
 # ====================================================================
-# Dictionnaires de configuration pour standardiser le rendu des pages
-# Structure : title (titre affiché), context (identifiant CSS/JS), page (template base)
-
 BASE: str = 'base.html'  # Template de base pour toutes les pages
 
+# Regroupement des blueprints pour faciliter l'enregistrement en masse
+acfc_blueprints: Tuple[Blueprint, ...] = (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp, stocks_bp, admin_bp)
+
+# Dictionnaires de configuration pour standardiser le rendu des pages
+# Structure : title (titre affiché), context (identifiant CSS/JS), page (template base)
 # Configuration page de connexion
 LOGIN: Dict[str, str] = {
     'title': 'ACFC - Authentification',  # Titre affiché dans l'onglet navigateur
@@ -100,6 +77,7 @@ CLIENT: Dict[str, str] = {
     'context': 'clients',
     'page': BASE
 }
+
 LOG_CLIENT_FILE = 'clients.log'
 
 # Configuration administration utilisateurs
@@ -146,6 +124,9 @@ ERROR500: Dict[str, str] = {
     'page': BASE
 }
 LOG_500_FILE = '500.log'
+
+# Configuration commerciale
+LOG_COMMERCIAL_FILE = 'commercial.log'
 
 # Messages d'erreur standardisés pour l'authentification
 INVALID: str = 'Identifiants invalides.'
@@ -203,6 +184,135 @@ def after_request(response: Response) -> Response:
     return response
 
 # ====================================================================
+# FONCTIONS DE RECHERCHES
+# ====================================================================
+
+def get_current_orders(id_client: int = 0) -> List[Commande]:
+    """
+    Récupère les commandes en cours pour un client donné.
+
+    Args:
+        id_client (int): ID du client, 0 pour tous les clients
+
+    Returns:
+        List[Commande]: Liste des commandes en cours
+    """
+    # Ouverture de la session
+    db_session_orders: SessionBdDType = SessionBdD()
+
+    # Récupération des commandes en cours sans notion de client
+    if id_client == 0:
+        commandes: List[Commande] = (
+            db_session_orders.query(Commande)
+            .filter(or_(
+                Commande.is_facture == False,
+                Commande.is_expedie == False
+            ))
+            .all()
+        )
+
+    # Récupération des commandes en cours pour un client spécifique
+    else:
+        commandes: List[Commande] = (
+            db_session_orders.query(Commande)
+            .filter(and_(
+                Commande.id_client == id_client,
+                or_(
+                    Commande.is_facture == False,
+                    Commande.is_expedie == False
+                )
+            ))
+            .all()
+        )
+
+    # Fermeture de la session
+    db_session_orders.close()
+
+    return commandes
+
+def get_commercial_indicators() -> Dict[str, Any] | None:
+    """
+    Récupère les indicateurs commerciaux:
+        - Chiffre d'affaire mensuel
+        - Chiffre d'affaire annuel
+        - Panier moyen
+        - Clients actifs
+        - Commandes annuelles
+
+    Returns:
+        Dict[str, Any]: Dictionnaire des indicateurs commerciaux
+    """
+    # Ouverture de la session
+    db_session_commercial: SessionBdDType = SessionBdD()
+
+    # Récupération des dates de référence
+    today = date.today()
+    first_day_of_month = today.replace(day=1)
+    first_day_of_year = today.replace(month=1, day=1)
+
+    # Récupération des indicateurs commerciaux et gestion des exceptions
+    try:
+        indicators: Dict[str, List[Any]] | None = {
+            # Chiffre d'affaire total facturé pour le mois en cours
+            "ca_current_month": [
+                db_session_commercial.query(func.sum(Commande.montant))
+                .filter(
+                    Commande.is_facture == True,
+                    Commande.date_commande >= first_day_of_month
+                ).scalar() or 0,
+                'CA Mensuel'
+            ],
+
+            # Chiffre d'affaire total facturé pour l'année en cours
+            "ca_current_year": [
+                db_session_commercial.query(func.sum(Commande.montant))
+                .filter(
+                    Commande.is_facture == True,
+                    Commande.date_commande >= first_day_of_year
+                ).scalar() or 0,
+                'CA Annuel'
+            ],
+
+            # Panier moyen annuel
+            "average_basket": [
+                db_session_commercial.query(func.avg(Commande.montant))
+                .filter(
+                    Commande.is_facture == True,
+                    Commande.date_commande >= first_day_of_year
+                ).scalar() or 0,
+                'Panier Moyen'
+            ],
+
+            # Clients actifs
+            "active_clients": [
+                db_session_commercial.query(func.count(func.distinct(Commande.id_client)))
+                .filter(
+                    Commande.is_facture == True,
+                    Commande.date_commande >= first_day_of_year
+                ).scalar() or 0,
+                'Clients Actifs'
+            ],
+
+            # Nombre de commandes par an
+            "orders_per_year": [
+                db_session_commercial.query(func.count(Commande.id))
+                .filter(
+                    Commande.is_facture == True,
+                    Commande.date_commande >= first_day_of_year
+                ).scalar() or 0,
+                'Commandes Annuelles'
+            ]
+        }
+    except Exception as e:
+        acfc_log.log_to_file(level=ERROR, message=str(e), specific_logger=LOG_COMMERCIAL_FILE, zone_log='commercial', db_log=False)
+        indicators = None
+    finally:
+        # Rollback et fermeture de la session
+        db_session_commercial.rollback()
+        db_session_commercial.close()
+    return indicators
+
+# ====================================================================
 # ROUTES PRINCIPALES DE L'APPLICATION
 # ====================================================================
 
@@ -249,6 +359,7 @@ def login() -> Any:
         session['last_name'] = user.nom
         session['first_name'] = user.prenom
         session['email'] = user.email
+        session['habilitations'] = user.permission
         user.nb_errors = 0  # Remise à zéro du compteur d'erreurs
 
     # === TRAITEMENT GET : Affichage du formulaire de connexion ===
@@ -317,7 +428,7 @@ def login() -> Any:
                              message="Veuillez changer votre mot de passe.", username=user.pseudo)
 
     # Redirection vers la page d'accueil (module Clients)
-    return render_template(DEFAULT['page'], title=DEFAULT['title'], context=DEFAULT['context'])
+    return redirect(url_for('dashboard'))
 
 @acfc.route('/logout')
 def logout() -> Any:
@@ -366,6 +477,18 @@ def health() -> Any:
             "error": str(e),
             "timestamp": datetime.now().isoformat()
         }), 500
+    
+@acfc.route('/dashboard')
+def dashboard() -> Any:
+    """
+    Affichage du tableau de bord utilisateur.
+    Point d'entrée principal après authentification. Affiche les commandes en cours.
+        - Commandes en cours
+        - Indicateurs commerciaux
+    """
+    current_orders = get_current_orders()
+    commercial_indicators = get_commercial_indicators()
+    return render_template(DEFAULT['page'], title=DEFAULT['title'], context=DEFAULT['context'], objects=[current_orders, commercial_indicators])
 
 @acfc.route('/chg_pwd', methods=['POST'])
 def chg_pwd() -> Any:
@@ -662,7 +785,6 @@ def handle_5xx_errors(error: HTTPException) -> str:
 # ====================================================================
 # ENREGISTREMENT DES MODULES MÉTIERS
 # ====================================================================
-
 # Enregistrement automatique de tous les blueprints définis
 for bp in acfc_blueprints:
     acfc.register_blueprint(bp)

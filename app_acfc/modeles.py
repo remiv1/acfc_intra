@@ -176,9 +176,6 @@ engine = create_engine(
     pool_recycle=3600                   # Recyclage des connexions après 1h
 )
 
-# Création automatique des tables si elles n'existent pas
-Base.metadata.create_all(engine)
-
 # Factory de sessions pour l'accès aux données
 SessionBdD = sessionmaker(
     autocommit=False,                   # Transactions manuelles pour meilleur contrôle
@@ -338,8 +335,8 @@ class Part(Base):
     nom = mapped_column(String(255), nullable=False, comment="Nom de famille")
     
     # === INFORMATIONS D'ÉTAT CIVIL ===
-    date_naissance = mapped_column(Date, nullable=False, comment="Date de naissance (vérification majorité)")
-    lieu_naissance = mapped_column(String(255), nullable=False, comment="Lieu de naissance")
+    date_naissance = mapped_column(Date, nullable=True, comment="Date de naissance (vérification majorité)")
+    lieu_naissance = mapped_column(String(255), nullable=True, comment="Lieu de naissance")
     
     def __repr__(self) -> str:
         return f"<Part(id={self.id}, nom='{self.nom}', prenom='{self.prenom}')>"
@@ -491,7 +488,7 @@ class Commande(Base):
 
     # === DONNÉES DE LA COMMANDE ===
     is_ad_livraison = mapped_column(Boolean, default=False, nullable=False)
-    id_adresse = mapped_column(Integer, ForeignKey('adresses.id'), nullable=True)
+    id_adresse = mapped_column(Integer, ForeignKey(PK_ADRESSE), nullable=True)
     descriptif = mapped_column(String(255), nullable=True)
     date_commande = mapped_column(Date, default=func.now(), nullable=False)
     montant = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
@@ -523,8 +520,8 @@ class DevisesFactures(Base):
     qte = mapped_column(Integer, nullable=False, default=1)
     prix_unitaire = mapped_column(Numeric(10, 4), nullable=False, default=0.00)
     remise = mapped_column(Numeric(10, 4), nullable=False, default=0.10)
-    prix_total = mapped_column(Numeric(10, 4), Computed('qte * prix_unitaire * (1 - remise)'), nullable=False)
-    remise_euro = mapped_column(Numeric(10, 4), Computed('qte * prix_unitaire * remise'), nullable=False)
+    prix_total = mapped_column(Numeric(10, 4), Computed('qte * prix_unitaire * (1 - remise)'))
+    remise_euro = mapped_column(Numeric(10, 4), Computed('qte * prix_unitaire * remise'))
 
 class Facture(Base):
     '''Représente une facture dans le système.'''
@@ -613,40 +610,15 @@ class Catalogue(Base):
     type_produit = mapped_column(String(100), nullable=False)
     stype_produit = mapped_column(String(100), nullable=False)
     millesime = mapped_column(Integer, nullable=True)
-    ref_auto = mapped_column(String(8), Computed('calculate_ref_auto()'), nullable=False)
-    des_auto = mapped_column(String(100), Computed('calculate_designation_auto()'), nullable=False)
+    ref_auto = mapped_column(String(8), Computed("CONCAT(SUBSTRING(millesime, -2), UPPER(LEFT(type_produit, 4)), LPAD(id, 2, 0))"))
+    des_auto = mapped_column(String(100), Computed("CONCAT(UPPER(stype_produit), ' TARIF ', millesime)"))
     prix_unitaire_ht = mapped_column(Numeric(10, 2), nullable=True, default=0.00)
-    geographie = mapped_column(String(10), Computed('get_geographie()'))
-    poids = mapped_column(String(5), Computed('get_weight()'))
+    geographie = mapped_column(String(10), Computed("CONCAT(UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(stype_produit, ' ', 4), ' ', -1)))"))
+    poids = mapped_column(String(5), Computed("SUBSTRING_INDEX(SUBSTRING_INDEX(stype_produit, ' ', 3), ' ', -1)"))
 
     # === DATES DE CREATION ET DE MISE A JOUR ===
     created_at = mapped_column(Date, default=func.now(), nullable=False)
     updated_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False)
-
-    # === Méthodes de la classe Catalogue ===
-    def calculate_ref_auto(self) -> str:
-        """
-        Calcule la référence automatique du produit au format AATYPE:4ID:2.
-        """
-        return f'{str(self.millesime)[-2:]}{str(self.type_produit[:4]).upper()}{str(self.id).zfill(2)}'
-    
-    def calculate_designation_auto(self) -> str:
-        """
-        Calcule la désignation automatique du produit au format STYPE TARIF MILLESIME:4.
-        """
-        return f'{str(self.stype_produit.upper())} TARIF {str(self.millesime)}'
-    
-    def get_geographie(self) -> str:
-        """
-        Calcule la géographie automatique du produit au format REGION.
-        """
-        return str(self.stype_produit).split(' ')[3].capitalize()
-    
-    def get_weight(self) -> str:
-        """
-        Calcule le poids automatique du produit au format WEIGHT.
-        """
-        return str(self.stype_produit).split(' ')[2]
 
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE GESTION COMPTABLE
@@ -726,80 +698,61 @@ class Stock(Base):
     __tablename__ = '40_stock'
 
     type_code = mapped_column(Integer, primary_key=True, nullable=False)     # 1: Francs (FR), 2: Euros (EU), 3: Valeur Permanente France (VPF), 4: Valeur Permanente Europe (VPE), 5: Valeur Permanente Monde (VPM)
-    type_valeur = mapped_column(String(3), Computed('_get_type_valeur()'), nullable=False)
-    val_code = mapped_column(String(4), Computed('_calculate_val_code()'), nullable=False)
-    code_produit = mapped_column(String(6), Computed('_calculate_code_produit()'), nullable=False)
+    type_valeur = mapped_column(String(3), Computed(
+        """
+        CASE
+            WHEN type_code = 1 THEN 'FR'
+            WHEN type_code = 2 THEN 'EU'
+            WHEN type_code = 3 THEN 'VPF'
+            WHEN type_code = 4 THEN 'VPE'
+            WHEN type_code = 5 THEN 'VPM'
+            ELSE 'NAN'
+        END
+        """
+    ))
+    val_code = mapped_column(String(4), Computed(
+        """
+        CASE
+            WHEN type_code <= 2 THEN LPAD(ROUND(val_valeur * 100), 4, '0')
+            ELSE LPAD(SUBSTRING_INDEX(SUBSTRING_INDEX(tvp_poids, ' ', 3), ' ', -1), 4, '0')
+        END
+        """
+    ))
+    code_produit = mapped_column(String(6), Computed(
+        """
+            CONCAT(type_valeur, val_code)
+        """
+    ))
     val_valeur = mapped_column(Numeric(5, 2), primary_key=True, nullable=False, default=0.00)
     qte = mapped_column(Integer, nullable=False, default=0)
     tvp_valeur = mapped_column(Numeric(5, 2), nullable=True)
     tvp_poids = mapped_column(String(4), nullable=True)
-    pu_ht = mapped_column(Numeric(8, 4), Computed('_calculate_pu_ht()'), nullable=False, default=0.00)
-    pt_fr = mapped_column(Numeric(5, 2), Computed('_calculate_pt_fr()'), nullable=False, default=0.00)
-    pt_eu = mapped_column(Numeric(5, 2), Computed('_calculate_pt_eu()'), nullable=False, default=0.00)
-
-
-    # --- Méthodes de la classe Stock ---
-    def _calculate_code_produit(self) -> str:
+    pu_ht = mapped_column(Numeric(8, 4), Computed(
         """
-        Calcule le code produit au format TYPE:4VAL:2.
+        CASE
+            WHEN type_code >= 3 THEN tvp_valeur
+            WHEN type_code = 2 THEN val_valeur
+            ELSE val_valeur / 6.55957
+        END
         """
-        return f'{self.type_valeur}{self.val_code}'
-
-
-    def _get_type_valeur(self) -> str:
+    ))
+    pt_fr = mapped_column(Numeric(5, 2), Computed(
         """
-        Retourne le code type de valeur au format TYPE:3.
+        CASE
+            WHEN type_code = 1 THEN val_valeur * qte
+            ELSE 0
+        END
         """
-        match self.type_code:
-            case 1: return "FR"
-            case 2: return "EU"
-            case 3: return "VPF"
-            case 4: return "VPE"
-            case 5: return "VPM"
-            case _: return "NAN"
-
-
-    def _calculate_val_code(self) -> str:
+    ))
+    pt_eu = mapped_column(Numeric(5, 2), Computed(
         """
-        Calcule la val_code au format VAL:4.
+        CASE
+            WHEN type_code = 1 THEN pt_fr / 6.55957
+            WHEN type_code = 2 THEN val_valeur * qte
+            ELSE qte * tvp_valeur
+        END
         """
-        if self.type_code in (1, 2):
-            return f'{(self.val_valeur*100).zfill(4)}'
-        else:
-            return f'{str(self.tvp_poids)[:-1].zfill(3)}'
-
-
-    def _calculate_pu_ht(self) -> float:
-        """
-        Calcule le prix unitaire hors taxes (PU HT).
-        """
-        if self.type_code >= 3:
-            return float(self.tvp_valeur)
-        elif self.type_code == 2:
-            return float(self.val_valeur)
-        else:
-            return float(self.val_valeur / 6.55957)
-
-    def _calculate_pt_fr(self) -> float:
-        """
-        Calcule le prix total en francs (PT FR).
-        """
-        if self.type_code == 1:
-            return float(self.val_valeur * self.qte)
-        else:
-            return 0.0
-
-
-    def _calculate_pt_eu(self) -> float:
-        """
-        Calcule le prix total en euros (PT EU).
-        """
-        if self.type_code == 1:
-            return float(self.pt_fr / 6.55957)        
-        elif self.type_code == 2:
-            return float(self.val_valeur * self.qte)
-        else:
-            return float(self.qte * self.tvp_valeur)
+    ))
 
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE TECHNIQUE
@@ -832,7 +785,11 @@ class Moi(Base):
     code_postal = mapped_column(Integer, nullable=False)
     ville = mapped_column(String(100), nullable=False)
     siret = mapped_column(String(14), nullable=False)
-    siren = mapped_column(String(9), Computed('get_siren()'), nullable=False)
+    siren = mapped_column(String(9), Computed(
+        """
+        CONCAT(SUBSTRING(siret, 1, 9))
+        """
+    ))
     is_tva_intra = mapped_column(Boolean, nullable=False, default=False)
     id_tva_intra = mapped_column(String(15), nullable=True)
     logo = mapped_column(LargeBinary, nullable=True)
@@ -841,8 +798,5 @@ class Moi(Base):
     mail = mapped_column(String(100), nullable=False)
     mois_comptable = mapped_column(Integer, nullable=False)
 
-    def get_siren(self) -> str:
-        """
-        Retourne le SIREN de l'entreprise.
-        """
-        return str(self.siret)[:9]
+# Création automatique des tables si elles n'existent pas
+Base.metadata.create_all(engine)
