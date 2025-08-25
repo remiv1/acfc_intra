@@ -36,7 +36,7 @@ def install_test_dependencies():
     print("🔧 Vérification des dépendances de test...")
     
     try:
-        import pytest
+        import pytest   # type: ignore
         print("✅ pytest déjà installé")
     except ImportError:
         print("📦 Installation des dépendances de test...")
@@ -46,7 +46,7 @@ def install_test_dependencies():
         ], check=True)
         print("✅ Dépendances installées")
 
-def run_tests(args):
+def run_tests(args: argparse.Namespace) -> int:
     """Exécute les tests avec les options spécifiées."""
     project_root = get_project_root()
     os.chdir(project_root)
@@ -184,7 +184,7 @@ Exemples d'utilisation:
     
     # Vérification de pytest
     try:
-        import pytest
+        import pytest   # type: ignore
     except ImportError:
         print("❌ pytest n'est pas installé")
         print("💡 Utilisez --install-deps pour installer les dépendances")

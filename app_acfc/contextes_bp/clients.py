@@ -363,7 +363,7 @@ def create_client():
             db_session.add(pro)
         
         db_session.commit()
-        acfc_log.log_to_file(logging.INFO, f"Nouveau client créé : ID {nouveau_client.id}", db_log=True, zone_log="clients")
+        acfc_log.log_to_file(logging.INFO, f"Nouveau client créé : ID {nouveau_client.id}", db_log=True, zone_log="clients.log")
         
         return redirect(url_for('clients.get_client', id_client=nouveau_client.id, success_message='Prospect créé avec succès.'))
         
@@ -378,7 +378,7 @@ def create_client():
     except Exception as e:
         if 'db_session' in locals():
             db_session.rollback()
-        acfc_log.log_to_file(logging.ERROR, f"Erreur lors de la création du client : {str(e)}", db_log=True, zone_log="clients")
+        acfc_log.log_to_file(logging.ERROR, f"Erreur lors de la création du client : {str(e)}", db_log=True, zone_log="clients.log")
         return render_template(CLIENT_FORM['page'],
                                title=TITLE_NEW_CLIENT,
                                context=CLIENT_FORM['context'],

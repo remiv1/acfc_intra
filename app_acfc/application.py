@@ -368,7 +368,7 @@ def login() -> Any:
     elif request.method != 'POST':
         acfc_log.log_to_file(level=WARNING,
                              message=f'{request.method} sur route Login par utilisateur {session.get("user_id", "inconnu")}',
-                             specific_logger=LOG_LOGIN_FILE, zone_log='login', db_log=True)
+                             specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
         return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=WRONG_ROAD)
 
     # === TRAITEMENT POST : Validation des identifiants ===
@@ -377,13 +377,13 @@ def login() -> Any:
     user = db_session.query(User).filter_by(pseudo=username).first()
     acfc_log.log_to_file(level=INFO,
                          message=f'début de session pour l\'utilisateur: {user is not None}',
-                         specific_logger=LOG_LOGIN_FILE, zone_log='login', db_log=True)
+                         specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
 
     # Vérification de l'existence de l'utilisateur
     if not user:
         acfc_log.log_to_file(level=WARNING,
                              message=f'Utilisateur non trouvé: {username}',
-                             specific_logger=LOG_LOGIN_FILE, zone_log='login', db_log=True)
+                             specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
         return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
 
     # Vérification du mot de passe avec Argon2... si mot de passe faux
@@ -398,7 +398,7 @@ def login() -> Any:
         except Exception as e:
             acfc_log.log_to_file(level=ERROR,
                                  message=f'Erreur {e} lors de la validation du mot de passe pour l\'utilisateur: {username}',
-                                 specific_logger=LOG_LOGIN_FILE, zone_log='login', db_log=True)
+                                 specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
             db_session.rollback()
             return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=str(e))
 
@@ -410,7 +410,7 @@ def login() -> Any:
         db_session.rollback()
         acfc_log.log_to_file(level=ERROR,
                              message=f'Erreur lors de la connexion pour l\'utilisateur: {username}, {e}.',
-                             specific_logger=LOG_LOGIN_FILE, zone_log='login', db_log=True)
+                             specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
         return render_template(LOGIN['page'], title=LOGIN['title'], context='500', message=str(e))
     
     # Vérification de la nécessité de re-hashage de mot de passe

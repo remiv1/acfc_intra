@@ -6,16 +6,16 @@ Ce fichier montre comment implémenter les endpoints requis pour
 l'interface de gestion des clients.
 """
 
-from flask import Blueprint, request, jsonify
+from typing import Literal
+from flask import Blueprint, Response, request, jsonify
 from app_acfc.modeles import Client, Part, Pro, Mail, Telephone, Adresse, Commande
 from sqlalchemy import or_, and_
-from sqlalchemy.orm import joinedload
 
 # Blueprint pour les API clients
 clients_api = Blueprint('clients_api', __name__, url_prefix='/api/clients')
 
 @clients_api.route('/search', methods=['GET'])
-def search_clients():
+def search_clients() -> Response | tuple[Response, Literal[500]]:
     """
     Endpoint de recherche de clients
     Paramètres de requête possibles:
