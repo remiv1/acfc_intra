@@ -1,7 +1,7 @@
 from sqlalchemy import Integer, String, Date, Boolean, Text, Numeric, event, Computed, LargeBinary, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Mapper, relationship, mapped_column, foreign
+from sqlalchemy.orm import sessionmaker, Mapper, relationship, mapped_column
 from typing import Any
 from sqlalchemy.engine import Connection
 from sqlalchemy import create_engine

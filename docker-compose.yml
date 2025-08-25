@@ -4,10 +4,11 @@
 # Configuration de l'architecture micro-services pour l'application ACFC
 # 
 # Services déployés :
-# - acfc-app     : Application web Flask (port 5000)
-# - acfc-nginx   : Reverse proxy et serveur statique (port 80)
-# - acfc-db      : Base de données MariaDB (port 3306)
-# - acfc-logs    : Base NoSQL MongoDB pour logging des traces (port 27017)
+# - acfc-app      : Application web Flask
+# - acfc-api-back : API interne FastAPI
+# - acfc-nginx    : Reverse proxy et serveur statique (port 80)
+# - acfc-db       : Base de données MariaDB
+# - acfc-logs     : Base NoSQL MongoDB pour logging des traces
 # 
 # Réseau : acfc-network (isolé, communication inter-services)
 # Volumes : Persistance des données (base, logs, documents --factures, commandes, remises de chèques--)

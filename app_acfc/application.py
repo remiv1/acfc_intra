@@ -29,7 +29,7 @@ from modeles import SessionBdD, User
 from datetime import datetime
 from sqlalchemy import text
 from sqlalchemy.orm import Session as SessionBdDType
-from logs.logger import CustomLogger, DEBUG, INFO, WARNING, ERROR 
+from logs.logger import CustomLogger, INFO, WARNING, ERROR 
 
 # Création de l'instance Flask principale avec configuration des dossiers statiques et templates
 acfc = Flask(__name__,
