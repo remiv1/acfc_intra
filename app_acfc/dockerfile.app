@@ -20,11 +20,6 @@
 # Avantages : Stabilité LTS, sécurité renforcée, support étendu des packages
 FROM python:3.12-bookworm
 
-# Configuration des métadonnées pour la traçabilité
-LABEL maintainer="ACFC Development Team"
-LABEL description="Application web ACFC - Gestion d'entreprise intégrée"
-LABEL version="1.0"
-
 # Définition du répertoire de travail dans le conteneur
 # Isolation complète des fichiers de l'application
 WORKDIR /app
@@ -33,8 +28,12 @@ WORKDIR /app
 # Copie du fichier de dépendances en premier pour optimiser le cache Docker
 # Si requirements-app.txt ne change pas, cette couche sera réutilisée
 COPY requirements-app.txt /app/requirements.txt
-COPY .env /app/.env
 COPY logs /app/logs
+
+# Configuration des métadonnées pour la traçabilité
+LABEL maintainer="ACFC Development Team"
+LABEL description="Application web ACFC - Gestion d'entreprise intégrée"
+LABEL version="1.0"
 
 # Installation des dépendances Python avec optimisations
 # --no-cache-dir : Évite le stockage du cache pip (réduit la taille de l'image)

@@ -1,7 +1,7 @@
 from sqlalchemy import Integer, String, Date, Boolean, Text, Numeric, event, Computed, LargeBinary, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Mapper, relationship, mapped_column
+from sqlalchemy.orm import sessionmaker, Mapper, relationship, mapped_column, foreign
 from typing import Any
 from sqlalchemy.engine import Connection
 from sqlalchemy import create_engine
@@ -60,7 +60,14 @@ def verify_env() -> bool:
         - DB_HOST : Adresse du serveur de base de données
         - DB_NAME : Nom de la base de données
     """
-    load_dotenv()
+    # Essayer de charger le .env si disponible (développement local)
+    # En production/Docker, les variables sont directement dans l'environnement
+    try:
+        load_dotenv()
+    except FileNotFoundError:
+        # Pas de fichier .env, on utilise les variables d'environnement directement
+        pass
+    
     db_user: str | None = getenv("DB_USER")
     db_password: str | None = getenv("DB_PASSWORD")
     db_host: str | None = getenv("DB_HOST")
@@ -69,7 +76,7 @@ def verify_env() -> bool:
     if db_user is None or db_password is None or db_host is None or db_name is None:
         raise ValueError(
             "Les variables d'environnement DB_USER, DB_PASSWORD, DB_HOST et DB_NAME "
-            "doivent être définies dans le fichier .env"
+            "doivent être définies (fichier .env ou variables d'environnement système)"
         )
     return True
 
@@ -99,7 +106,13 @@ class Configuration:
         Raises:
             ValueError: En cas de configuration incomplète ou invalide
         """
-        load_dotenv()
+        # Essayer de charger le .env si disponible (développement local)
+        # En production/Docker, les variables sont directement dans l'environnement
+        try:
+            load_dotenv()
+        except FileNotFoundError:
+            # Pas de fichier .env, on utilise les variables d'environnement directement
+            pass
         
         # === CONFIGURATION DU PORT DE BASE DE DONNÉES ===
         db_port_env: str | None = getenv("DB_PORT")
@@ -234,7 +247,8 @@ class User(Base):
                              comment="Nombre d'erreurs d'authentification consécutives")
     is_locked = mapped_column(Boolean, default=False, nullable=False, 
                              comment="Compte verrouillé après trop d'échecs d'authentification")
-    
+    permission = mapped_column(String(10), nullable=False, comment="Habilitations de l'utilisateur")
+
     # === CYCLE DE VIE ET ACTIVATION ===
     created_at = mapped_column(Date, default=func.now(), nullable=False, comment="Date de création du compte")
     is_active = mapped_column(Boolean, default=True, nullable=False, comment="Compte actif/inactif")
@@ -280,13 +294,13 @@ class Client(Base):
     notes = mapped_column(Text, nullable=True, comment="Notes libres sur le client")
 
     # === JONCTION CLIENT ===
-    part = relationship("Part", uselist=False, back_populates="01_clients")
-    pro = relationship("Pro", uselist=False, back_populates="01_clients")
-    tels = relationship("Telephone", back_populates="01_clients")
-    mails = relationship("Mail", back_populates="01_clients")
-    adresses = relationship("Adresse", back_populates="01_clients")
-    commandes = relationship("Commande", back_populates="01_clients")
-    factures = relationship("Facture", back_populates="01_clients")
+    part = relationship("Part", uselist=False, back_populates="client")
+    pro = relationship("Pro", uselist=False, back_populates="client")
+    tels = relationship("Telephone", back_populates="client")
+    mails = relationship("Mail", back_populates="client")
+    adresses = relationship("Adresse", back_populates="client")
+    commandes = relationship("Commande", back_populates="client")
+    factures = relationship("Facture", back_populates="client")
 
     @property
     def nom_affichage(self) -> str:
@@ -317,7 +331,8 @@ class Part(Base):
     # === IDENTIFIANT ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True, comment=UNIQUE_ID)
     id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False, comment="Ref vers le client propriétaire")
-    
+    client = relationship("Client", back_populates="part")
+
     # === INFORMATIONS PERSONNELLES ===
     prenom = mapped_column(String(255), nullable=False, comment="Prénom")
     nom = mapped_column(String(255), nullable=False, comment="Nom de famille")
@@ -347,7 +362,8 @@ class Pro(Base):
     # === IDENTIFIANT ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True, comment=UNIQUE_ID)
     id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False, comment="Ref vers le client propriétaire")
-    
+    client = relationship("Client", back_populates="pro")
+
     # === INFORMATIONS LÉGALES ===
     raison_sociale = mapped_column(String(255), nullable=False, comment="Dénomination sociale complète")
     type_pro = mapped_column(Integer, nullable=False, comment="Type: 1=Entreprise, 2=Association, 3=Administration")
@@ -387,7 +403,8 @@ class Mail(Base):
     # === IDENTIFIANT ET LIAISON CLIENT ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True, comment="Identifiant unique de l'email")
     id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False, comment="Référence vers le client propriétaire")
-    
+    client = relationship("Client", back_populates="mails")
+
     # === CLASSIFICATION ET DONNÉES ===
     type_mail = mapped_column(String(100), nullable=False, comment="Type: professionnel/personnel/facturation/marketing")
     detail = mapped_column(String(255), nullable=True, comment="Précision libre sur l'usage de cet email")
@@ -423,8 +440,9 @@ class Telephone(Base):
 
     # === IDENTIFIANT ET LIAISON CLIENT ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True, comment="Identifiant unique du téléphone")
-    id_client = mapped_column(Integer, nullable=False, comment="Référence vers le client propriétaire")
-    
+    id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False, comment="Référence vers le client propriétaire")
+    client = relationship("Client", back_populates="tels")
+
     # === CLASSIFICATION ===
     type_telephone = mapped_column(String(100), nullable=False, 
                                   comment="Type: fixe_pro/mobile_pro/fixe_perso/mobile_perso/fax")
@@ -443,12 +461,18 @@ class Adresse(Base):
     '''Représente une adresse associée à un client.'''
     __tablename__ = '04_adresse'
 
+    # === IDENTIFIANT ET LIAISON CLIENT ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False)
+    client = relationship("Client", back_populates="adresses")
+
+    # === DONNÉES D'ADRESSE ===
     adresse_l1 = mapped_column(String(255), nullable=False)
     adresse_l2 = mapped_column(String(255), nullable=True)
     code_postal = mapped_column(String(10), nullable=False)
     ville = mapped_column(String(100), nullable=False)
+
+    # === MÉTADONNÉES ===
     created_at = mapped_column(Date, default=func.now(), nullable=False)
     is_active = mapped_column(Boolean, default=True, nullable=False)
 
@@ -460,13 +484,21 @@ class Commande(Base):
     '''Représente une commande dans le système.'''
     __tablename__ = '11_commandes'
 
+    # === IDENTIFIANT ET LIAISON CLIENT ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    id_client = mapped_column(Integer, ForeignKey('clients.id'), nullable=False)
+    id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False)
+    client = relationship("Client", back_populates="commandes")
+
+    # === DONNÉES DE LA COMMANDE ===
     is_ad_livraison = mapped_column(Boolean, default=False, nullable=False)
     id_adresse = mapped_column(Integer, ForeignKey('adresses.id'), nullable=True)
     descriptif = mapped_column(String(255), nullable=True)
     date_commande = mapped_column(Date, default=func.now(), nullable=False)
     montant = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
+    devises = relationship("DevisesFactures", back_populates="commande")
+    facture = relationship("Facture", back_populates="commande")
+
+    # === ÉTAT DE LA COMMANDE ===
     is_facture = mapped_column(Boolean, default=False, nullable=False)
     date_facturation = mapped_column(Date, nullable=True)
     is_expedie = mapped_column(Boolean, default=False, nullable=False)
@@ -477,9 +509,15 @@ class DevisesFactures(Base):
     '''Représente les éléments des commandes et des factures dans le système.'''
     __tablename__ = '12_devises_factures'
 
+    # === IDENTIFIANT ET LIAISON ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_commande = mapped_column(Integer, ForeignKey(PK_COMMANDE), nullable=False)
+    commande = relationship("Commande", back_populates="devises")
     id_facture = mapped_column(Integer, nullable=True)
+    facture = relationship("Facture", back_populates="composantes_factures", 
+                          primaryjoin="foreign(DevisesFactures.id_facture) == Facture.id")
+
+    # === DONNÉES DE L'ÉLÉMENT ===
     reference = mapped_column(String(100), nullable=False)
     designation = mapped_column(String(255), nullable=False)
     qte = mapped_column(Integer, nullable=False, default=1)
@@ -492,19 +530,26 @@ class Facture(Base):
     '''Représente une facture dans le système.'''
     __tablename__ = '13_factures'
 
+    # === IDENTIFIANT ET LIAISON ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_fiscal = mapped_column(String(13), unique=True)
     id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False)
+    client = relationship("Client", back_populates="factures")
     id_commande = mapped_column(Integer, ForeignKey(PK_COMMANDE), nullable=False)
+    commande = relationship("Commande", back_populates="facture")
+
+    # === DONNÉES DE FACTURATION ===
     is_adresse_facturation = mapped_column(Boolean, default=False, nullable=False)
     id_adresse = mapped_column(Integer, ForeignKey(PK_ADRESSE), nullable=False)
     date_facturation = mapped_column(Date, nullable=False, default=func.now())
     montant_facture = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
+
+    # === ÉTAT DE LA FACTURE ===
     is_imprime = mapped_column(Boolean, default=False, nullable=False)
     date_impression = mapped_column(Date, nullable=True)
     is_prestation_facturee = mapped_column(Boolean, default=False, nullable=False)
-    composantes_factures = relationship("DevisesFactures", primaryjoin="Facture.id==DevisesFactures.id_facture",
-                                        back_populates="13_factures")
+    composantes_factures = relationship("DevisesFactures", primaryjoin="Facture.id == foreign(DevisesFactures.id_facture)",
+                                        back_populates="facture")
 
     # --- Méthodes de la classe Facture
     def generate_fiscal_id(self) -> str:
@@ -552,9 +597,19 @@ event.listen(Facture, 'after_insert', Facture.set_id_fiscal_after_insert)
 # ====================================================================
 
 class Catalogue(Base):
+    '''
+    Classe représentant un catalogue de produits.
+    La classe Catalogue gère l'ensemble des produits disponibles à la vente.
+        - Identification des produits
+        - Gestion des prix
+        - Suivi des stocks
+    '''
     __tablename__ = '21_catalogue'
 
+    # === IDENTIFIANT ET LIAISON ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    # === DONNÉES DU PRODUIT ===
     type_produit = mapped_column(String(100), nullable=False)
     stype_produit = mapped_column(String(100), nullable=False)
     millesime = mapped_column(Integer, nullable=True)
@@ -563,38 +618,36 @@ class Catalogue(Base):
     prix_unitaire_ht = mapped_column(Numeric(10, 2), nullable=True, default=0.00)
     geographie = mapped_column(String(10), Computed('get_geographie()'))
     poids = mapped_column(String(5), Computed('get_weight()'))
+
+    # === DATES DE CREATION ET DE MISE A JOUR ===
     created_at = mapped_column(Date, default=func.now(), nullable=False)
     updated_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False)
 
-    # --- Méthodes de la classe Catalogue ---
+    # === Méthodes de la classe Catalogue ===
     def calculate_ref_auto(self) -> str:
         """
         Calcule la référence automatique du produit au format AATYPE:4ID:2.
         """
-        _ref_auto = f'{str(self.millesime)[-2:]}{str(self.type_produit[:4]).upper()}{str(self.id).zfill(2)}'
-        return _ref_auto
+        return f'{str(self.millesime)[-2:]}{str(self.type_produit[:4]).upper()}{str(self.id).zfill(2)}'
     
     def calculate_designation_auto(self) -> str:
         """
         Calcule la désignation automatique du produit au format STYPE TARIF MILLESIME:4.
         """
-        _des_auto = f'{str(self.stype_produit.upper())} TARIF {str(self.millesime)}'
-        return _des_auto
+        return f'{str(self.stype_produit.upper())} TARIF {str(self.millesime)}'
     
     def get_geographie(self) -> str:
         """
         Calcule la géographie automatique du produit au format REGION.
         """
-        _geo = str(self.stype_produit).split(' ')[3].capitalize()
-        return _geo
+        return str(self.stype_produit).split(' ')[3].capitalize()
     
     def get_weight(self) -> str:
         """
         Calcule le poids automatique du produit au format WEIGHT.
         """
-        _weight = str(self.stype_produit).split(' ')[2]
-        return _weight
-    
+        return str(self.stype_produit).split(' ')[2]
+
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE GESTION COMPTABLE
 # ====================================================================
@@ -603,6 +656,7 @@ class PCG(Base):
     """Classe représentant un Plan Comptable Général (PCG)."""
     __tablename__ = '30_pcg'
 
+    # === IDENTIFIANT DES COMPTES ===
     classe = mapped_column(Integer, nullable=False)
     categorie = mapped_column(Integer, nullable=False)
     compte = mapped_column(Integer, primary_key=True)
@@ -612,24 +666,29 @@ class Operations(Base):
     """Classe représentant les opérations comptables."""
     __tablename__ = '31_operations'
 
+    # === IDENTIFIANT DE L'OPÉRATION ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    # === DONNEES DE L'OPÉRATION ===
     date_operation = mapped_column(Date, nullable=False)
     libelle_operation = mapped_column(String(100), nullable=False)
     montant_operation = mapped_column(Numeric(10, 2), nullable=False)
     annee_comptable = mapped_column(Integer, nullable=False)
 
-    # Gestion des ventilations de l'opération
-    ventilations = relationship("Ventilations", back_populates="31_operations")
-    documents = relationship("Documents", back_populates="31_operations")
+    # === RELATIONS ===
+    ventilations = relationship("Ventilations", back_populates="operation")
+    documents = relationship("Documents", back_populates="operation")
 
 class Ventilations(Base):
     """Classe représentant les ventilations comptables."""
     __tablename__ = '32_ventilations'
 
+    # === IDENTIFIANT ET REFERENCES DE LA VENTILATION ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_operation = mapped_column(Integer, ForeignKey(PK_OPERATION), nullable=False)
     compte_id = mapped_column(Integer, ForeignKey(PK_COMPTE), nullable=False)
-    compte = relationship('PCG', primaryjoin='Ventilations.compte_id == PCG.compte')
+
+    # === DONNEES DE LA VENTILATION ===
     sens = mapped_column(String(10), nullable=False)
     montant_debit = mapped_column(Numeric(10, 2), nullable=True)
     montant_credit = mapped_column(Numeric(10, 2), nullable=True)
@@ -637,16 +696,26 @@ class Ventilations(Base):
     id_facture = mapped_column(String(13), nullable=True)
     id_cheque = mapped_column(String(7), nullable=True)
 
+    # === RELATIONS ===
+    compte = relationship('PCG', primaryjoin='Ventilations.compte_id == PCG.compte')
+    operation = relationship("Operations", back_populates="ventilations")
+
 class Documents(Base):
     """Classe représentant les documents comptables."""
     __tablename__ = '33_documents'
 
+    # === IDENTIFIANT ET REFECRENCES DU DOCUMENT ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    # === DONNEES DU DOCUMENT ===
     id_operation = mapped_column(Integer, ForeignKey(PK_OPERATION), nullable=False)
     type_document = mapped_column(String(50), nullable=True)
     date_document = mapped_column(Date, nullable=True)
     montant_document = mapped_column(Numeric(10, 2), nullable=True)
     document = mapped_column(LargeBinary, nullable=False)
+
+    # === RELATIONS ===
+    operation = relationship("Operations", back_populates="documents")
 
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE GESTION DES STOCKS
@@ -731,7 +800,7 @@ class Stock(Base):
             return float(self.val_valeur * self.qte)
         else:
             return float(self.qte * self.tvp_valeur)
-        
+
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE TECHNIQUE
 # ====================================================================

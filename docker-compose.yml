@@ -28,10 +28,8 @@ services:
     ports:
       - "5000:5000"                           # Mapping port Flask (dev uniquement)
     volumes:
-      - ./logs:/app_acfc/logs                      # Volume pour logs (persistance)
+      - ./logs:/app/logs                      # Volume pour logs (persistance)
     environment:
-      - FLASK_ENV=development                 # Mode développement (à changer en prod)
-      - DATABASE_URL=mysql+pymysql://user:password@acfc-db/acfc  # Connexion BDD
       # Variables DB passées au conteneur pour que l'application se connecte au service acfc-db
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
@@ -80,8 +78,6 @@ services:
       MYSQL_DATABASE: ${DB_NAME}                # Base de données application
       MYSQL_USER: ${DB_USER}                    # Utilisateur application
       MYSQL_PASSWORD: ${DB_PASSWORD}            # Mot de passe utilisateur
-    ports:
-      - "3307:3306"                          # Port MySQL/MariaDB (dev uniquement)
     volumes:
       - acfc-db-data:/var/lib/mysql          # Persistance des données
       - ./mariadb/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro  # Script d'initialisation
@@ -107,8 +103,6 @@ services:
     networks:
       - acfc-network
     restart: always
-    ports:
-      - "27017:27017"                        # Port MongoDB (dev uniquement)
     command: ['mongod', '--config', '/etc/mongod.conf']  # Démarrage avec config personnalisée
     environment:
       # Configuration d'authentification MongoDB

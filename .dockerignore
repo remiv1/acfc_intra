@@ -1,0 +1,134 @@
+# ====================================================================
+# DOCKERIGNORE PRINCIPAL - PROJET ACFC
+# ====================================================================
+# Fichiers et dossiers à exclure du contexte de build Docker
+# Appliqué lors du build depuis la racine (docker-compose.yml)
+
+# ================================================================
+# FICHIERS DE DÉVELOPPEMENT ET CONFIGURATION
+# ================================================================
+# Variables d'environnement et secrets
+.env
+.env.*
+*.env
+.env.local
+.env.development
+.env.production
+
+# Configuration IDE et éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Configuration Git
+.git/
+.gitignore
+.gitattributes
+
+# ================================================================
+# FICHIERS PYTHON ET CACHE
+# ================================================================
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Environnements virtuels Python
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.virtualenv/
+
+# ================================================================
+# FICHIERS DE TEST ET QUALITÉ CODE
+# ================================================================
+# Tests et coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Linting et formatage
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+
+# ================================================================
+# LOGS ET FICHIERS TEMPORAIRES
+# ================================================================
+# Logs (sauf structure de dossiers)
+logs/*.log
+logs/**/*.log
+logs/fichiers_logs/*
+!logs/.gitkeep
+!logs/__init__.py
+
+# Fichiers temporaires
+*.tmp
+*.temp
+temp/
+tmp/
+
+# ================================================================
+# DOCUMENTATION ET RAPPORTS
+# ================================================================
+# Documentation générée
+docs/_build/
+.readthedocs.yml
+
+# Rapports de suivi (versions de travail)
+suivi_realisation_auto_*.md
+!suivi_realisation.md
+
+# ================================================================
+# FICHIERS SPÉCIFIQUES DÉVELOPPEMENT
+# ================================================================
+# Scripts de test local
+test-docker-ci.*
+clients_api_example.py
+
+# Sauvegardes
+*.backup
+*.bak
+
+# OS et système
+.DS_Store
+Thumbs.db
+*.log
+
+# ================================================================
+# EXCLUSIONS CONDITIONNELLES SERVICES
+# ================================================================
+# Exclure les autres Dockerfiles si build spécifique
+api_acfc/dockerfile.api
+mariadb/dockerfile.mariadb
+# Le dockerfile.app est inclus car c'est celui utilisé par docker-compose

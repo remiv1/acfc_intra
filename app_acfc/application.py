@@ -29,7 +29,7 @@ from modeles import SessionBdD, User
 from datetime import datetime
 from sqlalchemy import text
 from sqlalchemy.orm import Session as SessionBdDType
-from logs.logger import CustomLogger
+from logs.logger import CustomLogger, DEBUG, INFO, WARNING, ERROR 
 
 # Création de l'instance Flask principale avec configuration des dossiers statiques et templates
 acfc = Flask(__name__,
@@ -92,6 +92,7 @@ LOGIN: Dict[str, str] = {
     'context': 'login',                  # Contexte pour CSS/JS spécifiques
     'page': BASE                         # Template HTML à utiliser
 }
+LOG_LOGIN_FILE = 'login.log'
 
 # Configuration module Clients (CRM)
 CLIENT: Dict[str, str] = {
@@ -99,6 +100,7 @@ CLIENT: Dict[str, str] = {
     'context': 'clients',
     'page': BASE
 }
+LOG_CLIENT_FILE = 'clients.log'
 
 # Configuration administration utilisateurs
 USERS: Dict[str, str] = {
@@ -106,6 +108,7 @@ USERS: Dict[str, str] = {
     'context': 'user',
     'page': BASE
 }
+LOG_USERS_FILE = 'users.log'
 
 # Configuration changement de mot de passe
 CHG_PWD: Dict[str, str] = {
@@ -113,6 +116,7 @@ CHG_PWD: Dict[str, str] = {
     'context': 'change_password',
     'page': BASE
 }
+LOG_SECURITY_FILE = 'security.log'
 
 # Configuration changement de mot de passe
 USER: Dict[str, str] = {
@@ -141,6 +145,7 @@ ERROR500: Dict[str, str] = {
     'context': '500',
     'page': BASE
 }
+LOG_500_FILE = '500.log'
 
 # Messages d'erreur standardisés pour l'authentification
 INVALID: str = 'Identifiants invalides.'
@@ -250,24 +255,24 @@ def login() -> Any:
     if request.method == 'GET':
         return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'])
     elif request.method != 'POST':
-        acfc_log.log_to_file(level=30,
+        acfc_log.log_to_file(level=WARNING,
                              message=f'{request.method} sur route Login par utilisateur {session.get("user_id", "inconnu")}',
-                             specific_logger="login", zone_log='login', db_log=True)
+                             specific_logger=LOG_LOGIN_FILE, zone_log='login', db_log=True)
         return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=WRONG_ROAD)
 
     # === TRAITEMENT POST : Validation des identifiants ===
     username, password = _get_credentials()
     db_session = SessionBdD()
     user = db_session.query(User).filter_by(pseudo=username).first()
-    acfc_log.log_to_file(level=20,
+    acfc_log.log_to_file(level=INFO,
                          message=f'début de session pour l\'utilisateur: {user is not None}',
-                         specific_logger="login", zone_log='login', db_log=True)
+                         specific_logger=LOG_LOGIN_FILE, zone_log='login', db_log=True)
 
     # Vérification de l'existence de l'utilisateur
     if not user:
-        acfc_log.log_to_file(level=30,
+        acfc_log.log_to_file(level=WARNING,
                              message=f'Utilisateur non trouvé: {username}',
-                             specific_logger="login", zone_log='login', db_log=True)
+                             specific_logger=LOG_LOGIN_FILE, zone_log='login', db_log=True)
         return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
 
     # Vérification du mot de passe avec Argon2... si mot de passe faux
@@ -275,14 +280,14 @@ def login() -> Any:
         user.nb_errors += 1  # Incrémentation du compteur d'erreurs (sécurité)
         try:
             db_session.commit()
-            acfc_log.log_to_file(level=30,
+            acfc_log.log_to_file(level=WARNING,
                                  message=f'Tentative de connexion, mot de passe invalide pour l\'utilisateur: {username}. Reste {3 - user.nb_errors} tentatives.',
-                                 specific_logger="login", zone_log='login', db_log=True)
+                                 specific_logger=LOG_LOGIN_FILE, zone_log='login', db_log=True)
             return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
         except Exception as e:
-            acfc_log.log_to_file(level=40,
+            acfc_log.log_to_file(level=ERROR,
                                  message=f'Erreur {e} lors de la validation du mot de passe pour l\'utilisateur: {username}',
-                                 specific_logger="login", zone_log='login', db_log=True)
+                                 specific_logger=LOG_LOGIN_FILE, zone_log='login', db_log=True)
             db_session.rollback()
             return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=str(e))
 
@@ -292,9 +297,9 @@ def login() -> Any:
         db_session.commit()
     except Exception as e:
         db_session.rollback()
-        acfc_log.log_to_file(level=40,
+        acfc_log.log_to_file(level=ERROR,
                              message=f'Erreur lors de la connexion pour l\'utilisateur: {username}, {e}.',
-                             specific_logger="login", zone_log='login', db_log=True)
+                             specific_logger=LOG_LOGIN_FILE, zone_log='login', db_log=True)
         return render_template(LOGIN['page'], title=LOGIN['title'], context='500', message=str(e))
     
     # Vérification de la nécessité de re-hashage de mot de passe
