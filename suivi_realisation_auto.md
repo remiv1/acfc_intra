@@ -2,17 +2,17 @@
 
 **Date du rapport :** 25 August 2025  
 **Période analysée :** 18 August 2025 - 25 August 2025 (7 jours)  
-**Nombre de commits :** 33  
+**Nombre de commits :** 35  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 33 commits sur 7 jours  
-**Volume de code :** 15758 lignes ajoutées, 3767 lignes supprimées  
-**Fichiers impactés :** 402 fichiers modifiés  
-**Productivité moyenne :** 2251 lignes/jour
+**Activité de développement :** 35 commits sur 7 jours  
+**Volume de code :** 15854 lignes ajoutées, 3909 lignes supprimées  
+**Fichiers impactés :** 415 fichiers modifiés  
+**Productivité moyenne :** 2264 lignes/jour
 
 ---
 
@@ -355,6 +355,28 @@
 
 ### 25 August 2025
 
+#### 21:04 - 5df2fd0 - fix: Correction des journaux de connexion et de création de client pour une meilleure traçabilité
+
+**Catégorie :** Correction de bugs  
+**Impact :** +13 -83 lignes, 9 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Mon Aug 25 21:04:56 2025 +0200`
+- `    fix: Correction des journaux de connexion et de création de client pour une meilleure traçabilité`
+- ... et 6 autres fichiers
+
+#### 18:12 - e78ebb0 - 📊 Mise à jour automatique du rapport de suivi (25/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +83 -59 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Mon Aug 25 18:12:05 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (25/08/2025)`
+- ... et 1 autres fichiers
+
 #### 20:11 - 413b2e6 - chore: Suppression des fichiers README obsolètes pour l'interface clients et la configuration Docker
 
 **Catégorie :** Documentation  
@@ -404,19 +426,19 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 16 commits (48.5%)
-- **Interface utilisateur** : 13 commits (39.4%)
-- **Correction de bugs** : 2 commits (6.1%)
-- **Documentation** : 1 commits (3.0%)
-- **Refactoring** : 1 commits (3.0%)
+- **Développement de fonctionnalités** : 16 commits (45.7%)
+- **Interface utilisateur** : 14 commits (40.0%)
+- **Correction de bugs** : 3 commits (8.6%)
+- **Documentation** : 1 commits (2.9%)
+- **Refactoring** : 1 commits (2.9%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 60 fichiers modifiés
+- **Python** : 64 fichiers modifiés
 - **HTML** : 37 fichiers modifiés
-- **Documentation** : 28 fichiers modifiés
+- **Documentation** : 29 fichiers modifiés
 - **YAML/Config** : 15 fichiers modifiés
 - **Docker** : 12 fichiers modifiés
 - **CSS** : 7 fichiers modifiés
@@ -426,16 +448,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 4.7 commits/jour
-- **Volume de code :** 19525 modifications totales
-- **Ratio ajouts/suppressions :** 4.18
-- **Moyenne lignes par commit :** 592
+- **Fréquence de commit :** 5.0 commits/jour
+- **Volume de code :** 19763 modifications totales
+- **Ratio ajouts/suppressions :** 4.06
+- **Moyenne lignes par commit :** 565
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 15758 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 15854 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 25 August 2025*
