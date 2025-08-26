@@ -15,8 +15,8 @@ def commercial_index():
 def hello_commercial():
     return 'Commercial blueprint: hello'
 
-@commercial_bp.route('/commandes/create/client/<client_id>', methods=['GET'])
-def create_commande(client_id):
+@commercial_bp.route('/commandes/create/client/<id_client>', methods=['GET'])
+def create_commande(id_client):
     # Logique pour créer une commande
     return jsonify({'message': 'Commande créée avec succès'}), 201
 

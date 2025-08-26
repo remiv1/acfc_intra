@@ -9,6 +9,7 @@
 # - Configuration des utilisateurs et permissions
 # - Support des transactions ACID pour l'intégrité comptable
 # - Optimisations pour les applications d'entreprise
+# - Données de référence pré-chargées (PCG, villes françaises, indicatifs téléphoniques)
 # 
 # Sécurité :
 # - Variables d'environnement pour les mots de passe
@@ -33,10 +34,14 @@ LABEL version="1.0"
 # Cette approche sécurise les mots de passe sans les exposer dans l'image
 
 # === INITIALISATION DU SCHÉMA DE BASE DE DONNÉES ===
-# Copie du script d'initialisation dans le répertoire spécial de MariaDB
+# Copie du script d'initialisation principal dans le répertoire spécial de MariaDB
 # Ce script sera exécuté automatiquement au premier démarrage du conteneur
 # Contient : création des tables, index, données de référence, utilisateurs
 COPY mariadb/init_db.sql /docker-entrypoint-initdb.d/
+
+# Copie des fichiers de données de référence nécessaires pour l'initialisation
+# Ces fichiers sont référencés par des commandes SOURCE dans init_db.sql
+COPY mariadb/prepare_base_datas/ /docker-entrypoint-initdb.d/prepare_base_datas/
 
 # === CONFIGURATION RÉSEAU ===
 # Exposition du port standard MariaDB/MySQL (3306)

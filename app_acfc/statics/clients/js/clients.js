@@ -193,4 +193,110 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('clientTabs')) {
         initClientDetailsPage();
     }
+    
+    // Initialiser la recherche de clients si on est sur cette page
+    if (document.getElementById('client-search-form')) {
+        initClientSearchPage();
+    }
 });
+
+/**
+ * Initialisation de la page de recherche de clients
+ */
+function initClientSearchPage() {
+    const searchInput = document.getElementById('search-term');
+    const searchTypeInputs = document.querySelectorAll('input[name="search_type"]');
+    const resultsContainer = document.getElementById('search-results');
+    const resultsList = document.getElementById('results-list');
+    const resultsCount = document.getElementById('results-count');
+    const loadingDiv = document.getElementById('search-loading');
+    const noResultsDiv = document.getElementById('no-results');
+    
+    let searchTimeout;
+    
+    // Fonction de recherche
+    function performSearch() {
+        const searchTerm = searchInput.value.trim();
+        const searchType = document.querySelector('input[name="search_type"]:checked').value;
+        
+        // Masquer tous les éléments
+        resultsContainer.classList.add('d-none');
+        noResultsDiv.classList.add('d-none');
+        loadingDiv.classList.add('d-none');
+        
+        // Vérifier la longueur minimale
+        if (searchTerm.length < 3) {
+            return;
+        }
+        
+        // Afficher le loading
+        loadingDiv.classList.remove('d-none');
+        
+        // Effectuer la recherche
+        fetch(`/clients/recherche_avancee?q=${encodeURIComponent(searchTerm)}&type=${searchType}`)
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.classList.add('d-none');
+                
+                if (data.length === 0) {
+                    noResultsDiv.classList.remove('d-none');
+                } else {
+                    displayResults(data);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la recherche:', error);
+                loadingDiv.classList.add('d-none');
+                noResultsDiv.classList.remove('d-none');
+            });
+    }
+    
+    // Fonction d'affichage des résultats
+    function displayResults(clients) {
+        resultsList.innerHTML = '';
+        resultsCount.textContent = clients.length;
+        
+        clients.forEach(client => {
+            const listItem = document.createElement('a');
+            listItem.href = `/clients/${client.id}`;
+            listItem.className = 'list-group-item list-group-item-action';
+            
+            listItem.innerHTML = `
+                <div class="d-flex w-100 justify-content-between">
+                    <div>
+                        <h6 class="mb-1">${client.nom_affichage}</h6>
+                        <p class="mb-1">
+                            <span class="badge bg-${client.type_client === 1 ? 'success' : 'primary'} me-2">
+                                ${client.type_client_libelle}
+                            </span>
+                            ${client.code_postal} ${client.ville}
+                        </p>
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-arrow-right"></i>
+                    </small>
+                </div>
+            `;
+            
+            resultsList.appendChild(listItem);
+        });
+        
+        resultsContainer.classList.remove('d-none');
+    }
+    
+    // Événements de recherche
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(performSearch, 300); // Debounce de 300ms
+    });
+    
+    // Événement de changement de type de recherche
+    searchTypeInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            if (searchInput.value.trim().length >= 3) {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(performSearch, 100);
+            }
+        });
+    });
+}

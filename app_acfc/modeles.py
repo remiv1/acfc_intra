@@ -2,7 +2,7 @@ from sqlalchemy import Integer, String, Date, Boolean, Text, Numeric, event, Com
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Mapper, relationship, mapped_column
-from typing import Any
+from typing import Any, Dict
 from sqlalchemy.engine import Connection
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
@@ -307,6 +307,31 @@ class Client(Base):
             return self.pro.raison_sociale
         return ""
     
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convertit l'objet Client en dictionnaire pour les API JSON.
+        
+        Returns:
+            Dict[str, Any]: Dictionnaire contenant les données du client avec informations d'adresse
+        """
+        # Récupération de l'adresse principale (première active trouvée)
+        adresse_principale = None
+        for adresse in self.adresses:
+            if adresse.is_active:
+                adresse_principale = adresse
+                break
+        
+        return {
+            'id': self.id,
+            'nom_affichage': self.nom_affichage,
+            'type_client': self.type_client,
+            'type_client_libelle': 'Particulier' if self.type_client == 1 else 'Professionnel',
+            'code_postal': adresse_principale.code_postal if adresse_principale else '',
+            'ville': adresse_principale.ville if adresse_principale else '',
+            'is_active': self.is_active,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+    
     def __repr__(self) -> str:
         client_type = "Particulier" if self.type_client == 1 else "Professionnel"
         return f"<Client(id={self.id}, type={client_type}, active={self.is_active})>"
@@ -470,6 +495,8 @@ class Adresse(Base):
     ville = mapped_column(String(100), nullable=False)
 
     # === MÉTADONNÉES ===
+    is_principal = mapped_column(Boolean, default=False, nullable=False, 
+                                comment="Adresse principale pour ce client (une seule par client)")
     created_at = mapped_column(Date, default=func.now(), nullable=False)
     is_active = mapped_column(Boolean, default=True, nullable=False)
 
@@ -630,7 +657,8 @@ class PCG(Base):
 
     # === IDENTIFIANT DES COMPTES ===
     classe = mapped_column(Integer, nullable=False)
-    categorie = mapped_column(Integer, nullable=False)
+    categorie_1 = mapped_column(Integer, nullable=False)
+    categorie_2 = mapped_column(Integer, nullable=False)
     compte = mapped_column(Integer, primary_key=True)
     denomination = mapped_column(String(100), nullable=False)
 

@@ -31,3 +31,49 @@ ON DUPLICATE KEY UPDATE
     `is_locked` = VALUES(`is_locked`);
 
 -- Note : L'utilisateur devra modifier son mot de passe à la première utilisation.
+
+-- ========================================
+-- DONNÉES DE RÉFÉRENCE
+-- ========================================
+
+-- Plan Comptable Général (PCG)
+-- Source: prepare_base_datas/pcg/pcg.sql
+CREATE TABLE IF NOT EXISTS 30_pcg (
+    classe INT NOT NULL,
+    categorie_1 INT NOT NULL,
+    categorie_2 INT NOT NULL,
+    compte INT PRIMARY KEY,
+    denomination VARCHAR(255) NOT NULL
+);
+
+-- Indicatifs téléphoniques internationaux
+-- Source: prepare_base_datas/indic_tel/92_indicatifs_tel.sql
+CREATE TABLE IF NOT EXISTS 92_indicatifs_tel (
+    id INT PRIMARY KEY,
+    pays VARCHAR(255) NOT NULL,
+    indicatif VARCHAR(6) NOT NULL
+);
+
+-- Villes françaises avec codes postaux
+-- Source: prepare_base_datas/cp_villes/91_villes.sql
+CREATE TABLE IF NOT EXISTS 91_villes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nom VARCHAR(255) NOT NULL,
+    code_postal INT NOT NULL
+);
+
+-- ========================================
+-- INSERTION DES DONNÉES DE RÉFÉRENCE
+-- ========================================
+
+-- Insertion du Plan Comptable Général (PCG)
+-- Note: Ce fichier contient plus de 580 comptes comptables
+SOURCE prepare_base_datas/pcg/pcg.sql;
+
+-- Insertion des indicatifs téléphoniques internationaux
+-- Note: Ce fichier contient les indicatifs de tous les pays
+SOURCE prepare_base_datas/indic_tel/92_indicatifs_tel.sql;
+
+-- Insertion des villes françaises avec codes postaux
+-- Note: Ce fichier contient plus de 33000 villes françaises
+SOURCE prepare_base_datas/cp_villes/91_villes.sql;
