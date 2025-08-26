@@ -92,6 +92,11 @@
                                 <span class="badge bg-secondary">
                                     <i class="bi bi-calendar me-1"></i>Créé le {{ client.created_at.strftime('%d/%m/%Y') }}
                                 </span>
+                                
+                                <!-- Badge réduction -->
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-percent me-1"></i>Réduction {{ "%.1f"|format(client.reduces * 100) }}%
+                                </span>
                             </div>
                         </div>
                         
@@ -316,9 +321,14 @@
                                 <span class="text-muted">Commandes</span>
                                 <span class="badge bg-success-subtle text-success">{{ orders|length }}</span>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="text-muted">Factures</span>
                                 <span class="badge bg-warning-subtle text-warning">{{ bills|length }}</span>
+                            </div>
+                            <hr class="my-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Réduction appliquée</span>
+                                <span class="badge bg-info-subtle text-info">{{ "%.1f"|format(client.reduces * 100) }}%</span>
                             </div>
                         </div>
                     </div>

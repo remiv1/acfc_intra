@@ -134,6 +134,21 @@
                         </div>
                         {% endif %}
                         
+                        <!-- Réduction appliquée -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="reduces" class="form-label">Réduction appliquée</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="reduces" name="reduces" 
+                                           min="0" max="100" step="0.1" 
+                                           value="{% if client %}{{ (client.reduces * 100)|round(1) }}{% else %}10.0{% endif %}"
+                                           placeholder="10.0">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div class="form-text">Réduction en pourcentage (ex: 10.0 = 10%)</div>
+                            </div>
+                        </div>
+                        
                         <!-- Notes générales -->
                         <div class="row mb-3">
                             <div class="col-12">
@@ -385,6 +400,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.classList.remove('is-valid');
                 this.classList.add('is-invalid');
             }
+        });
+    }
+    
+    // Gestion du champ réduction
+    const reducesField = document.getElementById('reduces');
+    if (reducesField) {
+        // Validation en temps réel
+        reducesField.addEventListener('input', function() {
+            let value = parseFloat(this.value) || 0;
+            
+            // Validation de la plage
+            if (value >= 0 && value <= 100) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+        
+        // Conversion avant soumission (convertir le pourcentage en décimal pour la base de données)
+        const form = document.getElementById('clientForm');
+        form.addEventListener('submit', function(event) {
+            let percentValue = parseFloat(reducesField.value) || 0;
+            reducesField.value = (percentValue / 100).toFixed(3); // Convertir en décimal
         });
     }
 });

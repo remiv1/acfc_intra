@@ -289,6 +289,7 @@ class Client(Base):
     created_at = mapped_column(Date, default=func.now(), nullable=False, comment="Date de création du client")
     is_active = mapped_column(Boolean, default=True, nullable=False, comment="Client actif/inactif")
     notes = mapped_column(Text, nullable=True, comment="Notes libres sur le client")
+    reduces = mapped_column(Numeric(4,3), default=0.10, nullable=False, comment="Réduction appliquée au client")
 
     # === JONCTION CLIENT ===
     part = relationship("Part", uselist=False, back_populates="client")
