@@ -1,7 +1,7 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 25 August 2025  
-**Période analysée :** 18 August 2025 - 25 August 2025 (7 jours)  
+**Date du rapport :** 26 August 2025  
+**Période analysée :** 19 August 2025 - 26 August 2025 (7 jours)  
 **Nombre de commits :** 35  
 **Générateur :** Script automatique v1.0
 
@@ -10,9 +10,9 @@
 ## Résumé exécutif
 
 **Activité de développement :** 35 commits sur 7 jours  
-**Volume de code :** 15854 lignes ajoutées, 3909 lignes supprimées  
-**Fichiers impactés :** 415 fichiers modifiés  
-**Productivité moyenne :** 2264 lignes/jour
+**Volume de code :** 85224 lignes ajoutées, 3858 lignes supprimées  
+**Fichiers impactés :** 398 fichiers modifiés  
+**Productivité moyenne :** 12174 lignes/jour
 
 ---
 
@@ -53,50 +53,6 @@
 - `Date:   Tue Aug 19 21:35:38 2025 +0200`
 - `    feat: Ajout de la gestion des sessions Flask et mise à jour des dépendances`
 - ... et 18 autres fichiers
-
-#### 16:07 - 883a45a - 📊 Mise à jour automatique du rapport de suivi (19/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +39 -17 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Tue Aug 19 16:07:57 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (19/08/2025)`
-- ... et 1 autres fichiers
-
-#### 18:07 - 59de635 - feat : Refactor password management and enhance session handling
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +925 -199 lignes, 44 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Tue Aug 19 18:07:44 2025 +0200`
-- `    feat : Refactor password management and enhance session handling`
-- ... et 42 autres fichiers
-
-#### 11:33 - 0575047 - 📊 Mise à jour automatique du rapport de suivi (19/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +54 -30 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Tue Aug 19 11:33:26 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (19/08/2025)`
-- ... et 1 autres fichiers
-
-#### 13:33 - 6d09e08 - feat: Implement user authentication and error handling
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +328 -29 lignes, 26 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Tue Aug 19 13:33:11 2025 +0200`
-- `    feat: Implement user authentication and error handling`
-- ... et 24 autres fichiers
 
 
 ### 21 August 2025
@@ -355,6 +311,17 @@
 
 ### 25 August 2025
 
+#### 19:05 - 5a2fbf3 - 📊 Mise à jour automatique du rapport de suivi (25/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +39 -17 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Mon Aug 25 19:05:23 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (25/08/2025)`
+- ... et 1 autres fichiers
+
 #### 21:04 - 5df2fd0 - fix: Correction des journaux de connexion et de création de client pour une meilleure traçabilité
 
 **Catégorie :** Correction de bugs  
@@ -422,12 +389,48 @@
 - ... et 47 autres fichiers
 
 
+### 26 August 2025
+
+#### 19:09 - 68f56e0 - feat: Ajouter un champ de réduction appliquée pour les clients avec validation et conversion
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +52 -1 lignes, 6 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Aug 26 19:09:31 2025 +0200`
+- `    feat: Ajouter un champ de réduction appliquée pour les clients avec validation et conversion`
+- ... et 3 autres fichiers
+
+#### 19:02 - 8243e98 - feat: Add Dockerfile and entrypoint for mail management application
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +609 -2 lignes, 18 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Aug 26 19:02:09 2025 +0200`
+- `    feat: Add Dockerfile and entrypoint for mail management application`
+- ... et 16 autres fichiers
+
+#### 16:26 - 62c1f37 - feat: Add PCG data preparation script and SQL generation
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +70016 -204 lignes, 33 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Aug 26 16:26:51 2025 +0200`
+- `    feat: Add PCG data preparation script and SQL generation`
+- ... et 35 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 16 commits (45.7%)
-- **Interface utilisateur** : 14 commits (40.0%)
+- **Développement de fonctionnalités** : 17 commits (48.6%)
+- **Interface utilisateur** : 13 commits (37.1%)
 - **Correction de bugs** : 3 commits (8.6%)
 - **Documentation** : 1 commits (2.9%)
 - **Refactoring** : 1 commits (2.9%)
@@ -436,11 +439,11 @@
 
 ## Technologies et langages utilisés
 
-- **Python** : 64 fichiers modifiés
-- **HTML** : 37 fichiers modifiés
-- **Documentation** : 29 fichiers modifiés
+- **Python** : 69 fichiers modifiés
+- **HTML** : 32 fichiers modifiés
+- **Documentation** : 27 fichiers modifiés
+- **Docker** : 15 fichiers modifiés
 - **YAML/Config** : 15 fichiers modifiés
-- **Docker** : 12 fichiers modifiés
 - **CSS** : 7 fichiers modifiés
 - **JavaScript** : 7 fichiers modifiés
 
@@ -449,15 +452,15 @@
 ## Métriques de productivité
 
 - **Fréquence de commit :** 5.0 commits/jour
-- **Volume de code :** 19763 modifications totales
-- **Ratio ajouts/suppressions :** 4.06
-- **Moyenne lignes par commit :** 565
+- **Volume de code :** 89082 modifications totales
+- **Ratio ajouts/suppressions :** 22.09
+- **Moyenne lignes par commit :** 2545
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 15854 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 85224 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
-*Rapport généré automatiquement le 25 August 2025*
+*Rapport généré automatiquement le 26 August 2025*
