@@ -2,57 +2,21 @@
 
 **Date du rapport :** 26 August 2025  
 **Période analysée :** 19 August 2025 - 26 August 2025 (7 jours)  
-**Nombre de commits :** 35  
+**Nombre de commits :** 34  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 35 commits sur 7 jours  
-**Volume de code :** 85224 lignes ajoutées, 3858 lignes supprimées  
-**Fichiers impactés :** 398 fichiers modifiés  
-**Productivité moyenne :** 12174 lignes/jour
+**Activité de développement :** 34 commits sur 7 jours  
+**Volume de code :** 85174 lignes ajoutées, 3808 lignes supprimées  
+**Fichiers impactés :** 379 fichiers modifiés  
+**Productivité moyenne :** 12167 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 19 August 2025
-
-#### 19:36 - 4b02201 - 📊 Mise à jour automatique du rapport de suivi (19/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +47 -14 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Tue Aug 19 19:36:30 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (19/08/2025)`
-- ... et 1 autres fichiers
-
-#### 21:35 - 50f3a29 - feat: Refactor la gestion de l'authentification et ajouter la configuration SonarQube
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +73 -40 lignes, 5 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Tue Aug 19 21:35:59 2025 +0200`
-- `    feat: Refactor la gestion de l'authentification et ajouter la configuration SonarQube`
-- ... et 2 autres fichiers
-
-#### 21:35 - 90af708 - feat: Ajout de la gestion des sessions Flask et mise à jour des dépendances
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +88 -90 lignes, 21 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Tue Aug 19 21:35:38 2025 +0200`
-- `    feat: Ajout de la gestion des sessions Flask et mise à jour des dépendances`
-- ... et 18 autres fichiers
 
 
 ### 21 August 2025
@@ -391,6 +355,28 @@
 
 ### 26 August 2025
 
+#### 22:20 - 571d738 - feat: Améliorer le chargement des clients avec eager loading et ajouter la gestion des réductions
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +95 -34 lignes, 7 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Tue Aug 26 22:20:14 2025 +0200`
+- `    feat: Améliorer le chargement des clients avec eager loading et ajouter la gestion des réductions`
+- ... et 5 autres fichiers
+
+#### 17:09 - 80437c2 - 📊 Mise à jour automatique du rapport de suivi (26/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +63 -60 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Tue Aug 26 17:09:54 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (26/08/2025)`
+- ... et 1 autres fichiers
+
 #### 19:09 - 68f56e0 - feat: Ajouter un champ de réduction appliquée pour les clients avec validation et conversion
 
 **Catégorie :** Développement de fonctionnalités  
@@ -429,9 +415,9 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 17 commits (48.6%)
-- **Interface utilisateur** : 13 commits (37.1%)
-- **Correction de bugs** : 3 commits (8.6%)
+- **Développement de fonctionnalités** : 16 commits (47.1%)
+- **Interface utilisateur** : 13 commits (38.2%)
+- **Correction de bugs** : 3 commits (8.8%)
 - **Documentation** : 1 commits (2.9%)
 - **Refactoring** : 1 commits (2.9%)
 
@@ -439,10 +425,10 @@
 
 ## Technologies et langages utilisés
 
-- **Python** : 69 fichiers modifiés
-- **HTML** : 32 fichiers modifiés
+- **Python** : 66 fichiers modifiés
+- **HTML** : 33 fichiers modifiés
 - **Documentation** : 27 fichiers modifiés
-- **Docker** : 15 fichiers modifiés
+- **Docker** : 16 fichiers modifiés
 - **YAML/Config** : 15 fichiers modifiés
 - **CSS** : 7 fichiers modifiés
 - **JavaScript** : 7 fichiers modifiés
@@ -451,16 +437,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 5.0 commits/jour
-- **Volume de code :** 89082 modifications totales
-- **Ratio ajouts/suppressions :** 22.09
-- **Moyenne lignes par commit :** 2545
+- **Fréquence de commit :** 4.9 commits/jour
+- **Volume de code :** 88982 modifications totales
+- **Ratio ajouts/suppressions :** 22.37
+- **Moyenne lignes par commit :** 2617
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 85224 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 85174 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 26 August 2025*
