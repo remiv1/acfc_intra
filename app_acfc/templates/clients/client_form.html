@@ -33,7 +33,7 @@
                                 {% if sub_context == 'create' %}
                                     <i class="bi bi-person-plus me-2"></i>Nouveau Client
                                 {% else %}
-                                    <i class="bi bi-pencil me-2"></i>Modifier {{ client.nom_affichage }}
+                                    <i class="bi bi-pencil me-2"></i>Modifier {% if nom_affichage %}{{ nom_affichage }}{% else %}Client{% endif %}
                                 {% endif %}
                             </h2>
                             <p class="text-muted mb-0">
@@ -83,7 +83,7 @@
     <!-- Formulaire principal -->
     <div class="row">
         <div class="col-12">
-            <form action="{% if sub_context == 'create' %}{{ url_for('clients.create_client') }}{% else %}{{ url_for('clients.update_client', id_client=client.id) }}{% endif %}" 
+            <form action="{% if sub_context == 'create' %}{{ url_for('clients.create_client') }}{% else %}{{ url_for('clients.update_client', id_client=id_client) }}{% endif %}" 
                   method="post" class="needs-validation" novalidate id="clientForm">
                 
                 <div class="card border-0 shadow-sm">
@@ -306,16 +306,31 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Fonction pour basculer entre les types de formulaires
     function toggleClientType() {
+        // Déterminer le type client actuel
+        let isParticulier = false;
+        
         if (typeParticulier && typeParticulier.checked) {
-            formParticulier.style.display = 'block';
-            formProfessionnel.style.display = 'none';
+            isParticulier = true;
+        } else if (typeProfessionnel && typeProfessionnel.checked) {
+            isParticulier = false;
+        } else {
+            // Cas de modification : récupérer le type depuis le champ hidden
+            const hiddenTypeClient = document.querySelector('input[name="type_client"][type="hidden"]');
+            if (hiddenTypeClient) {
+                isParticulier = hiddenTypeClient.value === '1';
+            }
+        }
+        
+        if (isParticulier) {
+            if (formParticulier) formParticulier.style.display = 'block';
+            if (formProfessionnel) formProfessionnel.style.display = 'none';
             
             // Activer la validation pour les champs particulier
             setRequiredFields('particulier', true);
             setRequiredFields('professionnel', false);
-        } else if (typeProfessionnel && typeProfessionnel.checked) {
-            formParticulier.style.display = 'none';
-            formProfessionnel.style.display = 'block';
+        } else {
+            if (formParticulier) formParticulier.style.display = 'none';
+            if (formProfessionnel) formProfessionnel.style.display = 'block';
             
             // Activer la validation pour les champs professionnel
             setRequiredFields('particulier', false);
@@ -420,12 +435,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Conversion avant soumission (convertir le pourcentage en décimal pour la base de données)
-        const form = document.getElementById('clientForm');
-        form.addEventListener('submit', function(event) {
-            let percentValue = parseFloat(reducesField.value) || 0;
-            reducesField.value = (percentValue / 100).toFixed(3); // Convertir en décimal
-        });
     }
 });
 </script>

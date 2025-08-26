@@ -29,7 +29,7 @@ Version : 1.0
 """
 
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for
-from sqlalchemy.orm import Session as SessionBdDType
+from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy import or_, func
 from app_acfc.modeles import SessionBdD, Client, Part, Pro, Telephone, Mail, Commande, Facture, Adresse
 from typing import List, Dict
@@ -310,8 +310,16 @@ def get_client(id_client: int):
     # Ouverture d'une session vers la base de données
     db_session: SessionBdDType = SessionBdD()
 
-    # Recherche du client par ID
-    client: Client | None = db_session.query(Client).get(id_client)
+    # Recherche du client par ID avec eager loading
+    client: Client | None = db_session.query(Client).options(
+        joinedload(Client.part),
+        joinedload(Client.pro),
+        joinedload(Client.tels),
+        joinedload(Client.mails),
+        joinedload(Client.adresses),
+        joinedload(Client.commandes),
+        joinedload(Client.factures)
+    ).get(id_client)
     acfc_log.log_to_file(DEBUG, f'{client}')
 
     # Récupération du contexte du client et retour
@@ -355,15 +363,23 @@ def edit_client(id_client: int):
     Route d'affichage du formulaire de modification d'un client existant.
     """
     db_session: SessionBdDType = SessionBdD()
-    client: Client | None = db_session.query(Client).get(id_client)
+    client: Client | None = db_session.query(Client).options(
+        joinedload(Client.part),
+        joinedload(Client.pro)
+    ).get(id_client)
     
     if client:
+        # Récupération du nom d'affichage avant de fermer la session
+        nom_affichage = client.nom_affichage
+        id_client = client.id
         db_session.close()
         return render_template(CLIENT_FORM['page'],
-                               title=f"ACFC - Modifier {client.nom_affichage}",
+                               title=f"ACFC - Modifier {nom_affichage}",
                                context=CLIENT_FORM['context'],
                                sub_context='edit',
-                               client=client)
+                               client=client,
+                               client_id=id_client,
+                               nom_affichage=nom_affichage)
     else:
         db_session.close()
         return jsonify({"error": ERROR_CLIENT_NOT_FOUND}), 404
@@ -394,10 +410,18 @@ def create_client():
         type_client = int(type_client_str)
         notes = request.form.get('notes', '')
         
+        # Récupération de la réduction (en pourcentage depuis le formulaire)
+        reduces_str = request.form.get('reduces', '10.0')
+        try:
+            reduces = float(reduces_str) / 100  # Conversion pourcentage vers décimal
+        except (ValueError, TypeError):
+            reduces = 0.10  # Valeur par défaut : 10%
+        
         # Création du client de base
         nouveau_client = Client(
             type_client=type_client,
-            notes=notes
+            notes=notes,
+            reduces=reduces
         )
         db_session.add(nouveau_client)
         db_session.flush()  # Pour obtenir l'ID
@@ -479,7 +503,10 @@ def edit_client_form(id_client: int):
     """
     db_session = SessionBdD()
     try:
-        client = db_session.query(Client).get(id_client)
+        client = db_session.query(Client).options(
+            joinedload(Client.part),
+            joinedload(Client.pro)
+        ).get(id_client)
         
         if not client:
             return render_template("errors/404.html",
@@ -487,13 +514,18 @@ def edit_client_form(id_client: int):
                                    sub_context="error",
                                    error_message=ERROR_CLIENT_NOT_FOUND)
         
-        title = f"ACFC - Modifier {getattr(client, 'nom_affichage', f'Client {id_client}')}"
+        # Récupération du nom d'affichage avant de fermer la session
+        nom_affichage = client.nom_affichage
+        id_client = client.id
+        title = f"ACFC - Modifier {nom_affichage}"
         
         return render_template(CLIENT_FORM['page'],
                                title=title,
                                context=CLIENT_FORM['context'],
                                sub_context='edit',
-                               client=client)
+                               client=client,
+                               client_id=id_client,
+                               nom_affichage=nom_affichage)
     finally:
         db_session.close()
 
@@ -503,19 +535,31 @@ def update_client(id_client: int):
     """
     Mise à jour des informations d'un client existant.
     """
+    acfc_log.log_to_file(logging.INFO, f"Tentative de modification du client {id_client}")
+    acfc_log.log_to_file(logging.DEBUG, f"Données reçues: {dict(request.form)}")
     db_session = SessionBdD()
     client = None
+    nom_affichage = None
     
     try:
-        client = db_session.query(Client).get(id_client)
+        client = db_session.query(Client).options(
+            joinedload(Client.part),
+            joinedload(Client.pro)
+        ).get(id_client)
+        acfc_log.log_to_file(DEBUG, f'Client avant mise à jour : {client}')
         
         if not client:
             return jsonify({"error": ERROR_CLIENT_NOT_FOUND}), 404
         
+        # Récupération du nom d'affichage au début pour éviter les problèmes de session
+        nom_affichage = client.nom_affichage
+        
         # Mise à jour des données de base
         notes = request.form.get('notes', '')
         client.notes = notes
-        
+        reduces = request.form.get('reduces', '10')
+        client.reduces = float(reduces) / 100
+
         # Mise à jour des données spécifiques selon le type
         if client.type_client == 1 and client.part:  # Particulier
             prenom = request.form.get('prenom')
@@ -548,8 +592,8 @@ def update_client(id_client: int):
         db_session.commit()
         acfc_log.log_to_file(logging.INFO, f"Client modifié : ID {client.id}")
         
-        # Redirection vers la page de détails du client
-        return redirect(url_for(CLIENT_DETAIL, id_client=client.id))
+        # Redirection vers la page de détails du client avec message de succès
+        return redirect(url_for(CLIENT_DETAIL, id_client=client.id, success_message="Client modifié avec succès"))
         
     except Exception as e:
         if 'db_session' in locals():
@@ -558,14 +602,18 @@ def update_client(id_client: int):
         
         # Gestion de l'affichage en cas d'erreur
         title = TITLE_EDIT_CLIENT
-        if client:
-            title = f"ACFC - Modifier {getattr(client, 'nom_affichage', f'Client {id_client}')}"
+        if nom_affichage:
+            title = f"ACFC - Modifier {nom_affichage}"
+        elif client:
+            title = f"ACFC - Modifier Client {id_client}"
             
         return render_template(CLIENT_FORM['page'],
                                title=title,
                                context=CLIENT_FORM['context'],
                                sub_context='edit',
                                client=client,
+                               client_id=client.id if client else id_client,
+                               nom_affichage=nom_affichage if nom_affichage else f"Client {id_client}",
                                error_message=f"Erreur lors de la modification : {str(e)}")
     finally:
         if 'db_session' in locals():
@@ -673,7 +721,7 @@ def clients_add_email():
         # Récupération et validation des données
         id_client = request.form.get('id_client')
         if not id_client:
-            return jsonify({"error": ERROR_id_client_MISSING}), 400
+            return jsonify({"error": ERROR_CLIENT_ID_MISSING}), 400
             
         client = db_session.query(Client).get(id_client)
         if not client:

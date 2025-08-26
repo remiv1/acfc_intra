@@ -51,8 +51,12 @@ COPY ./requirements-mail.txt requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copier tout sauf le Dockerfile
-COPY ./mails/ ./
-RUN rm -f dockerfile.mails
+# Copier les fichiers Python de l'application
+COPY ./mails/mail_api.py ./
+COPY ./mails/mail_service.py ./
 
-ENTRYPOINT ["./entrypoint.sh"]
+# Exposer le port utilisé par FastAPI
+EXPOSE 8000
+
+# Lancer directement l'API FastAPI avec uvicorn
+CMD ["uvicorn", "mail_api:app", "--host", "0.0.0.0", "--port", "8000"]
