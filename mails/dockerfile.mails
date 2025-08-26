@@ -1,0 +1,58 @@
+# ====================================================================
+# DOCKERFILE - GESTION DES MAILS
+# ====================================================================
+# Configuration Docker pour l'application de gestion des mails ACFC
+#
+# Architecture : Application FastAPI + Redis + RQ
+# Base : Python 3.11 sur Debian Bookworm (LTS, sécurisé)
+# Port : 8000 (standard FastAPI, mappé par docker-compose)
+#
+# Optimisations incluses :
+# - Image officielle Python optimisée
+# - Cache pip désactivé pour réduire la taille
+# - Isolation des dépendances
+# - Configuration multi-stage possible (future optimisation)
+# 
+# Maintenu par : ACFC Development Team
+# Dernière mise à jour : Août 2025
+
+# Utilisation de l'image Python officielle basée sur Debian Bookworm
+# Avantages : Stabilité LTS, sécurité renforcée, support étendu des packages
+FROM python:3.12-bullseye
+
+# Configuration des métadonnées pour la traçabilité
+LABEL maintainer="ACFC Development Team"
+LABEL description="Application mail ACFC - Gestion d'entreprise intégrée"
+LABEL version="1.0"
+
+# Installation des variables d'environnement
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Installation des dépendances système nécessaires
+RUN apt-get update && apt-get install -y \
+libsasl2-dev \
+libssl-dev \
+libffi-dev \
+build-essential \
+&& rm -rf /var/lib/apt/lists/*
+
+# Définition du répertoire de travail dans le conteneur
+# Isolation complète des fichiers de l'application
+WORKDIR /app
+
+# Installation des dépendances Python avec optimisations
+# --no-cache-dir : Évite le stockage du cache pip (réduit la taille de l'image)
+COPY ./requirements-mail.txt requirements.txt
+
+# Installation des dépendances Python avec optimisations
+# --no-cache-dir : Évite le stockage du cache pip (réduit la taille de l'image)
+# --upgrade : Force la mise à jour vers les dernières versions compatibles
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copier tout sauf le Dockerfile
+COPY ./mails/ ./
+RUN rm -f dockerfile.mails
+
+ENTRYPOINT ["./entrypoint.sh"]

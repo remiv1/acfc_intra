@@ -7,6 +7,19 @@
 
 **ACFC** (Accounting, Customer Relationship Management, Billing & Stock Management) est une solution web intégrée pour la gestion d'une entreprise de commercialisation de prêt à poster développée en Python Flask.
 
+## 🏗️ Architecture globale
+
+L'architecture de l'application ACFC repose sur une approche micro-services, chaque service étant conteneurisé avec Docker. Les principaux composants sont :
+
+- **Frontend** : Interface utilisateur développée en HTML5, CSS3 et JavaScript.
+- **Backend** : API RESTful construite avec Python 3.12 et Flask.
+- **Base de données** : MariaDB pour les données relationnelles et MongoDB pour les logs.
+- **Serveur** : Nginx en tant que reverse proxy et serveur statique.
+- **Cache** : Redis pour la gestion des sessions et des files d'attente.
+- **Mails** : Service de gestion des emails.
+
+[Diagramme d'Architecture](documentation/architecturedocker.svg)
+
 ## 🎯 Fonctionnalités
 
 ### Modules Métiers

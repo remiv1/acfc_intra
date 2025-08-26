@@ -9,7 +9,9 @@
 # - acfc-nginx    : Reverse proxy et serveur statique (port 80)
 # - acfc-db       : Base de données MariaDB
 # - acfc-logs     : Base NoSQL MongoDB pour logging des traces
-# 
+# - acfc-mails    : Service de gestion des emails
+# - acfc-redis    : Cache et file d'attente Redis
+#
 # Réseau : acfc-network (isolé, communication inter-services)
 # Volumes : Persistance des données (base, logs, documents --factures, commandes, remises de chèques--)
 # 
@@ -138,6 +140,35 @@ services:
     restart: unless-stopped
     # Aucun port exposé, usage interne uniquement (autres conteneurs ou cron)
 
+  # ================================================================
+  # SERVICE FAST API (BACK-OFFICE, INTERNE)
+  # ================================================================
+  acfc-mails:
+    container_name: acfc-mails
+    build:
+      context: .
+      dockerfile: mails/dockerfile.mails
+    networks:
+      - acfc-network
+    environment:
+      - METTREICILESPARAMETRESIMAPENSECRET=1
+      - REDIS_HOST=acfc-redis
+      - REDIS_PORT=6379
+    depends_on:
+      - acfc-redis
+
+  # ================================================================
+  # SERVICE REDIS
+  # ================================================================
+  acfc-redis:
+    container_name: acfc-redis
+    image: redis:latest
+    networks:
+      - acfc-network
+    volumes:
+      - acfc-redis-data:/data
+    restart: always
+
 # ================================================================
 # VOLUMES PERSISTANTS
 # ================================================================
@@ -155,7 +186,10 @@ volumes:
   acfc-rch:
     driver: local                            # Stockage pour documents de remises de chèques
     name: acfc_research_storage
-  
+  acfc-redis-data:
+    driver: local                            # Stockage pour données Redis
+    name: acfc_redis_data
+
 # ================================================================
 # RÉSEAUX
 # ================================================================
