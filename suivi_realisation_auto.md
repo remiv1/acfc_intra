@@ -2,17 +2,17 @@
 
 **Date du rapport :** 27 August 2025  
 **Période analysée :** 20 August 2025 - 27 August 2025 (7 jours)  
-**Nombre de commits :** 38  
+**Nombre de commits :** 41  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 38 commits sur 7 jours  
-**Volume de code :** 90588 lignes ajoutées, 5001 lignes supprimées  
-**Fichiers impactés :** 452 fichiers modifiés  
-**Productivité moyenne :** 12941 lignes/jour
+**Activité de développement :** 41 commits sur 7 jours  
+**Volume de code :** 90984 lignes ajoutées, 5102 lignes supprimées  
+**Fichiers impactés :** 470 fichiers modifiés  
+**Productivité moyenne :** 12997 lignes/jour
 
 ---
 
@@ -424,6 +424,40 @@
 
 ### 27 August 2025
 
+#### 19:43 - cda4b59 - fix: Améliorer l'insertion des données dans le script prepare_pcg.py pour éviter les erreurs de formatage feat: Ajouter une fonction pour vérifier l'installation de pytest dans run_tests.py fix: Corriger la logique d'attente pour Flask dans test-docker-ci.ps1 refactor: Utiliser des variables dans les commandes Docker du script test-docker-ci.sh
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +20 -13 lignes, 10 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Aug 27 19:43:40 2025 +0200`
+- `    fix: Améliorer l'insertion des données dans le script prepare_pcg.py pour éviter les erreurs de formatage`
+- `    feat: Ajouter une fonction pour vérifier l'installation de pytest dans run_tests.py`
+- ... et 7 autres fichiers
+
+#### 19:35 - a026f08 - 📊 Mise à jour du rapport de suivi avec les dates et périodes révisées, ajout d'analyses chronologiques détaillées des réalisations et mise à jour des statistiques globales du projet.
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +305 -64 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Aug 27 19:35:28 2025 +0200`
+- `    📊 Mise à jour du rapport de suivi avec les dates et périodes révisées, ajout d'analyses chronologiques détaillées des réalisations et mise à jour des statistiques globales du projet.`
+- ... et 1 autres fichiers
+
+#### 17:26 - 95f18c6 - 📊 Mise à jour automatique du rapport de suivi (27/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +71 -24 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Wed Aug 27 17:26:57 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (27/08/2025)`
+- ... et 1 autres fichiers
+
 #### 19:26 - 625c28f - Add scripts for preparing and populating database tables
 
 **Catégorie :** Développement de fonctionnalités  
@@ -462,19 +496,19 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 19 commits (50.0%)
-- **Interface utilisateur** : 14 commits (36.8%)
-- **Correction de bugs** : 3 commits (7.9%)
-- **Documentation** : 1 commits (2.6%)
-- **Refactoring** : 1 commits (2.6%)
+- **Développement de fonctionnalités** : 20 commits (48.8%)
+- **Interface utilisateur** : 16 commits (39.0%)
+- **Correction de bugs** : 3 commits (7.3%)
+- **Documentation** : 1 commits (2.4%)
+- **Refactoring** : 1 commits (2.4%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 77 fichiers modifiés
+- **Python** : 80 fichiers modifiés
 - **HTML** : 49 fichiers modifiés
-- **Documentation** : 29 fichiers modifiés
+- **Documentation** : 31 fichiers modifiés
 - **YAML/Config** : 16 fichiers modifiés
 - **Docker** : 16 fichiers modifiés
 - **JavaScript** : 12 fichiers modifiés
@@ -484,16 +518,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 5.4 commits/jour
-- **Volume de code :** 95589 modifications totales
-- **Ratio ajouts/suppressions :** 18.11
-- **Moyenne lignes par commit :** 2516
+- **Fréquence de commit :** 5.9 commits/jour
+- **Volume de code :** 96086 modifications totales
+- **Ratio ajouts/suppressions :** 17.83
+- **Moyenne lignes par commit :** 2344
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 90588 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 90984 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 27 August 2025*
