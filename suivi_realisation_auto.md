@@ -1,18 +1,18 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 26 August 2025  
-**Période analysée :** 19 August 2025 - 26 August 2025 (7 jours)  
-**Nombre de commits :** 34  
+**Date du rapport :** 27 August 2025  
+**Période analysée :** 20 August 2025 - 27 August 2025 (7 jours)  
+**Nombre de commits :** 38  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 34 commits sur 7 jours  
-**Volume de code :** 85174 lignes ajoutées, 3808 lignes supprimées  
-**Fichiers impactés :** 379 fichiers modifiés  
-**Productivité moyenne :** 12167 lignes/jour
+**Activité de développement :** 38 commits sur 7 jours  
+**Volume de code :** 90588 lignes ajoutées, 5001 lignes supprimées  
+**Fichiers impactés :** 452 fichiers modifiés  
+**Productivité moyenne :** 12941 lignes/jour
 
 ---
 
@@ -355,6 +355,17 @@
 
 ### 26 August 2025
 
+#### 20:20 - 2c87a69 - 📊 Mise à jour automatique du rapport de suivi (26/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +38 -52 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Tue Aug 26 20:20:40 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (26/08/2025)`
+- ... et 1 autres fichiers
+
 #### 22:20 - 571d738 - feat: Améliorer le chargement des clients avec eager loading et ajouter la gestion des réductions
 
 **Catégorie :** Développement de fonctionnalités  
@@ -411,42 +422,78 @@
 - ... et 35 autres fichiers
 
 
+### 27 August 2025
+
+#### 19:26 - 625c28f - Add scripts for preparing and populating database tables
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +2281 -948 lignes, 46 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Aug 27 19:26:38 2025 +0200`
+- `    Add scripts for preparing and populating database tables`
+- ... et 46 autres fichiers
+
+#### 14:04 - a185ed3 - Add templates for command management: create/edit forms and command list
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +2906 -8 lignes, 15 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Aug 27 14:04:48 2025 +0200`
+- `    Add templates for command management: create/edit forms and command list`
+- ... et 13 autres fichiers
+
+#### 11:31 - 3a66b33 - feat: Réorganiser et améliorer la gestion des clients avec ajout de la logique de création/modification et mise à jour des formulaires
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +189 -185 lignes, 8 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Aug 27 11:31:31 2025 +0200`
+- `    feat: Réorganiser et améliorer la gestion des clients avec ajout de la logique de création/modification et mise à jour des formulaires`
+- ... et 5 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 16 commits (47.1%)
-- **Interface utilisateur** : 13 commits (38.2%)
-- **Correction de bugs** : 3 commits (8.8%)
-- **Documentation** : 1 commits (2.9%)
-- **Refactoring** : 1 commits (2.9%)
+- **Développement de fonctionnalités** : 19 commits (50.0%)
+- **Interface utilisateur** : 14 commits (36.8%)
+- **Correction de bugs** : 3 commits (7.9%)
+- **Documentation** : 1 commits (2.6%)
+- **Refactoring** : 1 commits (2.6%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 66 fichiers modifiés
-- **HTML** : 33 fichiers modifiés
-- **Documentation** : 27 fichiers modifiés
+- **Python** : 77 fichiers modifiés
+- **HTML** : 49 fichiers modifiés
+- **Documentation** : 29 fichiers modifiés
+- **YAML/Config** : 16 fichiers modifiés
 - **Docker** : 16 fichiers modifiés
-- **YAML/Config** : 15 fichiers modifiés
-- **CSS** : 7 fichiers modifiés
-- **JavaScript** : 7 fichiers modifiés
+- **JavaScript** : 12 fichiers modifiés
+- **CSS** : 8 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 4.9 commits/jour
-- **Volume de code :** 88982 modifications totales
-- **Ratio ajouts/suppressions :** 22.37
-- **Moyenne lignes par commit :** 2617
+- **Fréquence de commit :** 5.4 commits/jour
+- **Volume de code :** 95589 modifications totales
+- **Ratio ajouts/suppressions :** 18.11
+- **Moyenne lignes par commit :** 2516
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 85174 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 90588 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
-*Rapport généré automatiquement le 26 August 2025*
+*Rapport généré automatiquement le 27 August 2025*
