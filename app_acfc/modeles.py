@@ -524,6 +524,7 @@ class Commande(Base):
     facture = relationship("Facture", back_populates="commande")
 
     # === ÉTAT DE LA COMMANDE ===
+    is_annulee = mapped_column(Boolean, default=False, nullable=False)
     is_facture = mapped_column(Boolean, default=False, nullable=False)
     date_facturation = mapped_column(Date, nullable=True)
     is_expedie = mapped_column(Boolean, default=False, nullable=False)

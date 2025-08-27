@@ -1,0 +1,428 @@
+<!-- ====================================================================
+     ACFC - Template "Liste des Commandes"
+     ====================================================================
+     
+     Interface de gestion et consultation des commandes avec filtres et recherche.
+     Design moderne Bootstrap avec pagination et actions par lot.
+     
+     Variables Jinja attendues :
+     - commandes : Liste des commandes à afficher
+     - pagination : Objet de pagination Flask
+     - search_query (optionnel) : Terme de recherche actuel
+     - filter_status (optionnel) : Filtre de statut actuel
+     - filter_client (optionnel) : Filtre client actuel
+     - stats : Statistiques des commandes (total, en cours, facturées, etc.)
+     
+     Features :
+     - Recherche temps réel par client et numéro de commande
+     - Filtrage par statut (en cours, facturée, expédiée)
+     - Tri par colonnes
+     - Actions par lot (facturation, expédition)
+     - Pagination avec navigation
+     - Design responsive Bootstrap 5
+==================================================================== -->
+
+<!-- CSS spécifique aux commandes -->
+<link rel="stylesheet" href="{{ url_for('static', filename='commandes/css/commandes.css') }}">
+
+<div class="container-fluid">
+    <!-- En-tête avec statistiques -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="mb-1 text-dark">
+                                <i class="fas fa-shopping-cart me-2"></i>Gestion des Commandes
+                            </h2>
+                            <p class="text-muted mb-0">
+                                Suivi et gestion des commandes clients
+                            </p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('commandes.commande_form') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Nouvelle Commande
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques en cartes -->
+    {% if stats %}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-uppercase mb-1">Total Commandes</h6>
+                            <h3 class="mb-0">{{ stats.total }}</h3>
+                        </div>
+                        <div>
+                            <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-uppercase mb-1">En Cours</h6>
+                            <h3 class="mb-0">{{ stats.en_cours }}</h3>
+                        </div>
+                        <div>
+                            <i class="fas fa-clock fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-uppercase mb-1">Facturées</h6>
+                            <h3 class="mb-0">{{ stats.facturees }}</h3>
+                        </div>
+                        <div>
+                            <i class="fas fa-file-invoice fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-uppercase mb-1">Expédiées</h6>
+                            <h3 class="mb-0">{{ stats.expediees }}</h3>
+                        </div>
+                        <div>
+                            <i class="fas fa-shipping-fast fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Filtres et recherche -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label fw-bold">Recherche</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       value="{{ search_query or '' }}" 
+                                       placeholder="Client, numéro de commande...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="filter_status" class="form-label fw-bold">Statut</label>
+                            <select class="form-select" id="filter_status" name="filter_status">
+                                <option value="">Tous les statuts</option>
+                                <option value="en_cours" {% if filter_status == 'en_cours' %}selected{% endif %}>En cours</option>
+                                <option value="facturee" {% if filter_status == 'facturee' %}selected{% endif %}>Facturée</option>
+                                <option value="expediee" {% if filter_status == 'expediee' %}selected{% endif %}>Expédiée</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter_client" class="form-label fw-bold">Client</label>
+                            <select class="form-select" id="filter_client" name="filter_client">
+                                <option value="">Tous les clients</option>
+                                {% for client in clients %}
+                                <option value="{{ client.id }}" {% if filter_client == client.id|string %}selected{% endif %}>
+                                    {{ client.nom_affichage }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter me-1"></i>Filtrer
+                                </button>
+                                <a href="{{ url_for('commandes.commande_list') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i>Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions par lot -->
+    <div class="row mb-3" id="bulk_actions" style="display: none;">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <strong><span id="selected_count">0</span> commande(s) sélectionnée(s)</strong>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-warning me-2" id="bulk_facture">
+                            <i class="fas fa-file-invoice me-1"></i>Marquer comme facturées
+                        </button>
+                        <button type="button" class="btn btn-sm btn-info me-2" id="bulk_expedie">
+                            <i class="fas fa-shipping-fast me-1"></i>Marquer comme expédiées
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="clear_selection">
+                            <i class="fas fa-times me-1"></i>Désélectionner
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des commandes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" width="40">
+                                        <input type="checkbox" id="selectAll" class="form-check-input">
+                                    </th>
+                                    <th scope="col">N° Commande</th>
+                                    <th scope="col">Client</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Montant</th>
+                                    <th scope="col">Statut</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if commandes %}
+                                    {% for commande in commandes %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input commande-checkbox" 
+                                                   value="{{ commande.id }}">
+                                        </td>
+                                        <td>
+                                            <strong>#{{ commande.id }}</strong>
+                                            {% if commande.descriptif %}
+                                                <br><small class="text-muted">{{ commande.descriptif[:50] }}...</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div>
+                                                    <strong>{{ commande.client.nom_affichage }}</strong>
+                                                    {% if commande.client.adresses %}
+                                                        <br><small class="text-muted">{{ commande.client.adresses[0].ville }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {{ commande.date_commande.strftime('%d/%m/%Y') }}
+                                            {% if commande.date_facturation %}
+                                                <br><small class="text-success">Fact: {{ commande.date_facturation.strftime('%d/%m/%Y') }}</small>
+                                            {% endif %}
+                                            {% if commande.date_expedition %}
+                                                <br><small class="text-info">Exp: {{ commande.date_expedition.strftime('%d/%m/%Y') }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <strong>{{ "%.2f"|format(commande.montant) }} €</strong>
+                                        </td>
+                                        <td>
+                                            {% if commande.is_expedie %}
+                                                <span class="badge bg-info">
+                                                    <i class="fas fa-shipping-fast me-1"></i>Expédiée
+                                                </span>
+                                                {% if commande.id_suivi %}
+                                                    <br><small class="text-muted">{{ commande.id_suivi }}</small>
+                                                {% endif %}
+                                            {% elif commande.is_facture %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-file-invoice me-1"></i>Facturée
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-clock me-1"></i>En cours
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ url_for('commandes.commande_details', id=commande.id) }}" 
+                                                   class="btn btn-sm btn-outline-primary" title="Voir les détails">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('commandes.commande_form', id=commande.id) }}" 
+                                                   class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                {% if not commande.is_facture %}
+                                                <button type="button" class="btn btn-sm btn-outline-success generate-facture" 
+                                                        data-commande-id="{{ commande.id }}" title="Générer la facture">
+                                                    <i class="fas fa-file-invoice"></i>
+                                                </button>
+                                                {% endif %}
+                                                {% if commande.is_facture and not commande.is_expedie %}
+                                                <button type="button" class="btn btn-sm btn-outline-info mark-expedie" 
+                                                        data-commande-id="{{ commande.id }}" title="Marquer comme expédiée">
+                                                    <i class="fas fa-shipping-fast"></i>
+                                                </button>
+                                                {% endif %}
+                                                <button type="button" class="btn btn-sm btn-outline-danger delete-commande" 
+                                                        data-commande-id="{{ commande.id }}" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5">
+                                            <div class="text-muted">
+                                                <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                                                <h5>Aucune commande trouvée</h5>
+                                                <p>Commencez par créer votre première commande.</p>
+                                                <a href="{{ url_for('commandes.commande_form') }}" class="btn btn-primary">
+                                                    <i class="fas fa-plus me-1"></i>Nouvelle Commande
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination and pagination.pages > 1 %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Navigation des commandes">
+                <ul class="pagination justify-content-center">
+                    {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('commandes.commande_list', page=pagination.prev_num, search=search_query, filter_status=filter_status, filter_client=filter_client) }}">
+                                <i class="fas fa-angle-left"></i> Précédent
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != pagination.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('commandes.commande_list', page=page_num, search=search_query, filter_status=filter_status, filter_client=filter_client) }}">
+                                        {{ page_num }}
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">…</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('commandes.commande_list', page=pagination.next_num, search=search_query, filter_status=filter_status, filter_client=filter_client) }}">
+                                Suivant <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            
+            <div class="text-center text-muted">
+                Affichage de {{ (pagination.page-1) * pagination.per_page + 1 }} à 
+                {{ pagination.page * pagination.per_page if pagination.page * pagination.per_page <= pagination.total else pagination.total }} 
+                sur {{ pagination.total }} commande(s)
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modales de confirmation -->
+<div class="modal fade" id="confirmFactureModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmer la facturation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir générer la facture pour cette commande ?</p>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="auto_date_facture" checked>
+                    <label class="form-check-label" for="auto_date_facture">
+                        Utiliser la date du jour comme date de facturation
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-success" id="confirmFacture">Générer la facture</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmExpeditionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmer l'expédition</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Marquer cette commande comme expédiée ?</p>
+                <div class="mb-3">
+                    <label for="expedition_date" class="form-label">Date d'expédition</label>
+                    <input type="date" class="form-control" id="expedition_date" value="{{ "now"|strftime('%Y-%m-%d') }}">
+                </div>
+                <div class="mb-3">
+                    <label for="tracking_id" class="form-label">Numéro de suivi (optionnel)</label>
+                    <input type="text" class="form-control" id="tracking_id" placeholder="Numéro de suivi de l'expédition">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-info" id="confirmExpedition">Marquer comme expédiée</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript spécifique aux commandes -->
+<script src="{{ url_for('static', filename='commandes/js/commandes.js') }}"></script>

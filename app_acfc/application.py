@@ -37,6 +37,7 @@ from app_acfc.contextes_bp.commercial import commercial_bp   # Module Commercial
 from app_acfc.contextes_bp.comptabilite import comptabilite_bp # Module Comptabilité - Facturation
 from app_acfc.contextes_bp.stocks import stocks_bp          # Module Stocks - Inventaire
 from app_acfc.contextes_bp.admin import admin_bp            # Module Administration - Utilisateurs
+from app_acfc.contextes_bp.commandes import commandes_bp    # Module Commandes - Gestion des commandes
 
 # Création de l'instance Flask principale avec configuration des dossiers statiques et templates
 acfc = Flask(__name__,
@@ -59,7 +60,7 @@ Session(acfc)
 BASE: str = 'base.html'  # Template de base pour toutes les pages
 
 # Regroupement des blueprints pour faciliter l'enregistrement en masse
-acfc_blueprints: Tuple[Blueprint, ...] = (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp, stocks_bp, admin_bp)
+acfc_blueprints: Tuple[Blueprint, ...] = (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp, stocks_bp, admin_bp, commandes_bp)
 
 # Dictionnaires de configuration pour standardiser le rendu des pages
 # Structure : title (titre affiché), context (identifiant CSS/JS), page (template base)
