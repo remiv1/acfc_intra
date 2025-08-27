@@ -146,7 +146,7 @@ class CustomLogger:
         logger.addHandler(handler)
         return logger
 
-    def log_to_db(self, level: int, message: str, specific_logger: str | None = None, zone_log: str = "general"):
+    def _log_to_db(self, level: int, message: str, specific_logger: str | None = None, zone_log: str = "general"):
         """
         Enregistre un log dans la base de données MongoDB avec métadonnées.
         
@@ -174,8 +174,6 @@ class CustomLogger:
                 "timestamp": datetime.now(timezone.utc),
                 "zone": zone_log
             }
-            if specific_logger:
-                self._create_specific_logger(specific_logger, level).log(level, message)
             self.collection.insert_one(log_entry)
         except Exception as e:
             # En cas d'erreur MongoDB, on continue sans interrompre l'application
@@ -205,7 +203,7 @@ class CustomLogger:
         """
         # Log dans la base de données si demandé
         if db_log: 
-            self.log_to_db(level, message, zone_log)
+            self._log_to_db(level, message, zone_log)
         
         # Distribution vers les fichiers de logs par niveau
         if level == logging.ERROR:

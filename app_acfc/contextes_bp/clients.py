@@ -28,7 +28,7 @@ Auteur : Rémi Verschuur - Module CRM
 Version : 1.0
 """
 
-from flask import Blueprint, render_template, jsonify, request, redirect, url_for
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for, Request, session
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy import or_, func
 from app_acfc.modeles import SessionBdD, Client, Part, Pro, Telephone, Mail, Commande, Facture, Adresse
@@ -58,6 +58,9 @@ TITLE_NEW_CLIENT = "ACFC - Nouveau client"
 TITLE_EDIT_CLIENT = "ACFC - Modifier client"
 BASE = 'base.html'
 
+# Fichiers logs
+LOG_CLIENTS_FILE = 'clients.log'
+
 # Pages de redirection
 CLIENT_DETAIL = 'clients.get_client'
 
@@ -85,6 +88,88 @@ clients_bp = Blueprint(
     url_prefix='/clients',                  # Préfixe pour toutes les routes (/clients/...)
     static_folder='statics/clients'         # Dossier statique spécialisé (CSS, JS, images)
 )
+
+# ================================================================
+# FONCTIONS HORS ROUTES
+# ================================================================
+
+def get_reduces(request: Request) -> float:
+    """
+    Récupère le taux de réduction depuis la requête.
+
+    Args:
+        request (Request): Objet de requête Flask
+
+    Returns:
+        float: Taux de réduction (0.10 par défaut si non spécifié)
+    """
+    reduces_str = request.form.get('reduces', '0.10')
+    try:
+        return float(reduces_str) / 100  # Conversion pourcentage vers décimal
+    except (ValueError, TypeError):
+        return 10.0  # Valeur par défaut : 10%
+
+def test_part_pro(request: Request, type_client: int, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
+    '''
+    Teste la création d'un client particulier ou professionnel.
+    Création du client suivant le type.
+    '''
+    if type_client == 1:  # Particulier
+        create_or_modify_part(request, client, db_session, type_test)
+
+    elif type_client == 2:  # Professionnel
+        create_or_modify_pro(request, client, db_session, type_test)
+
+def create_or_modify_part(request: Request, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
+    """
+    Crée ou modifie un client particulier.
+
+    Args:
+        request (Request): Objet de requête Flask
+        client (Client): Objet client à modifier ou à créer
+        db_session (SessionBdDType): Session de base de données
+        type_test (str): Type de test ('create' ou 'update')
+    """
+    # Récupération des données spécifiques au particulier depuis le formulaire
+    prenom = request.form.get('prenom', '')
+    nom = request.form.get('nom', '')
+    date_naissance_str = request.form.get('date_naissance', None)
+    lieu_naissance = request.form.get('lieu_naissance', '')
+
+    # Création ou récupération du client particulier
+    part = Part(id_client=client.id) if type_test == 'create' else client.part
+    part.prenom = prenom
+    part.nom = nom
+    part.date_naissance = datetime.strptime(date_naissance_str, '%Y-%m-%d').date() if date_naissance_str else None
+    part.lieu_naissance = lieu_naissance if lieu_naissance else None
+
+    db_session.add(part) if type_test == 'create' else db_session.merge(part)
+
+def create_or_modify_pro(request: Request, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
+    """
+    Crée ou modifie un client professionnel.
+
+    Args:
+        request (Request): Objet de requête Flask
+        client (Client): Objet client à modifier ou à créer
+        db_session (SessionBdDType): Session de base de données
+        type_test (str): Type de test ('create' ou 'update')
+    """
+    # Récupération des données spécifiques au professionnel depuis le formulaire
+    raison_sociale = request.form.get('raison_sociale', '')
+    type_pro_str = request.form.get('type_pro', '')
+    siren = request.form.get('siren', '')
+    rna = request.form.get('rna', '')
+
+    # Création ou récupération du client professionnel
+    pro = Pro(id_client=client.id) if type_test == 'create' else client.pro
+    pro.raison_sociale = raison_sociale
+    pro.type_pro = int(type_pro_str)
+    pro.siren = siren if siren else None
+    pro.rna = rna if rna else None
+
+    db_session.add(pro) if type_test == 'create' else db_session.merge(pro)
+
 
 # ================================================================
 # ROUTES - INTERFACE DE RECHERCHE CLIENTS
@@ -294,7 +379,6 @@ def client_list():
 # ================================================================
 # DONNÉES CLIENTS INDIVIDUELLES
 # ================================================================
-
 @clients_bp.route('/<int:id_client>', methods=['GET'])
 @validate_habilitation(CLIENTS)
 def get_client(id_client: int):
@@ -340,7 +424,7 @@ def get_client(id_client: int):
     else:
         db_session.close()
         return jsonify({"error": ERROR_CLIENT_NOT_FOUND}), 404
-    
+
 @clients_bp.route('/<id_client>/commandes/en-cours')
 @validate_habilitation(CLIENTS)
 def get_commandes_en_cours(id_client: int):
@@ -378,7 +462,7 @@ def edit_client(id_client: int):
                                context=CLIENT_FORM['context'],
                                sub_context='edit',
                                client=client,
-                               client_id=id_client,
+                               id_client=id_client,
                                nom_affichage=nom_affichage)
     else:
         db_session.close()
@@ -393,29 +477,19 @@ def create_client():
     GET : Affiche le formulaire de création
     POST : Traite les données et crée le client
     """
-    if request.method == 'GET':
-        return render_template(CLIENT_FORM['page'],
+    if request.method == 'GET': return render_template(CLIENT_FORM['page'],
                                title=TITLE_NEW_CLIENT,
                                context=CLIENT_FORM['context'],
                                sub_context='create')
-    
     # Traitement POST
     db_session = SessionBdD()
     try:
         # Validation des données requises
         type_client_str = request.form.get('type_client')
-        if not type_client_str:
-            raise ValueError("Le type de client est obligatoire")
-        
+        if not type_client_str: raise ValueError("Le type de client est obligatoire")
         type_client = int(type_client_str)
         notes = request.form.get('notes', '')
-        
-        # Récupération de la réduction (en pourcentage depuis le formulaire)
-        reduces_str = request.form.get('reduces', '10.0')
-        try:
-            reduces = float(reduces_str) / 100  # Conversion pourcentage vers décimal
-        except (ValueError, TypeError):
-            reduces = 0.10  # Valeur par défaut : 10%
+        reduces = get_reduces(request)
         
         # Création du client de base
         nouveau_client = Client(
@@ -426,54 +500,18 @@ def create_client():
         db_session.add(nouveau_client)
         db_session.flush()  # Pour obtenir l'ID
         
-        # Création des informations spécifiques selon le type
-        if type_client == 1:  # Particulier
-            date_naissance_str = request.form.get('date_naissance', None)
-            prenom = request.form.get('prenom')
-            nom = request.form.get('nom')
-            lieu_naissance = request.form.get('lieu_naissance')
-            
-            if not all([prenom, nom]):
-                raise ValueError("Tous les champs particulier sont obligatoires")
-            
-            part = Part(
-                id_client=nouveau_client.id,
-                prenom=prenom,
-                nom=nom,
-                date_naissance=datetime.strptime(date_naissance_str, '%Y-%m-%d').date() if date_naissance_str else None,
-                lieu_naissance=lieu_naissance if lieu_naissance else None
-            )
-            db_session.add(part)
-            
-        elif type_client == 2:  # Professionnel
-            raison_sociale = request.form.get('raison_sociale')
-            if raison_sociale: raison_sociale = raison_sociale.strip()
-            type_pro_str = request.form.get('type_pro')
-            
-            if not all([raison_sociale, type_pro_str]):
-                raise ValueError("La raison sociale et le type sont obligatoires pour un professionnel")
-            
-            # Vérification de type explicite pour type_pro_str
-            if not isinstance(type_pro_str, str):
-                raise ValueError("Type de professionnel invalide")
-            
-            siren = request.form.get('siren', '')
-            rna = request.form.get('rna', '')
-            
-            pro = Pro(
-                id_client=nouveau_client.id,
-                raison_sociale=raison_sociale,
-                type_pro=int(type_pro_str),
-                siren=siren if siren else None,
-                rna=rna if rna else None
-            )
-            db_session.add(pro)
+        # Création du client particulier ou professionnel
+        test_part_pro(request, type_client, nouveau_client, db_session)
+
+        db_session.commit()        
         
-        db_session.commit()
-        acfc_log.log_to_file(logging.INFO, f"Nouveau client créé : ID {nouveau_client.id}", db_log=True, zone_log="clients.log")
+        # Log de l'opération
+        acfc_log.log_to_file(level=logging.INFO,
+                             message=f'Nouveau client créé : ID {nouveau_client.id} par l\'utilisateur {session['pseudo']}',
+                             db_log=True,
+                             zone_log="clients.log")
         
         return redirect(url_for(CLIENT_DETAIL, id_client=nouveau_client.id, success_message='Prospect créé avec succès.'))
-        
     except ValueError as e:
         if 'db_session' in locals():
             db_session.rollback()
@@ -483,17 +521,18 @@ def create_client():
                                sub_context='create',
                                error_message=str(e))
     except Exception as e:
-        if 'db_session' in locals():
-            db_session.rollback()
-        acfc_log.log_to_file(logging.ERROR, f"Erreur lors de la création du client : {str(e)}", db_log=True, zone_log="clients.log")
+        if 'db_session' in locals(): db_session.rollback()
+        acfc_log.log_to_file(level=logging.ERROR,
+                              message=f'Erreur lors de la création du client : {str(e)} par {session['pseudo']}.',
+                              db_log=True,
+                              zone_log=LOG_CLIENTS_FILE)
         return render_template(CLIENT_FORM['page'],
                                title=TITLE_NEW_CLIENT,
                                context=CLIENT_FORM['context'],
                                sub_context='create',
                                error_message=f"Une erreur est survenue lors de la création du client: {e}")
     finally:
-        if 'db_session' in locals():
-            db_session.close()
+        if 'db_session' in locals(): db_session.close()
 
 @clients_bp.route('/<int:id_client>/edit', methods=['GET'])
 @validate_habilitation(CLIENTS)
@@ -524,7 +563,7 @@ def edit_client_form(id_client: int):
                                context=CLIENT_FORM['context'],
                                sub_context='edit',
                                client=client,
-                               client_id=id_client,
+                               id_client=id_client,
                                nom_affichage=nom_affichage)
     finally:
         db_session.close()
@@ -535,21 +574,19 @@ def update_client(id_client: int):
     """
     Mise à jour des informations d'un client existant.
     """
-    acfc_log.log_to_file(logging.INFO, f"Tentative de modification du client {id_client}")
-    acfc_log.log_to_file(logging.DEBUG, f"Données reçues: {dict(request.form)}")
     db_session = SessionBdD()
     client = None
     nom_affichage = None
     
     try:
+        # Récupération du client à modifier
         client = db_session.query(Client).options(
             joinedload(Client.part),
             joinedload(Client.pro)
         ).get(id_client)
-        acfc_log.log_to_file(DEBUG, f'Client avant mise à jour : {client}')
         
-        if not client:
-            return jsonify({"error": ERROR_CLIENT_NOT_FOUND}), 404
+        # Gestion de l'absence de retours
+        if not client: return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message=f'Nous n\'avons pas pu identifier le client {id_client}'))
         
         # Récupération du nom d'affichage au début pour éviter les problèmes de session
         nom_affichage = client.nom_affichage
@@ -559,65 +596,36 @@ def update_client(id_client: int):
         client.notes = notes
         reduces = request.form.get('reduces', '10')
         client.reduces = float(reduces) / 100
+        type_client = client.type_client
 
-        # Mise à jour des données spécifiques selon le type
-        if client.type_client == 1 and client.part:  # Particulier
-            prenom = request.form.get('prenom')
-            nom = request.form.get('nom')
-            lieu_naissance = request.form.get('lieu_naissance')
-            date_naissance_str = request.form.get('date_naissance')
-            
-            if prenom:
-                client.part.prenom = prenom
-            if nom:
-                client.part.nom = nom
-            if lieu_naissance:
-                client.part.lieu_naissance = lieu_naissance
-            if date_naissance_str:
-                client.part.date_naissance = datetime.strptime(date_naissance_str, '%Y-%m-%d').date()
+        # Création du client part ou pro suivant le context
+        test_part_pro(request, type_client, client, db_session, type_test='update')
         
-        elif client.type_client == 2 and client.pro:  # Professionnel
-            raison_sociale = request.form.get('raison_sociale')
-            type_pro_str = request.form.get('type_pro')
-            siren = request.form.get('siren', '')
-            rna = request.form.get('rna', '')
-            
-            if raison_sociale:
-                client.pro.raison_sociale = raison_sociale
-            if type_pro_str:
-                client.pro.type_pro = int(type_pro_str)
-            client.pro.siren = siren if siren else None
-            client.pro.rna = rna if rna else None
-        
+        # Intégration dans la base de données et log des opérations 
         db_session.commit()
-        acfc_log.log_to_file(logging.INFO, f"Client modifié : ID {client.id}")
+        acfc_log.log_to_file(level=logging.INFO,
+                             message=f'Client modifié : ID {client.id} par {session['pseudo']}.',
+                             db_log=True,
+                             zone_log=LOG_CLIENTS_FILE)
         
         # Redirection vers la page de détails du client avec message de succès
         return redirect(url_for(CLIENT_DETAIL, id_client=client.id, success_message="Client modifié avec succès"))
-        
     except Exception as e:
-        if 'db_session' in locals():
-            db_session.rollback()
-        acfc_log.log_to_file(logging.ERROR, f"Erreur lors de la modification du client {id_client} : {str(e)}")
-        
-        # Gestion de l'affichage en cas d'erreur
-        title = TITLE_EDIT_CLIENT
-        if nom_affichage:
-            title = f"ACFC - Modifier {nom_affichage}"
-        elif client:
-            title = f"ACFC - Modifier Client {id_client}"
-            
+        if 'db_session' in locals(): db_session.rollback()
+        acfc_log.log_to_file(level=logging.ERROR,
+                             message=f'Erreur lors de la modification du client {id_client} par {session['pseudo']} : {str(e)}',
+                             db_log=True,
+                             zone_log=LOG_CLIENTS_FILE)
         return render_template(CLIENT_FORM['page'],
-                               title=title,
+                               title=TITLE_EDIT_CLIENT,
                                context=CLIENT_FORM['context'],
                                sub_context='edit',
                                client=client,
-                               client_id=client.id if client else id_client,
+                               id_client=client.id if client else id_client,
                                nom_affichage=nom_affichage if nom_affichage else f"Client {id_client}",
                                error_message=f"Erreur lors de la modification : {str(e)}")
     finally:
-        if 'db_session' in locals():
-            db_session.close()
+        if 'db_session' in locals(): db_session.close()
 
 @clients_bp.route('/add_phone/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -681,7 +689,7 @@ def clients_add_phone():
         db_session.add(new_telephone)
         db_session.commit()
 
-        acfc_log.log_to_file(logging.INFO, f"Téléphone ajouté avec succès pour le client {id_client}", specific_logger='clients.log', zone_log='clients.log', db_log=False)
+        acfc_log.log_to_file(logging.INFO, f"Téléphone ajouté avec succès pour le client {id_client}", specific_logger=LOG_CLIENTS_FILE, zone_log=LOG_CLIENTS_FILE, db_log=False)
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message="Téléphone ajouté avec succès"))
 
     except Exception as e:
@@ -689,7 +697,7 @@ def clients_add_phone():
             db_session.rollback()
         error_msg = f"Erreur lors de l'ajout du téléphone pour le client {id_client}" if id_client else "Erreur lors de l'ajout du téléphone"
         acfc_log.log_to_file(logging.ERROR, f"{error_msg} : {str(e)}")
-        return redirect(url_for(CLIENT_DETAIL, id_client=id_client, message=f"Erreur lors de l'ajout du téléphone : {e}"))
+        return redirect(url_for(CLIENT_DETAIL, id_client=id_client, error_message=f"Erreur lors de l'ajout du téléphone : {e}"))
     finally:
         if 'db_session' in locals():
             db_session.close()
@@ -764,7 +772,7 @@ def clients_add_email():
         if 'db_session' in locals():
             db_session.rollback()
         acfc_log.log_to_file(logging.ERROR, f"Erreur lors de l'ajout de l'email pour le client {id_client} : {str(e)}")
-        return redirect(url_for(CLIENT_DETAIL, id_client=id_client, message=f"Erreur lors de l'ajout de l'email : {e}"))
+        return redirect(url_for(CLIENT_DETAIL, id_client=id_client, error_message=f"Erreur lors de l'ajout de l'email : {e}"))
     finally:
         if 'db_session' in locals():
             db_session.close()
@@ -844,9 +852,7 @@ def clients_add_address():
         if 'db_session' in locals():
             db_session.rollback()
         acfc_log.log_to_file(logging.ERROR, f"Erreur lors de l'ajout de l'adresse pour le client {id_client} : {str(e)}")
-        return redirect(url_for(CLIENT_DETAIL, id_client=id_client, message=f"Erreur lors de l'ajout de l'adresse : {e}"))
+        return redirect(url_for(CLIENT_DETAIL, id_client=id_client, error_message=f"Erreur lors de l'ajout de l'adresse : {e}"))
     finally:
         if 'db_session' in locals():
             db_session.close()
-
-

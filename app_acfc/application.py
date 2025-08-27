@@ -184,7 +184,7 @@ def after_request(response: Response) -> Response:
     return response
 
 # ====================================================================
-# FONCTIONS DE RECHERCHES
+# FONCTIONS DE RECHERCHES - HORS ROUTES
 # ====================================================================
 
 def get_current_orders(id_client: int = 0) -> List[Commande]:
@@ -393,7 +393,7 @@ def login() -> Any:
             db_session.commit()
             acfc_log.log_to_file(level=WARNING,
                                  message=f'Tentative de connexion, mot de passe invalide pour l\'utilisateur: {username}. Reste {3 - user.nb_errors} tentatives.',
-                                 specific_logger=LOG_LOGIN_FILE, zone_log='login', db_log=True)
+                                 specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
             return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
         except Exception as e:
             acfc_log.log_to_file(level=ERROR,
@@ -489,53 +489,6 @@ def dashboard() -> Any:
     current_orders = get_current_orders()
     commercial_indicators = get_commercial_indicators()
     return render_template(DEFAULT['page'], title=DEFAULT['title'], context=DEFAULT['context'], objects=[current_orders, commercial_indicators])
-
-@acfc.route('/chg_pwd', methods=['POST'])
-def chg_pwd() -> Any:
-    """
-    Changement de mot de passe utilisateur.
-    """
-    if request.method == 'POST':
-        # Récupération des données du formulaire
-        username = request.form.get('username', '')
-        old_password = request.form.get('old_password', '')
-        new_password = request.form.get('new_password', '')
-        confirm_password = request.form.get('confirm_password', '')
-
-        # Validation des données
-        if not all([username, old_password, new_password, confirm_password]):
-            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
-                                   message='Merci de remplir tous les champs.', username=username)
-
-        if new_password != confirm_password:
-            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
-                                   message="Les mots de passe ne correspondent pas.", username=username)
-
-        if new_password == old_password:
-            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
-                                   message="Le nouveau mot de passe ne peut pas être identique à l'ancien.", username=username)
-
-        # Vérification de l'ancien mot de passe
-        db_session = SessionBdD()
-        user = db_session.query(User).filter_by(pseudo=username).first()
-        if not user or not ph_acfc.verify_password(old_password, user.sha_mdp):
-            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
-                                   message='Ancien mot de passe incorrect.', username=username)
-
-        # Hashage du nouveau mot de passe
-        user.sha_mdp = ph_acfc.hash_password(new_password)
-
-        # retrait de la nécessité de changer le mot de passe
-        user.is_chg_mdp = False
-        try:
-            db_session.commit()
-        except Exception as e:
-            db_session.rollback()
-            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context='500', message=str(e))
-
-        return redirect(url_for('login'))
-
-    return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=INVALID)
 
 # ====================================================================
 # GESTIONNAIRES UTILISATEURS/UTILISATEUR
@@ -707,6 +660,53 @@ def user_parameters(pseudo: str) -> Any:
         return redirect(url_for('my_account', pseudo=pseudo))
     else:
         return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'])
+    
+@acfc.route('/chg_pwd', methods=['POST'])
+def chg_pwd() -> Any:
+    """
+    Changement de mot de passe utilisateur.
+    """
+    if request.method == 'POST':
+        # Récupération des données du formulaire
+        username = request.form.get('username', '')
+        old_password = request.form.get('old_password', '')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        # Validation des données
+        if not all([username, old_password, new_password, confirm_password]):
+            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
+                                   message='Merci de remplir tous les champs.', username=username)
+
+        if new_password != confirm_password:
+            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
+                                   message="Les mots de passe ne correspondent pas.", username=username)
+
+        if new_password == old_password:
+            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
+                                   message="Le nouveau mot de passe ne peut pas être identique à l'ancien.", username=username)
+
+        # Vérification de l'ancien mot de passe
+        db_session = SessionBdD()
+        user = db_session.query(User).filter_by(pseudo=username).first()
+        if not user or not ph_acfc.verify_password(old_password, user.sha_mdp):
+            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
+                                   message='Ancien mot de passe incorrect.', username=username)
+
+        # Hashage du nouveau mot de passe
+        user.sha_mdp = ph_acfc.hash_password(new_password)
+
+        # retrait de la nécessité de changer le mot de passe
+        user.is_chg_mdp = False
+        try:
+            db_session.commit()
+        except Exception as e:
+            db_session.rollback()
+            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context='500', message=str(e))
+
+        return redirect(url_for('login'))
+
+    return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=INVALID)
 
 # ====================================================================
 # GESTIONNAIRES D'ERREURS HTTP

@@ -154,7 +154,7 @@
                             <div class="col-12">
                                 <label for="notes" class="form-label">Notes (optionnel)</label>
                                 <textarea class="form-control" id="notes" name="notes" rows="3" 
-                                          placeholder="Notes ou commentaires sur ce client...">{% if client %}{{ client.notes }}{% endif %}</textarea>
+                                          placeholder="Notes ou commentaires sur ce client...">{% if client and client.notes %}{{ client.notes }}{% endif %}</textarea>
                             </div>
                         </div>
                     </div>
@@ -174,7 +174,7 @@
                                 <div class="mb-3">
                                     <label for="prenom" class="form-label">Prénom <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="prenom" name="prenom" 
-                                           value="{% if client and client.part %}{{ client.part.prenom }}{% endif %}" 
+                                           value="{% if client and client.part and client.part.prenom %}{{ client.part.prenom }}{% endif %}" 
                                            placeholder="Prénom" required>
                                     <div class="invalid-feedback">Le prénom est obligatoire.</div>
                                 </div>
@@ -183,7 +183,7 @@
                                 <div class="mb-3">
                                     <label for="nom" class="form-label">Nom <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="nom" name="nom" 
-                                           value="{% if client and client.part %}{{ client.part.nom }}{% endif %}" 
+                                           value="{% if client and client.part and client.part.nom %}{{ client.part.nom }}{% endif %}" 
                                            placeholder="Nom de famille" required>
                                     <div class="invalid-feedback">Le nom est obligatoire.</div>
                                 </div>
@@ -194,7 +194,7 @@
                                 <div class="mb-3">
                                     <label for="date_naissance" class="form-label">Date de naissance</label>
                                     <input type="date" class="form-control" id="date_naissance" name="date_naissance" 
-                                           value="{% if client and client.part %}{{ client.part.date_naissance }}{% endif %}" 
+                                           value="{% if client and client.part and client.part.date_naissance %}{{ client.part.date_naissance }}{% endif %}" 
                                            >
                                 </div>
                             </div>
@@ -202,7 +202,7 @@
                                 <div class="mb-3">
                                     <label for="lieu_naissance" class="form-label">Lieu de naissance</label>
                                     <input type="text" class="form-control" id="lieu_naissance" name="lieu_naissance" 
-                                           value="{% if client and client.part %}{{ client.part.lieu_naissance }}{% endif %}" 
+                                           value="{% if client and client.part and client.part.lieu_naissance %}{{ client.part.lieu_naissance }}{% endif %}" 
                                            placeholder="Ville de naissance">
                                 </div>
                             </div>
@@ -224,7 +224,7 @@
                                 <div class="mb-3">
                                     <label for="raison_sociale" class="form-label">Raison sociale <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="raison_sociale" name="raison_sociale" 
-                                           value="{% if client and client.pro %}{{ client.pro.raison_sociale }}{% endif %}" 
+                                           value="{% if client and client.pro and client.pro.raison_sociale %}{{ client.pro.raison_sociale }}{% endif %}" 
                                            placeholder="Nom de l'entreprise ou organisation" required>
                                     <div class="invalid-feedback">La raison sociale est obligatoire.</div>
                                 </div>
@@ -247,7 +247,7 @@
                                 <div class="mb-3">
                                     <label for="siren" class="form-label">SIREN</label>
                                     <input type="text" class="form-control" id="siren" name="siren" 
-                                           value="{% if client and client.pro %}{{ client.pro.siren }}{% endif %}" 
+                                           value="{% if client and client.pro and client.pro.siren %}{{ client.pro.siren }}{% endif %}" 
                                            placeholder="123456789" maxlength="9" pattern="[0-9]{9}">
                                     <div class="form-text">9 chiffres (obligatoire pour les entreprises)</div>
                                     <div class="invalid-feedback">Le SIREN doit contenir exactement 9 chiffres.</div>
@@ -257,7 +257,7 @@
                                 <div class="mb-3">
                                     <label for="rna" class="form-label">RNA</label>
                                     <input type="text" class="form-control" id="rna" name="rna" 
-                                           value="{% if client and client.pro %}{{ client.pro.rna }}{% endif %}" 
+                                           value="{% if client and client.pro and client.pro.rna %}{{ client.pro.rna }}{% endif %}" 
                                            placeholder="W123456789" maxlength="10" pattern="W[0-9]{9}">
                                     <div class="form-text">Numéro RNA pour les associations (W + 9 chiffres)</div>
                                     <div class="invalid-feedback">Le RNA doit commencer par W suivi de 9 chiffres.</div>
