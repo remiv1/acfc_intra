@@ -25,10 +25,10 @@ from waitress import serve
 from typing import Any, Dict, Tuple, List
 from werkzeug.exceptions import HTTPException, Forbidden, Unauthorized
 from services import PasswordService, SecureSessionService
-from modeles import SessionBdD, User, Commande
+from modeles import SessionBdD, User, Commande, Client
 from datetime import datetime, date
 from sqlalchemy import text, and_, or_
-from sqlalchemy.orm import Session as SessionBdDType
+from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy.sql.functions import func
 from logs.logger import acfc_log, INFO, WARNING, ERROR
 from app_acfc.contextes_bp.clients import clients_bp         # Module CRM - Gestion clients
@@ -205,6 +205,10 @@ def get_current_orders(id_client: int = 0) -> List[Commande]:
     if id_client == 0:
         commandes: List[Commande] = (
             db_session_orders.query(Commande)
+            .options(
+                joinedload(Commande.client).joinedload(Client.part),  # Eager loading du client particulier
+                joinedload(Commande.client).joinedload(Client.pro)    # Eager loading du client professionnel
+            )
             .filter(or_(
                 Commande.is_facture == False,
                 Commande.is_expedie == False
@@ -216,6 +220,10 @@ def get_current_orders(id_client: int = 0) -> List[Commande]:
     else:
         commandes: List[Commande] = (
             db_session_orders.query(Commande)
+            .options(
+                joinedload(Commande.client).joinedload(Client.part),  # Eager loading du client particulier
+                joinedload(Commande.client).joinedload(Client.pro)    # Eager loading du client professionnel
+            )
             .filter(and_(
                 Commande.id_client == id_client,
                 or_(

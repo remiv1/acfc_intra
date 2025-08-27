@@ -97,7 +97,7 @@
                         <div class="mb-3">
                             <label for="date_commande" class="form-label fw-bold">Date de commande *</label>
                             <input type="date" class="form-control" id="date_commande" name="date_commande" 
-                                   value="{% if commande %}{{ commande.date_commande.strftime('%Y-%m-%d') }}{% else %}{{ moment().strftime('%Y-%m-%d') if moment else '' }}{% endif %}" required>
+                                   value="{% if commande %}{{ commande.date_commande.strftime('%Y-%m-%d') }}{% else %}{{ today.strftime('%Y-%m-%d') }}{% endif %}" required>
                         </div>
 
                         <!-- Descriptif -->
@@ -311,76 +311,6 @@
     </form>
 </div>
 
-<script>
-// JavaScript minimal pour gérer l'affichage des champs conditionnels
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialiser la date du jour si nécessaire
-    const dateCommandeInput = document.getElementById('date_commande');
-    if (!dateCommandeInput.value) {
-        const today = new Date();
-        const formattedDate = today.getFullYear() + '-' + 
-                             (today.getMonth() + 1).toString().padStart(2, '0') + '-' + 
-                             today.getDate().toString().padStart(2, '0');
-        dateCommandeInput.value = formattedDate;
-    }
-
-    // Gestion de l'affichage de la date de facturation
-    const isFactureCheckbox = document.getElementById('is_facture');
-    const dateFacturationGroup = document.getElementById('date_facturation_group');
-    
-    isFactureCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            dateFacturationGroup.style.display = 'block';
-            if (!document.getElementById('date_facturation').value) {
-                document.getElementById('date_facturation').value = new Date().toISOString().split('T')[0];
-            }
-        } else {
-            dateFacturationGroup.style.display = 'none';
-            document.getElementById('date_facturation').value = '';
-        }
-    });
-
-    // Gestion de l'affichage des champs d'expédition
-    const isExpedieCheckbox = document.getElementById('is_expedie');
-    const dateExpeditionGroup = document.getElementById('date_expedition_group');
-    const idSuiviGroup = document.getElementById('id_suivi_group');
-    
-    isExpedieCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            dateExpeditionGroup.style.display = 'block';
-            idSuiviGroup.style.display = 'block';
-            if (!document.getElementById('date_expedition').value) {
-                document.getElementById('date_expedition').value = new Date().toISOString().split('T')[0];
-            }
-        } else {
-            dateExpeditionGroup.style.display = 'none';
-            idSuiviGroup.style.display = 'none';
-            document.getElementById('date_expedition').value = '';
-            document.getElementById('id_suivi').value = '';
-        }
-    });
-
-    // Gestion des checkboxes de produits pour activer/désactiver les champs quantité
-    document.querySelectorAll('.product-checkbox').forEach(function(checkbox) {
-        checkbox.addEventListener('change', function() {
-            const row = this.closest('tr');
-            const quantityInput = row.querySelector('.quantity-input');
-            
-            if (this.checked) {
-                row.classList.add('table-success');
-                quantityInput.disabled = false;
-            } else {
-                row.classList.remove('table-success');
-                quantityInput.disabled = true;
-            }
-        });
-        
-        // Initialiser l'état
-        if (checkbox.checked) {
-            checkbox.closest('tr').classList.add('table-success');
-            checkbox.closest('tr').querySelector('input[type="number"]').disabled = false;
-        }
-    });
-});
-</script>
+<!-- JavaScript spécifique au formulaire de commande -->
+<script src="{{ url_for('static', filename='commandes/js/commande_form.js') }}"></script>
 {% endblock %}

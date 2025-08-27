@@ -41,11 +41,11 @@
                             </p>
                         </div>
                         <div class="d-flex gap-2">
-                            <a href="{{ url_for('commandes.commande_form', id=commande.id) }}" class="btn btn-outline-secondary">
+                            <a href="{{ url_for('commandes.commande_modify', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-edit me-1"></i>Modifier
                             </a>
-                            <a href="{{ url_for('commandes.commande_list') }}" class="btn btn-outline-primary">
-                                <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                            <a href="{{ url_for('clients.get_client', id_client=commande.id_client) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-1"></i>Retour au client
                             </a>
                         </div>
                     </div>
@@ -211,7 +211,7 @@
                                 </button>
                             {% endif %}
                             
-                            <a href="{{ url_for('commandes.commande_form', id=commande.id) }}" class="btn btn-outline-secondary">
+                            <a href="{{ url_for('commandes.commande_modify', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-edit me-1"></i>Modifier la commande
                             </a>
                         {% else %}

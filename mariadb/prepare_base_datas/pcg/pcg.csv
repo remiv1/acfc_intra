@@ -146,9 +146,12 @@ Classe,Categorie 1,Categorie 2,Compte,Libelle de Compte
 2,25,25,25,Parts dans des entreprises liées et créances sur des entreprises liées
 2,26,261,261,Titres de participation
 2,26,266,266,Autres formes de participation
-2,26,267,267,Créances rattachées à des participations
+2,26,267,2671,Créances rattachées à des participations (groupe)
+2,26,267,2674,Créances rattachées à des participations (hors groupe)
+2,26,267,2675,Versements représentatifs d'apports non capitalisés
+2,26,267,2677,Autres créances rattachées à des participations
 2,26,268,268,Créances rattachées à des sociétés en participation
-2,26,267,267,Versements restant à effectuer sur titres de participation non libérés
+2,26,269,269,Versements restant à effectuer sur titres de participation non libérés
 2,27,271,271,Titres immobilisés autres que les titres immobilisés de l'activité de portefeuille (droit de propriété)
 2,27,272,272,Titres immobilisés (droit de créance)
 2,27,273,273,Titres immobilisés de l'activité de portefeuille

@@ -83,7 +83,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}            # Mot de passe utilisateur
     volumes:
       - acfc-db-data:/var/lib/mysql          # Persistance des données
-      - ./mariadb/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro  # Script d'initialisation
+      - ./mariadb/:/docker-entrypoint-initdb.d/:ro  # Script d'initialisation
     healthcheck:
       # Vérification de santé pour démarrage ordonné des services
       test: ["CMD", "mariadb", "-u", "root", "-p${DB_ROOT_PASSWORD}", "-e", "SELECT 1"]

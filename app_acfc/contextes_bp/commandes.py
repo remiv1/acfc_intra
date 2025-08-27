@@ -17,9 +17,8 @@ Version : 1.0
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 from datetime import datetime, date
-from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session as SessionBdDType
-from app_acfc.modeles import SessionBdD, Commande, DevisesFactures, Catalogue, Client, Adresse
+from app_acfc.modeles import SessionBdD, Commande, DevisesFactures, Catalogue, Client
 from app_acfc.habilitations import validate_habilitation, CLIENTS
 from logs.logger import acfc_log, ERROR, DEBUG
 from typing import List, Dict, Optional, Any
@@ -47,16 +46,18 @@ def nouvelle_commande(id_client: int):
         
         if request.method == 'POST':
             action = request.form.get('action', 'save')
+            acfc_log.log_to_file(level=DEBUG, message=f'Action reçue: {action}', zone_log=LOG_FILE_COMMANDES)
             
-            # Si c'est une action de filtrage, on traite les filtres
-            if action in ['clear_filters'] or any(key.startswith('filter_') for key in request.form.keys()):
-                return handle_filters(client, None, request.form, session_db)
+            # Actions spéciales pour facturation et expédition
+            if action in ['facturer', 'expedier']:
+                return handle_special_action(client=client, commande=None, action=action, form_data=request.form, session_db=session_db)
             
-            # Sinon, c'est une sauvegarde de commande
-            return save_commande(client, None, request.form, session_db)
-        
+            # Sauvegarde de commande (toutes les autres actions)
+            acfc_log.log_to_file(level=DEBUG, message='Sauvegarde de la commande en cours', zone_log=LOG_FILE_COMMANDES)
+            return save_commande(client=client, commande=None, form_data=request.form, session_db=session_db)
+
         # GET - Afficher le formulaire
-        return render_commande_form(client, None, session_db)
+        return render_commande_form(client=client, commande=None, session_db=session_db)
         
     except Exception as e:
         acfc_log.log_to_file(level=ERROR, message=f'Erreur lors de la création de commande pour client {id_client}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
@@ -68,7 +69,7 @@ def nouvelle_commande(id_client: int):
 
 @commandes_bp.route('/client/<int:id_client>/commandes/<int:id_commande>/modifier', methods=['GET', 'POST'])
 @validate_habilitation(CLIENTS)
-def modifier_commande(id_client: int, id_commande: int):
+def commande_modify(id_client: int, id_commande: int):
     """Modifier une commande existante"""
     session_db = SessionBdD()
     try:
@@ -83,9 +84,9 @@ def modifier_commande(id_client: int, id_commande: int):
         if request.method == 'POST':
             action = request.form.get('action', 'save')
             
-            # Si c'est une action de filtrage, on traite les filtres
-            if action in ['clear_filters'] or any(key.startswith('filter_') for key in request.form.keys()):
-                return handle_filters(client, commande, request.form, session_db)
+            # Actions spéciales pour facturation et expédition
+            if action in ['facturer', 'expedier']:
+                return handle_special_action(client=client, commande=commande, action=action, form_data=request.form, session_db=session_db)
             
             # Sinon, c'est une sauvegarde de commande
             return save_commande(client, commande, request.form, session_db)
@@ -103,28 +104,14 @@ def modifier_commande(id_client: int, id_commande: int):
 def render_commande_form(client: Client, commande: Optional[Commande], session_db: SessionBdDType):
     """Rendre le formulaire de commande avec toutes les données nécessaires"""
     try:
-        # Récupérer les filtres depuis la session ou les initialiser
-        selected_filters = {
-            'millesime': session.get('commande_filter_millesime', ''),
-            'type_produit': session.get('commande_filter_type_produit', ''),
-            'geographie': session.get('commande_filter_geographie', '')
-        }
+        # Récupérer l'année en cours pour les filtres par défaut
+        current_year = datetime.now().year
         
-        # Construire la requête de base pour le catalogue
-        catalogue_query = session_db.query(Catalogue)
+        # Récupérer TOUT le catalogue - filtrage côté JavaScript
+        catalogue_complet = session_db.query(Catalogue).order_by(Catalogue.id.desc()).all()
+        acfc_log.log_to_file(level=DEBUG, message=f'Catalogue complet chargé: {len(catalogue_complet)} produits', zone_log=LOG_FILE_COMMANDES)
         
-        # Appliquer les filtres
-        if selected_filters['millesime']:
-            catalogue_query = catalogue_query.filter(Catalogue.millesime == selected_filters['millesime'])
-        if selected_filters['type_produit']:
-            catalogue_query = catalogue_query.filter(Catalogue.type_produit == selected_filters['type_produit'])
-        if selected_filters['geographie']:
-            catalogue_query = catalogue_query.filter(Catalogue.geographie == selected_filters['geographie'])
-        
-        # Récupérer les produits filtrés
-        catalogue_filtered = catalogue_query.order_by(Catalogue.ref_auto).all()
-        
-        # Récupérer les valeurs pour les filtres
+        # Récupérer les valeurs distinctes pour les filtres
         millesimes = session_db.query(Catalogue.millesime).distinct().filter(Catalogue.millesime.isnot(None)).order_by(Catalogue.millesime.desc()).all()
         millesimes = [m[0] for m in millesimes if m[0]]
         
@@ -134,29 +121,53 @@ def render_commande_form(client: Client, commande: Optional[Commande], session_d
         geographies = session_db.query(Catalogue.geographie).distinct().filter(Catalogue.geographie.isnot(None)).order_by(Catalogue.geographie).all()
         geographies = [g[0] for g in geographies if g[0]]
         
+        acfc_log.log_to_file(level=DEBUG, message=f'Valeurs distinctes pour les filtres: millésimes={millesimes}, types_produit={types_produit}, geographies={geographies}', zone_log=LOG_FILE_COMMANDES)
         # Si on modifie une commande, récupérer les produits déjà sélectionnés
-        produits_commande: Dict[str, DevisesFactures] = {}
-        produits_id_commandes: List[DevisesFactures] = []
+        produits_commande: Dict[int, Any] = {}
+        produits_id_commandes: List[int] = []
         if commande:
             devises = session_db.query(DevisesFactures).filter(DevisesFactures.id_commande == commande.id).all()
             for devise in devises:
                 produits_commande[devise.id_catalogue] = devise
                 produits_id_commandes.append(devise.id_catalogue)
+        else:
+            # Pour une nouvelle commande, restaurer les sélections temporaires
+            temp_produits = session.get('temp_produits_selectionnes', [])
+            temp_data = session.get('temp_commande_data', {})
+            
+            for produit_id in temp_produits:
+                produit_id_int = int(produit_id)
+                produits_id_commandes.append(produit_id_int)
+                
+                # Créer un objet temporaire avec les données sauvées
+                class TempDevise:
+                    def __init__(self):
+                        self.qte = int(temp_data.get(f'qte_{produit_id}', 1))
+                        self.prix_unitaire = float(temp_data.get(f'prix_{produit_id}', 0))
+                
+                produits_commande[produit_id_int] = TempDevise()
+            
+            acfc_log.log_to_file(level=DEBUG, message=f'Sélections temporaires restaurées: {temp_produits}', zone_log=LOG_FILE_COMMANDES)
         
         # Déterminer le sous-contexte
-        sub_context = 'create' if commande is None else 'edit'
-        
-        return render_template('commandes/commande_form.html',
+        sub_context = 'form'
+        form_sub_context = 'create' if commande is None else 'edit'
+        acfc_log.log_to_file(level=DEBUG, message=f'Sous-contexte de commande: {sub_context}', zone_log=LOG_FILE_COMMANDES)
+
+        return render_template('base.html',
+                               context='commandes',
+                               sub_context=sub_context,
+                               form_sub_context=form_sub_context,
                                client=client,
                                commande=commande,
-                               sub_context=sub_context,
-                               catalogue_filtered=catalogue_filtered,
+                               catalogue_complet=catalogue_complet,
                                millesimes=millesimes,
                                types_produit=types_produit,
                                geographies=geographies,
-                               selected_filters=selected_filters,
+                               current_year=current_year,
                                produits_commande=produits_commande,
-                               produits_id_commandes=produits_id_commandes)
+                               produits_id_commandes=produits_id_commandes,
+                               today=date.today())
     
     except Exception as e:
         acfc_log.log_to_file(level=ERROR, message=f'Erreur lors du rendu du formulaire de commande: {str(e)}', zone_log=LOG_FILE_COMMANDES)
@@ -167,23 +178,95 @@ def handle_filters(client: Client, commande: Optional[Commande], form_data: Any,
     """Gérer les filtres du catalogue"""
     try:
         action = form_data.get('action')
+        current_year = datetime.now().year
+        
+        # Sauvegarder les sélections temporairement pour une nouvelle commande
+        if commande is None:
+            # Sauver les produits sélectionnés et leurs quantités/prix
+            produits_selectionnes = form_data.getlist('produits_selectionnes')
+            session['temp_produits_selectionnes'] = produits_selectionnes
+            
+            # Sauver les quantités et prix personnalisés
+            temp_data = {}
+            for produit_id in produits_selectionnes:
+                qte_key = f'qte_{produit_id}'
+                prix_key = f'prix_{produit_id}'
+                if form_data.get(qte_key):
+                    temp_data[qte_key] = form_data.get(qte_key)
+                if form_data.get(prix_key):
+                    temp_data[prix_key] = form_data.get(prix_key)
+            session['temp_commande_data'] = temp_data
+            acfc_log.log_to_file(level=DEBUG, message=f'Sélections temporaires sauvées: {produits_selectionnes}', zone_log=LOG_FILE_COMMANDES)
         
         if action == 'clear_filters':
-            # Effacer tous les filtres
-            session.pop('commande_filter_millesime', None)
-            session.pop('commande_filter_type_produit', None)
-            session.pop('commande_filter_geographie', None)
+            # Remettre les filtres par défaut
+            session['commande_filter_millesime'] = str(current_year)
+            session['commande_filter_type_produit'] = 'Courrier'
+            session['commande_filter_geographie'] = 'FRANCE'
         else:
             # Sauvegarder les filtres en session
-            session['commande_filter_millesime'] = form_data.get('filter_millesime', '')
-            session['commande_filter_type_produit'] = form_data.get('filter_type_produit', '')
-            session['commande_filter_geographie'] = form_data.get('filter_geographie', '')
+            session['commande_filter_millesime'] = form_data.get('filter_millesime', str(current_year))
+            session['commande_filter_type_produit'] = form_data.get('filter_type_produit', 'Courrier')
+            session['commande_filter_geographie'] = form_data.get('filter_geographie', 'FRANCE')
         
         # Re-rendre le formulaire avec les nouveaux filtres
         return render_commande_form(client, commande, session_db)
         
     except Exception as e:
         acfc_log.log_to_file(level=ERROR, message=f'Erreur lors de la gestion des filtres: {str(e)}', zone_log=LOG_FILE_COMMANDES)
+        return render_commande_form(client, commande, session_db)
+
+
+def handle_special_action(client: Client, commande: Optional[Commande], action: str, form_data: Any, session_db: SessionBdDType):
+    """Gérer les actions spéciales de facturation et d'expédition"""
+    try:
+        if action == 'facturer':
+            # Pour une nouvelle commande, il faut d'abord la sauvegarder
+            if commande is None:
+                flash('Vous devez d\'abord créer la commande avant de la facturer', 'warning')
+                return render_commande_form(client, commande, session_db)
+            
+            # Marquer comme facturée
+            commande.is_facture = True
+            commande.date_facturation = datetime.strptime(form_data.get('date_facturation'), '%Y-%m-%d').date()
+            session_db.commit()
+            
+            flash(f'Commande #{commande.id} facturée avec succès', 'success')
+            acfc_log.log_to_file(level=DEBUG, message=f'Commande {commande.id} facturée', zone_log=LOG_FILE_COMMANDES)
+            
+        elif action == 'expedier':
+            # Pour une nouvelle commande, il faut d'abord la sauvegarder
+            if commande is None:
+                flash('Vous devez d\'abord créer la commande avant de l\'expédier', 'warning')
+                return render_commande_form(client, commande, session_db)
+            
+            # Vérifier que la commande est facturée
+            if not commande.is_facture:
+                flash('La commande doit être facturée avant d\'être expédiée', 'warning')
+                return render_commande_form(client, commande, session_db)
+            
+            # Marquer comme expédiée
+            commande.is_expedie = True
+            commande.date_expedition = datetime.strptime(form_data.get('date_expedition'), '%Y-%m-%d').date()
+            
+            # Gérer le numéro de suivi selon le mode d'expédition
+            mode_expedition = form_data.get('mode_expedition', 'sans_suivi')
+            if mode_expedition == 'suivi':
+                commande.id_suivi = form_data.get('id_suivi', '')
+            else:
+                commande.id_suivi = f'{mode_expedition.replace("_", " ").title()}'
+            
+            session_db.commit()
+            
+            flash(f'Commande #{commande.id} expédiée avec succès', 'success')
+            acfc_log.log_to_file(level=DEBUG, message=f'Commande {commande.id} expédiée', zone_log=LOG_FILE_COMMANDES)
+        
+        return redirect(url_for(DETAIL_CLIENT, id_client=client.id))
+        
+    except Exception as e:
+        session_db.rollback()
+        acfc_log.log_to_file(level=ERROR, message=f'Erreur lors de l\'action {action}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
+        flash(f'Erreur lors de l\'action {action}', 'error')
         return render_commande_form(client, commande, session_db)
 
 
@@ -197,11 +280,13 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
             commande.id_client = client.id
         
         # Récupérer les données du formulaire
+        acfc_log.log_to_file(level=DEBUG, message='Récupération des données du formulaire pour sauvegarde de commande', zone_log=LOG_FILE_COMMANDES)
         commande.date_commande = datetime.strptime(form_data.get('date_commande'), '%Y-%m-%d').date()
         commande.descriptif = form_data.get('descriptif', '')
         commande.id_adresse = int(form_data.get('id_adresse')) if form_data.get('id_adresse') else None
         
         # États de la commande
+        acfc_log.log_to_file(level=DEBUG, message='Mise à jour des états de la commande', zone_log=LOG_FILE_COMMANDES)
         commande.is_facture = 'is_facture' in form_data
         commande.is_expedie = 'is_expedie' in form_data
         
@@ -221,11 +306,14 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
         # Sauvegarder la commande pour obtenir l'ID
         if is_new:
             session_db.add(commande)
+            acfc_log.log_to_file(level=DEBUG, message='Nouvelle commande ajoutée à la session', zone_log=LOG_FILE_COMMANDES)
             session_db.flush()  # Pour obtenir l'ID
-        
+            acfc_log.log_to_file(level=DEBUG, message=f'ID de la nouvelle commande: {commande.id}', zone_log=LOG_FILE_COMMANDES)
+
         # Traiter les produits sélectionnés
         produits_selectionnes = form_data.getlist('produits_selectionnes')
-        
+        acfc_log.log_to_file(level=DEBUG, message=f'Produits sélectionnés: {produits_selectionnes}', zone_log=LOG_FILE_COMMANDES)
+
         if not is_new:
             # Supprimer les anciens produits
             session_db.query(DevisesFactures).filter(DevisesFactures.id_commande == commande.id).delete()
@@ -235,6 +323,7 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
         for produit_id in produits_selectionnes:
             produit_id = int(produit_id)
             qte_key = f'qte_{produit_id}'
+            prix_key = f'prix_{produit_id}'  # Nouveau: prix personnalisé
             qte = int(form_data.get(qte_key, 1))
             
             # Récupérer les infos du produit
@@ -246,19 +335,37 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
                 devise.reference = produit.ref_auto
                 devise.designation = produit.des_auto
                 devise.qte = qte
-                devise.prix_unitaire = float(produit.prix_unitaire_ht)
-                devise.remise = 0.0  # Pas de remise par défaut
-                devise.prix_total = devise.qte * devise.prix_unitaire * (1 - devise.remise)
                 
-                montant_total += devise.prix_total
+                # Utiliser le prix personnalisé si fourni, sinon le prix du catalogue
+                prix_personnalise = form_data.get(prix_key)
+                if prix_personnalise:
+                    devise.prix_unitaire = float(prix_personnalise)
+                else:
+                    devise.prix_unitaire = float(produit.prix_unitaire_ht)
+                
+                devise.remise = 0.0  # Pas de remise par défaut
+                # Ne pas assigner prix_total - il est calculé automatiquement par la base
+                
+                # Calculer le montant total côté application pour l'affichage
+                prix_ligne = devise.qte * devise.prix_unitaire * (1 - devise.remise)
+                montant_total += prix_ligne
                 
                 session_db.add(devise)
+                acfc_log.log_to_file(level=DEBUG, message=f'Produit ajouté à la commande: {devise.designation}, QTE: {devise.qte}, Prix Unitaire: {devise.prix_unitaire}, Prix calculé: {prix_ligne}', zone_log=LOG_FILE_COMMANDES)
         
         # Mettre à jour le montant total
         commande.montant = montant_total
+        acfc_log.log_to_file(level=DEBUG, message=f'Montant total de la commande mis à jour: {commande.montant}', zone_log=LOG_FILE_COMMANDES)
         
         # Sauvegarder tout
         session_db.commit()
+        acfc_log.log_to_file(level=DEBUG, message='Commande et produits sauvegardés avec succès', zone_log=LOG_FILE_COMMANDES)
+        
+        # Nettoyer les données temporaires après succès
+        if is_new:
+            session.pop('temp_produits_selectionnes', None)
+            session.pop('temp_commande_data', None)
+            acfc_log.log_to_file(level=DEBUG, message='Données temporaires nettoyées', zone_log=LOG_FILE_COMMANDES)
         
         # Message de succès
         if is_new:
@@ -269,7 +376,7 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
             acfc_log.log_to_file(level=DEBUG, message=f'Commande {commande.id} modifiée pour le client {client.nom_affichage}', zone_log=LOG_FILE_COMMANDES)
 
         # Rediriger vers la fiche client
-        return redirect(url_for('clients.client_details', id=client.id))
+        return redirect(url_for('clients.get_client', id_client=client.id))
         
     except Exception as e:
         session_db.rollback()
@@ -316,7 +423,7 @@ def annuler_commande(id_commande: int, id_client: int):
             session_db.close()
 
 
-@commandes_bp.route('clients/<int:id_client>/commandes/<int:id_commande>/details')
+@commandes_bp.route('/client/<int:id_client>/commandes/<int:id_commande>/details')
 @validate_habilitation(CLIENTS)
 def commande_details(id_commande: int, id_client: int):
     """Afficher les détails d'une commande"""

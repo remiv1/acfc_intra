@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, Date, Boolean, Text, Numeric, event, Computed, LargeBinary, ForeignKey
+from sqlalchemy import Integer, String, Date, DateTime, Boolean, Text, Numeric, event, Computed, LargeBinary, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Mapper, relationship, mapped_column
@@ -623,13 +623,15 @@ event.listen(Facture, 'after_insert', Facture.set_id_fiscal_after_insert)
 # ====================================================================
 
 class Catalogue(Base):
-    '''
+    """
     Classe représentant un catalogue de produits.
     La classe Catalogue gère l'ensemble des produits disponibles à la vente.
-        - Identification des produits
-        - Gestion des prix
-        - Suivi des stocks
-    '''
+    +==================================================+
+    ||        ATTENTION                               ||
+    ||  Vérifier que les changements sont identiques  ||
+    ||  à ceux du fichier d'initialisation init_db.*  ||
+    +==================================================+
+    """
     __tablename__ = '21_catalogue'
 
     # === IDENTIFIANT ET LIAISON ===
@@ -638,16 +640,34 @@ class Catalogue(Base):
     # === DONNÉES DU PRODUIT ===
     type_produit = mapped_column(String(100), nullable=False)
     stype_produit = mapped_column(String(100), nullable=False)
-    millesime = mapped_column(Integer, nullable=True)
-    ref_auto = mapped_column(String(8), Computed("CONCAT(SUBSTRING(millesime, -2), UPPER(LEFT(type_produit, 4)), LPAD(id, 2, 0))"))
-    des_auto = mapped_column(String(100), Computed("CONCAT(UPPER(stype_produit), ' TARIF ', millesime)"))
-    prix_unitaire_ht = mapped_column(Numeric(10, 2), nullable=True, default=0.00)
-    geographie = mapped_column(String(10), Computed("CONCAT(UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(stype_produit, ' ', 4), ' ', -1)))"))
-    poids = mapped_column(String(5), Computed("SUBSTRING_INDEX(SUBSTRING_INDEX(stype_produit, ' ', 3), ' ', -1)"))
+    millesime = mapped_column(Integer, nullable=False)
+    prix_unitaire_ht = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
+    geographie = mapped_column(String(10), Computed("UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(stype_produit, ' ', 4), ' ', -1))", persisted=True))
+    poids = mapped_column(String(5), Computed("SUBSTRING_INDEX(SUBSTRING_INDEX(stype_produit, ' ', 3), ' ', -1)", persisted=True))
 
     # === DATES DE CREATION ET DE MISE A JOUR ===
-    created_at = mapped_column(Date, default=func.now(), nullable=False)
-    updated_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False)
+    created_at = mapped_column(Date, server_default=func.current_date(), nullable=False)
+    updated_at = mapped_column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp(), nullable=False)
+
+    # === PROPRIÉTÉS CALCULÉES (ref_auto et des_auto) ===
+    @property
+    def ref_auto(self) -> str:
+        """
+        Génère la référence automatique (ref_auto) en fonction des données de la ligne.
+        Cette logique est également gérée par un trigger dans la base de données.
+        """
+        return f"{str(self.millesime)[-2:]}{self.type_produit[:4].upper()}{str(self.id).zfill(2)}"
+
+    @property
+    def des_auto(self) -> str:
+        """
+        Génère la description automatique (des_auto) en fonction des données de la ligne.
+        Cette logique est également gérée par un trigger dans la base de données.
+        """
+        return f'{self.stype_produit.upper()} TARIF {self.millesime}'
+
+    def __repr__(self) -> str:
+        return f"<Catalogue(id={self.id}, type_produit='{self.type_produit}', ref_auto='{self.ref_auto}')>"
 
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE GESTION COMPTABLE

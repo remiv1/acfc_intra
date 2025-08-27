@@ -197,7 +197,12 @@
                     <button class="nav-link" id="orders-tab" data-bs-toggle="tab" 
                             data-bs-target="#orders" type="button" role="tab">
                         <i class="bi bi-cart me-2"></i>Commandes
-                        <span id="orders-count" class="badge bg-secondary ms-1">{{ orders|length }}</span>
+                        {% set commandes_en_cours = orders|selectattr('is_expedie', 'equalto', false)|selectattr('is_annulee', 'equalto', false)|list %}
+                        {% set nb_en_cours = commandes_en_cours|length %}
+                        {% if nb_en_cours > 0 %}
+                            <span class="badge bg-warning text-dark ms-1">{{ nb_en_cours }} en cours</span>
+                        {% endif %}
+                        <span id="orders-count" class="badge bg-secondary ms-1">{{ orders|length }} total</span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -577,20 +582,20 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <div class="btn-group" role="group" aria-label="Actions commande">
-                                                <a href="{{ url_for('commandes.commande_details', id_commande=commande.id) }}" 
+                                            <div class="btn-group gap-1" role="group" aria-label="Actions commande">
+                                                <a href="{{ url_for('commandes.commande_details', id_commande=commande.id, id_client=commande.id_client) }}" 
                                                    class="btn btn-sm btn-outline-primary" title="Voir les détails">
                                                     <i class="bi bi-eye me-1"></i>Voir
                                                 </a>
                                                 {% if not commande.is_annulee %}
-                                                <a href="{{ url_for('commandes.modifier_commande', id_commande=commande.id, id_client=commande.id_client) }}" 
-                                                   class="btn btn-sm btn-outline-secondary" title="Modifier la commande">
+                                                <a href="{{ url_for('commandes.commande_modify', id_commande=commande.id, id_client=commande.id_client) }}" 
+                                                   class="btn btn-sm btn-outline-secondary ms-1" title="Modifier la commande">
                                                     <i class="bi bi-pencil me-1"></i>Modifier
                                                 </a>
                                                 {% if not commande.is_expedie %}
                                                 <form method="POST" action="{{ url_for('commandes.annuler_commande', id_commande=commande.id, id_client=commande.id_client) }}" 
                                                       style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Annuler la commande">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Annuler la commande">
                                                         <i class="bi bi-x-circle me-1"></i>Annuler
                                                     </button>
                                                 </form>

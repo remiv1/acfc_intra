@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS 30_pcg (
     compte INT PRIMARY KEY,
     denomination VARCHAR(255) NOT NULL
 );
-INSERT INTO 30_pcg VALUES ('1', '10', '101', '101', 'Capital');
 INSERT INTO 30_pcg VALUES ('1', '10', '101', '1011', 'Capital souscrit – non appelé');
 INSERT INTO 30_pcg VALUES ('1', '10', '101', '1012', 'Capital souscrit – appelé, non versé');
 INSERT INTO 30_pcg VALUES ('1', '10', '101', '1013', 'Capital souscrit – appelé, versé');
@@ -153,9 +152,12 @@ INSERT INTO 30_pcg VALUES ('2', '23', '238', '238', 'Avances et acomptes versés
 INSERT INTO 30_pcg VALUES ('2', '25', '25', '25', 'Parts dans des entreprises liées et créances sur des entreprises liées');
 INSERT INTO 30_pcg VALUES ('2', '26', '261', '261', 'Titres de participation');
 INSERT INTO 30_pcg VALUES ('2', '26', '266', '266', 'Autres formes de participation');
-INSERT INTO 30_pcg VALUES ('2', '26', '267', '267', 'Créances rattachées à des participations');
+INSERT INTO 30_pcg VALUES ('2', '26', '267', '2671', 'Créances rattachées à des participations (groupe)');
+INSERT INTO 30_pcg VALUES ('2', '26', '267', '2674', 'Créances rattachées à des participations (hors groupe)');
+INSERT INTO 30_pcg VALUES ('2', '26', '267', '2675', 'Versements représentatifs d''apports non capitalisés');
+INSERT INTO 30_pcg VALUES ('2', '26', '267', '2677', 'Autres créances rattachées à des participations');
 INSERT INTO 30_pcg VALUES ('2', '26', '268', '268', 'Créances rattachées à des sociétés en participation');
-INSERT INTO 30_pcg VALUES ('2', '26', '267', '267', 'Versements restant à effectuer sur titres de participation non libérés');
+INSERT INTO 30_pcg VALUES ('2', '26', '269', '269', 'Versements restant à effectuer sur titres de participation non libérés');
 INSERT INTO 30_pcg VALUES ('2', '27', '271', '271', 'Titres immobilisés autres que les titres immobilisés de l''activité de portefeuille (droit de propriété)');
 INSERT INTO 30_pcg VALUES ('2', '27', '272', '272', 'Titres immobilisés (droit de créance)');
 INSERT INTO 30_pcg VALUES ('2', '27', '273', '273', 'Titres immobilisés de l''activité de portefeuille');
