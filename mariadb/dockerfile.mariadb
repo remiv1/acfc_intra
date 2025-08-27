@@ -1,0 +1,54 @@
+# ====================================================================
+# DOCKERFILE - BASE DE DONNÉES MARIADB
+# ====================================================================
+# Configuration Docker pour la base de données MariaDB de l'application ACFC
+# 
+# Fonctionnalités :
+# - Base de données relationnelle haute performance
+# - Initialisation automatique du schéma
+# - Configuration des utilisateurs et permissions
+# - Support des transactions ACID pour l'intégrité comptable
+# - Optimisations pour les applications d'entreprise
+# - Données de référence pré-chargées (PCG, villes françaises, indicatifs téléphoniques)
+# 
+# Sécurité :
+# - Variables d'environnement pour les mots de passe
+# - Utilisateur dédié non-root pour l'application
+# - Isolation réseau via docker-compose
+# 
+# Maintenu par : ACFC Development Team
+# Dernière mise à jour : Août 2025
+
+# Utilisation de l'image officielle MariaDB (dernière version stable)
+# MariaDB est un fork performant de MySQL, 100% compatible
+# Avantages : Open source, performances optimisées, développement actif
+FROM mariadb:latest
+
+# Configuration des métadonnées
+LABEL maintainer="Rémi Verschuur"
+LABEL description="Base de données MariaDB pour application ACFC"
+LABEL version="1.0"
+
+# === CONFIGURATION DES VARIABLES D'ENVIRONNEMENT ===
+# Variables injectées depuis docker-compose.yml et fichier .env
+# Cette approche sécurise les mots de passe sans les exposer dans l'image
+
+# === INITIALISATION DU SCHÉMA DE BASE DE DONNÉES ===
+# Copie du script d'initialisation principal dans le répertoire spécial de MariaDB
+# Ce script sera exécuté automatiquement au premier démarrage du conteneur
+# Contient : création des tables, index, données de référence, utilisateurs
+COPY mariadb/init_db.sql /docker-entrypoint-initdb.d/
+
+# Copie des fichiers de données de référence nécessaires pour l'initialisation
+# Ces fichiers sont référencés par des commandes SOURCE dans init_db.sql
+COPY mariadb/prepare_base_datas/ /docker-entrypoint-initdb.d/prepare_base_datas/
+
+# === CONFIGURATION RÉSEAU ===
+# Exposition du port standard MariaDB/MySQL (3306)
+# Mappé et sécurisé via docker-compose (accessible uniquement depuis le réseau interne)
+EXPOSE 3306
+
+# === OPTIMISATIONS DE PERFORMANCE ===
+# Configuration additionnelle via variables d'environnement
+# Note: Pour des optimisations avancées, utiliser un fichier my.cnf personnalisé
+ENV MYSQL_INITDB_SKIP_TZINFO=1

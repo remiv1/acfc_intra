@@ -1,0 +1,17 @@
+<div class="container centered-messages">
+    <h1>Erreur {{ status_code }} : {{ status_message }}</h1>
+    <img
+        src="{{ url_for('static', filename='common/img/serv-err.svg') }}"
+        alt="Erreur 500, problème server"
+        sizes="(max-width: 600px) 100vw, 600px"
+        class="img-error img-fluid">
+    <div class="container messages">
+        <div class="alert alert-danger bd-callout-danger">
+            <p><strong>Ce n'est pas vous, c'est nous !</strong></p>
+            {% if message %}
+            {{ message }}
+            {% endif %}
+            <p>Veuillez contacter l'administrateur de l'application.</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,418 @@
+<!-- ====================================================================
+     ACFC - Template "Détails Commande"
+     ====================================================================
+     
+     Page de consultation détaillée d'une commande avec historique et actions.
+     Interface moderne Bootstrap avec informations complètes et timeline.
+     
+     Variables Jinja attendues :
+     - commande : Objet Commande SQLAlchemy
+     - devises_factures : Liste des éléments de la commande
+     - facture : Objet Facture SQLAlchemy (si la commande est facturée)
+     
+     Features :
+     - Affichage complet des informations de commande
+     - Timeline des actions (commande, facturation, expédition)
+     - Tableau détaillé des produits
+     - Actions contextuelles selon l'état
+     - Impression et export
+     - Design responsive Bootstrap 5
+==================================================================== -->
+
+<!-- CSS spécifique aux commandes -->
+<link rel="stylesheet" href="{{ url_for('static', filename='commandes/css/commandes.css') }}">
+
+<div class="container-fluid">
+    <!-- En-tête de la commande -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="mb-1 text-dark">
+                                <i class="fas fa-shopping-cart me-2"></i>Commande #{{ commande.id }}
+                            </h2>
+                            <p class="text-muted mb-0">
+                                Créée le {{ commande.date_commande.strftime('%d/%m/%Y') }}
+                                {% if commande.descriptif %}
+                                    - {{ commande.descriptif }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('commandes.commande_modify', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-edit me-1"></i>Modifier
+                            </a>
+                            <a href="{{ url_for('clients.get_client', id_client=commande.id_client) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-1"></i>Retour au client
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informations principales -->
+        <div class="col-lg-8 mb-4">
+            <!-- Informations client et livraison -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>Informations Client</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">CLIENT</h6>
+                            <p class="mb-1"><strong>{{ commande.client.nom_affichage }}</strong></p>
+                            {% if commande.client.adresses %}
+                                {% set adresse = commande.client.adresses[0] %}
+                                <p class="mb-1">{{ adresse.adresse_l1 }}</p>
+                                {% if adresse.adresse_l2 %}
+                                    <p class="mb-1">{{ adresse.adresse_l2 }}</p>
+                                {% endif %}
+                                <p class="mb-0">{{ adresse.code_postal }} {{ adresse.ville }}</p>
+                            {% endif %}
+                            
+                            <!-- Contacts -->
+                            {% if commande.client.mails %}
+                                <hr class="my-3">
+                                <h6 class="text-muted mb-2">CONTACT</h6>
+                                {% for mail in commande.client.mails %}
+                                    {% if mail.is_principal %}
+                                        <p class="mb-1">
+                                            <i class="fas fa-envelope me-1"></i>{{ mail.mail }}
+                                        </p>
+                                    {% endif %}
+                                {% endfor %}
+                                {% for tel in commande.client.tels %}
+                                    {% if tel.is_principal %}
+                                        <p class="mb-0">
+                                            <i class="fas fa-phone me-1"></i>{{ tel.indicatif }}{{ tel.telephone }}
+                                        </p>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">LIVRAISON</h6>
+                            {% if commande.is_ad_livraison and commande.id_adresse %}
+                                <!-- Afficher l'adresse de livraison spécifique -->
+                                <p class="mb-0">
+                                    <span class="badge bg-info mb-2">Adresse de livraison différente</span><br>
+                                    <!-- Ici, il faudrait récupérer l'adresse via l'id_adresse -->
+                                    Adresse de livraison spécifiée
+                                </p>
+                            {% else %}
+                                <p class="mb-0">
+                                    <span class="badge bg-success mb-2">Adresse principale du client</span><br>
+                                    {% if commande.client.adresses %}
+                                        {% set adresse = commande.client.adresses[0] %}
+                                        {{ adresse.adresse_l1 }}<br>
+                                        {% if adresse.adresse_l2 %}{{ adresse.adresse_l2 }}<br>{% endif %}
+                                        {{ adresse.code_postal }} {{ adresse.ville }}
+                                    {% endif %}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Produits de la commande -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Produits Commandés</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Référence</th>
+                                    <th scope="col">Désignation</th>
+                                    <th scope="col" class="text-center">Quantité</th>
+                                    <th scope="col" class="text-end">Prix Unitaire</th>
+                                    <th scope="col" class="text-center">Remise</th>
+                                    <th scope="col" class="text-end">Total HT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for devise in devises_factures %}
+                                <tr>
+                                    <td><code>{{ devise.reference }}</code></td>
+                                    <td>{{ devise.designation }}</td>
+                                    <td class="text-center">{{ devise.qte }}</td>
+                                    <td class="text-end">{{ "%.4f"|format(devise.prix_unitaire) }} €</td>
+                                    <td class="text-center">{{ "%.1f"|format(devise.remise * 100) }}%</td>
+                                    <td class="text-end"><strong>{{ "%.2f"|format(devise.prix_total) }} €</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <th colspan="5" class="text-end">Total de la commande :</th>
+                                    <th class="text-end">
+                                        <span class="fs-5 text-primary">{{ "%.2f"|format(commande.montant) }} €</span>
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau latéral -->
+        <div class="col-lg-4">
+            <!-- Statut et actions -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Statut et Actions</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Statut actuel -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">STATUT ACTUEL</h6>
+                        {% if commande.is_annulee %}
+                            <span class="badge bg-danger fs-6">
+                                <i class="fas fa-ban me-1"></i>Annulée
+                            </span>
+                        {% elif commande.is_expedie %}
+                            <span class="badge bg-info fs-6">
+                                <i class="fas fa-shipping-fast me-1"></i>Expédiée
+                            </span>
+                        {% elif commande.is_facture %}
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-file-invoice me-1"></i>Facturée
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning fs-6">
+                                <i class="fas fa-clock me-1"></i>En cours
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Actions disponibles -->
+                    <div class="d-grid gap-2">
+                        {% if not commande.is_annulee %}
+                            {% if not commande.is_facture %}
+                                <button type="button" class="btn btn-success" id="generateFacture" data-commande-id="{{ commande.id }}">
+                                    <i class="fas fa-file-invoice me-1"></i>Générer la facture
+                                </button>
+                            {% endif %}
+                            
+                            {% if commande.is_facture and not commande.is_expedie %}
+                                <button type="button" class="btn btn-info" id="markExpedition" data-commande-id="{{ commande.id }}">
+                                    <i class="fas fa-shipping-fast me-1"></i>Marquer comme expédiée
+                                </button>
+                            {% endif %}
+                            
+                            <a href="{{ url_for('commandes.commande_modify', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-edit me-1"></i>Modifier la commande
+                            </a>
+                        {% else %}
+                            <div class="alert alert-danger text-center">
+                                <i class="fas fa-ban me-2"></i>
+                                <strong>Commande annulée</strong><br>
+                                <small>Aucune action disponible</small>
+                            </div>
+                        {% endif %}
+                        
+                        {% if commande.is_facture and facture %}
+                            <a href="{{ url_for('factures.facture_pdf', id=facture.id) }}" class="btn btn-outline-primary" target="_blank">
+                                <i class="fas fa-file-pdf me-1"></i>Télécharger la facture
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline des événements -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Historique</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <!-- Création de la commande -->
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Commande créée</h6>
+                                <p class="text-muted mb-0">{{ commande.date_commande.strftime('%d/%m/%Y') }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Facturation -->
+                        {% if commande.is_facture %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Commande facturée</h6>
+                                <p class="text-muted mb-0">
+                                    {{ commande.date_facturation.strftime('%d/%m/%Y') if commande.date_facturation else 'Date non renseignée' }}
+                                    {% if facture %}
+                                        <br><small>Facture {{ facture.id_fiscal }}</small>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Expédition -->
+                        {% if commande.is_expedie %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-info"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Commande expédiée</h6>
+                                <p class="text-muted mb-0">
+                                    {{ commande.date_expedition.strftime('%d/%m/%Y') if commande.date_expedition else 'Date non renseignée' }}
+                                    {% if commande.id_suivi %}
+                                        <br><small>Suivi: {{ commande.id_suivi }}</small>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Annulation -->
+                        {% if commande.is_annulee %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-danger"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Commande annulée</h6>
+                                <p class="text-muted mb-0">Commande annulée par l'utilisateur</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations complémentaires -->
+            {% if commande.is_expedie and commande.id_suivi %}
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-truck me-2"></i>Suivi de l'expédition</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>Numéro de suivi :</strong></p>
+                    <p class="font-monospace bg-light p-2 rounded">{{ commande.id_suivi }}</p>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="navigator.clipboard.writeText('{{ commande.id_suivi }}')">
+                        <i class="fas fa-copy me-1"></i>Copier
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modales -->
+<div class="modal fade" id="confirmFactureModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Générer la facture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Générer la facture pour la commande #{{ commande.id }} ?</p>
+                <div class="mb-3">
+                    <label for="date_facturation" class="form-label">Date de facturation</label>
+                    <input type="date" class="form-control" id="date_facturation" value="{{ "now"|strftime('%Y-%m-%d') }}">
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Cette action créera une facture définitive avec un numéro fiscal unique.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-success" id="confirmFactureGeneration">
+                    <i class="fas fa-file-invoice me-1"></i>Générer la facture
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmExpeditionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Marquer comme expédiée</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Marquer la commande #{{ commande.id }} comme expédiée ?</p>
+                <div class="mb-3">
+                    <label for="date_expedition" class="form-label">Date d'expédition</label>
+                    <input type="date" class="form-control" id="date_expedition" value="{{ "now"|strftime('%Y-%m-%d') }}">
+                </div>
+                <div class="mb-3">
+                    <label for="numero_suivi" class="form-label">Numéro de suivi (optionnel)</label>
+                    <input type="text" class="form-control" id="numero_suivi" placeholder="Numéro de suivi de l'expédition">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-info" id="confirmExpeditionAction">
+                    <i class="fas fa-shipping-fast me-1"></i>Marquer comme expédiée
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript spécifique aux commandes -->
+<script src="{{ url_for('static', filename='commandes/js/commandes.js') }}"></script>
+
+<style>
+/* Timeline custom styles */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid #6c757d;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+</style>

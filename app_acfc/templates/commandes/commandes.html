@@ -1,0 +1,29 @@
+<!-- ====================================================================
+     ACFC - Template Principal "Commandes"
+     ====================================================================
+     
+     Template principal pour le module commandes, gère les sous-contextes :
+     - form : Formulaire de création/modification de commande
+     - details : Détails d'une commande
+     - list : Liste des commandes
+     
+     Variables Jinja attendues :
+     - sub_context : Type de vue ('form', 'details', 'list')
+     - Autres variables selon le sous-contexte
+     
+     Architecture cohérente avec les autres modules ACFC.
+==================================================================== -->
+
+{% if sub_context == 'form' %}
+    {% include 'commandes/commande_form_content.html' %}
+{% elif sub_context == 'details' %}
+    {% include 'commandes/commande_details_content.html' %}
+{% elif sub_context == 'list' %}
+    {% include 'commandes/commandes_list.html' %}
+{% else %}
+    <!-- Vue par défaut : liste des commandes -->
+    {% include 'commandes/commandes_list.html' %}
+{% endif %}
+
+<!-- JavaScript spécifique aux commandes -->
+<script src="{{ url_for('static', filename='commandes/js/commandes.js') }}"></script>

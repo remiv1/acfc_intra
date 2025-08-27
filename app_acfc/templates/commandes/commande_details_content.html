@@ -1,0 +1,25 @@
+<!-- ====================================================================
+     ACFC - Template "Détails Commande" (Contenu)
+     ====================================================================
+     
+     Page de consultation détaillée d'une commande avec historique et actions.
+     Inclus dans le template principal des commandes via le système de contextes.
+     
+     Variables Jinja attendues :
+     - commande : Objet Commande SQLAlchemy
+     - devises_factures : Liste des éléments de la commande
+     - facture : Objet Facture SQLAlchemy (si la commande est facturée)
+==================================================================== -->
+
+<!-- CSS spécifique aux commandes -->
+<link rel="stylesheet" href="{{ url_for('static', filename='commandes/css/commandes.css') }}">
+
+<!-- Contenu du template commande_details.html existant -->
+<!-- (On peut inclure le contenu existant ici) -->
+
+<div class="container-fluid">
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        Template de détails de commande à intégrer ici depuis commande_details.html existant.
+    </div>
+</div>

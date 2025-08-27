@@ -1,0 +1,203 @@
+# ====================================================================
+# DOCKER COMPOSE - INFRASTRUCTURE ACFC
+# ====================================================================
+# Configuration de l'architecture micro-services pour l'application ACFC
+# 
+# Services déployés :
+# - acfc-app      : Application web Flask
+# - acfc-api-back : API interne FastAPI
+# - acfc-nginx    : Reverse proxy et serveur statique (port 80)
+# - acfc-db       : Base de données MariaDB
+# - acfc-logs     : Base NoSQL MongoDB pour logging des traces
+# - acfc-mails    : Service de gestion des emails
+# - acfc-redis    : Cache et file d'attente Redis
+#
+# Réseau : acfc-network (isolé, communication inter-services)
+# Volumes : Persistance des données (base, logs, documents --factures, commandes, remises de chèques--)
+# 
+# Environnement : Development/Production (configurable via .env)
+# Maintenu par : Rémi Verschuur
+# Version : 1.0
+
+services:
+  # ================================================================
+  # SERVICE APPLICATION WEB FLASK
+  # ================================================================
+  acfc-app:
+    container_name: acfc-app
+    build:
+      context: .                              # Build depuis la racine du projet
+      dockerfile: app_acfc/dockerfile.app     # Dockerfile spécialisé application
+    ports:
+      - "5000:5000"                           # Mapping port Flask (dev uniquement)
+    volumes:
+      - ./logs:/app/logs                      # Volume pour logs (persistance)
+    environment:
+      # Variables DB passées au conteneur pour que l'application se connecte au service acfc-db
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    networks:
+      - acfc-network                          # Réseau privé inter-services
+    depends_on:
+      acfc-db:
+        condition: service_healthy            # Attendre que la BDD soit prête
+      acfc-logs:
+        condition: service_healthy            # Attendre que MongoDB soit prêt
+    restart: unless-stopped                   # Redémarrage automatique sauf arrêt manuel
+  
+  # ================================================================
+  # SERVICE REVERSE PROXY NGINX
+  # ================================================================
+  acfc-proxy:
+    container_name: acfc-nginx
+    image: nginx:latest                       # Image officielle Nginx
+    ports:
+      - "80:80"                              # Port HTTP standard
+      - "443:443"                            # Port HTTPS (certificats à configurer)
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro  # Configuration personnalisée
+      - ./nginx/certs:/etc/nginx/certs:ro            # Certificats SSL
+    networks:
+      - acfc-network
+    depends_on:
+      - acfc-app                             # Démarre après l'application
+    restart: unless-stopped
+
+  # ================================================================
+  # SERVICE BASE DE DONNÉES MARIADB
+  # ================================================================
+  acfc-db:
+    container_name: acfc-db
+    build:
+      context: .                   # Dossier contenant Dockerfile et scripts
+      dockerfile: ./mariadb/dockerfile.mariadb         # Dockerfile spécialisé MariaDB
+    restart: always                          # Redémarrage permanent (service critique)
+    environment:
+      # Variables d'environnement sécurisées via fichier .env
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}  # Mot de passe administrateur
+      MYSQL_DATABASE: ${DB_NAME}                # Base de données application
+      MYSQL_USER: ${DB_USER}                    # Utilisateur application
+      MYSQL_PASSWORD: ${DB_PASSWORD}            # Mot de passe utilisateur
+    volumes:
+      - acfc-db-data:/var/lib/mysql          # Persistance des données
+      - ./mariadb/:/docker-entrypoint-initdb.d/:ro  # Script d'initialisation
+    healthcheck:
+      # Vérification de santé pour démarrage ordonné des services
+      test: ["CMD", "mariadb", "-u", "root", "-p${DB_ROOT_PASSWORD}", "-e", "SELECT 1"]
+      interval: 10s                          # Vérification toutes les 10 secondes
+      timeout: 5s                            # Timeout par tentative
+      retries: 10                            # 10 tentatives max
+    networks:
+      - acfc-network
+
+  # ================================================================
+  # SERVICE LOGGING MONGODB
+  # ================================================================
+  acfc-logs:
+    container_name: acfc-logs
+    image: mongo:latest                      # Image officielle MongoDB
+    volumes:
+      - acfc-logs-data:/data/db              # Persistance des logs
+      - ./mongo/mongod.conf:/etc/mongod.conf:ro           # Configuration MongoDB
+      - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro  # Script d'initialisation
+    networks:
+      - acfc-network
+    restart: always
+    command: ['mongod', '--config', '/etc/mongod.conf']  # Démarrage avec config personnalisée
+    environment:
+      # Configuration d'authentification MongoDB
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+    healthcheck:
+      # Test de connectivité MongoDB (compatible avec différentes versions)
+      test: ["CMD-SHELL", "mongo --eval 'db.adminCommand({ping: 1})' --quiet || mongosh --eval 'db.adminCommand({ping: 1})' --quiet"]
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
+
+  # ================================================================
+  # SERVICE FAST API (BACK-OFFICE, INTERNE)
+  # ================================================================
+  acfc-api-back:
+    container_name: acfc-api-back
+    build:
+      context: .
+      dockerfile: api_acfc/dockerfile.api
+    volumes:
+      - ./api_acfc:/app
+    networks:
+      - acfc-network
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    restart: unless-stopped
+    # Aucun port exposé, usage interne uniquement (autres conteneurs ou cron)
+
+  # ================================================================
+  # SERVICE FAST API (BACK-OFFICE, INTERNE)
+  # ================================================================
+  acfc-mails:
+    container_name: acfc-mails
+    build:
+      context: .
+      dockerfile: mails/dockerfile.mails
+    networks:
+      - acfc-network
+    environment:
+      - METTREICILESPARAMETRESIMAPENSECRET=1
+      - REDIS_HOST=acfc-redis
+      - REDIS_PORT=6379
+    depends_on:
+      - acfc-redis
+
+  # ================================================================
+  # SERVICE REDIS
+  # ================================================================
+  acfc-redis:
+    container_name: acfc-redis
+    image: redis:latest
+    networks:
+      - acfc-network
+    volumes:
+      - acfc-redis-data:/data
+    restart: always
+
+# ================================================================
+# VOLUMES PERSISTANTS
+# ================================================================
+# Stockage persistant des données pour survie aux redémarrages
+volumes:
+  acfc-db-data:
+    driver: local                            # Stockage local pour données MariaDB
+    name: acfc_database_data
+  acfc-logs-data:
+    driver: local                            # Stockage local pour logs MongoDB
+    name: acfc_logs_data
+  acfc-factures:
+    driver: local                            # Stockage pour documents PDF de facturation
+    name: acfc_invoices_storage
+  acfc-rch:
+    driver: local                            # Stockage pour documents de remises de chèques
+    name: acfc_research_storage
+  acfc-redis-data:
+    driver: local                            # Stockage pour données Redis
+    name: acfc_redis_data
+
+# ================================================================
+# RÉSEAUX
+# ================================================================
+# Réseau privé pour communication sécurisée inter-services
+networks:
+  acfc-network:
+    driver: bridge                           # Driver bridge pour isolation réseau
+    name: acfc_internal_network
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16             # Sous-réseau privé dédié

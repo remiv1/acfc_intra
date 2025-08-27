@@ -1,0 +1,131 @@
+name: 📊 Génération Automatique de Rapport de Suivi
+
+on:
+  # Déclenchement manuel
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Nombre de jours à analyser'
+        required: false
+        default: '7'
+        type: string
+      
+  # Déclenchement automatique chaque dimanche à 20h
+  schedule:
+    - cron: '0 20 * * 0'  # Dimanche 20h UTC
+  
+  # Déclenchement sur push vers main ou sprint branches
+  push:
+    branches: [ main, sprint_* ]
+    paths-ignore:
+      - 'suivi_realisation*.md'
+      - '.github/**'
+
+jobs:
+  generate-report:
+    name: 🔄 Génération du rapport
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+    - name: 📥 Checkout du code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Récupère tout l'historique Git
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: 🐍 Configuration Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: 📊 Génération du rapport
+      id: generate
+      run: |
+        # Définir le nombre de jours
+        DAYS="${{ github.event.inputs.days || '7' }}"
+        echo "Analyse des $DAYS derniers jours"
+        
+        # Exécuter le script
+        python scripts/generate_progress_report.py \
+          --days "$DAYS" \
+          --output "suivi_realisation_auto.md" \
+          --repo "."
+        
+        # Vérifier si le fichier a été créé/modifié
+        if [ -f "suivi_realisation_auto.md" ]; then
+          echo "report_generated=true" >> $GITHUB_OUTPUT
+          echo "✅ Rapport généré avec succès"
+        else
+          echo "report_generated=false" >> $GITHUB_OUTPUT
+          echo "❌ Échec de la génération du rapport"
+        fi
+    
+    - name: 📝 Configuration Git
+      if: steps.generate.outputs.report_generated == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action - Progress Report"
+    
+    - name: 💾 Commit et push du rapport
+      if: steps.generate.outputs.report_generated == 'true'
+      run: |
+        # Ajouter le fichier
+        git add suivi_realisation_auto.md
+        
+        # Vérifier s'il y a des changements
+        if git diff --staged --quiet; then
+          echo "ℹ️ Aucune modification détectée dans le rapport"
+        else
+          # Créer le commit
+          COMMIT_MSG="📊 Mise à jour automatique du rapport de suivi ($(date '+%d/%m/%Y'))"
+          git commit -m "$COMMIT_MSG"
+          
+          # Pousser les changements
+          git push
+          
+          echo "✅ Rapport mis à jour et poussé vers le dépôt"
+        fi
+    
+    - name: 📋 Résumé des métriques
+      if: steps.generate.outputs.report_generated == 'true'
+      run: |
+        echo "## 📊 Résumé du Rapport Généré" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📅 Date de génération :** $(date '+%d/%m/%Y à %H:%M')" >> $GITHUB_STEP_SUMMARY
+        echo "**📊 Période analysée :** ${{ github.event.inputs.days || '7' }} derniers jours" >> $GITHUB_STEP_SUMMARY
+        echo "**🌿 Branche :** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Extraire quelques métriques du rapport généré
+        if [ -f "suivi_realisation_auto.md" ]; then
+          COMMITS=$(grep -o "Nombre de commits.*[0-9]" suivi_realisation_auto.md | head -1 || echo "Non disponible")
+          LIGNES=$(grep -o "[0-9]* lignes ajoutées" suivi_realisation_auto.md | head -1 || echo "Non disponible")
+          
+          echo "**📈 Métriques clés :**" >> $GITHUB_STEP_SUMMARY
+          echo "- $COMMITS" >> $GITHUB_STEP_SUMMARY
+          echo "- $LIGNES" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📄 Fichier généré : \`suivi_realisation_auto.md\`" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  notify-completion:
+    name: 🔔 Notification de fin
+    needs: generate-report
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: 📢 Statut du workflow
+      run: |
+        if [ "${{ needs.generate-report.result }}" == "success" ]; then
+          echo "✅ Workflow terminé avec succès"
+          echo "Le rapport de suivi a été généré et mis à jour automatiquement."
+        else
+          echo "❌ Échec du workflow"
+          echo "La génération du rapport de suivi a échoué. Vérifiez les logs."
+          exit 1
+        fi

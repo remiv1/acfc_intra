@@ -1,0 +1,103 @@
+/* Make the page a column flex layout so footer can stick to bottom */
+html, body {
+    height: 100%;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+/* Let the main content grow to fill available space */
+main {
+    flex: 1 1 auto;
+}
+/* Import des polices de caractère */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Playwrite+CA:wght@100..400&display=swap');
+
+/* Gestion éléments par défaut */
+:root {
+    --bs-primary: #196b24;
+    --bs-primary-rgb: 25, 107, 36;
+    --bs-secondary: #54bb8f;
+    --bs-secondary-rgb: 84, 187, 143;
+    --bs-success: #47d45a;
+    --bs-success-rgb: 71, 212, 90;
+    --bs-info: #0c3512;
+    --bs-info-rgb: 12, 53, 18;
+    --bs-warning: #e97132;
+    --bs-warning-rgb: 233, 113, 50;
+    --bs-danger: #a80011;
+    --bs-danger-rgb: 168, 0, 17;
+    --light-color: #e8e8e8;
+    --light-color-rgb: 232, 232, 232;
+    --dark-color: #404040;
+    --dark-color-rgb: 64, 64, 64;
+    --font-family: 'Newsreader', serif;
+    --font-title: 'Playwrite CA', sans-serif;
+    --font-size-base: 1rem;
+    --line-height-base: 1.5;
+}
+
+/* Header / Navigation */
+header.site-header {
+    width: 100%;
+    background-color: var(--light-color);
+    color: var(--bs-primary);
+    font-family: var(--font-title);
+}
+.nav-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
+}
+.nav-container .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+}
+.nav-container .marque { font-size: 1.1rem; font-weight: 700; margin: 0; }
+.nav-container .logo { max-width: 100px; flex: 0 0 auto; }
+.nav-container .logo img { max-height: 44px; width: auto; display: block; }
+.nav-container .titre { flex: 1 1 auto; text-align: center; }
+.nav-container .titre h1 { font-size: 1.25rem; margin: 0; }
+.nav-actions { display: none; flex: 0 0 auto; }
+.btn { background: var(--bs-primary); color: white; border: none; padding: 0.4rem 0.75rem; border-radius: 4px; cursor: pointer; }
+.btn:focus { outline: 2px solid var(--secondary-color); }
+.btn-link {min-width: 150px; padding: 0.4rem 0.75rem; border-radius: 4px; cursor: pointer; margin: 0.25rem 0;}
+.nav-toggle { display: block; background: transparent; border: none; font-size: 1.25rem; cursor: pointer; }
+header li {
+    margin: 0 0.25rem;
+}
+/* Small screens: hide actions, show toggle; header can expand when .is-open */
+header.site-header.is-open .nav-actions { display: block; }
+
+/* Medium and up: expand the nav, show actions inline and hide toggle */
+@media (min-width: 768px) {
+    .nav-toggle { display: none; }
+    .nav-actions { display: flex; align-items: center; gap: 0.5rem; }
+}
+
+footer {
+    flex-shrink: 0;
+}
+button {
+    background-color: var(--info-color);
+}
+.btn:hover {
+    background-color: var(--light-color);
+    color: var(--info-color);
+}
+.centered-messages {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.img-error {
+    max-height: 25vh;
+    max-width: 50vw;
+    width: auto;
+}

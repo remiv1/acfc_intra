@@ -1,0 +1,31 @@
+{# main.html: include le template spécifique en fonction de la variable `context` #}
+{% if context == 'catalogue' %}
+    {% include 'catalogue/catalogue.html' %}
+{% elif context == 'clients' %}
+    {% include 'clients/clients.html' %}
+{% elif context == 'commandes' %}
+    {% include 'commandes/commandes.html' %}
+{% elif context == 'commercial' %}
+    {% include 'commercial/commercial.html' %}
+{% elif context == 'comptabilite' %}
+    {% include 'comptabilite/comptabilite.html' %}
+{% elif context == 'stocks' %}
+    {% include 'stocks/stocks.html' %}
+{% elif context == '400' %}
+    {% include '400.html' %}
+{% elif context == '500' %}
+    {% include '500.html' %}
+{% elif context == 'login' %}
+    {% include 'login.html' %}
+{% elif context == 'user' %}
+    {% include 'admin/users.html' %}
+{% elif context == 'change_password' %}
+    {% include 'admin/change_password.html' %}
+{% elif context == 'user_account' %}
+    {% include 'utilisateurs/account.html' %}
+{% elif context == 'default' %}
+    {% include 'default.html' %}
+{% else %}
+    {# template par défaut si `context` absent ou inconnu #}
+    {% include 'default.html' %}
+{% endif %}

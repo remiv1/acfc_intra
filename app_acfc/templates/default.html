@@ -1,0 +1,143 @@
+<!-- Page d'accueil -->
+<div class="home-page">
+    <!-- Message d'accueil - 100% largeur, 25% hauteur -->
+    <section class="welcome-section d-flex align-items-center justify-content-center text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="display-4 fw-bold text-primary mb-3">Bienvenue sur l'Intranet ACFC</h2>
+                    <p class="lead text-muted">Votre plateforme de gestion commerciale et administrative</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section principale - 50% hauteur -->
+    <section class="main-dashboard">
+        <div class="container-fluid h-100">
+            <div class="row h-100 g-3">
+                <!-- Colonne gauche - Commandes en cours (25% sur desktop) -->
+                <div class="col-12 col-lg-3 h-100">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                Commandes en cours
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <!-- Include pour les commandes - sera appelé par l'API Fast -->
+                            {% include 'dashboard/commandes_en_cours.html' ignore missing %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colonne centrale - Logo (50% sur desktop) -->
+                <div class="col-12 col-lg-6 h-100 d-flex align-items-center justify-content-center">
+                    <div class="logo-container text-center">
+                        <!-- Logo SVG -->
+                        <div class="logo-wrapper mb-3">
+                            <img src="{{ url_for('static', filename='common/img/Logo.svg') }}" 
+                                 alt="Logo ACFC" 
+                                 class="img-fluid logo-main">
+                        </div>
+                        <div class="logo-text">
+                            <h3 class="text-primary">Système de gestion intégré</h3>
+                            <p class="text-muted">Catalogue • Clients • Commercial • Comptabilité • Stocks</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colonne droite - Indicateurs commerciaux (25% sur desktop) -->
+                <div class="col-12 col-lg-3 h-100">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Indicateurs commerciaux
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <!-- Include pour les indicateurs - sera appelé par l'API Fast -->
+                            {% include 'dashboard/indicateurs_commerciaux.html' ignore missing %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section liens rapides - Reste de la hauteur -->
+    <section class="quick-links py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h3 class="text-center mb-4">Accès rapide</h3>
+                </div>
+            </div>
+            <div class="row g-3">
+                <!-- Liens vers les différentes sections -->
+                <div class="col-6 col-md-4 col-lg-2">
+                    <a href="{{ url_for('catalogue.catalogue_list') }}" class="text-decoration-none">
+                        <div class="card text-center h-100 quick-link-card">
+                            <div class="card-body">
+                                <i class="fas fa-book fa-2x text-primary mb-2"></i>
+                                <h6 class="card-title">Catalogue</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <a href="{{ url_for('clients.get_clients') }}" class="text-decoration-none">
+                        <div class="card text-center h-100 quick-link-card">
+                            <div class="card-body">
+                                <i class="fas fa-users fa-2x text-info mb-2"></i>
+                                <h6 class="card-title">Clients</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <a href="{{ url_for('commercial.commercial_index') }}" class="text-decoration-none">
+                        <div class="card text-center h-100 quick-link-card">
+                            <div class="card-body">
+                                <i class="fas fa-handshake fa-2x text-warning mb-2"></i>
+                                <h6 class="card-title">Commercial</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <a href="{{ url_for('comptabilite.comptabilite_index') }}" class="text-decoration-none">
+                        <div class="card text-center h-100 quick-link-card">
+                            <div class="card-body">
+                                <i class="fas fa-calculator fa-2x text-success mb-2"></i>
+                                <h6 class="card-title">Comptabilité</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <a href="{{ url_for('stocks.stocks_index') }}" class="text-decoration-none">
+                        <div class="card text-center h-100 quick-link-card">
+                            <div class="card-body">
+                                <i class="fas fa-boxes fa-2x text-danger mb-2"></i>
+                                <h6 class="card-title">Stocks</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <a href="{{ url_for('admin.admin_list') }}" class="text-decoration-none">
+                        <div class="card text-center h-100 quick-link-card">
+                            <div class="card-body">
+                                <i class="fas fa-cog fa-2x text-secondary mb-2"></i>
+                                <h6 class="card-title">Administration</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

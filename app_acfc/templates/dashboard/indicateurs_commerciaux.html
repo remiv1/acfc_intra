@@ -1,0 +1,37 @@
+<!-- Template pour les indicateurs commerciaux -->
+<div class="indicateurs-commerciaux h-100">
+    <div class="p-3">
+        <!-- Liste des indicateurs -->
+        <div id="indicateurs-list">
+            <div class="row g-2">
+                {% set indicators = objects[1] %}
+                {% if indicators and indicators|length > 0 %}
+                    {% for key, value in indicators.items() %}
+                        <div class="col-12">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body p-2 text-center">
+                                    <h6 class="card-title text-success mb-1">{{ value[0] }}€</h6>
+                                    <small class="text-muted">{{ value[1] }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center p-4">
+                        <i class="fas fa-handshake fa-2x text-warning mb-2"></i>
+                        <p class="text-muted">Aucun indicateur disponible</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer avec lien -->
+    <div class="card-footer bg-light">
+        <div class="text-center">
+            <a href="{{ url_for('commercial.commercial_index') }}" class="btn btn-sm btn-outline-success">
+                Voir détails
+            </a>
+        </div>
+    </div>
+</div>

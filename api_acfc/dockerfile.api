@@ -1,0 +1,24 @@
+# ====================================================================
+# DOCKERFILE - API FASTAPI POUR ACFC (Back-Office)
+# ====================================================================
+# Ce Dockerfile construit une image pour l'API FastAPI dédiée aux opérations back-office
+# (vérification des impayés, traitements batch, etc.)
+# Aucun port n'est exposé : communication uniquement inter-containers ou via cron
+# ====================================================================
+
+FROM python:3.12-bullseye
+
+# Copie des requirements
+COPY requirements-api.txt /app/requirements.txt
+
+# Installation des dépendances Python
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# Copie du code source
+COPY ./api_acfc /app
+WORKDIR /app
+
+# Aucun port exposé explicitement, usage interne uniquement
+# Le point d'entrée par défaut de l'image lance l'app FastAPI
+
+CMD ["uvicorn", "api_back:app", "--host", "0.0.0.0", "--port", "8000"]
