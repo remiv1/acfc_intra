@@ -26,5 +26,5 @@ CREATE TABLE IF NOT EXISTS 30_pcg (
 """)
     # Insertion des données
     for _, row in df.iterrows():
-        values = "', '".join(str(x).replace("'", "''") for x in row)
-        f.write(f"INSERT INTO 30_pcg VALUES ('{values}');\n")
+        values = [f"'{str(x).replace('\'', '\'\'')}'" for x in row]
+        f.write(f"INSERT INTO 30_pcg VALUES ({', '.join(values)});\n")

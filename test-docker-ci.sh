@@ -31,7 +31,7 @@ echo "4️⃣ Attente de la disponibilité des services..."
 
 # Attendre MariaDB
 echo "   Attente de MariaDB..."
-timeout $TIMEOUT bash -c 'until docker compose -f docker-compose.yml ps acfc-db | grep -q "healthy\|Up"; do sleep 2; done' || {
+timeout $TIMEOUT bash -c "until docker compose -f $COMPOSE_FILE ps acfc-db | grep -q 'healthy\|Up'; do sleep 2; done" || {
     echo "❌ MariaDB n'est pas prêt"
     docker compose -f $COMPOSE_FILE logs acfc-db
     exit 1
@@ -40,7 +40,7 @@ echo "   ✅ MariaDB prêt"
 
 # Attendre MongoDB
 echo "   Attente de MongoDB..."
-timeout 60 bash -c 'until docker compose -f docker-compose.yml exec -T acfc-logs mongosh --eval "db.adminCommand(\"ping\")" > /dev/null 2>&1; do sleep 2; done' || {
+timeout 60 bash -c "until docker compose -f $COMPOSE_FILE exec -T acfc-logs mongosh --eval 'db.adminCommand(\"ping\")' > /dev/null 2>&1; do sleep 2; done" || {
     echo "⚠️ MongoDB non accessible (continuer quand même)"
 }
 echo "   ✅ MongoDB prêt"

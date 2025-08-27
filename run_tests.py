@@ -31,14 +31,20 @@ def get_project_root():
     """Retourne le répertoire racine du projet."""
     return Path(__file__).parent.absolute()
 
+def is_pytest_installed() -> bool:
+    """Vérifie si pytest est installé."""
+    try:
+        import pytest  # type: ignore
+        return True
+    except ImportError:
+        return False
+
 def install_test_dependencies():
     """Installe les dépendances de test si nécessaire."""
     print("🔧 Vérification des dépendances de test...")
-    
-    try:
-        import pytest   # type: ignore
+    if is_pytest_installed():
         print("✅ pytest déjà installé")
-    except ImportError:
+    else:
         print("📦 Installation des dépendances de test...")
         subprocess.run([
             sys.executable, "-m", "pip", "install", 
@@ -183,9 +189,7 @@ Exemples d'utilisation:
         create_reports_directory()
     
     # Vérification de pytest
-    try:
-        import pytest   # type: ignore
-    except ImportError:
+    if not is_pytest_installed():
         print("❌ pytest n'est pas installé")
         print("💡 Utilisez --install-deps pour installer les dépendances")
         return 1

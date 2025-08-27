@@ -60,9 +60,12 @@ while ($attempts -lt $maxAttempts -and -not $flaskReady) {
                 Write-Host "   ✅ Flask prêt (endpoint principal)" -ForegroundColor Green
             }
         } catch {
-            Start-Sleep -Seconds 2
-            $attempts++
+            # Do nothing, will sleep below
         }
+    }
+    if (-not $flaskReady) {
+        Start-Sleep -Seconds 2
+        $attempts++
     }
 }
 
