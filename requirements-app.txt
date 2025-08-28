@@ -6,3 +6,5 @@ flask-session==0.8.0
 sqlalchemy==2.0.43
 mysql-connector-python==9.4.0
 pymongo==4.14.1
+qrcode[pil]==8.2
+pillow==11.3.0

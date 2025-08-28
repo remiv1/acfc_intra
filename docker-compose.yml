@@ -86,10 +86,12 @@ services:
       - ./mariadb/:/docker-entrypoint-initdb.d/:ro  # Script d'initialisation
     healthcheck:
       # Vérification de santé pour démarrage ordonné des services
-      test: ["CMD", "mariadb", "-u", "root", "-p${DB_ROOT_PASSWORD}", "-e", "SELECT 1"]
-      interval: 10s                          # Vérification toutes les 10 secondes
-      timeout: 5s                            # Timeout par tentative
-      retries: 10                            # 10 tentatives max
+      # Test avec l'utilisateur application pour s'assurer qu'il est créé et fonctionnel
+      test: ["CMD", "mariadb", "-u", "${DB_USER}", "-p${DB_PASSWORD}", "-h", "localhost", "-D", "${DB_NAME}", "-e", "SELECT * FROM 21_catalogue LIMIT 1;"]
+      interval: 15s                          # Vérification toutes les 15 secondes
+      timeout: 10s                           # Timeout par tentative plus long
+      retries: 20                            # Plus de tentatives (script init long)
+      start_period: 45s                      # Délai avant premier test (init DB)
     networks:
       - acfc-network
 

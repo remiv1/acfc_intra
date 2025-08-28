@@ -413,7 +413,7 @@ def get_client(id_client: int):
         phones: List[Telephone] = client.tels
         mails: List[Mail] = client.mails
         addresses: List[Adresse] = client.adresses
-        orders: List[Commande] = client.commandes
+        orders: List[Commande] = sorted(client.commandes, key=lambda x: x.id, reverse=True)
         bills: List[Facture] = client.factures
         nom_affichage = client.nom_affichage
         db_session.close()

@@ -39,11 +39,16 @@
                                 {% if form_sub_context == 'create' %}
                                     Créer une nouvelle commande pour {{ client.nom_affichage }}
                                 {% else %}
-                                    Modification de la commande du {{ commande.date_commande.strftime('%d/%m/%Y') }}
+                                    Modification de la commande du {{ commande.date_commande|strftime }}
                                 {% endif %}
                             </p>
                         </div>
-                        <div>
+                        <div class="d-flex gap-2">
+                            {% if form_sub_context == 'edit' %}
+                                <a href="{{ url_for('commandes.commande_details', id_client=client.id, id_commande=commande.id) }}" class="btn btn-outline-info">
+                                    <i class="fas fa-eye me-1"></i>Voir détails
+                                </a>
+                            {% endif %}
                             <a href="{{ url_for('clients.get_client', id_client=client.id) }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-arrow-left me-1"></i>Retour au client
                             </a>
@@ -103,7 +108,7 @@
                         <div class="mb-3">
                             <label for="date_commande" class="form-label fw-bold">Date de commande *</label>
                             <input type="date" class="form-control" id="date_commande" name="date_commande" 
-                                   value="{% if commande %}{{ commande.date_commande.strftime('%Y-%m-%d') }}{% else %}{{ today.strftime('%Y-%m-%d') }}{% endif %}" required>
+                                   value="{% if commande %}{{ commande.date_commande|date_input }}{% else %}{{ today|date_input }}{% endif %}" required>
                         </div>
 
                         <!-- Descriptif -->
@@ -113,21 +118,51 @@
                                       placeholder="Description libre de la commande...">{% if commande %}{{ commande.descriptif }}{% endif %}</textarea>
                         </div>
 
-                        <!-- Adresse de livraison -->
+                        <!-- Adresses de facturation et livraison -->
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Adresse de livraison</label>
                             {% if client.adresses %}
-                                {% for adresse in client.adresses %}
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="id_adresse" id="adresse_{{ adresse.id }}" 
-                                           value="{{ adresse.id }}" {% if loop.first and not commande %}checked{% elif commande and commande.id_adresse == adresse.id %}checked{% endif %}>
-                                    <label class="form-check-label" for="adresse_{{ adresse.id }}">
-                                        <strong>{{ adresse.designation or 'Adresse principale' }}</strong><br>
-                                        {{ adresse.voie }}<br>
-                                        {{ adresse.cp }} {{ adresse.ville }}
-                                    </label>
-                                </div>
-                                {% endfor %}
+                                {% set adresse_principale = client.adresses[0] %}
+                                {% set adresse_livraison = commande.id_adresse if commande else adresse_principale.id %}
+                                
+                                {% if client.adresses|length == 1 or (commande and commande.id_adresse == adresse_principale.id) %}
+                                    <!-- Une seule adresse ou même adresse pour facturation et livraison -->
+                                    <label class="form-label fw-bold">Adresse de Facturation & Livraison</label>
+                                    <input type="hidden" name="id_adresse" value="{{ adresse_principale.id }}">
+                                    <div class="form-control-plaintext border p-2 bg-light">
+                                        <strong>{{ adresse_principale.designation or 'Adresse principale' }}</strong><br>
+                                        {{ adresse_principale.voie }}<br>
+                                        {% if adresse_principale.complement %}{{ adresse_principale.complement }}<br>{% endif %}
+                                        {{ adresse_principale.cp }} {{ adresse_principale.ville }}
+                                    </div>
+                                {% else %}
+                                    <!-- Adresses différentes pour facturation et livraison -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Adresse de Facturation</label>
+                                            <div class="form-control-plaintext border p-2 bg-light">
+                                                <strong>{{ adresse_principale.designation or 'Adresse principale' }}</strong><br>
+                                                {{ adresse_principale.voie }}<br>
+                                                {% if adresse_principale.complement %}{{ adresse_principale.complement }}<br>{% endif %}
+                                                {{ adresse_principale.cp }} {{ adresse_principale.ville }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Adresse de Livraison</label>
+                                            {% for adresse in client.adresses %}
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="id_adresse" id="adresse_{{ adresse.id }}" 
+                                                           value="{{ adresse.id }}" {% if adresse.id == adresse_livraison %}checked{% endif %}>
+                                                    <label class="form-check-label" for="adresse_{{ adresse.id }}">
+                                                        <strong>{{ adresse.designation or 'Adresse principale' }}</strong><br>
+                                                        {{ adresse.voie }}<br>
+                                                        {% if adresse.complement %}{{ adresse.complement }}<br>{% endif %}
+                                                        {{ adresse.cp }} {{ adresse.ville }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
                             {% else %}
                                 <div class="text-muted">Aucune adresse renseignée pour ce client</div>
                             {% endif %}
@@ -148,14 +183,14 @@
                             <label class="form-label fw-bold">Montant total</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" id="montant" name="montant" 
-                                       value="{% if commande %}{{ commande.montant }}{% else %}0.00{% endif %}" 
+                                       value="{% if commande and commande.montant %}{{ "%.2f"|format(commande.montant) }}{% else %}0.00{% endif %}" 
                                        step="0.01" readonly>
                                 <span class="input-group-text">€</span>
                             </div>
                             <small class="text-muted">Calculé automatiquement selon les produits sélectionnés</small>
                         </div>
 
-                        <!-- Statut et actions de la commande -->
+                        <!-- Statut de la commande (lecture seule) -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">Statut de la commande</label>
                             
@@ -164,7 +199,7 @@
                                 <div class="alert alert-info">
                                     <i class="fas fa-clock me-2"></i>
                                     <strong>En cours</strong><br>
-                                    <small>Une fois créée, vous pourrez facturer puis expédier cette commande.</small>
+                                    <small>Une fois créée, vous pourrez facturer puis expédier cette commande depuis les détails.</small>
                                 </div>
                             {% elif commande.is_annulee %}
                                 <!-- Commande annulée -->
@@ -178,7 +213,7 @@
                                 <div class="alert alert-success">
                                     <i class="fas fa-shipping-fast me-2"></i>
                                     <strong>Commande expédiée</strong><br>
-                                    <small>Expédiée le {{ commande.date_expedition.strftime('%d/%m/%Y') if commande.date_expedition else 'Date non renseignée' }}</small>
+                                    <small>Expédiée le {{ commande.date_expedition|strftime if commande.date_expedition else 'Date non renseignée' }}</small>
                                     {% if commande.id_suivi %}
                                         <br><small>Suivi: {{ commande.id_suivi }}</small>
                                     {% endif %}
@@ -188,25 +223,24 @@
                                 <div class="alert alert-warning">
                                     <i class="fas fa-file-invoice me-2"></i>
                                     <strong>Commande facturée</strong><br>
-                                    <small>Facturée le {{ commande.date_facturation.strftime('%d/%m/%Y') if commande.date_facturation else 'Date non renseignée' }}</small>
+                                    <small>Facturée le {{ commande.date_facturation|strftime if commande.date_facturation else 'Date non renseignée' }}</small>
                                 </div>
-                                
-                                {% if not commande.is_annulee %}
-                                <button type="button" class="btn btn-info mt-2" data-bs-toggle="modal" data-bs-target="#expeditionModal">
-                                    <i class="fas fa-shipping-fast me-1"></i>Expédier la commande
-                                </button>
-                                {% endif %}
                             {% else %}
-                                <!-- Commande en cours - peut être facturée -->
+                                <!-- Commande en cours -->
                                 <div class="alert alert-primary">
                                     <i class="fas fa-clock me-2"></i>
                                     <strong>En cours</strong><br>
                                     <small>Commande en cours de traitement</small>
                                 </div>
-                                
-                                <button type="button" class="btn btn-success mt-2" data-bs-toggle="modal" data-bs-target="#facturationModal">
-                                    <i class="fas fa-file-invoice me-1"></i>Facturer la commande
-                                </button>
+                            {% endif %}
+                            
+                            {% if commande and not commande.is_annulee %}
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        La facturation et l'expédition se gèrent depuis la page des détails de la commande.
+                                    </small>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
@@ -214,125 +248,110 @@
             </div>
         </div>
 
-        <!-- Sélection des produits du catalogue -->
+        <!-- Section remise client et sélection produits -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Sélection des produits</h5>
+                        <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Produits de la commande</h5>
                     </div>
                     <div class="card-body">
-                        <!-- Filtres pour le catalogue -->
+                        <!-- Remise par défaut du client -->
                         <div class="row mb-4">
-                            <div class="col-md-3">
-                                <label for="filter_millesime" class="form-label fw-bold">Millésime</label>
-                                <select class="form-select" id="filter_millesime" data-current-year="{{ current_year }}" onchange="appliquerFiltres()">
-                                    <option value="">Tous les millésimes</option>
-                                    {% for millesime in millesimes %}
-                                    <option value="{{ millesime }}" {% if millesime == current_year %}selected{% endif %}>{{ millesime }}</option>
-                                    {% endfor %}
-                                </select>
+                            <div class="col-md-6">
+                                <label for="remise_client" class="form-label fw-bold">Remise par défaut du client</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="remise_client" name="remise_client" 
+                                           value="{{ (client.reduces * 100)|round(1) }}" step="0.1" min="0" max="100">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <small class="text-muted">Cette remise sera appliquée par défaut aux nouveaux produits ajoutés</small>
                             </div>
-                            <div class="col-md-3">
-                                <label for="filter_type_produit" class="form-label fw-bold">Type de produit</label>
-                                <select class="form-select" id="filter_type_produit" onchange="appliquerFiltres()">
-                                    <option value="">Tous les types</option>
-                                    {% for type_produit in types_produit %}
-                                    <option value="{{ type_produit }}" {% if type_produit == 'Courrier' %}selected{% endif %}>{{ type_produit }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="filter_geographie" class="form-label fw-bold">Géographie</label>
-                                <select class="form-select" id="filter_geographie" onchange="appliquerFiltres()">
-                                    <option value="">Toutes les géographies</option>
-                                    {% for geographie in geographies %}
-                                    <option value="{{ geographie }}" {% if geographie == 'FRANCE' %}selected{% endif %}>{{ geographie }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-3 d-flex align-items-end">
-                                <button type="button" onclick="reinitialiserFiltres()" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times me-1"></i>Remettre filtres par défaut
+                            <div class="col-md-6 d-flex align-items-end">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#selectionProduitsModal">
+                                    <i class="fas fa-plus me-1"></i>Ajouter des produits
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Tableau des produits du catalogue -->
+                        <!-- Tableau des produits sélectionnés -->
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover" id="tableProduitsSelectionnes">
                                 <thead class="table-light">
                                     <tr>
-                                        <th width="50">Sélection</th>
                                         <th>Référence</th>
                                         <th>Désignation</th>
-                                        <th>Type</th>
-                                        <th>Millésime</th>
-                                        <th>Géographie</th>
-                                        <th>Prix HT</th>
+                                        <th>Prix unitaire HT</th>
                                         <th>Quantité</th>
+                                        <th>Remise</th>
+                                        <th>Total HT</th>
+                                        <th width="120">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody id="catalogue-tbody">
-                                    {% for produit in catalogue_complet %}
-                                    <tr class="catalogue-row" 
-                                        data-millesime="{{ produit.millesime }}" 
-                                        data-type="{{ produit.type_produit }}" 
-                                        data-geographie="{{ produit.geographie }}">
-                                        <td>
-                                            <input type="checkbox" class="form-check-input product-checkbox" 
-                                                   name="produits_selectionnes" value="{{ produit.id }}"
-                                                   {% if produit.id in produits_id_commandes %}checked{% endif %}>
-                                        </td>
-                                        <td>{{ produit.ref_auto }}</td>
-                                        <td>{{ produit.des_auto }}</td>
-                                        <td>{{ produit.type_produit }}</td>
-                                        <td>{{ produit.millesime }}</td>
-                                        <td>{{ produit.geographie }}</td>
-                                        <td>
-                                            {% if produit.type_produit == 'Timbres' %}
-                                                <!-- Prix éditable pour les timbres -->
-                                                <div class="input-group input-group-sm" style="width: 120px;">
-                                                    <input type="number" class="form-control form-control-sm price-input" 
-                                                           name="prix_{{ produit.id }}" 
-                                                           value="{% if produit.id in produits_commande %}{{ produits_commande[produit.id].prix_unitaire }}{% else %}{{ "%.2f"|format(produit.prix_unitaire_ht) }}{% endif %}" 
-                                                           step="0.01" min="0"
-                                                           {% if produit.id not in produits_id_commandes %}disabled{% endif %}>
+                                <tbody id="produitsSelectionnesBody">
+                                    {% if commande and lignes_devis %}
+                                        {% for ligne in lignes_devis %}
+                                        <tr data-produit-id="{{ ligne.produit_id }}" data-ligne-id="{{ ligne.ligne_id }}">
+                                            <td class="reference">{{ ligne.produit.ref_auto }}</td>
+                                            <td class="designation">{{ ligne.produit.des_auto }}</td>
+                                            <td>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" class="form-control prix-input" 
+                                                           name="prix_{{ ligne.produit_id }}_{{ ligne.ligne_id }}" 
+                                                           value="{{ "%.2f"|format(ligne.devise.prix_unitaire) }}" 
+                                                           step="0.01" min="0" onchange="calculerTotalLigne(this)"
+                                                           title="Prix unitaire HT">
                                                     <span class="input-group-text">€</span>
                                                 </div>
-                                            {% else %}
-                                                <!-- Prix fixe pour les autres types -->
-                                                {{ "%.2f"|format(produit.prix_unitaire_ht) }} €
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <input type="number" class="form-control form-control-sm quantity-input" 
-                                                   name="qte_{{ produit.id }}" 
-                                                   value="{% if produit.id in produits_commande %}{{ produits_commande[produit.id].qte }}{% else %}1{% endif %}" 
-                                                   min="1" style="width: 80px;"
-                                                   {% if produit.id not in produits_id_commandes %}disabled{% endif %}>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control form-control-sm qte-input" 
+                                                       name="qte_{{ ligne.produit_id }}_{{ ligne.ligne_id }}" 
+                                                       value="{{ ligne.devise.qte }}" 
+                                                       min="1" onchange="calculerTotalLigne(this)"
+                                                       title="Quantité">
+                                            </td>
+                                            <td>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" class="form-control remise-input" 
+                                                           name="remise_{{ ligne.produit_id }}_{{ ligne.ligne_id }}" 
+                                                           value="{{ ((ligne.devise.remise or 0) * 100)|round(1) }}" 
+                                                           step="0.1" min="0" max="100" onchange="calculerTotalLigne(this)"
+                                                           title="Remise en pourcentage">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </td>
+                                            <td class="total-ligne fw-bold">
+                                                {{ "%.2f"|format(ligne.total_ligne) }} €
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="duppliquerLigne(this)" title="Dupliquer">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="supprimerLigne(this)" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% endif %}
                                 </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <td colspan="5" class="text-end fw-bold">Total de la commande :</td>
+                                        <td class="fw-bold" id="totalCommande">
+                                            {% if commande and commande.montant %}{{ "%.2f"|format(commande.montant) }} €{% else %}0.00 €{% endif %}
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
                             </table>
-                        </div>
-
-                        {% if not catalogue_complet %}
-                        <div class="text-center text-muted py-4">
-                            <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
-                            <h5>Aucun produit dans le catalogue</h5>
-                            <p>Il n'y a actuellement aucun produit dans le catalogue.<br>
-                            Veuillez contacter l'administrateur pour ajouter des produits.</p>
-                        </div>
-                        {% endif %}
-                        
-                        <!-- Message pour les produits filtrés -->
-                        <div id="no-products-message" class="text-center text-muted py-4" style="display: none;">
-                            <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
-                            <h5>Aucun produit trouvé</h5>
-                            <p>Aucun produit ne correspond aux filtres sélectionnés.<br>
-                            Essayez de modifier ou d'effacer les filtres.</p>
+                            
+                            <div id="aucunProduitMessage" class="text-center text-muted py-4" {% if commande and lignes_devis %}style="display: none;"{% endif %}>
+                                <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                                <h5>Aucun produit sélectionné</h5>
+                                <p>Cliquez sur "Ajouter des produits" pour commencer votre commande.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -359,98 +378,128 @@
 <!-- JavaScript spécifique au formulaire de contenu de commande -->
 <script src="{{ url_for('static', filename='commandes/js/commande_form_content.js') }}"></script>
 
-<!-- Modales pour facturation et expédition -->
-
-<!-- Modale de facturation -->
-<div class="modal fade" id="facturationModal" tabindex="-1" aria-labelledby="facturationModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<!-- Modal de sélection des produits -->
+<div class="modal fade" id="selectionProduitsModal" tabindex="-1" aria-labelledby="selectionProduitsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="facturationModalLabel">
-                    <i class="fas fa-file-invoice me-2"></i>Facturer la commande
+                <h5 class="modal-title" id="selectionProduitsModalLabel">
+                    <i class="fas fa-search me-2"></i>Sélectionner des produits
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="facturationForm">
-                    <div class="mb-3">
-                        <label for="date_facturation_modal" class="form-label fw-bold">Date de facturation *</label>
-                        <input type="date" class="form-control" id="date_facturation_modal" 
-                               value="{{ today.strftime('%Y-%m-%d') }}" required>
+                <!-- Barre de recherche -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" id="rechercheProductsInput" 
+                                   placeholder="Rechercher par référence ou désignation..." 
+                                   onkeyup="filtrerProduitsCatalogue()">
+                        </div>
                     </div>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Information :</strong> Une fois facturée, la commande pourra être expédiée.
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-outline-secondary" onclick="reinitialiserRecherche()">
+                            <i class="fas fa-times me-1"></i>Effacer la recherche
+                        </button>
                     </div>
-                </form>
+                </div>
+                
+                <!-- Filtres -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label for="modalFilterMillesime" class="form-label">Millésime</label>
+                        <select class="form-select" id="modalFilterMillesime" onchange="filtrerProduitsCatalogue()">
+                            <option value="">Tous</option>
+                            {% for millesime in millesimes %}
+                            <option value="{{ millesime }}" {% if millesime == current_year %}selected{% endif %}>{{ millesime }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="modalFilterType" class="form-label">Type</label>
+                        <select class="form-select" id="modalFilterType" onchange="filtrerProduitsCatalogue()">
+                            <option value="">Tous</option>
+                            {% for type_produit in types_produit %}
+                            <option value="{{ type_produit }}" {% if type_produit == 'Courrier' %}selected{% endif %}>{{ type_produit }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="modalFilterGeographie" class="form-label">Géographie</label>
+                        <select class="form-select" id="modalFilterGeographie" onchange="filtrerProduitsCatalogue()">
+                            <option value="">Toutes</option>
+                            {% for geographie in geographies %}
+                            <option value="{{ geographie }}" {% if geographie == 'FRANCE' %}selected{% endif %}>{{ geographie }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-outline-secondary w-100" onclick="reinitialiserFiltresModal()">
+                            <i class="fas fa-eraser me-1"></i>Reset filtres
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Tableau des produits du catalogue -->
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover table-sm">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width: 50px;">Sélection</th>
+                                <th>Référence</th>
+                                <th>Désignation</th>
+                                <th>Type</th>
+                                <th>Millésime</th>
+                                <th>Géographie</th>
+                                <th>Prix HT</th>
+                                <th style="width: 80px;">Qté</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalCatalogueBody">
+                            {% for produit in catalogue_complet %}
+                            <tr class="modal-catalogue-row" 
+                                data-millesime="{{ produit.millesime }}" 
+                                data-type="{{ produit.type_produit }}" 
+                                data-geographie="{{ produit.geographie }}"
+                                data-reference="{{ produit.ref_auto|lower }}"
+                                data-designation="{{ produit.des_auto|lower }}">
+                                <td>
+                                    <input type="checkbox" class="form-check-input modal-product-checkbox" 
+                                           value="{{ produit.id }}" data-produit-id="{{ produit.id }}">
+                                </td>
+                                <td>{{ produit.ref_auto }}</td>
+                                <td>{{ produit.des_auto }}</td>
+                                <td>{{ produit.type_produit }}</td>
+                                <td>{{ produit.millesime }}</td>
+                                <td>{{ produit.geographie }}</td>
+                                <td>{{ "%.2f"|format(produit.prix_unitaire_ht) }} €</td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm modal-qte-input" 
+                                           id="modalQte_{{ produit.id }}" value="1" min="1" style="width: 70px;">
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="modalAucunProduitMessage" class="text-center text-muted py-4" style="display: none;">
+                    <i class="fas fa-search fa-2x mb-2"></i>
+                    <h5>Aucun produit trouvé</h5>
+                    <p>Aucun produit ne correspond à vos critères de recherche.</p>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-success" id="confirmerFacturation">
-                    <i class="fas fa-file-invoice me-1"></i>Confirmer la facturation
+                <button type="button" class="btn btn-primary" onclick="ajouterProduitsSelectionnes()">
+                    <i class="fas fa-plus me-1"></i>Ajouter les produits sélectionnés
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modale d'expédition -->
-<div class="modal fade" id="expeditionModal" tabindex="-1" aria-labelledby="expeditionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="expeditionModalLabel">
-                    <i class="fas fa-shipping-fast me-2"></i>Expédier la commande
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-            </div>
-            <div class="modal-body">
-                <form id="expeditionForm">
-                    <div class="mb-3">
-                        <label for="date_expedition_modal" class="form-label fw-bold">Date d'expédition *</label>
-                        <input type="date" class="form-control" id="date_expedition_modal" 
-                               value="{{ today.strftime('%Y-%m-%d') }}" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Mode d'expédition *</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="mode_expedition" id="expedition_suivi" value="suivi" checked>
-                            <label class="form-check-label" for="expedition_suivi">
-                                <i class="fas fa-truck me-1"></i>Expédié avec suivi
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="mode_expedition" id="expedition_sans_suivi" value="sans_suivi">
-                            <label class="form-check-label" for="expedition_sans_suivi">
-                                <i class="fas fa-box me-1"></i>Expédié sans suivi
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="mode_expedition" id="expedition_main_propre" value="main_propre">
-                            <label class="form-check-label" for="expedition_main_propre">
-                                <i class="fas fa-hand-holding me-1"></i>Remise en main propre
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3" id="numero_suivi_group">
-                        <label for="numero_suivi_modal" class="form-label fw-bold">Numéro de suivi</label>
-                        <input type="text" class="form-control" id="numero_suivi_modal" 
-                               placeholder="Entrez le numéro de suivi">
-                        <small class="text-muted">Requis pour l'expédition avec suivi</small>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-info" id="confirmerExpedition">
-                    <i class="fas fa-shipping-fast me-1"></i>Confirmer l'expédition
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Le script JavaScript a été déplacé vers commande_form_content.js -->
-<!-- Il contient la gestion des modales de facturation et expédition et les fonctions de filtrage -->
+<!-- Le script JavaScript Enhanced pour la gestion avancée des commandes -->
+<script src="{{ url_for('static', filename='commandes/js/commande_form_enhanced.js') }}"></script>

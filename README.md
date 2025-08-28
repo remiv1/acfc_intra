@@ -1,4 +1,10 @@
-# ACFC - Application de Gestion d'Entreprise 🏢
+---
+title: ReadMe d'une application pour la gestion d'entreprise
+author: Rémi Verschuur
+date: 2025-08-28
+tags: ['Flask', 'Docker', 'Microservices', 'API', 'Gestion d\'entreprise', 'Web', 'Python', 'MariaDB', 'Au Collectionneur Franc-Comtois']
+---
+# 🏢 ACFC - Application de Gestion d'Entreprise
 
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-Latest-green.svg)](https://flask.palletsprojects.com/)
@@ -18,7 +24,7 @@ L'architecture de l'application ACFC repose sur une approche micro-services, cha
 - **Cache** : Redis pour la gestion des sessions et des files d'attente.
 - **Mails** : Service de gestion des emails.
 
-[Diagramme d'Architecture](documentation/architecturedocker.svg)
+[![Diagramme d'Architecture](documentation/architecture-docker.svg)](documentation/architecture-docker.svg)
 
 ## 🎯 Fonctionnalités
 

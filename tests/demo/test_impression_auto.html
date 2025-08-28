@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test des Options d'Impression - ACFC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .demo-card {
+            transition: transform 0.2s;
+        }
+        .demo-card:hover {
+            transform: translateY(-5px);
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center mb-5">
+                    <i class="bi bi-printer-fill text-success me-3"></i>
+                    Options d'Impression Automatique
+                </h1>
+                <p class="lead text-center mb-5">
+                    Testez les différentes façons d'imprimer automatiquement le bon de commande
+                </p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Option 1: Aperçu normal -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card demo-card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon text-primary">
+                            <i class="bi bi-eye"></i>
+                        </div>
+                        <h5 class="card-title">Aperçu Normal</h5>
+                        <p class="card-text">
+                            Ouvre la page d'impression sans déclencher l'impression automatiquement.
+                            L'utilisateur peut utiliser Ctrl+P quand il le souhaite.
+                        </p>
+                        <div class="code-block mb-3">
+                            /bon-impression
+                        </div>
+                        <a href="#" class="btn btn-outline-primary" onclick="testPrint('')">
+                            <i class="bi bi-eye me-1"></i>Tester
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option 2: Impression automatique -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card demo-card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon text-success">
+                            <i class="bi bi-printer-fill"></i>
+                        </div>
+                        <h5 class="card-title">Impression Automatique</h5>
+                        <p class="card-text">
+                            Déclenche automatiquement la boîte de dialogue d'impression après 1.5 seconde.
+                            Laisse la page ouverte après impression.
+                        </p>
+                        <div class="code-block mb-3">
+                            /bon-impression?auto_print=true
+                        </div>
+                        <a href="#" class="btn btn-success" onclick="testPrint('?auto_print=true')">
+                            <i class="bi bi-printer-fill me-1"></i>Tester
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option 3: Impression et fermeture -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card demo-card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon text-warning">
+                            <i class="bi bi-printer"></i>
+                        </div>
+                        <h5 class="card-title">Imprimer et Fermer</h5>
+                        <p class="card-text">
+                            Déclenche l'impression automatiquement puis ferme automatiquement l'onglet
+                            après l'impression (si le navigateur le permet).
+                        </p>
+                        <div class="code-block mb-3">
+                            /bon-impression?auto_print=close
+                        </div>
+                        <a href="#" class="btn btn-warning" onclick="testPrint('?auto_print=close')">
+                            <i class="bi bi-printer me-1"></i>Tester
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option 4: Impression rapide -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card demo-card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon text-info">
+                            <i class="bi bi-lightning"></i>
+                        </div>
+                        <h5 class="card-title">Impression Rapide</h5>
+                        <p class="card-text">
+                            Déclenche l'impression très rapidement (0.5 seconde).
+                            Utile pour les impressions en série.
+                        </p>
+                        <div class="code-block mb-3">
+                            /bon-impression?auto_print=true&delay=500
+                        </div>
+                        <a href="#" class="btn btn-info" onclick="testPrint('?auto_print=true&delay=500')">
+                            <i class="bi bi-lightning me-1"></i>Tester
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option 5: Mode test -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card demo-card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon text-secondary">
+                            <i class="bi bi-cursor"></i>
+                        </div>
+                        <h5 class="card-title">Mode Test</h5>
+                        <p class="card-text">
+                            Affiche un indicateur et permet de déclencher l'impression en cliquant
+                            n'importe où sur la page. Pratique pour les tests.
+                        </p>
+                        <div class="code-block mb-3">
+                            /bon-impression?click_print=true
+                        </div>
+                        <a href="#" class="btn btn-secondary" onclick="testPrint('?click_print=true')">
+                            <i class="bi bi-cursor me-1"></i>Tester
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option 6: Délai personnalisé -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card demo-card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon text-dark">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <h5 class="card-title">Délai Personnalisé</h5>
+                        <p class="card-text">
+                            Permet de définir un délai personnalisé avant l'impression.
+                            Utile pour s'adapter à différentes vitesses de chargement.
+                        </p>
+                        <div class="code-block mb-3">
+                            /bon-impression?auto_print=true&delay=3000
+                        </div>
+                        <a href="#" class="btn btn-dark" onclick="testPrint('?auto_print=true&delay=3000')">
+                            <i class="bi bi-clock me-1"></i>Tester (3s)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section technique -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="bi bi-code-slash me-2"></i>Implémentation Technique</h3>
+                    </div>
+                    <div class="card-body">
+                        <h5>JavaScript Utilisé :</h5>
+                        <div class="code-block mb-4">
+// Lecture des paramètres URL
+const urlParams = new URLSearchParams(window.location.search);
+const autoPrint = urlParams.get('auto_print');
+const printDelay = parseInt(urlParams.get('delay') || '1500');
+
+// Impression avec délai
+if (autoPrint) {
+    setTimeout(function() {
+        window.print();
+        
+        // Fermeture automatique si demandée
+        if (autoPrint === 'close') {
+            window.addEventListener('afterprint', function() {
+                window.close();
+            });
+        }
+    }, printDelay);
+}
+                        </div>
+
+                        <h5>Paramètres URL Supportés :</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <strong>auto_print=true</strong> : Déclenche l'impression automatiquement
+                            </li>
+                            <li class="list-group-item">
+                                <strong>auto_print=close</strong> : Déclenche l'impression puis ferme l'onglet
+                            </li>
+                            <li class="list-group-item">
+                                <strong>delay=X</strong> : Délai en millisecondes avant impression (défaut: 1500)
+                            </li>
+                            <li class="list-group-item">
+                                <strong>click_print=true</strong> : Mode test avec impression au clic
+                            </li>
+                        </ul>
+
+                        <div class="alert alert-info mt-4">
+                            <h6><i class="bi bi-info-circle me-2"></i>Notes importantes :</h6>
+                            <ul class="mb-0">
+                                <li>La fermeture automatique ne fonctionne que si la page est ouverte par un script</li>
+                                <li>Certains navigateurs peuvent bloquer l'impression automatique</li>
+                                <li>Le raccourci clavier 'P' est disponible comme alternative</li>
+                                <li>L'impression fonctionne même si JavaScript est désactivé (via Ctrl+P)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function testPrint(params) {
+            // Pour les tests, on simule avec une page de démonstration
+            const testUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Test d'impression</title>
+                    <style>
+                        body { font-family: Arial; padding: 20px; }
+                        .demo { border: 2px dashed #007bff; padding: 20px; margin: 20px 0; }
+                    </style>
+                </head>
+                <body>
+                    <h1>🖨️ Test d'Impression ACFC</h1>
+                    <div class="demo">
+                        <h2>Bon de Commande #12345</h2>
+                        <p><strong>Client:</strong> Société Test SARL</p>
+                        <p><strong>Date:</strong> ${new Date().toLocaleDateString('fr-FR')}</p>
+                        <p><strong>Montant:</strong> 1 234,56 €</p>
+                    </div>
+                    <p><em>Ceci est une page de test. En production, cela serait le vrai bon de commande.</em></p>
+                    
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const urlParams = new URLSearchParams('${params}');
+                            const autoPrint = urlParams.get('auto_print');
+                            const printDelay = parseInt(urlParams.get('delay') || '1500');
+                            
+                            if (autoPrint) {
+                                console.log('Impression programmée dans ' + printDelay + 'ms');
+                                setTimeout(function() {
+                                    window.print();
+                                    if (autoPrint === 'close') {
+                                        window.addEventListener('afterprint', function() {
+                                            setTimeout(() => window.close(), 500);
+                                        });
+                                    }
+                                }, printDelay);
+                            }
+                            
+                            if (urlParams.get('click_print') === 'true') {
+                                document.addEventListener('click', () => window.print());
+                                document.body.insertAdjacentHTML('afterbegin', 
+                                    '<div style="position:fixed;top:10px;right:10px;background:#007bff;color:white;padding:10px;border-radius:5px;z-index:1000;">🖨️ Cliquez pour imprimer</div>'
+                                );
+                            }
+                        });
+                    </script>
+                </body>
+                </html>
+            `);
+            
+            window.open(testUrl, '_blank');
+        }
+    </script>
+</body>
+</html>

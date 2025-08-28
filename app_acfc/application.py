@@ -25,7 +25,7 @@ from waitress import serve
 from typing import Any, Dict, Tuple, List
 from werkzeug.exceptions import HTTPException, Forbidden, Unauthorized
 from services import PasswordService, SecureSessionService
-from modeles import SessionBdD, User, Commande, Client
+from modeles import SessionBdD, User, Commande, Client, init_database
 from datetime import datetime, date
 from sqlalchemy import text, and_, or_
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
@@ -136,6 +136,13 @@ WRONG_ROAD: str = 'Méthode non autorisée ou droits insuffisants.'
 # Instance du service de gestion des mots de passe (hachage Argon2)
 ph_acfc = PasswordService()
 
+# Création automatique des tables si elles n'existent pas (avec retry)
+try:
+    init_database()
+except Exception as e:
+    print(f"❌ Erreur critique lors de l'initialisation de la base : {e}")
+    exit(1)
+
 # ====================================================================
 # MIDDLEWARES - GESTION DES REQUÊTES GLOBALES
 # ====================================================================
@@ -183,6 +190,19 @@ def after_request(response: Response) -> Response:
     """
     print("After request")  # Log basique - à remplacer par un logger professionnel
     return response
+
+@acfc.template_filter('strftime')
+def format_datetime(value: datetime | date | None, format: str='%d/%m/%Y'):
+    if isinstance(value, (datetime, date)):
+        return value.strftime(format)
+    return value
+
+@acfc.template_filter('date_input')
+def format_date_input(value: datetime | date | None):
+    """Filtre spécifique pour les champs input[type=date] qui attendent le format ISO (YYYY-MM-DD)"""
+    if isinstance(value, (datetime, date)):
+        return value.strftime('%Y-%m-%d')
+    return value
 
 # ====================================================================
 # FONCTIONS DE RECHERCHES - HORS ROUTES

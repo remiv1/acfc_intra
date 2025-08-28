@@ -18,11 +18,6 @@
     {% include 'commandes/commande_form_content.html' %}
 {% elif sub_context == 'details' %}
     {% include 'commandes/commande_details_content.html' %}
-{% elif sub_context == 'list' %}
-    {% include 'commandes/commandes_list.html' %}
-{% else %}
-    <!-- Vue par défaut : liste des commandes -->
-    {% include 'commandes/commandes_list.html' %}
 {% endif %}
 
 <!-- JavaScript spécifique aux commandes -->

@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, Date, DateTime, Boolean, Text, Numeric, event, Computed, LargeBinary, ForeignKey
+from sqlalchemy import Integer, String, Date, DateTime, Boolean, Text, Numeric, event, Computed, LargeBinary, ForeignKey, text
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Mapper, relationship, mapped_column
@@ -488,6 +488,7 @@ class Adresse(Base):
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False)
     client = relationship("Client", back_populates="adresses")
+    commandes = relationship("Commande", back_populates="adresse")
 
     # === DONNÉES D'ADRESSE ===
     adresse_l1 = mapped_column(String(255), nullable=False)
@@ -517,19 +518,27 @@ class Commande(Base):
     # === DONNÉES DE LA COMMANDE ===
     is_ad_livraison = mapped_column(Boolean, default=False, nullable=False)
     id_adresse = mapped_column(Integer, ForeignKey(PK_ADRESSE), nullable=True)
+    adresse = relationship("Adresse", back_populates="commandes")
     descriptif = mapped_column(String(255), nullable=True)
     date_commande = mapped_column(Date, default=func.now(), nullable=False)
     montant = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
     devises = relationship("DevisesFactures", back_populates="commande")
     facture = relationship("Facture", back_populates="commande")
 
-    # === ÉTAT DE LA COMMANDE ===
+    # === ÉTAT DE LA COMMANDE (GLOBAL) ===
     is_annulee = mapped_column(Boolean, default=False, nullable=False)
-    is_facture = mapped_column(Boolean, default=False, nullable=False)
-    date_facturation = mapped_column(Date, nullable=True)
-    is_expedie = mapped_column(Boolean, default=False, nullable=False)
-    date_expedition = mapped_column(Date, nullable=True)
-    id_suivi = mapped_column(String(100), nullable=True)
+    is_facture = mapped_column(Boolean, default=False, nullable=False,
+                              comment="True quand toute la commande est facturée")
+    is_expedie = mapped_column(Boolean, default=False, nullable=False,
+                              comment="True quand toute la commande est expédiée")
+    
+    # === DATES HÉRITÉES (POUR COMPATIBILITÉ) ===
+    date_facturation = mapped_column(Date, nullable=True,
+                                    comment="Date de première facturation (compatibilité)")
+    date_expedition = mapped_column(Date, nullable=True,
+                                   comment="Date de première expédition (compatibilité)")
+    id_suivi = mapped_column(String(100), nullable=True,
+                            comment="Premier numéro de suivi (compatibilité)")
 
 class DevisesFactures(Base):
     '''Représente les éléments des commandes et des factures dans le système.'''
@@ -539,9 +548,6 @@ class DevisesFactures(Base):
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_commande = mapped_column(Integer, ForeignKey(PK_COMMANDE), nullable=False)
     commande = relationship("Commande", back_populates="devises")
-    id_facture = mapped_column(Integer, nullable=True)
-    facture = relationship("Facture", back_populates="composantes_factures", 
-                          primaryjoin="foreign(DevisesFactures.id_facture) == Facture.id")
 
     # === DONNÉES DE L'ÉLÉMENT ===
     reference = mapped_column(String(100), nullable=False)
@@ -551,6 +557,34 @@ class DevisesFactures(Base):
     remise = mapped_column(Numeric(10, 4), nullable=False, default=0.10)
     prix_total = mapped_column(Numeric(10, 4), Computed('qte * prix_unitaire * (1 - remise)'))
     remise_euro = mapped_column(Numeric(10, 4), Computed('qte * prix_unitaire * remise'))
+    
+    # === ÉTAT DE FACTURATION ET EXPÉDITION ===
+    is_facture = mapped_column(Boolean, default=False, nullable=False, 
+                              comment="Indique si cette ligne a été facturée")
+    id_facture = mapped_column(Integer, nullable=True)
+    facture = relationship("Facture", back_populates="composantes_factures", 
+                          primaryjoin="foreign(DevisesFactures.id_facture) == Facture.id")
+    facture_by = mapped_column(String(100), nullable=True,
+                              comment="Utilisateur qui a facturé cette ligne")
+    
+    is_expedie = mapped_column(Boolean, default=False, nullable=False,
+                              comment="Indique si cette ligne a été expédiée")
+    id_expedition = mapped_column(String(50), nullable=True,
+                                     comment="Numéro d'expédition de cette ligne")
+    id_expedition = mapped_column(Integer, ForeignKey('14_expeditions.id'), nullable=True)
+    expedition = relationship("Expeditions", back_populates="devises")
+    expedie_by = mapped_column(String(100), nullable=True,
+                              comment="Utilisateur qui a expédié cette ligne")
+    
+    # === MÉTADONNÉES ===
+    created_by = mapped_column(String(100), nullable=True,
+                              comment="Utilisateur qui a créé cette ligne")
+    created_at = mapped_column(DateTime, default=func.now(), nullable=False,
+                              comment="Date de création de cette ligne")
+    updated_by = mapped_column(String(100), nullable=True,
+                              comment="Utilisateur qui a modifié cette ligne")
+    updated_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False,
+                              comment="Date de dernière modification")
 
 class Facture(Base):
     '''Représente une facture dans le système.'''
@@ -617,6 +651,19 @@ class Facture(Base):
 
 # Enregistrement de l'écouteur qui délègue la logique à la méthode de la classe
 event.listen(Facture, 'after_insert', Facture.set_id_fiscal_after_insert)
+
+class Expeditions(Base):
+    """Table des expéditions simplifiée"""
+    __tablename__ = '14_expeditions'
+    
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_commande = mapped_column(Integer, ForeignKey('11_commandes.id'), nullable=False)
+    devises = relationship("DevisesFactures", back_populates="expedition")
+    is_main_propre = mapped_column(Boolean, default=False, nullable=False)
+    numero_expedition = mapped_column(String(50), nullable=False)
+    date_expedition_remise = mapped_column(Date, nullable=False)
+    created_by = mapped_column(String(50), nullable=True)
+    created_at = mapped_column(DateTime, default=func.now)
 
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE GESTION DES PRODUITS
@@ -848,5 +895,46 @@ class Moi(Base):
     mail = mapped_column(String(100), nullable=False)
     mois_comptable = mapped_column(Integer, nullable=False)
 
-# Création automatique des tables si elles n'existent pas
-Base.metadata.create_all(engine)
+# ====================================================================
+# INITIALISATION BASE DE DONNÉES AVEC RETRY
+# ====================================================================
+
+def init_database(max_retries: int = 30, retry_delay: int = 2) -> None:
+    """
+    Initialise la base de données avec mécanisme de retry.
+    
+    Args:
+        max_retries (int): Nombre maximum de tentatives
+        retry_delay (int): Délai entre les tentatives en secondes
+    
+    Raises:
+        ConnectionError: Si impossible de se connecter après toutes les tentatives
+    """
+    import time
+    from sqlalchemy.exc import OperationalError, DatabaseError
+    
+    for attempt in range(1, max_retries + 1):
+        try:
+            print(f"🔄 Tentative {attempt}/{max_retries} de connexion à la base de données...")
+            
+            # Test de connexion
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            
+            # Si connexion OK, création des tables
+            Base.metadata.create_all(engine)
+            print("✅ Base de données initialisée avec succès !")
+            return
+            
+        except (OperationalError, DatabaseError) as e:
+            if attempt == max_retries:
+                print(f"❌ Échec final après {max_retries} tentatives")
+                raise ConnectionError(
+                    f"Impossible de se connecter à la base de données après {max_retries} tentatives. "
+                    f"Dernière erreur: {e}"
+                ) from e
+            
+            print(f"⚠️  Tentative {attempt} échouée: {e}")
+            print(f"🕒 Nouvelle tentative dans {retry_delay}s...")
+            time.sleep(retry_delay)
+

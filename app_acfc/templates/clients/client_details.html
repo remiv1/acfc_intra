@@ -158,12 +158,9 @@
                     <button class="nav-link" id="phones-tab" data-bs-toggle="tab" 
                             data-bs-target="#phones" type="button" role="tab">
                         <i class="bi bi-telephone me-2"></i>Téléphones
-                        <span id="phones-count" class="badge bg-secondary ms-1">{{ phones|length }}</span>
                         {% set principal_phones = phones|selectattr('is_principal')|list %}
                         {% if principal_phones %}
-                            <span class="badge badge-principal ms-1">
-                                <i class="bi bi-star-fill"></i> {{ principal_phones|length }}
-                            </span>
+                            <i class="bi bi-star-fill text-warning ms-1">+</i>
                         {% endif %}
                     </button>
                 </li>
@@ -171,12 +168,9 @@
                     <button class="nav-link" id="emails-tab" data-bs-toggle="tab" 
                             data-bs-target="#emails" type="button" role="tab">
                         <i class="bi bi-envelope me-2"></i>Emails
-                        <span id="emails-count" class="badge bg-secondary ms-1">{{ mails|length }}</span>
                         {% set principal_emails = mails|selectattr('is_principal')|list %}
                         {% if principal_emails %}
-                            <span class="badge badge-principal ms-1">
-                                <i class="bi bi-star-fill"></i> {{ principal_emails|length }}
-                            </span>
+                            <i class="bi bi-star-fill text-warning ms-1">+</i>
                         {% endif %}
                     </button>
                 </li>
@@ -184,12 +178,9 @@
                     <button class="nav-link" id="addresses-tab" data-bs-toggle="tab" 
                             data-bs-target="#addresses" type="button" role="tab">
                         <i class="bi bi-geo-alt me-2"></i>Adresses
-                        <span id="addresses-count" class="badge bg-secondary ms-1">{{ addresses|length }}</span>
                         {% set principal_addresses = addresses|selectattr('is_principal')|list %}
                         {% if principal_addresses %}
-                            <span class="badge badge-principal ms-1">
-                                <i class="bi bi-star-fill"></i> {{ principal_addresses|length }}
-                            </span>
+                            <i class="bi bi-star-fill text-warning ms-1">+</i>
                         {% endif %}
                     </button>
                 </li>
@@ -202,7 +193,6 @@
                         {% if nb_en_cours > 0 %}
                             <span class="badge bg-warning text-dark ms-1">{{ nb_en_cours }} en cours</span>
                         {% endif %}
-                        <span id="orders-count" class="badge bg-secondary ms-1">{{ orders|length }} total</span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -583,17 +573,17 @@
                                         </td>
                                         <td>
                                             <div class="btn-group gap-1" role="group" aria-label="Actions commande">
-                                                <a href="{{ url_for('commandes.commande_details', id_commande=commande.id, id_client=commande.id_client) }}" 
+                                                <a href="{{ url_for('commandes.commande_details', id_client=commande.id_client, id_commande=commande.id) }}" 
                                                    class="btn btn-sm btn-outline-primary" title="Voir les détails">
                                                     <i class="bi bi-eye me-1"></i>Voir
                                                 </a>
                                                 {% if not commande.is_annulee %}
-                                                <a href="{{ url_for('commandes.commande_modify', id_commande=commande.id, id_client=commande.id_client) }}" 
+                                                <a href="{{ url_for('commandes.commande_modify', id_client=commande.id_client, id_commande=commande.id) }}" 
                                                    class="btn btn-sm btn-outline-secondary ms-1" title="Modifier la commande">
                                                     <i class="bi bi-pencil me-1"></i>Modifier
                                                 </a>
                                                 {% if not commande.is_expedie %}
-                                                <form method="POST" action="{{ url_for('commandes.annuler_commande', id_commande=commande.id, id_client=commande.id_client) }}" 
+                                                <form method="POST" action="{{ url_for('commandes.annuler_commande', id_client=commande.id_client, id_commande=commande.id) }}" 
                                                       style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
                                                     <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Annuler la commande">
                                                         <i class="bi bi-x-circle me-1"></i>Annuler
