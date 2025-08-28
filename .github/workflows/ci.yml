@@ -2,9 +2,9 @@ name: CI/CD Pipeline - ACFC Application
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: '**'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
   workflow_dispatch:
 
 env:
@@ -51,7 +51,7 @@ jobs:
         pytest tests/unit/ -v --tb=short --cov=app_acfc --cov=api_acfc --cov-report=xml --cov-report=html
         
     - name: Upload des rapports de couverture
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-reports-unit
         path: |
@@ -188,7 +188,7 @@ jobs:
         bandit -r app_acfc/ api_acfc/ -f txt
         
     - name: Upload du rapport Bandit
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: security-report
@@ -230,7 +230,7 @@ jobs:
         pylint app_acfc/ api_acfc/ --output-format=text
         
     - name: Upload du rapport Pylint
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: pylint-report
