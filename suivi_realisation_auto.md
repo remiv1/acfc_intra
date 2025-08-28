@@ -10,9 +10,9 @@
 ## Résumé exécutif
 
 **Activité de développement :** 42 commits sur 7 jours  
-**Volume de code :** 185719 lignes ajoutées, 5450 lignes supprimées  
-**Fichiers impactés :** 505 fichiers modifiés  
-**Productivité moyenne :** 26531 lignes/jour
+**Volume de code :** 185587 lignes ajoutées, 5415 lignes supprimées  
+**Fichiers impactés :** 502 fichiers modifiés  
+**Productivité moyenne :** 26512 lignes/jour
 
 ---
 
@@ -41,28 +41,6 @@
 - `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
 - `Date:   Thu Aug 21 22:40:07 2025 +0200`
 - `    feat: Ajout d'un workflow CI/CD Docker Compose avec tests d'intégration et endpoints de santé`
-- ... et 7 autres fichiers
-
-#### 19:53 - 0eb4207 - 📊 Mise à jour automatique du rapport de suivi (21/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +39 -17 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Thu Aug 21 19:53:12 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (21/08/2025)`
-- ... et 1 autres fichiers
-
-#### 21:52 - e8883c3 - feat(password): Ajout de la fonctionnalité de changement de mot de passe avec validation et redirection
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +128 -53 lignes, 9 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Thu Aug 21 21:52:38 2025 +0200`
-- `    feat(password): Ajout de la fonctionnalité de changement de mot de passe avec validation et redirection`
 - ... et 7 autres fichiers
 
 
@@ -473,6 +451,28 @@
 
 ### 28 August 2025
 
+#### 22:02 - 07051d4 - feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +2 -2 lignes, 6 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Thu Aug 28 22:02:40 2025 +0200`
+- `    feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker`
+- ... et 3 autres fichiers
+
+#### 19:52 - 1c94c8f - 📊 Mise à jour automatique du rapport de suivi (28/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +33 -33 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Thu Aug 28 19:52:16 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (28/08/2025)`
+- ... et 1 autres fichiers
+
 #### 21:51 - bf26cdc - feat: Ajout de la gestion des comptes utilisateurs avec validation des formulaires et changement de mot de passe
 
 **Catégorie :** Développement de fonctionnalités  
@@ -522,11 +522,11 @@
 
 ## Technologies et langages utilisés
 
-- **Python** : 91 fichiers modifiés
-- **HTML** : 60 fichiers modifiés
+- **Python** : 90 fichiers modifiés
+- **HTML** : 58 fichiers modifiés
 - **Documentation** : 31 fichiers modifiés
 - **YAML/Config** : 16 fichiers modifiés
-- **JavaScript** : 14 fichiers modifiés
+- **JavaScript** : 13 fichiers modifiés
 - **Docker** : 11 fichiers modifiés
 - **CSS** : 8 fichiers modifiés
 
@@ -535,15 +535,15 @@
 ## Métriques de productivité
 
 - **Fréquence de commit :** 6.0 commits/jour
-- **Volume de code :** 191169 modifications totales
-- **Ratio ajouts/suppressions :** 34.08
-- **Moyenne lignes par commit :** 4552
+- **Volume de code :** 191002 modifications totales
+- **Ratio ajouts/suppressions :** 34.27
+- **Moyenne lignes par commit :** 4548
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 185719 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 185587 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 28 August 2025*
