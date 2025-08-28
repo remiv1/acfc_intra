@@ -1,18 +1,18 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 27 August 2025  
-**Période analysée :** 20 August 2025 - 27 August 2025 (7 jours)  
-**Nombre de commits :** 41  
+**Date du rapport :** 28 August 2025  
+**Période analysée :** 21 August 2025 - 28 August 2025 (7 jours)  
+**Nombre de commits :** 42  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 41 commits sur 7 jours  
-**Volume de code :** 90984 lignes ajoutées, 5102 lignes supprimées  
-**Fichiers impactés :** 470 fichiers modifiés  
-**Productivité moyenne :** 12997 lignes/jour
+**Activité de développement :** 42 commits sur 7 jours  
+**Volume de code :** 185778 lignes ajoutées, 5438 lignes supprimées  
+**Fichiers impactés :** 509 fichiers modifiés  
+**Productivité moyenne :** 26539 lignes/jour
 
 ---
 
@@ -86,28 +86,6 @@
 - `Date:   Thu Aug 21 19:43:07 2025 +0200`
 - `    feat: Ajout de la gestion des logs, mise à jour des modèles et amélioration de la gestion des mots de passe`
 - ... et 11 autres fichiers
-
-#### 13:27 - 73afa77 - 📊 Mise à jour automatique du rapport de suivi (21/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +44 -19 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Thu Aug 21 13:27:21 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (21/08/2025)`
-- ... et 1 autres fichiers
-
-#### 15:26 - 7d500b6 - feat(security): Enhance password management with Argon2 and secure session handling
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +1586 -221 lignes, 18 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Thu Aug 21 15:26:21 2025 +0200`
-- `    feat(security): Enhance password management with Argon2 and secure session handling`
-- ... et 16 autres fichiers
 
 
 ### 22 August 2025
@@ -424,6 +402,29 @@
 
 ### 27 August 2025
 
+#### 19:46 - 6d2ba8b - Merge pull request #1 from remiv1/sprint_interface
+
+**Catégorie :** Développement général  
+**Impact :** +90092 -52 lignes, 6 fichiers
+
+**Fichiers modifiés :**
+- `Merge: fd93f77 31da6f7`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Aug 27 19:46:13 2025 +0200`
+- `    Merge pull request #1 from remiv1/sprint_interface`
+- ... et 3 autres fichiers
+
+#### 17:43 - 31da6f7 - 📊 Mise à jour automatique du rapport de suivi (27/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +51 -17 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Wed Aug 27 17:43:55 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (27/08/2025)`
+- ... et 1 autres fichiers
+
 #### 19:43 - cda4b59 - fix: Améliorer l'insertion des données dans le script prepare_pcg.py pour éviter les erreurs de formatage feat: Ajouter une fonction pour vérifier l'installation de pytest dans run_tests.py fix: Corriger la logique d'attente pour Flask dans test-docker-ci.ps1 refactor: Utiliser des variables dans les commandes Docker du script test-docker-ci.sh
 
 **Catégorie :** Développement de fonctionnalités  
@@ -492,13 +493,28 @@
 - ... et 5 autres fichiers
 
 
+### 28 August 2025
+
+#### 19:34 - debfcfa - test:Add comprehensive unit and integration tests for security, QR code generation, and basic functionality
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +6281 -507 lignes, 51 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Thu Aug 28 19:34:42 2025 +0200`
+- `    test:Add comprehensive unit and integration tests for security, QR code generation, and basic functionality`
+- ... et 51 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 20 commits (48.8%)
-- **Interface utilisateur** : 16 commits (39.0%)
-- **Correction de bugs** : 3 commits (7.3%)
+- **Développement de fonctionnalités** : 20 commits (47.6%)
+- **Interface utilisateur** : 16 commits (38.1%)
+- **Correction de bugs** : 3 commits (7.1%)
+- **Développement général** : 1 commits (2.4%)
 - **Documentation** : 1 commits (2.4%)
 - **Refactoring** : 1 commits (2.4%)
 
@@ -506,28 +522,28 @@
 
 ## Technologies et langages utilisés
 
-- **Python** : 80 fichiers modifiés
-- **HTML** : 49 fichiers modifiés
+- **Python** : 93 fichiers modifiés
+- **HTML** : 59 fichiers modifiés
 - **Documentation** : 31 fichiers modifiés
-- **YAML/Config** : 16 fichiers modifiés
-- **Docker** : 16 fichiers modifiés
-- **JavaScript** : 12 fichiers modifiés
+- **YAML/Config** : 17 fichiers modifiés
+- **JavaScript** : 14 fichiers modifiés
+- **Docker** : 13 fichiers modifiés
 - **CSS** : 8 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 5.9 commits/jour
-- **Volume de code :** 96086 modifications totales
-- **Ratio ajouts/suppressions :** 17.83
-- **Moyenne lignes par commit :** 2344
+- **Fréquence de commit :** 6.0 commits/jour
+- **Volume de code :** 191216 modifications totales
+- **Ratio ajouts/suppressions :** 34.16
+- **Moyenne lignes par commit :** 4553
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 90984 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 185778 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
-*Rapport généré automatiquement le 27 August 2025*
+*Rapport généré automatiquement le 28 August 2025*
