@@ -689,7 +689,7 @@ def user_parameters(pseudo: str) -> Any:
         return redirect(url_for('my_account', pseudo=pseudo))
     else:
         return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'])
-    
+
 @acfc.route('/chg_pwd', methods=['POST'])
 def chg_pwd() -> Any:
     """

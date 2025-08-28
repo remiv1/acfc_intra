@@ -566,10 +566,8 @@
 </div>
 
 <!-- JavaScript spécifique au compte utilisateur -->
-{% if subcontext == 'parameters' %}
-<script src="{{ url_for('static', filename='utilisateurs/js/account.js') }}"></script>
+<script src="{{ url_for('static', filename='common/js/account.js') }}"></script>
 <script>
 // Activation de l'onglet sécurité si demandé
 activateSecurityTab();
 </script>
-{% endif %}
