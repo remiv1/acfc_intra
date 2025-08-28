@@ -2,9 +2,9 @@ name: CI/CD Pipeline - ACFC Application
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: '**'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
   workflow_dispatch:
 
 env:
