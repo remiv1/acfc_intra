@@ -10,9 +10,9 @@
 ## Résumé exécutif
 
 **Activité de développement :** 42 commits sur 7 jours  
-**Volume de code :** 185778 lignes ajoutées, 5438 lignes supprimées  
-**Fichiers impactés :** 509 fichiers modifiés  
-**Productivité moyenne :** 26539 lignes/jour
+**Volume de code :** 185719 lignes ajoutées, 5450 lignes supprimées  
+**Fichiers impactés :** 505 fichiers modifiés  
+**Productivité moyenne :** 26531 lignes/jour
 
 ---
 
@@ -64,28 +64,6 @@
 - `Date:   Thu Aug 21 21:52:38 2025 +0200`
 - `    feat(password): Ajout de la fonctionnalité de changement de mot de passe avec validation et redirection`
 - ... et 7 autres fichiers
-
-#### 17:51 - 40c8ab0 - 📊 Mise à jour automatique du rapport de suivi (21/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +40 -18 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Thu Aug 21 17:51:52 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (21/08/2025)`
-- ... et 1 autres fichiers
-
-#### 19:43 - a9db200 - feat: Ajout de la gestion des logs, mise à jour des modèles et amélioration de la gestion des mots de passe
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +142 -68 lignes, 14 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Thu Aug 21 19:43:07 2025 +0200`
-- `    feat: Ajout de la gestion des logs, mise à jour des modèles et amélioration de la gestion des mots de passe`
-- ... et 11 autres fichiers
 
 
 ### 22 August 2025
@@ -495,6 +473,28 @@
 
 ### 28 August 2025
 
+#### 21:51 - bf26cdc - feat: Ajout de la gestion des comptes utilisateurs avec validation des formulaires et changement de mot de passe
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +64 -55 lignes, 10 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Thu Aug 28 21:51:43 2025 +0200`
+- `    feat: Ajout de la gestion des comptes utilisateurs avec validation des formulaires et changement de mot de passe`
+- ... et 8 autres fichiers
+
+#### 17:34 - e89fbbd - 📊 Mise à jour automatique du rapport de suivi (28/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +59 -43 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Thu Aug 28 17:34:59 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (28/08/2025)`
+- ... et 1 autres fichiers
+
 #### 19:34 - debfcfa - test:Add comprehensive unit and integration tests for security, QR code generation, and basic functionality
 
 **Catégorie :** Développement de fonctionnalités  
@@ -522,12 +522,12 @@
 
 ## Technologies et langages utilisés
 
-- **Python** : 93 fichiers modifiés
-- **HTML** : 59 fichiers modifiés
+- **Python** : 91 fichiers modifiés
+- **HTML** : 60 fichiers modifiés
 - **Documentation** : 31 fichiers modifiés
-- **YAML/Config** : 17 fichiers modifiés
+- **YAML/Config** : 16 fichiers modifiés
 - **JavaScript** : 14 fichiers modifiés
-- **Docker** : 13 fichiers modifiés
+- **Docker** : 11 fichiers modifiés
 - **CSS** : 8 fichiers modifiés
 
 ---
@@ -535,15 +535,15 @@
 ## Métriques de productivité
 
 - **Fréquence de commit :** 6.0 commits/jour
-- **Volume de code :** 191216 modifications totales
-- **Ratio ajouts/suppressions :** 34.16
-- **Moyenne lignes par commit :** 4553
+- **Volume de code :** 191169 modifications totales
+- **Ratio ajouts/suppressions :** 34.08
+- **Moyenne lignes par commit :** 4552
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 185778 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 185719 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 28 August 2025*
