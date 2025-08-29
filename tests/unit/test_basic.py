@@ -14,7 +14,8 @@ from unittest.mock import Mock, patch
 # Test basique pour valider pytest
 def test_pytest_works() -> None:
     """Test basique pour vérifier que pytest fonctionne"""
-    assert True
+    result = 2 + 2
+    assert result == 4
 
 
 def test_environment_variables() -> None:
@@ -168,10 +169,13 @@ class TestExceptionHandling:
         with pytest.raises(ValueError):
             int("not a number")
 
+    def _diviser(self, a: int, b: int) -> float:
+        return a / b
+
     def test_exception_message(self) -> None:
         """Test vérifiant le message d'exception"""
         with pytest.raises(ZeroDivisionError, match="division by zero"):
-            1 / 0  # type: ignore
+            self._diviser(1, 0)
 
     def test_exception_with_custom_message(self) -> None:
         """Test avec message d'exception personnalisé"""
