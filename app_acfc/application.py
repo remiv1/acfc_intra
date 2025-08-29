@@ -24,19 +24,10 @@ from flask_session import Session
 from waitress import serve
 from typing import Any, Dict, Tuple, List
 from werkzeug.exceptions import HTTPException, Forbidden, Unauthorized
-from services import PasswordService, SecureSessionService
-from modeles import SessionBdD, User, Commande, Client, init_database
 from datetime import datetime, date
-from typing import Any, Dict, Tuple, List
 from sqlalchemy import text, and_, or_
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy.sql.functions import func
-
-from flask import Flask, request, render_template, jsonify, redirect, url_for, session, Response
-from flask_session import Session
-from waitress import serve
-from werkzeug.exceptions import HTTPException, Forbidden, Unauthorized
-
 from logs.logger import acfc_log, INFO, WARNING, ERROR
 from app_acfc.services import PasswordService, SecureSessionService
 from app_acfc.modeles import SessionBdD, User, Commande, Client, init_database
