@@ -22,6 +22,10 @@ Version : 1.0
 from flask import Flask, Response, render_template, request, Request, Blueprint, session, url_for, redirect, jsonify
 from flask_session import Session
 from waitress import serve
+from typing import Any, Dict, Tuple, List
+from werkzeug.exceptions import HTTPException, Forbidden, Unauthorized
+from services import PasswordService, SecureSessionService
+from modeles import SessionBdD, User, Commande, Client, init_database
 from datetime import datetime, date
 from typing import Any, Dict, Tuple, List
 from sqlalchemy import text, and_, or_
@@ -854,7 +858,7 @@ def start_server():
     # Configuration sécurisée de l'host
     # En développement: localhost uniquement (plus sécurisé)
     # En production Docker: 0.0.0.0 pour permettre l'accès depuis le conteneur
-    host = os.environ.get('FLASK_HOST', '0.0.0.0')
+    host = os.environ.get('FLASK_HOST', 'localhost')
     port = int(os.environ.get('FLASK_PORT', 5000))
     
     serve(acfc, host=host, port=port)
