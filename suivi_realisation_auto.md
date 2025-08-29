@@ -2,17 +2,17 @@
 
 **Date du rapport :** 29 August 2025  
 **Période analysée :** 22 August 2025 - 29 August 2025 (7 jours)  
-**Nombre de commits :** 50  
+**Nombre de commits :** 53  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 50 commits sur 7 jours  
-**Volume de code :** 185697 lignes ajoutées, 6147 lignes supprimées  
-**Fichiers impactés :** 579 fichiers modifiés  
-**Productivité moyenne :** 26528 lignes/jour
+**Activité de développement :** 53 commits sur 7 jours  
+**Volume de code :** 186075 lignes ajoutées, 6423 lignes supprimées  
+**Fichiers impactés :** 608 fichiers modifiés  
+**Productivité moyenne :** 26582 lignes/jour
 
 ---
 
@@ -517,6 +517,40 @@
 
 ### 29 August 2025
 
+#### 10:04 - c0d39a3 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
+
+**Catégorie :** Développement général  
+**Impact :** +54 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Merge: 944aea1 8442689`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 10:04:22 2025 +0200`
+- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
+
+#### 10:02 - 944aea1 - feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker fix: Correction de l'importation des variables d'environnement dans les tests refactor: Refactorisation du chargement des variables d'environnement pour une meilleure maintenabilité
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +270 -238 lignes, 21 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 10:02:13 2025 +0200`
+- `    feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker`
+- `    fix: Correction de l'importation des variables d'environnement dans les tests`
+- ... et 18 autres fichiers
+
+#### 07:59 - 8442689 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +54 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Aug 29 07:59:35 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
+- ... et 1 autres fichiers
+
 #### 09:59 - 52affd1 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
 
 **Catégorie :** Développement général  
@@ -603,21 +637,21 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 23 commits (46.0%)
-- **Interface utilisateur** : 18 commits (36.0%)
-- **Développement général** : 4 commits (8.0%)
-- **Correction de bugs** : 3 commits (6.0%)
-- **Documentation** : 1 commits (2.0%)
-- **Refactoring** : 1 commits (2.0%)
+- **Développement de fonctionnalités** : 24 commits (45.3%)
+- **Interface utilisateur** : 19 commits (35.8%)
+- **Développement général** : 5 commits (9.4%)
+- **Correction de bugs** : 3 commits (5.7%)
+- **Documentation** : 1 commits (1.9%)
+- **Refactoring** : 1 commits (1.9%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 117 fichiers modifiés
+- **Python** : 126 fichiers modifiés
 - **HTML** : 58 fichiers modifiés
-- **Documentation** : 34 fichiers modifiés
-- **YAML/Config** : 22 fichiers modifiés
+- **Documentation** : 36 fichiers modifiés
+- **YAML/Config** : 24 fichiers modifiés
 - **JavaScript** : 13 fichiers modifiés
 - **Docker** : 11 fichiers modifiés
 - **CSS** : 8 fichiers modifiés
@@ -626,16 +660,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 7.1 commits/jour
-- **Volume de code :** 191844 modifications totales
-- **Ratio ajouts/suppressions :** 30.21
-- **Moyenne lignes par commit :** 3837
+- **Fréquence de commit :** 7.6 commits/jour
+- **Volume de code :** 192498 modifications totales
+- **Ratio ajouts/suppressions :** 28.97
+- **Moyenne lignes par commit :** 3632
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 185697 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 186075 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 29 August 2025*
