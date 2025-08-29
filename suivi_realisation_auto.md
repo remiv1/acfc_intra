@@ -2,17 +2,17 @@
 
 **Date du rapport :** 29 August 2025  
 **Période analysée :** 22 August 2025 - 29 August 2025 (7 jours)  
-**Nombre de commits :** 63  
+**Nombre de commits :** 66  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 63 commits sur 7 jours  
-**Volume de code :** 189139 lignes ajoutées, 7498 lignes supprimées  
-**Fichiers impactés :** 713 fichiers modifiés  
-**Productivité moyenne :** 27019 lignes/jour
+**Activité de développement :** 66 commits sur 7 jours  
+**Volume de code :** 194065 lignes ajoutées, 8949 lignes supprimées  
+**Fichiers impactés :** 778 fichiers modifiés  
+**Productivité moyenne :** 27723 lignes/jour
 
 ---
 
@@ -517,6 +517,40 @@
 
 ### 29 August 2025
 
+#### 18:06 - 91da666 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
+
+**Catégorie :** Développement général  
+**Impact :** +1159 -1 lignes, 6 fichiers
+
+**Fichiers modifiés :**
+- `Merge: 5978662 71e2f83`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 18:06:22 2025 +0200`
+- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
+- ... et 3 autres fichiers
+
+#### 18:00 - 5978662 - fix:Add unit tests and mocking for ACFC application
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +3713 -1430 lignes, 55 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 18:00:28 2025 +0200`
+- `    fix:Add unit tests and mocking for ACFC application`
+- ... et 53 autres fichiers
+
+#### 11:58 - 71e2f83 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +54 -20 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Aug 29 11:58:19 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
+- ... et 1 autres fichiers
+
 #### 13:58 - 92cf644 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
 
 **Catégorie :** Développement général  
@@ -750,39 +784,39 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 28 commits (44.4%)
-- **Interface utilisateur** : 22 commits (34.9%)
-- **Développement général** : 8 commits (12.7%)
-- **Correction de bugs** : 3 commits (4.8%)
-- **Documentation** : 1 commits (1.6%)
-- **Refactoring** : 1 commits (1.6%)
+- **Développement de fonctionnalités** : 29 commits (43.9%)
+- **Interface utilisateur** : 23 commits (34.8%)
+- **Développement général** : 9 commits (13.6%)
+- **Correction de bugs** : 3 commits (4.5%)
+- **Documentation** : 1 commits (1.5%)
+- **Refactoring** : 1 commits (1.5%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 150 fichiers modifiés
-- **HTML** : 64 fichiers modifiés
-- **Documentation** : 41 fichiers modifiés
-- **YAML/Config** : 31 fichiers modifiés
-- **JavaScript** : 14 fichiers modifiés
+- **Python** : 173 fichiers modifiés
+- **HTML** : 70 fichiers modifiés
+- **Documentation** : 47 fichiers modifiés
+- **YAML/Config** : 35 fichiers modifiés
+- **JavaScript** : 15 fichiers modifiés
+- **CSS** : 12 fichiers modifiés
 - **Docker** : 11 fichiers modifiés
-- **CSS** : 10 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 9.0 commits/jour
-- **Volume de code :** 196637 modifications totales
-- **Ratio ajouts/suppressions :** 25.23
-- **Moyenne lignes par commit :** 3121
+- **Fréquence de commit :** 9.4 commits/jour
+- **Volume de code :** 203014 modifications totales
+- **Ratio ajouts/suppressions :** 21.69
+- **Moyenne lignes par commit :** 3076
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 189139 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 194065 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 29 August 2025*
