@@ -251,3 +251,6 @@
     min-width: 2em;
     text-align: center;
 }
+.inline-display {
+    display: inline;
+}

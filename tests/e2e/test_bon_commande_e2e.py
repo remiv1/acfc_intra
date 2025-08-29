@@ -182,7 +182,7 @@ class TestQRCodeE2E:
         for url in test_urls:
             # Vérifier la structure de l'URL
             assert '/commandes/client/' in url
-            assert '/details' in url.split('/')[-1]
+            assert 'details' in url.split('/')[-1]
             
             # Vérifier que l'URL peut être générée en QR Code
             import qrcode
@@ -238,7 +238,7 @@ class TestPrintingE2E:
             
             # Test des conditions
             auto_print = 'auto_print' in params
-            delay: int = int(params.get('delay', 1500))
+            delay = int(params.get('delay', 1500)) if auto_print else None
             close_after = params.get('auto_print') == 'close'
             
             assert auto_print == scenario['auto_print']

@@ -2,17 +2,17 @@
 
 **Date du rapport :** 29 August 2025  
 **Période analysée :** 22 August 2025 - 29 August 2025 (7 jours)  
-**Nombre de commits :** 53  
+**Nombre de commits :** 63  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 53 commits sur 7 jours  
-**Volume de code :** 186075 lignes ajoutées, 6423 lignes supprimées  
-**Fichiers impactés :** 608 fichiers modifiés  
-**Productivité moyenne :** 26582 lignes/jour
+**Activité de développement :** 63 commits sur 7 jours  
+**Volume de code :** 189139 lignes ajoutées, 7498 lignes supprimées  
+**Fichiers impactés :** 713 fichiers modifiés  
+**Productivité moyenne :** 27019 lignes/jour
 
 ---
 
@@ -517,6 +517,119 @@
 
 ### 29 August 2025
 
+#### 13:58 - 92cf644 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
+
+**Catégorie :** Développement général  
+**Impact :** +53 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Merge: 8cafaa9 15a3a21`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 13:58:06 2025 +0200`
+- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
+
+#### 13:57 - 8cafaa9 - feat: Enhance commande details functionality with conditional elements and form validation fix: Improve accessibility and maintainability in client and commande templates - Added management for conditional elements such as tracking number and alerts based on order amount in commande_details.js. - Implemented "Select All" checkboxes for billing and shipping sections. - Improved form validation to ensure at least one line is selected for billing and shipping. - Updated client_details.html to improve accessibility with aria attributes and structured navigation. - Refactored client_form.html and client_research.html for better semantic HTML and accessibility. - Removed inline styles from commande_details.html and moved them to external CSS for better maintainability. - Cleaned up unused styles and scripts from commande_details_content.html. - Integrated auto-print functionality in commande_bon_impression.html with improved error handling.
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +582 -663 lignes, 21 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 13:57:30 2025 +0200`
+- `    feat: Enhance commande details functionality with conditional elements and form validation`
+- `    fix: Improve accessibility and maintainability in client and commande templates`
+- ... et 18 autres fichiers
+
+#### 09:56 - 15a3a21 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +53 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Aug 29 09:56:37 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
+- ... et 1 autres fichiers
+
+#### 11:56 - 10e4a38 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
+
+**Catégorie :** Développement général  
+**Impact :** +64 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Merge: 6ac4392 7f2bb41`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 11:56:15 2025 +0200`
+- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
+
+#### 11:55 - 6ac4392 - feat: Ajout de la configuration pour le développement et les tests, y compris le fichier setup.py et les tests d'import fix: Correction des imports conditionnels dans conftest.py pour éviter les erreurs en CI/CD refactor: Refactorisation des fixtures de test pour une meilleure clarté et maintenabilité
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +158 -4 lignes, 15 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 11:55:59 2025 +0200`
+- `    feat: Ajout de la configuration pour le développement et les tests, y compris le fichier setup.py et les tests d'import`
+- `    fix: Correction des imports conditionnels dans conftest.py pour éviter les erreurs en CI/CD`
+- ... et 12 autres fichiers
+
+#### 09:30 - 7f2bb41 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +64 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Aug 29 09:30:49 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
+- ... et 1 autres fichiers
+
+#### 11:30 - 313bf82 - Add comprehensive unit tests to enhance application coverage
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +1692 -74 lignes, 24 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 11:30:29 2025 +0200`
+- `    Add comprehensive unit tests to enhance application coverage`
+- ... et 22 autres fichiers
+
+#### 10:11 - d960c31 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
+
+**Catégorie :** Développement général  
+**Impact :** +0 -0 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Merge: ff0e1fe 8a5b0ca`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 10:11:00 2025 +0200`
+- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
+
+#### 10:10 - ff0e1fe - feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker fix: Correction de l'importation des variables d'environnement dans les tests refactor: Refactorisation du chargement des variables d'environnement pour une meilleure maintenabilité
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +345 -239 lignes, 21 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 10:10:57 2025 +0200`
+- `    feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker`
+- `    fix: Correction de l'importation des variables d'environnement dans les tests`
+- ... et 18 autres fichiers
+
+#### 08:04 - 8a5b0ca - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +53 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Aug 29 08:04:38 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
+- ... et 1 autres fichiers
+
 #### 10:04 - c0d39a3 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
 
 **Catégorie :** Développement général  
@@ -637,39 +750,39 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 24 commits (45.3%)
-- **Interface utilisateur** : 19 commits (35.8%)
-- **Développement général** : 5 commits (9.4%)
-- **Correction de bugs** : 3 commits (5.7%)
-- **Documentation** : 1 commits (1.9%)
-- **Refactoring** : 1 commits (1.9%)
+- **Développement de fonctionnalités** : 28 commits (44.4%)
+- **Interface utilisateur** : 22 commits (34.9%)
+- **Développement général** : 8 commits (12.7%)
+- **Correction de bugs** : 3 commits (4.8%)
+- **Documentation** : 1 commits (1.6%)
+- **Refactoring** : 1 commits (1.6%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 126 fichiers modifiés
-- **HTML** : 58 fichiers modifiés
-- **Documentation** : 36 fichiers modifiés
-- **YAML/Config** : 24 fichiers modifiés
-- **JavaScript** : 13 fichiers modifiés
+- **Python** : 150 fichiers modifiés
+- **HTML** : 64 fichiers modifiés
+- **Documentation** : 41 fichiers modifiés
+- **YAML/Config** : 31 fichiers modifiés
+- **JavaScript** : 14 fichiers modifiés
 - **Docker** : 11 fichiers modifiés
-- **CSS** : 8 fichiers modifiés
+- **CSS** : 10 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 7.6 commits/jour
-- **Volume de code :** 192498 modifications totales
-- **Ratio ajouts/suppressions :** 28.97
-- **Moyenne lignes par commit :** 3632
+- **Fréquence de commit :** 9.0 commits/jour
+- **Volume de code :** 196637 modifications totales
+- **Ratio ajouts/suppressions :** 25.23
+- **Moyenne lignes par commit :** 3121
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 186075 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 189139 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 29 August 2025*

@@ -4,3 +4,4 @@
 *.pyc
 *.pem
 .env
+/flask_session

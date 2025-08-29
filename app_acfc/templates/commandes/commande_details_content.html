@@ -14,7 +14,7 @@
 <!-- CSS spécifique aux commandes -->
 <link rel="stylesheet" href="{{ url_for('static', filename='commandes/css/commandes.css') }}">
 
-<div class="container-fluid">
+<div class="container-fluid" data-montant-commande="{{ commande.montant }}">
     <!-- En-tête de la commande -->
     <div class="row mb-4">
         <div class="col-12">
@@ -34,7 +34,7 @@
                         </div>
                         <div class="d-flex gap-2">
                             <!-- Dropdown pour les options d'impression -->
-                            <div class="btn-group" role="group">
+                            <fieldset class="btn-group" role="group">
                                 <a href="{{ url_for('commandes.commande_bon_impression', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-success" target="_blank">
                                     <i class="bi bi-printer me-1"></i>Bon de commande
                                 </a>
@@ -53,7 +53,7 @@
                                         </a>
                                     </li>
                                 </ul>
-                            </div>
+                            </fieldset>
                             <a href="{{ url_for('commandes.commande_modify', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-pencil me-1"></i>Modifier
                             </a>
@@ -363,228 +363,6 @@
 </div>
 
 <!-- Les sections de facturation et expédition sont maintenant dans les modales -->
-
-<style>
-/* Timeline custom styles */
-.timeline {
-    position: relative;
-    padding-left: 30px;
-}
-
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 15px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: #dee2e6;
-}
-
-.timeline-item {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.timeline-marker {
-    position: absolute;
-    left: -22px;
-    top: 5px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 2px solid white;
-    box-shadow: 0 0 0 2px #dee2e6;
-}
-
-.timeline-content {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    border-left: 3px solid #6c757d;
-}
-
-.timeline-item:last-child {
-    margin-bottom: 0;
-}
-
-/* Styles pour la section facturation/expédition */
-.scroll-section {
-    max-height: 200px;
-    overflow-y: auto;
-}
-</style>
-
-<!-- JavaScript spécifique aux détails de commande -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Variables globales
-    const montantCommande = {{ commande.montant }};
-    const alertMontant80 = document.getElementById('alert_montant_80');
-    const numeroSuiviContainer = document.getElementById('numero_suivi_container');
-    const envoisRadios = document.querySelectorAll('input[name="mode_expedition"]');
-    
-    // Gestion de l'affichage du numéro de suivi et de l'alerte montant
-    function handleModeExpeditionChange() {
-        const selectedMode = document.querySelector('input[name="mode_expedition"]:checked')?.value;
-        
-        // Afficher/masquer le champ numéro de suivi
-        if (selectedMode === 'envoi_suivi') {
-            numeroSuiviContainer.style.display = 'block';
-            document.getElementById('numero_suivi_expedition').required = true;
-        } else {
-            numeroSuiviContainer.style.display = 'none';
-            document.getElementById('numero_suivi_expedition').required = false;
-        }
-        
-        // Gestion de l'alerte pour montant > 80€
-        if (montantCommande > 80) {
-            if (selectedMode === 'envoi_simple') {
-                alertMontant80.style.display = 'block';
-                // Désactiver le bouton de soumission
-                document.querySelector('#expeditionForm button[type="submit"]').disabled = true;
-            } else {
-                alertMontant80.style.display = 'none';
-                // Réactiver le bouton de soumission
-                document.querySelector('#expeditionForm button[type="submit"]').disabled = false;
-            }
-        } else {
-            alertMontant80.style.display = 'none';
-            document.querySelector('#expeditionForm button[type="submit"]').disabled = false;
-        }
-    }
-    
-    // Écouter les changements de mode d'expédition
-    envoisRadios.forEach(radio => {
-        radio.addEventListener('change', handleModeExpeditionChange);
-    });
-    
-    // Initialiser l'état au chargement
-    handleModeExpeditionChange();
-    
-    // Gestion des cases à cocher "Sélectionner tout" pour la facturation
-    const selectAllFacturation = document.getElementById('selectAllFacturation');
-    const lignesFacturation = document.querySelectorAll('.ligne-facturation');
-    
-    if (selectAllFacturation) {
-        selectAllFacturation.addEventListener('change', function() {
-            lignesFacturation.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-        });
-        
-        // Mettre à jour l'état du "Sélectionner tout" quand une ligne change
-        lignesFacturation.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const checkedCount = document.querySelectorAll('.ligne-facturation:checked').length;
-                selectAllFacturation.checked = checkedCount === lignesFacturation.length;
-                selectAllFacturation.indeterminate = checkedCount > 0 && checkedCount < lignesFacturation.length;
-            });
-        });
-    }
-    
-    // Gestion des cases à cocher "Sélectionner tout" pour l'expédition
-    const selectAllExpedition = document.getElementById('selectAllExpedition');
-    const lignesExpedition = document.querySelectorAll('.ligne-expedition');
-    
-    if (selectAllExpedition) {
-        selectAllExpedition.addEventListener('change', function() {
-            lignesExpedition.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-        });
-        
-        // Mettre à jour l'état du "Sélectionner tout" quand une ligne change
-        lignesExpedition.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const checkedCount = document.querySelectorAll('.ligne-expedition:checked').length;
-                selectAllExpedition.checked = checkedCount === lignesExpedition.length;
-                selectAllExpedition.indeterminate = checkedCount > 0 && checkedCount < lignesExpedition.length;
-            });
-        });
-    }
-    
-    // Validation des formulaires avant soumission
-    const formFacturation = document.getElementById('facturationForm');
-    const formExpedition = document.getElementById('expeditionForm');
-    
-    if (formFacturation) {
-        formFacturation.addEventListener('submit', function(e) {
-            const checkedBoxes = formFacturation.querySelectorAll('input[name="lignes_facturer[]"]:checked');
-            if (checkedBoxes.length === 0) {
-                e.preventDefault();
-                alert('Veuillez sélectionner au moins une ligne à facturer.');
-                return false;
-            }
-        });
-    }
-    
-    if (formExpedition) {
-        formExpedition.addEventListener('submit', function(e) {
-            const checkedBoxes = formExpedition.querySelectorAll('input[name="lignes_expedier[]"]:checked');
-            if (checkedBoxes.length === 0) {
-                e.preventDefault();
-                alert('Veuillez sélectionner au moins une ligne à expédier.');
-                return false;
-            }
-            
-            const selectedMode = document.querySelector('input[name="mode_expedition"]:checked')?.value;
-            if (selectedMode === 'envoi_suivi') {
-                const numeroSuivi = document.getElementById('numero_suivi_expedition').value.trim();
-                if (!numeroSuivi) {
-                    e.preventDefault();
-                    alert('Veuillez saisir un numéro de suivi pour l\'envoi suivi.');
-                    return false;
-                }
-            }
-        });
-    }
-});
-</script>
-
-<style>
-/* Classes pour gérer l'affichage conditionnel */
-.d-none-js {
-    display: none !important;
-}
-
-/* Gestion de l'affichage des éléments conditionnels */
-#numero_suivi_container {
-    display: none;
-    border-left: 3px solid #0dcaf0;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    padding: 15px;
-    margin-top: 1rem;
-}
-
-#alert_montant_80 {
-    display: none;
-    border-left: 4px solid #f0ad4e;
-}
-
-/* Amélioration de l'apparence des tables dans les modales */
-.modal-body .table th {
-    border-top: none;
-    font-weight: 600;
-    font-size: 0.875rem;
-}
-
-.modal-body .table th.checkbox-col {
-    width: 5%;
-}
-
-.modal-body .table td {
-    vertical-align: middle;
-    font-size: 0.875rem;
-}
-
-/* Style pour les boutons radio */
-.form-check-input:checked {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-</style>
 
 <!-- ====================================================================
      MODALES DE GESTION FACTURATION ET EXPÉDITION

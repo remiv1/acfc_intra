@@ -13,16 +13,18 @@ import pytest
 import sys
 import os
 from datetime import datetime, date
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
+from typing import Dict, List, Any
+from flask import Flask
 
 # Ajouter le chemin du projet pour les imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../'))
 
 
 @pytest.fixture
-def sample_client():
+def sample_client() -> Dict[str, int | str]:
     """Fixture pour un client de test"""
-    return {
+    dict_sample_client: Dict[str, int | str] = {
         'id': 1,
         'nom': 'Entreprise Dupont',
         'adresse': '123 Rue de la Paix',
@@ -33,12 +35,13 @@ def sample_client():
         'siret': '12345678901234',
         'tva': 'FR12345678901'
     }
+    return dict_sample_client
 
 
 @pytest.fixture
-def sample_articles():
+def sample_articles() -> List[Dict[str, int | str | float]]:
     """Fixture pour des articles de test"""
-    return [
+    list_sample_articles: List[Dict[str, int | str | float]] = [
         {
             'id': 1,
             'nom': 'Article Premium A',
@@ -70,12 +73,15 @@ def sample_articles():
             'total_ttc': 90.0
         }
     ]
+    return list_sample_articles
 
 
 @pytest.fixture
-def sample_commande(sample_client, sample_articles):
+def sample_commande(sample_client: Dict[str, int | str],
+                    sample_articles: List[Dict[str, int | str | float]]
+                    ) -> Dict[str, Any]:
     """Fixture pour une commande de test complète"""
-    return {
+    dict_sample_commande: Dict[str, Any] = {
         'id': 1,
         'numero': 'CMD-2024-001',
         'client_id': sample_client['id'],
@@ -100,10 +106,11 @@ def sample_commande(sample_client, sample_articles):
             'numero_suivi': None
         }
     }
+    return dict_sample_commande
 
 
 @pytest.fixture
-def sample_commande_facturee(sample_commande):
+def sample_commande_facturee(sample_commande: Dict[str, Any]) -> Dict[str, Any]:
     """Fixture pour une commande facturée"""
     commande = sample_commande.copy()
     commande['facturation'] = {
@@ -116,7 +123,7 @@ def sample_commande_facturee(sample_commande):
 
 
 @pytest.fixture
-def sample_commande_expediee(sample_commande_facturee):
+def sample_commande_expediee(sample_commande_facturee: Dict[str, Any]) -> Dict[str, Any]:
     """Fixture pour une commande expédiée"""
     commande = sample_commande_facturee.copy()
     commande['expedition'] = {
@@ -130,7 +137,7 @@ def sample_commande_expediee(sample_commande_facturee):
 
 
 @pytest.fixture
-def mock_flask_app():
+def mock_flask_app() -> Flask:
     """Fixture pour une application Flask mockée"""
     app = Mock()
     app.config = {
@@ -149,7 +156,7 @@ def mock_flask_app():
 
 
 @pytest.fixture
-def mock_qr_code():
+def mock_qr_code() -> Mock:
     """Fixture pour un QR Code mocké"""
     mock_qr = Mock()
     mock_qr.add_data = Mock()
@@ -165,14 +172,14 @@ def mock_qr_code():
 
 
 @pytest.fixture
-def sample_qr_code_base64():
+def sample_qr_code_base64() -> str:
     """Fixture pour un QR Code en base64"""
     # QR Code minimal en base64 (image 1x1 pixel PNG)
     return "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
 
 
 @pytest.fixture
-def sample_urls():
+def sample_urls() -> Dict[str, str]:
     """Fixture pour des URLs de test"""
     return {
         'base_url': 'http://localhost:5000',
@@ -186,9 +193,9 @@ def sample_urls():
 
 
 @pytest.fixture
-def mock_template_context():
+def mock_template_context() -> Dict[str, Any]:
     """Fixture pour un contexte de template mocké"""
-    return {
+    dict_template_context: Dict[str, Any] = {
         'commande': None,  # Sera remplacé par une fixture de commande
         'client': None,    # Sera remplacé par une fixture de client
         'qr_code': None,   # Sera remplacé par une fixture de QR code
@@ -201,22 +208,24 @@ def mock_template_context():
             'role': 'commercial'
         }
     }
+    return dict_template_context
 
 
 @pytest.fixture
-def sample_print_parameters():
+def sample_print_parameters() -> List[Dict[str, Any]]:
     """Fixture pour les paramètres d'impression"""
-    return [
+    dict_sample_print_parameters: List[Dict[str, Any]] = [
         {'params': '', 'auto_print': False, 'delay': None, 'close_after': False},
         {'params': 'auto_print=true', 'auto_print': True, 'delay': 1500, 'close_after': False},
         {'params': 'auto_print=close', 'auto_print': True, 'delay': 1500, 'close_after': True},
         {'params': 'auto_print=true&delay=500', 'auto_print': True, 'delay': 500, 'close_after': False},
         {'params': 'click_print=true', 'auto_print': False, 'delay': None, 'close_after': False}
     ]
+    return dict_sample_print_parameters
 
 
 @pytest.fixture
-def mock_database():
+def mock_database() -> Mock:
     """Fixture pour une base de données mockée"""
     db = Mock()
     
@@ -231,7 +240,7 @@ def mock_database():
 
 
 @pytest.fixture
-def mock_request():
+def mock_request() -> Mock:
     """Fixture pour un objet request Flask mocké"""
     request = Mock()
     request.method = 'GET'
@@ -246,9 +255,9 @@ def mock_request():
 
 
 @pytest.fixture
-def error_scenarios():
+def error_scenarios() -> List[Dict[str, Any]]:
     """Fixture pour les scénarios d'erreur"""
-    return [
+    list_error_scenarios: List[Dict[str, Any]] = [
         {
             'name': 'Client ID invalide',
             'client_id': 'abc',
@@ -280,12 +289,13 @@ def error_scenarios():
             'expected_error': 'Commande non trouvée'
         }
     ]
+    return list_error_scenarios
 
 
 @pytest.fixture
-def performance_test_data():
+def performance_test_data() -> Dict[str, Dict[str, int]]:
     """Fixture pour les tests de performance"""
-    return {
+    dict_perf_test_data: Dict[str, Dict[str, int]] = {
         'small_commande': {
             'articles_count': 3,
             'expected_time_ms': 100
@@ -299,12 +309,13 @@ def performance_test_data():
             'expected_time_ms': 1000
         }
     }
+    return dict_perf_test_data
 
 
 @pytest.fixture
-def browser_compatibility():
+def browser_compatibility() -> Dict[str, Dict[str, bool]]:
     """Fixture pour les tests de compatibilité navigateur"""
-    return {
+    dict_browser_compatibility: Dict[str, Dict[str, bool]] = {
         'chrome': {
             'auto_print': True,
             'auto_close': True,
@@ -342,12 +353,13 @@ def browser_compatibility():
             'javascript': True
         }
     }
+    return dict_browser_compatibility
 
 
 @pytest.fixture
-def sample_test_scenarios():
+def sample_test_scenarios() -> List[Dict[str, Any]]:
     """Fixture pour différents scénarios de test"""
-    return [
+    list_sample_test_scenarios: List[Dict[str, Any]] = [
         {
             'name': 'Commande simple',
             'commande_id': 1,
@@ -381,6 +393,7 @@ def sample_test_scenarios():
             'statut': 'Expédiée'
         }
     ]
+    return list_sample_test_scenarios
 
 
 # Utilitaires pour les tests
@@ -389,9 +402,11 @@ class TestDataBuilder:
     """Constructeur de données de test"""
     
     @staticmethod
-    def build_commande(commande_id=1, client_id=1, articles_count=3):
+    def build_commande(commande_id: int=1,
+                       client_id: int=1,
+                       articles_count: int=3) -> Dict[str, Any]:
         """Construit une commande de test avec le nombre d'articles spécifié"""
-        articles = []
+        articles: List[Dict[str, Any]] = []
         total_ht = 0
         
         for i in range(articles_count):
@@ -409,7 +424,7 @@ class TestDataBuilder:
             
             total_ht += total_article
         
-        return {
+        dict_build_commande: Dict[str, Any] = {
             'id': commande_id,
             'client_id': client_id,
             'articles': articles,
@@ -418,14 +433,15 @@ class TestDataBuilder:
             'date_creation': datetime.now(),
             'statut': 'En préparation'
         }
+        return dict_build_commande
     
     @staticmethod
-    def build_qr_url(client_id, commande_id, base_url='http://localhost:5000'):
+    def build_qr_url(client_id: int, commande_id: int, base_url: str='http://localhost:5000') -> str:
         """Construit une URL pour QR Code"""
         return f"{base_url}/commandes/client/{client_id}/commandes/{commande_id}/details"
     
     @staticmethod
-    def build_print_url(client_id, commande_id, **params):
+    def build_print_url(client_id: int, commande_id: int, **params: Any) -> str:
         """Construit une URL d'impression avec paramètres"""
         base_url = f"/commandes/client/{client_id}/commandes/{commande_id}/bon-impression"
         

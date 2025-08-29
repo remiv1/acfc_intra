@@ -22,15 +22,20 @@ Version : 1.0
 from flask import Flask, Response, render_template, request, Request, Blueprint, session, url_for, redirect, jsonify
 from flask_session import Session
 from waitress import serve
-from typing import Any, Dict, Tuple, List
-from werkzeug.exceptions import HTTPException, Forbidden, Unauthorized
-from services import PasswordService, SecureSessionService
-from modeles import SessionBdD, User, Commande, Client, init_database
 from datetime import datetime, date
+from typing import Any, Dict, Tuple, List
 from sqlalchemy import text, and_, or_
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy.sql.functions import func
+
+from flask import Flask, request, render_template, jsonify, redirect, url_for, session, Response
+from flask_session import Session
+from waitress import serve
+from werkzeug.exceptions import HTTPException, Forbidden, Unauthorized
+
 from logs.logger import acfc_log, INFO, WARNING, ERROR
+from app_acfc.services import PasswordService, SecureSessionService
+from app_acfc.modeles import SessionBdD, User, Commande, Client, init_database
 from app_acfc.contextes_bp.clients import clients_bp         # Module CRM - Gestion clients
 from app_acfc.contextes_bp.catalogue import catalogue_bp     # Module Catalogue produits
 from app_acfc.contextes_bp.commercial import commercial_bp   # Module Commercial - Devis, commandes
@@ -192,9 +197,19 @@ def after_request(response: Response) -> Response:
     return response
 
 @acfc.template_filter('strftime')
-def format_datetime(value: datetime | date | None, format: str='%d/%m/%Y'):
+def format_datetime(value: datetime | date | None, fmt: str='%d/%m/%Y'):
+    """
+    Filtre Jinja2 pour formater les dates et datetime.
+    
+    Args:
+        value: Date ou datetime à formater
+        fmt: Format de sortie (défaut: '%d/%m/%Y')
+    
+    Returns:
+        str: Date formatée ou chaîne vide si None
+    """
     if isinstance(value, (datetime, date)):
-        return value.strftime(format)
+        return value.strftime(fmt)
     return value
 
 @acfc.template_filter('date_input')
@@ -230,8 +245,8 @@ def get_current_orders(id_client: int = 0) -> List[Commande]:
                 joinedload(Commande.client).joinedload(Client.pro)    # Eager loading du client professionnel
             )
             .filter(or_(
-                Commande.is_facture == False,
-                Commande.is_expedie == False
+                Commande.is_facture.is_(False),
+                Commande.is_expedie.is_(False)
             ))
             .all()
         )
@@ -247,8 +262,8 @@ def get_current_orders(id_client: int = 0) -> List[Commande]:
             .filter(and_(
                 Commande.id_client == id_client,
                 or_(
-                    Commande.is_facture == False,
-                    Commande.is_expedie == False
+                    Commande.is_facture.is_(False),
+                    Commande.is_expedie.is_(False)
                 )
             ))
             .all()
@@ -286,7 +301,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
             "ca_current_month": [
                 db_session_commercial.query(func.sum(Commande.montant))
                 .filter(
-                    Commande.is_facture == True,
+                    Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_month
                 ).scalar() or 0,
                 'CA Mensuel'
@@ -296,7 +311,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
             "ca_current_year": [
                 db_session_commercial.query(func.sum(Commande.montant))
                 .filter(
-                    Commande.is_facture == True,
+                    Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_year
                 ).scalar() or 0,
                 'CA Annuel'
@@ -306,7 +321,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
             "average_basket": [
                 db_session_commercial.query(func.avg(Commande.montant))
                 .filter(
-                    Commande.is_facture == True,
+                    Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_year
                 ).scalar() or 0,
                 'Panier Moyen'
@@ -316,7 +331,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
             "active_clients": [
                 db_session_commercial.query(func.count(func.distinct(Commande.id_client)))
                 .filter(
-                    Commande.is_facture == True,
+                    Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_year
                 ).scalar() or 0,
                 'Clients Actifs'
@@ -326,7 +341,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
             "orders_per_year": [
                 db_session_commercial.query(func.count(Commande.id))
                 .filter(
-                    Commande.is_facture == True,
+                    Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_year
                 ).scalar() or 0,
                 'Commandes Annuelles'
@@ -346,7 +361,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
 # ====================================================================
 
 @acfc.route('/')
-def index() -> str:
+def index() -> Any:
     """
     Page d'accueil de l'application.
     
@@ -356,7 +371,7 @@ def index() -> str:
     Returns:
         str: Template HTML du module Clients
     """
-    return render_template(CLIENT['page'], title=CLIENT['title'], context=CLIENT['context'])
+    return redirect(url_for('dashboard'))
 
 @acfc.route('/login', methods=['GET', 'POST'])
 def login() -> Any:
@@ -553,7 +568,7 @@ def users() -> Any:
     elif request.method == 'GET':
         # TODO: Récupération et affichage de la liste des utilisateurs
         # Devra inclure: pagination, filtrage, contrôle des autorisations
-        return render_template(BASE, title='ACFC - Gestion Utilisateurs', context='users')
+        return render_template(USERS['page'], title=USERS['title'], context=USERS['context'])
     else:
         return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=WRONG_ROAD)
 
@@ -822,16 +837,28 @@ for bp in acfc_blueprints:
 # POINT D'ENTRÉE DE L'APPLICATION
 # ====================================================================
 
-if __name__ == '__main__':
+def start_server():
     """
     Démarrage de l'application en mode production avec Waitress.
     
     Waitress est un serveur WSGI production-ready qui remplace le serveur 
     de développement Flask. Configuration :
-    - Host: 0.0.0.0 (écoute sur toutes les interfaces)
+    - Host: configurable via variable d'environnement (défaut: localhost)
     - Port: 5000 (port standard de l'application)
     
     Note: En production, l'application est généralement déployée derrière
     un reverse proxy (Nginx) pour la gestion SSL et la distribution de charge.
     """
-    serve(acfc, host="0.0.0.0", port=5000)
+    import os
+    
+    # Configuration sécurisée de l'host
+    # En développement: localhost uniquement (plus sécurisé)
+    # En production Docker: 0.0.0.0 pour permettre l'accès depuis le conteneur
+    host = os.environ.get('FLASK_HOST', '0.0.0.0')
+    port = int(os.environ.get('FLASK_PORT', 5000))
+    
+    serve(acfc, host=host, port=port)
+
+
+if __name__ == '__main__':
+    start_server()

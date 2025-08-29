@@ -1,7 +1,19 @@
 #!/usr/bin/env python3
 """
 Script d'exécution des tests ACFC
-=================================
+=        print("Tes        print("Tests end-to-end...")s unitaires...")
+    elif args.integration:
+        cmd.append("tests/integration/")
+        print("Tests d'intégration...")
+    elif args.e2e:
+        cmd.append("tests/e2e/")
+        print("Tests end-to-end...")
+    elif args.demo:
+        cmd.append("tests/demo/")
+        print("Tests de démonstration...")
+    else:
+        print("Exécution de tous les tests...")
+        cmd.append("tests/")===================
 
 Script utilitaire pour exécuter les tests de l'application ACFC
 avec différentes options et configurations.
@@ -29,7 +41,7 @@ from pathlib import Path
 
 def get_project_root():
     """Retourne le répertoire racine du projet."""
-    return Path(__file__).parent.absolute()
+    return Path(__file__).parent.parent.absolute()
 
 def is_pytest_installed() -> bool:
     """Vérifie si pytest est installé."""
@@ -41,16 +53,16 @@ def is_pytest_installed() -> bool:
 
 def install_test_dependencies():
     """Installe les dépendances de test si nécessaire."""
-    print("🔧 Vérification des dépendances de test...")
+    print("Vérification des dépendances de test...")
     if is_pytest_installed():
-        print("✅ pytest déjà installé")
+        print("pytest déjà installé")
     else:
-        print("📦 Installation des dépendances de test...")
+        print("Installation des dépendances de test...")
         subprocess.run([
             sys.executable, "-m", "pip", "install", 
             "-r", "requirements-test.txt"
         ], check=True)
-        print("✅ Dépendances installées")
+        print("Dépendances installées")
 
 def run_tests(args: argparse.Namespace) -> int:
     """Exécute les tests avec les options spécifiées."""
@@ -62,32 +74,39 @@ def run_tests(args: argparse.Namespace) -> int:
     
     # Options selon les arguments
     if args.unit:
-        cmd.extend(["-m", "unit"])
-        print("🧪 Exécution des tests unitaires...")
+        cmd.append("tests/unit/")
+        print("Tests unitaires...")
     elif args.integration:
-        cmd.extend(["-m", "integration"])
-        print("🔗 Exécution des tests d'intégration...")
+        cmd.append("tests/integration/")
+        print("Tests d'intégration...")
+    elif args.e2e:
+        cmd.append("tests/e2e/")
+        print("� Exécution des tests end-to-end...")
+    elif args.demo:
+        cmd.append("tests/demo/")
+        print("Tests de démonstration...")
     else:
-        print("🚀 Exécution de tous les tests...")
+        print("Exécution de tous les tests...")
+        cmd.append("tests/")
     
     if args.verbose:
         cmd.append("-v")
     
     if args.coverage:
         cmd.extend(["--cov=app_acfc", "--cov-report=term", "--cov-report=html"])
-        print("📊 Génération du rapport de coverage...")
+        print("Génération du rapport de coverage...")
     
     if args.html:
         cmd.extend(["--html=tests/reports/report.html", "--self-contained-html"])
-        print("📄 Génération du rapport HTML...")
+        print("Génération du rapport HTML...")
     
     if args.parallel:
         cmd.extend(["-n", "auto"])
-        print("⚡ Exécution en parallèle...")
+        print("Exécution en parallèle...")
     
     if args.fast:
         cmd.extend(["-x", "--tb=short"])
-        print("🏃 Mode rapide (arrêt au premier échec)...")
+        print("Mode rapide (arrêt au premier échec)...")
     
     # Options par défaut
     cmd.extend([
@@ -95,22 +114,19 @@ def run_tests(args: argparse.Namespace) -> int:
         "--tb=short" if not args.verbose else "--tb=long"
     ])
     
-    # Ajout du répertoire de tests
-    cmd.append("tests/")
-    
     # Exécution
-    print(f"🎯 Commande: {' '.join(cmd)}")
+    print(f"Commande: {' '.join(cmd)}")
     print("-" * 50)
     
     try:
         result = subprocess.run(cmd, check=False)
         return result.returncode
     except FileNotFoundError:
-        print("❌ Erreur: pytest n'est pas installé")
-        print("💡 Exécutez: pip install -r requirements-test.txt")
+        print("Erreur: pytest n'est pas installé")
+        print("Exécutez: pip install -r requirements-test.txt")
         return 1
     except KeyboardInterrupt:
-        print("\n⏹️  Tests interrompus par l'utilisateur")
+        print("\nTests interrompus par l'utilisateur")
         return 130
 
 def create_reports_directory():
@@ -142,6 +158,14 @@ Exemples d'utilisation:
     test_group.add_argument(
         "--integration", action="store_true",
         help="Exécuter seulement les tests d'intégration"
+    )
+    test_group.add_argument(
+        "--e2e", action="store_true",
+        help="Exécuter seulement les tests end-to-end"
+    )
+    test_group.add_argument(
+        "--demo", action="store_true",
+        help="Exécuter seulement les tests de démonstration"
     )
     
     # Options de rapport
@@ -176,7 +200,7 @@ Exemples d'utilisation:
     
     args = parser.parse_args()
     
-    print("🧪 ACFC - Exécution des Tests")
+    print("ACFC - Exécution des Tests")
     print("=" * 30)
     
     # Installation des dépendances si demandée
@@ -190,8 +214,8 @@ Exemples d'utilisation:
     
     # Vérification de pytest
     if not is_pytest_installed():
-        print("❌ pytest n'est pas installé")
-        print("💡 Utilisez --install-deps pour installer les dépendances")
+        print("pytest n'est pas installé")
+        print("Utilisez --install-deps pour installer les dépendances")
         return 1
     
     # Exécution des tests
@@ -199,13 +223,13 @@ Exemples d'utilisation:
     
     # Messages de fin
     if return_code == 0:
-        print("\n✅ Tous les tests sont passés avec succès!")
+        print("\nTous les tests sont passés avec succès!")
         if args.coverage:
-            print("📊 Rapport de coverage: htmlcov/index.html")
+            print("Rapport de coverage: htmlcov/index.html")
         if args.html:
-            print("📄 Rapport HTML: tests/reports/report.html")
+            print("Rapport HTML: tests/reports/report.html")
     else:
-        print(f"\n❌ Les tests ont échoué (code: {return_code})")
+        print(f"\nLes tests ont échoué (code: {return_code})")
     
     return return_code
 

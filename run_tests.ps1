@@ -36,7 +36,7 @@ function Write-Error {
 }
 
 function Show-Header {
-    Write-Host "🚀 Lancement des Tests ACFC" -ForegroundColor $Colors.Blue
+    Write-Host "Lancement des Tests ACFC" -ForegroundColor $Colors.Blue
     Write-Host "=============================" -ForegroundColor $Colors.Blue
     Write-Host ""
 }
@@ -78,7 +78,7 @@ function Test-Environment {
 
 function Invoke-UnitTests {
     Write-Status "Exécution des tests unitaires..."
-    $result = pytest tests/unit/ -v --tb=short -m unit
+    $result = python tests/run_tests.py --unit
     if ($LASTEXITCODE -eq 0) {
         Write-Success "Tests unitaires réussis"
         return $true
@@ -90,7 +90,7 @@ function Invoke-UnitTests {
 
 function Invoke-IntegrationTests {
     Write-Status "Exécution des tests d'intégration..."
-    $result = pytest tests/integration/ -v --tb=short -m integration
+    $result = python tests/run_tests.py --integration
     if ($LASTEXITCODE -eq 0) {
         Write-Success "Tests d'intégration réussis"
         return $true
@@ -102,7 +102,7 @@ function Invoke-IntegrationTests {
 
 function Invoke-E2ETests {
     Write-Status "Exécution des tests end-to-end..."
-    $result = pytest tests/e2e/ -v --tb=short -m e2e
+    $result = python tests/run_tests.py --e2e
     if ($LASTEXITCODE -eq 0) {
         Write-Success "Tests end-to-end réussis"
         return $true
@@ -114,7 +114,7 @@ function Invoke-E2ETests {
 
 function Invoke-DemoTests {
     Write-Status "Exécution des tests de démonstration..."
-    $result = pytest tests/demo/ -v -s --tb=short -m demo
+    $result = python tests/run_tests.py --demo
     if ($LASTEXITCODE -eq 0) {
         Write-Success "Tests de démonstration réussis"
         return $true
@@ -126,7 +126,7 @@ function Invoke-DemoTests {
 
 function Invoke-CoverageTests {
     Write-Status "Exécution des tests avec couverture..."
-    $result = pytest --cov=app_acfc --cov=api_acfc --cov-report=html --cov-report=xml --cov-report=term
+    $result = python tests/run_tests.py --coverage
     if ($LASTEXITCODE -eq 0) {
         Write-Success "Tests de couverture réussis"
         Write-Status "Rapport HTML généré dans htmlcov/"
@@ -137,43 +137,14 @@ function Invoke-CoverageTests {
     }
 }
 
-function Invoke-QRCodeTests {
-    Write-Status "Exécution des tests QR Code..."
-    $result = pytest -m qrcode -v --tb=short
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "Tests QR Code réussis"
-        return $true
-    } else {
-        Write-Error "Échec des tests QR Code"
-        return $false
-    }
-}
-
-function Invoke-PrintingTests {
-    Write-Status "Exécution des tests d'impression..."
-    $result = pytest -m printing -v --tb=short
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "Tests d'impression réussis"
-        return $true
-    } else {
-        Write-Error "Échec des tests d'impression"
-        return $false
-    }
-}
-
 function Invoke-AllTests {
     Write-Status "Exécution de tous les tests..."
-    $failed = 0
-    
-    if (-not (Invoke-UnitTests)) { $failed++ }
-    if (-not (Invoke-IntegrationTests)) { $failed++ }
-    if (-not (Invoke-E2ETests)) { $failed++ }
-    
-    if ($failed -eq 0) {
-        Write-Success "Tous les tests ont réussi!"
+    $result = python tests/run_tests.py
+    if ($LASTEXITCODE -eq 0) {
+        Write-Success "Tous les tests réussis"
         return $true
     } else {
-        Write-Error "$failed suite(s) de tests ont échoué"
+        Write-Error "Échec de certains tests"
         return $false
     }
 }
@@ -185,11 +156,8 @@ function Show-Menu {
     Write-Host "2) Tests d'intégration uniquement"
     Write-Host "3) Tests end-to-end uniquement"
     Write-Host "4) Tests de démonstration"
-    Write-Host "5) Tests QR Code spécifiques"
-    Write-Host "6) Tests d'impression spécifiques"
-    Write-Host "7) Tests avec couverture de code"
-    Write-Host "8) Tous les tests"
-    Write-Host "9) Tests rapides (unitaires + QR Code)"
+    Write-Host "5) Tests avec couverture de code"
+    Write-Host "6) Tous les tests"
     Write-Host "0) Quitter"
     Write-Host ""
 }
@@ -294,21 +262,10 @@ while ($true) {
             Invoke-DemoTests
         }
         "5" {
-            Invoke-QRCodeTests
-        }
-        "6" {
-            Invoke-PrintingTests
-        }
-        "7" {
             Invoke-CoverageTests
         }
-        "8" {
+        "6" {
             Invoke-AllTests
-        }
-        "9" {
-            Write-Status "Tests rapides (unitaires + QR Code)..."
-            $unit = Invoke-UnitTests
-            $qr = Invoke-QRCodeTests
         }
         "0" {
             Write-Status "Au revoir!"
