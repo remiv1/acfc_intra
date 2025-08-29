@@ -2,17 +2,17 @@
 
 **Date du rapport :** 29 August 2025  
 **Période analysée :** 22 August 2025 - 29 August 2025 (7 jours)  
-**Nombre de commits :** 57  
+**Nombre de commits :** 60  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 57 commits sur 7 jours  
-**Volume de code :** 188165 lignes ajoutées, 6755 lignes supprimées  
-**Fichiers impactés :** 661 fichiers modifiés  
-**Productivité moyenne :** 26880 lignes/jour
+**Activité de développement :** 60 commits sur 7 jours  
+**Volume de code :** 188451 lignes ajoutées, 6797 lignes supprimées  
+**Fichiers impactés :** 684 fichiers modifiés  
+**Productivité moyenne :** 26921 lignes/jour
 
 ---
 
@@ -517,6 +517,40 @@
 
 ### 29 August 2025
 
+#### 11:56 - 10e4a38 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
+
+**Catégorie :** Développement général  
+**Impact :** +64 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Merge: 6ac4392 7f2bb41`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 11:56:15 2025 +0200`
+- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
+
+#### 11:55 - 6ac4392 - feat: Ajout de la configuration pour le développement et les tests, y compris le fichier setup.py et les tests d'import fix: Correction des imports conditionnels dans conftest.py pour éviter les erreurs en CI/CD refactor: Refactorisation des fixtures de test pour une meilleure clarté et maintenabilité
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +158 -4 lignes, 15 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 11:55:59 2025 +0200`
+- `    feat: Ajout de la configuration pour le développement et les tests, y compris le fichier setup.py et les tests d'import`
+- `    fix: Correction des imports conditionnels dans conftest.py pour éviter les erreurs en CI/CD`
+- ... et 12 autres fichiers
+
+#### 09:30 - 7f2bb41 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +64 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Aug 29 09:30:49 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
+- ... et 1 autres fichiers
+
 #### 11:30 - 313bf82 - Add comprehensive unit tests to enhance application coverage
 
 **Catégorie :** Développement de fonctionnalités  
@@ -682,21 +716,21 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 26 commits (45.6%)
-- **Interface utilisateur** : 20 commits (35.1%)
-- **Développement général** : 6 commits (10.5%)
-- **Correction de bugs** : 3 commits (5.3%)
-- **Documentation** : 1 commits (1.8%)
-- **Refactoring** : 1 commits (1.8%)
+- **Développement de fonctionnalités** : 27 commits (45.0%)
+- **Interface utilisateur** : 21 commits (35.0%)
+- **Développement général** : 7 commits (11.7%)
+- **Correction de bugs** : 3 commits (5.0%)
+- **Documentation** : 1 commits (1.7%)
+- **Refactoring** : 1 commits (1.7%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 145 fichiers modifiés
+- **Python** : 150 fichiers modifiés
 - **HTML** : 58 fichiers modifiés
-- **Documentation** : 39 fichiers modifiés
-- **YAML/Config** : 28 fichiers modifiés
+- **Documentation** : 40 fichiers modifiés
+- **YAML/Config** : 31 fichiers modifiés
 - **JavaScript** : 13 fichiers modifiés
 - **Docker** : 11 fichiers modifiés
 - **CSS** : 8 fichiers modifiés
@@ -705,16 +739,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 8.1 commits/jour
-- **Volume de code :** 194920 modifications totales
-- **Ratio ajouts/suppressions :** 27.86
-- **Moyenne lignes par commit :** 3420
+- **Fréquence de commit :** 8.6 commits/jour
+- **Volume de code :** 195248 modifications totales
+- **Ratio ajouts/suppressions :** 27.73
+- **Moyenne lignes par commit :** 3254
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 188165 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 188451 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 29 August 2025*
