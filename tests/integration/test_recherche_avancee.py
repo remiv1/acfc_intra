@@ -3,15 +3,16 @@ Test de la nouvelle fonctionnalité de recherche avancée de clients.
 """
 import pytest
 import json
-from app_acfc.application import app
-from app_acfc.modeles import SessionBdD, Client, Part, Pro, Mail, Telephone, Adresse
+from app_acfc.application import acfc
+from app_acfc.modeles import SessionBdD, Client, Part, Pro, Adresse
+from typing import Any
 
 
 @pytest.fixture
 def client():
     """Créer un client de test Flask."""
-    app.config['TESTING'] = True
-    with app.test_client() as client:
+    acfc.config['TESTING'] = True
+    with acfc.test_client() as client:
         yield client
 
 
@@ -80,7 +81,7 @@ def sample_data():
     db_session.close()
 
 
-def test_recherche_avancee_particulier(client, sample_data):
+def test_recherche_avancee_particulier(client: Client, sample_data: Any):
     """Test de recherche par particulier."""
     response = client.get('/clients/recherche_avancee?q=Jean&type=part')
     assert response.status_code == 200
@@ -90,7 +91,7 @@ def test_recherche_avancee_particulier(client, sample_data):
     assert any(result['nom_affichage'] == 'Jean Dupont' for result in data)
 
 
-def test_recherche_avancee_professionnel(client, sample_data):
+def test_recherche_avancee_professionnel(client: Client, sample_data: Any):
     """Test de recherche par professionnel."""
     response = client.get('/clients/recherche_avancee?q=ACME&type=pro')
     assert response.status_code == 200
@@ -100,7 +101,7 @@ def test_recherche_avancee_professionnel(client, sample_data):
     assert any(result['nom_affichage'] == 'ACME Corporation' for result in data)
 
 
-def test_recherche_avancee_adresse(client, sample_data):
+def test_recherche_avancee_adresse(client: Client, sample_data: Any):
     """Test de recherche par adresse."""
     response = client.get('/clients/recherche_avancee?q=75001&type=adresse')
     assert response.status_code == 200
@@ -110,7 +111,7 @@ def test_recherche_avancee_adresse(client, sample_data):
     assert any(result['code_postal'] == '75001' for result in data)
 
 
-def test_recherche_avancee_terme_trop_court(client):
+def test_recherche_avancee_terme_trop_court(client: Client):
     """Test avec un terme de recherche trop court."""
     response = client.get('/clients/recherche_avancee?q=Je&type=part')
     assert response.status_code == 200
@@ -119,7 +120,7 @@ def test_recherche_avancee_terme_trop_court(client):
     assert len(data) == 0  # Aucun résultat pour moins de 3 caractères
 
 
-def test_recherche_avancee_sans_resultat(client):
+def test_recherche_avancee_sans_resultat(client: Client):
     """Test avec un terme qui ne donne aucun résultat."""
     response = client.get('/clients/recherche_avancee?q=TermeInexistant&type=part')
     assert response.status_code == 200

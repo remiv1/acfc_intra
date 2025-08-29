@@ -269,7 +269,7 @@ class TestErrorHandling:
         # Simuler un échec d'autorisation
         mock_validate.return_value = unauthorized_decorator
 
-        response = client.post('/clients/add_phone/', data={    # type: ignore
+        _ = client.post('/clients/add_phone/', data={    # type: ignore
             'client_id': '1',
             'telephone': '0102030405'
         })

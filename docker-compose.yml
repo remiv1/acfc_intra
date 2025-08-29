@@ -39,6 +39,9 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      # Configuration sécurisée pour Docker
+      - FLASK_HOST=${FLASK_HOST}                   # Nécessaire dans le conteneur Docker
+      - FLASK_PORT=${FLASK_PORT}
     networks:
       - acfc-network                          # Réseau privé inter-services
     depends_on:
