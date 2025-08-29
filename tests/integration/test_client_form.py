@@ -6,12 +6,14 @@ Ce script valide la syntaxe et les imports du module clients.
 
 import sys
 import os
+from flask import Blueprint
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from typing import List, Any
 
 def test_client_module_import():
     """Test d'import du module clients."""
     try:
-        from app_acfc.contextes_bp.clients import clients_bp
+        from app_acfc.contextes_bp.clients import clients_bp    # type: ignore
         print("✅ Import du module clients réussi")
         return True
     except ImportError as e:
@@ -23,15 +25,13 @@ def test_client_routes():
     try:
         from app_acfc.contextes_bp.clients import clients_bp
         
-        routes = []
-        for rule in clients_bp.url_map.iter_rules():
-            routes.append(f"{rule.rule} -> {rule.endpoint}")
-        
-        expected_routes = [
-            '/create',
-            '/<int:client_id>/edit', 
-            '/<int:client_id>/update'
-        ]
+        # Annotation de type pour clients_bp
+        clients_bp: Blueprint
+
+        # Récupération des routes
+        routes: List[str] = []
+        for rule in clients_bp.url_map.iter_rules():    # type: ignore
+            routes.append(f"{rule.rule} -> {rule.endpoint}")    # type: ignore
         
         print("📋 Routes détectées :")
         for route in routes:
@@ -64,7 +64,7 @@ def main():
         test_template_exists
     ]
     
-    results = []
+    results: List[Any] = []
     for test in tests:
         print(f"\n🔍 Exécution de {test.__name__}...")
         result = test()

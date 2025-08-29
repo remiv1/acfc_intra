@@ -85,7 +85,7 @@ class TestAuthenticationSecurity:
 
             initial_errors = mock_user.nb_errors
 
-            response = client.post('/login', data={  # type: ignore
+            _ = client.post('/login', data={  # type: ignore
                 'username': 'testuser',
                 'password': 'wrongpassword'
             })
@@ -240,7 +240,7 @@ class TestSessionSecurity:
             sess['sensitive_data'] = 'secret'
 
         # Déconnexion
-        response = client.get('/logout')    # type: ignore
+        _ = client.get('/logout')
 
         # Vérification que la session est vidée
         with client.session_transaction() as sess:
@@ -252,7 +252,7 @@ class TestSessionSecurity:
         """Test protection contre la fixation de session."""
         # Obtenoir un ID de session initial
         with client.session_transaction() as sess:
-            initial_session_id = sess.get('_id', 'no_id')   # type: ignore
+            _ = sess.get('_id', 'no_id')
 
         # Connexion
         with patch('application.SessionBdD') as mock_session_class:
@@ -267,14 +267,14 @@ class TestSessionSecurity:
                 mock_ph.verify_password.return_value = True
                 mock_ph.needs_rehash.return_value = False
 
-                response = client.post('/login', data={     # type: ignore
+                _ = client.post('/login', data={
                     'username': 'testuser',
                     'password': 'password123'
                 })
 
         # L'ID de session devrait avoir changé après la connexion
         with client.session_transaction() as sess:
-            new_session_id = sess.get('_id', 'no_id')       # type: ignore
+            _ = sess.get('_id', 'no_id')
             # Note: Flask peut ou non changer l'ID de session automatiquement
 
 class TestRateLimitingSecurity:
