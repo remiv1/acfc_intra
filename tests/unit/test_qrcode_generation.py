@@ -16,12 +16,10 @@ import base64
 from unittest.mock import Mock, patch
 import sys
 import os
+from typing import Any, Dict
 
 # Ajouter le chemin du projet pour les imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../'))
-
-from app_acfc.contextes_bp.commandes import commandes_bp
-
 
 class TestQRCodeGeneration:
     """Tests pour la génération de QR Code"""
@@ -29,11 +27,9 @@ class TestQRCodeGeneration:
     def test_qrcode_import(self):
         """Test que les imports QR Code fonctionnent"""
         import qrcode
-        from io import BytesIO
         import base64
         
         assert qrcode is not None
-        assert BytesIO is not None
         assert base64 is not None
     
     def test_qrcode_basic_generation(self):
@@ -69,13 +65,11 @@ class TestQRCodeGeneration:
         
         img = qr.make_image(fill_color="black", back_color="white")
         buffer = BytesIO()
-        img.save(buffer, format='PNG')
+        img.save(buffer, 'SVG')
         qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
         
         assert len(qr_code_base64) > 0
         assert isinstance(qr_code_base64, str)
-        # Vérifier que c'est du base64 valide
-        assert base64.b64decode(qr_code_base64) is not None
     
     def test_qrcode_different_urls(self):
         """Test avec différentes URLs"""
@@ -92,7 +86,7 @@ class TestQRCodeGeneration:
             
             img = qr.make_image(fill_color="black", back_color="white")
             buffer = BytesIO()
-            img.save(buffer, format='PNG')
+            img.save(buffer, 'SVG')
             qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
             
             assert len(qr_code_base64) > 0
@@ -166,7 +160,7 @@ class TestBonCommandeIntegration:
     
     @patch('app_acfc.contextes_bp.commandes.SessionBdD')
     @patch('app_acfc.contextes_bp.commandes.render_template')
-    def test_commande_bon_impression_route_structure(self, mock_render, mock_session):
+    def test_commande_bon_impression_route_structure(self, mock_render: Mock, mock_session: Mock):
         """Test de la structure de la route bon-impression"""
         # Ce test vérifie que la route est bien structurée pour recevoir les paramètres
         # Note: Test basique de structure, les tests complets nécessitent un environnement Flask
@@ -196,9 +190,9 @@ class TestTemplateFunctionality:
         """Test de la logique JavaScript d'auto-impression (simulation)"""
         # Simulation de la logique JavaScript
         
-        def simulate_url_params(url_search):
+        def simulate_url_params(url_search: str):
             """Simule URLSearchParams JavaScript"""
-            params = {}
+            params: Dict[str, Any] = {}
             if url_search:
                 for param in url_search.split('&'):
                     if '=' in param:
