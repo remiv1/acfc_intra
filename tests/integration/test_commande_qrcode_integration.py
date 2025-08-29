@@ -56,8 +56,8 @@ class TestCommandeBonImpressionIntegration:
     @patch('app_acfc.contextes_bp.commandes.SessionBdD')
     @patch('app_acfc.contextes_bp.commandes.render_template')
     @patch('app_acfc.contextes_bp.commandes.url_for')
-    def test_commande_bon_impression_complete_flow(self, mock_url_for: Mock, mock_render: Mock, 
-                                                  mock_session: Mock, mock_b64encode: Mock, mock_qr_class: Mock):
+    def test_commande_bon_impression_complete_flow(self, mock_url_for, mock_render, 
+                                                  mock_session, mock_b64encode, mock_qr_class):
         """Test du flux complet de génération du bon de commande"""
         
         # Configuration des mocks
