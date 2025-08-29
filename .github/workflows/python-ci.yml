@@ -44,6 +44,8 @@ jobs:
         pip install -r requirements-test.txt
         pip install -r requirements-app.txt
         pip install -r requirements-api.txt
+        # Installation du package en mode développement pour résoudre les imports
+        pip install -e .
         
     - name: Vérification de la syntaxe Python
       run: |
@@ -54,7 +56,8 @@ jobs:
         
     - name: Tests unitaires avec pytest
       run: |
-        pytest tests/unit/ -v --tb=short --cov=app_acfc --cov=api_acfc --cov-report=xml --cov-report=html
+        # Utilisation de PYTHONPATH en backup
+        PYTHONPATH=. pytest tests/unit/ -v --tb=short --cov=app_acfc --cov=api_acfc --cov-report=xml --cov-report=html
       env:
         TESTING: 'true'
         FLASK_ENV: testing

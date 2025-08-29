@@ -23,11 +23,18 @@ Version : 2.0
 """
 
 import os
+import sys
 import pytest
 from unittest.mock import Mock, patch
 from werkzeug.security import generate_password_hash
 from flask import Flask
-from app_acfc.modeles import Client
+from typing import Any
+
+# Ajouter le répertoire racine au PYTHONPATH pour les imports
+# Ceci résout les problèmes d'import en CI/CD et environnements divers
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 # Configuration des variables d'environnement pour les tests
 os.environ['DB_HOST'] = 'localhost'
@@ -38,6 +45,18 @@ os.environ['DB_PASSWORD'] = 'test_password'
 os.environ['MONGO_URL'] = 'mongodb://localhost:27017/test'
 os.environ['FLASK_ENV'] = 'testing'
 os.environ['TESTING'] = 'true'
+
+# Maintenant on peut importer les modules de l'application
+# Imports conditionnels pour éviter les erreurs en CI/CD
+try:
+    from app_acfc.application import acfc   # type: ignore
+    flask_app = True
+except ImportError:
+    # Fallback si l'import échoue encore
+    acfc = None
+    flask_app = False
+
+FLASK_APP_AVAILABLE = flask_app
 
 # Patch global des modules problématiques avant l'import
 @pytest.fixture(scope="session", autouse=True)
@@ -99,7 +118,7 @@ def mock_user():
 
 
 @pytest.fixture
-def authenticated_session(client: Client, mock_user: Mock):
+def authenticated_session(client: Any, mock_user: Mock):
     """Session authentifiée pour les tests."""
     with client.session_transaction() as sess:
         sess['pseudo'] = mock_user.pseudo

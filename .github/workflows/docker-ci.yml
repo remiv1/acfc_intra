@@ -60,6 +60,8 @@ jobs:
           SESSION_PASSKEY=change_me_to_a_random_long_secret
           API_SECRET=replace_with_real_secret
           EOF
+          FLASK_HOST=localhost
+          FLASK_PORT=5000
 
       - name: Build all Docker images
         run: |
