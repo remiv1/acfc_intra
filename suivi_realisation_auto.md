@@ -1,47 +1,22 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 28 August 2025  
-**Période analysée :** 21 August 2025 - 28 August 2025 (7 jours)  
-**Nombre de commits :** 42  
+**Date du rapport :** 29 August 2025  
+**Période analysée :** 22 August 2025 - 29 August 2025 (7 jours)  
+**Nombre de commits :** 44  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 42 commits sur 7 jours  
-**Volume de code :** 185587 lignes ajoutées, 5415 lignes supprimées  
-**Fichiers impactés :** 502 fichiers modifiés  
-**Productivité moyenne :** 26512 lignes/jour
+**Activité de développement :** 44 commits sur 7 jours  
+**Volume de code :** 185081 lignes ajoutées, 5610 lignes supprimées  
+**Fichiers impactés :** 521 fichiers modifiés  
+**Productivité moyenne :** 26440 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 21 August 2025
-
-#### 20:40 - 2ff4b26 - 📊 Mise à jour automatique du rapport de suivi (21/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +37 -15 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Thu Aug 21 20:40:35 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (21/08/2025)`
-- ... et 1 autres fichiers
-
-#### 22:40 - 266f71b - feat: Ajout d'un workflow CI/CD Docker Compose avec tests d'intégration et endpoints de santé
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +665 -1 lignes, 10 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Thu Aug 21 22:40:07 2025 +0200`
-- `    feat: Ajout d'un workflow CI/CD Docker Compose avec tests d'intégration et endpoints de santé`
-- ... et 7 autres fichiers
 
 
 ### 22 August 2025
@@ -451,6 +426,39 @@
 
 ### 28 August 2025
 
+#### 22:10 - b8d9519 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
+
+**Catégorie :** Développement général  
+**Impact :** +0 -0 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Merge: 729eb4c 2d4a531`
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Thu Aug 28 22:10:05 2025 +0200`
+- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
+
+#### 22:09 - 729eb4c - feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +37 -37 lignes, 7 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Thu Aug 28 22:09:49 2025 +0200`
+- `    feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker`
+- ... et 4 autres fichiers
+
+#### 20:03 - 2d4a531 - 📊 Mise à jour automatique du rapport de suivi (28/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +32 -32 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Thu Aug 28 20:03:12 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (28/08/2025)`
+- ... et 1 autres fichiers
+
 #### 22:02 - 07051d4 - feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker
 
 **Catégorie :** Développement de fonctionnalités  
@@ -507,25 +515,40 @@
 - ... et 51 autres fichiers
 
 
+### 29 August 2025
+
+#### 09:34 - 0d83c5f - feat: Amélioration des tests d'intégration et d'unité avec des annotations de type et des corrections de format - Ajout d'annotations de type pour une meilleure lisibilité et maintenabilité du code. - Correction des erreurs de formatage pour se conformer aux normes PEP 8. - Amélioration de la couverture des tests d'intégration et d'unité pour garantir la fiabilité du code. - Mise à jour des workflows CI/CD pour inclure les nouvelles pratiques de test et assurer une intégration continue fluide.
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +127 -142 lignes, 18 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 09:34:18 2025 +0200`
+- `    feat: Amélioration des tests d'intégration et d'unité avec des annotations de type et des corrections de format`
+- `    - Ajout d'annotations de type pour une meilleure lisibilité et maintenabilité du code.`
+- ... et 15 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 20 commits (47.6%)
-- **Interface utilisateur** : 16 commits (38.1%)
-- **Correction de bugs** : 3 commits (7.1%)
-- **Développement général** : 1 commits (2.4%)
-- **Documentation** : 1 commits (2.4%)
-- **Refactoring** : 1 commits (2.4%)
+- **Développement de fonctionnalités** : 21 commits (47.7%)
+- **Interface utilisateur** : 16 commits (36.4%)
+- **Correction de bugs** : 3 commits (6.8%)
+- **Développement général** : 2 commits (4.5%)
+- **Documentation** : 1 commits (2.3%)
+- **Refactoring** : 1 commits (2.3%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 90 fichiers modifiés
+- **Python** : 98 fichiers modifiés
 - **HTML** : 58 fichiers modifiés
 - **Documentation** : 31 fichiers modifiés
-- **YAML/Config** : 16 fichiers modifiés
+- **YAML/Config** : 18 fichiers modifiés
 - **JavaScript** : 13 fichiers modifiés
 - **Docker** : 11 fichiers modifiés
 - **CSS** : 8 fichiers modifiés
@@ -534,16 +557,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 6.0 commits/jour
-- **Volume de code :** 191002 modifications totales
-- **Ratio ajouts/suppressions :** 34.27
-- **Moyenne lignes par commit :** 4548
+- **Fréquence de commit :** 6.3 commits/jour
+- **Volume de code :** 190691 modifications totales
+- **Ratio ajouts/suppressions :** 32.99
+- **Moyenne lignes par commit :** 4334
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 185587 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 185081 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
-*Rapport généré automatiquement le 28 August 2025*
+*Rapport généré automatiquement le 29 August 2025*
