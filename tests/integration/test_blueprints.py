@@ -79,7 +79,7 @@ class TestBlueprintRegistration:
             'stocks_bp': '/stocks'
         }
         
-        for bp_name, _ in expected_prefixes.items():
+        for bp_name in expected_prefixes.keys():
             if bp_name in [bp.name for bp in acfc.blueprints.values()]:
                 _ = next(bp for bp in acfc.blueprints.values() if bp.name == bp_name)
                 # Note: Flask peut stocker les préfixes différemment selon la version

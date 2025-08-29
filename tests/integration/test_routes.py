@@ -31,9 +31,18 @@ import os
 from unittest.mock import Mock, patch
 from werkzeug.security import generate_password_hash
 from flask.testing import FlaskClient
+import string
+import secrets
 
 # Ajout du chemin de l'application pour les imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'app_acfc'))
+
+def generate_password(length: int = 15):
+    alphabet: str = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
+# MdP générique de test (remplacé car compromis)
+TEST_PWD = generate_password()
 
 # Import conditionnel pour éviter les erreurs de dépendances
 try:
@@ -67,7 +76,7 @@ def mock_user() -> Mock:
     user.nom = "Dupont"
     user.email = "jean.dupont@test.com"
     user.telephone = "0123456789"
-    user.sha_mdp = generate_password_hash("testpassword123")
+    user.sha_mdp = generate_password_hash(TEST_PWD)
     user.is_active = True
     user.is_locked = False
     user.is_chg_mdp = False
@@ -117,7 +126,7 @@ class TestAuthenticationRoutes:
         # Données du formulaire
         data = {
             'username': 'testuser',
-            'password': 'testpassword123'
+            'password': TEST_PWD
         }
 
         response = client.post('/login', data=data)
@@ -564,7 +573,7 @@ class TestIntegration:
         # 1. Login
         login_data = {
             'username': 'testuser',
-            'password': 'testpassword123'
+            'password': TEST_PWD
         }
         response = client.post('/login', data=login_data)
         assert response.status_code == 200

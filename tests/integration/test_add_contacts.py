@@ -11,10 +11,11 @@ Version : 1.0
 
 import pytest
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, Mock
 from app_acfc.contextes_bp.clients import clients_bp
-from app_acfc.modeles import Client, Telephone, Mail, Adresse
+from app_acfc.modeles import Client
 from flask import Flask
+from typing import Any, Callable, Tuple
 
 @pytest.fixture
 def app():
@@ -25,7 +26,7 @@ def app():
     return app
 
 @pytest.fixture
-def client(app):
+def client(app: Flask):
     """Fixture pour créer un client de test."""
     return app.test_client()
 
@@ -47,7 +48,7 @@ def mock_client():
 class TestAddPhone:
     """Tests pour la route d'ajout de téléphone."""
     
-    def test_add_phone_success(self, client, mock_session, mock_client):
+    def test_add_phone_success(self, client: Client, mock_session: Mock, mock_client: Mock):
         """Test d'ajout de téléphone réussi."""
         # Setup
         mock_session.query.return_value.get.return_value = mock_client
@@ -72,7 +73,7 @@ class TestAddPhone:
         mock_session.add.assert_called_once()
         mock_session.commit.assert_called_once()
     
-    def test_add_phone_missing_client_id(self, client, mock_session):
+    def test_add_phone_missing_client_id(self, client: Client, mock_session: Mock):
         """Test avec ID client manquant."""
         response = client.post('/clients/add_phone/', data={
             'telephone': '0102030405'
@@ -82,7 +83,7 @@ class TestAddPhone:
         data = json.loads(response.data)
         assert "ID client manquant" in data['error']
     
-    def test_add_phone_client_not_found(self, client, mock_session):
+    def test_add_phone_client_not_found(self, client: Client, mock_session: Mock):
         """Test avec client inexistant."""
         mock_session.query.return_value.get.return_value = None
         
@@ -95,7 +96,7 @@ class TestAddPhone:
         data = json.loads(response.data)
         assert "Client not found" in data['error']
     
-    def test_add_phone_missing_telephone(self, client, mock_session, mock_client):
+    def test_add_phone_missing_telephone(self, client: Client, mock_session: Mock, mock_client: Mock):
         """Test avec numéro de téléphone manquant."""
         mock_session.query.return_value.get.return_value = mock_client
         
@@ -107,7 +108,7 @@ class TestAddPhone:
         data = json.loads(response.data)
         assert "Numéro de téléphone manquant" in data['error']
     
-    def test_add_phone_principal_updates_others(self, client, mock_session, mock_client):
+    def test_add_phone_principal_updates_others(self, client: Client, mock_session: Mock, mock_client: Mock):
         """Test que définir un téléphone principal désactive les autres."""
         mock_session.query.return_value.get.return_value = mock_client
         
@@ -123,8 +124,8 @@ class TestAddPhone:
 
 class TestAddEmail:
     """Tests pour la route d'ajout d'email."""
-    
-    def test_add_email_success(self, client, mock_session, mock_client):
+
+    def test_add_email_success(self, client: Client, mock_session: Mock, mock_client: Mock):
         """Test d'ajout d'email réussi."""
         mock_session.query.return_value.get.return_value = mock_client
         
@@ -143,8 +144,8 @@ class TestAddEmail:
         
         mock_session.add.assert_called_once()
         mock_session.commit.assert_called_once()
-    
-    def test_add_email_invalid_format(self, client, mock_session, mock_client):
+
+    def test_add_email_invalid_format(self, client: Client, mock_session: Mock, mock_client: Mock):
         """Test avec format d'email invalide."""
         mock_session.query.return_value.get.return_value = mock_client
         
@@ -156,8 +157,8 @@ class TestAddEmail:
         assert response.status_code == 400
         data = json.loads(response.data)
         assert "Format d'email invalide" in data['error']
-    
-    def test_add_email_missing_email(self, client, mock_session, mock_client):
+
+    def test_add_email_missing_email(self, client: Client, mock_session: Mock, mock_client: Mock):
         """Test avec email manquant."""
         mock_session.query.return_value.get.return_value = mock_client
         
@@ -171,8 +172,8 @@ class TestAddEmail:
 
 class TestAddAddress:
     """Tests pour la route d'ajout d'adresse."""
-    
-    def test_add_address_success(self, client, mock_session, mock_client):
+
+    def test_add_address_success(self, client: Client, mock_session: Mock, mock_client: Mock):
         """Test d'ajout d'adresse réussi."""
         mock_session.query.return_value.get.return_value = mock_client
         
@@ -191,8 +192,8 @@ class TestAddAddress:
         
         mock_session.add.assert_called_once()
         mock_session.commit.assert_called_once()
-    
-    def test_add_address_missing_required_fields(self, client, mock_session, mock_client):
+
+    def test_add_address_missing_required_fields(self, client: Client, mock_session: Mock, mock_client: Mock):
         """Test avec champs obligatoires manquants."""
         mock_session.query.return_value.get.return_value = mock_client
         
@@ -225,8 +226,8 @@ class TestAddAddress:
         assert response.status_code == 400
         data = json.loads(response.data)
         assert "Ville manquante" in data['error']
-    
-    def test_add_address_optional_fields(self, client, mock_session, mock_client):
+
+    def test_add_address_optional_fields(self, client: Client, mock_session: Mock, mock_client: Mock):
         """Test avec champ optionnel adresse_l2."""
         mock_session.query.return_value.get.return_value = mock_client
         
@@ -242,8 +243,8 @@ class TestAddAddress:
 
 class TestErrorHandling:
     """Tests pour la gestion d'erreurs communes."""
-    
-    def test_database_error_handling(self, client, mock_session, mock_client):
+
+    def test_database_error_handling(self, client: Client, mock_session: Mock, mock_client: Mock):
         """Test de gestion des erreurs de base de données."""
         mock_session.query.return_value.get.return_value = mock_client
         mock_session.commit.side_effect = Exception("Erreur DB")
@@ -261,12 +262,14 @@ class TestErrorHandling:
         mock_session.rollback.assert_called_once()
     
     @patch('app_acfc.contextes_bp.clients.validate_habilitation')
-    def test_authorization_required(self, mock_validate, client):
+    def test_authorization_required(self, mock_validate: Mock, client: Client):
         """Test que les routes nécessitent une autorisation."""
+        def unauthorized_decorator(f: Callable[..., Any]) -> Callable[..., Tuple[str, int]]:
+            return lambda *args, **kwargs: ("Unauthorized", 401)
         # Simuler un échec d'autorisation
-        mock_validate.return_value = lambda f: lambda *args, **kwargs: ("Unauthorized", 401)
-        
-        response = client.post('/clients/add_phone/', data={
+        mock_validate.return_value = unauthorized_decorator
+
+        response = client.post('/clients/add_phone/', data={    # type: ignore
             'client_id': '1',
             'telephone': '0102030405'
         })
