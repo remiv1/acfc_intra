@@ -2,17 +2,17 @@
 
 **Date du rapport :** 29 August 2025  
 **Période analysée :** 22 August 2025 - 29 August 2025 (7 jours)  
-**Nombre de commits :** 44  
+**Nombre de commits :** 47  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 44 commits sur 7 jours  
-**Volume de code :** 185081 lignes ajoutées, 5610 lignes supprimées  
-**Fichiers impactés :** 521 fichiers modifiés  
-**Productivité moyenne :** 26440 lignes/jour
+**Activité de développement :** 47 commits sur 7 jours  
+**Volume de code :** 185352 lignes ajoutées, 5868 lignes supprimées  
+**Fichiers impactés :** 548 fichiers modifiés  
+**Productivité moyenne :** 26478 lignes/jour
 
 ---
 
@@ -517,6 +517,40 @@
 
 ### 29 August 2025
 
+#### 09:40 - b6c869e - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
+
+**Catégorie :** Développement général  
+**Impact :** +69 -46 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Merge: 4e3b5a2 bbfe3e0`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 09:40:34 2025 +0200`
+- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
+
+#### 09:40 - 4e3b5a2 - feat: Amélioration des tests d'intégration et d'unité avec des annotations de type et des corrections de format - Ajout d'annotations de type pour une meilleure lisibilité et maintenabilité du code. - Correction des erreurs de formatage pour se conformer aux normes PEP 8. - Amélioration de la couverture des tests d'intégration et d'unité pour garantir la fiabilité du code. - Mise à jour des workflows CI/CD pour inclure les nouvelles pratiques de test et assurer une intégration continue fluide.
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +133 -166 lignes, 19 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 09:40:32 2025 +0200`
+- `    feat: Amélioration des tests d'intégration et d'unité avec des annotations de type et des corrections de format`
+- `    - Ajout d'annotations de type pour une meilleure lisibilité et maintenabilité du code.`
+- ... et 16 autres fichiers
+
+#### 07:34 - bbfe3e0 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +69 -46 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Aug 29 07:34:33 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
+- ... et 1 autres fichiers
+
 #### 09:34 - 0d83c5f - feat: Amélioration des tests d'intégration et d'unité avec des annotations de type et des corrections de format - Ajout d'annotations de type pour une meilleure lisibilité et maintenabilité du code. - Correction des erreurs de formatage pour se conformer aux normes PEP 8. - Amélioration de la couverture des tests d'intégration et d'unité pour garantir la fiabilité du code. - Mise à jour des workflows CI/CD pour inclure les nouvelles pratiques de test et assurer une intégration continue fluide.
 
 **Catégorie :** Développement de fonctionnalités  
@@ -534,21 +568,21 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 21 commits (47.7%)
-- **Interface utilisateur** : 16 commits (36.4%)
-- **Correction de bugs** : 3 commits (6.8%)
-- **Développement général** : 2 commits (4.5%)
-- **Documentation** : 1 commits (2.3%)
-- **Refactoring** : 1 commits (2.3%)
+- **Développement de fonctionnalités** : 22 commits (46.8%)
+- **Interface utilisateur** : 17 commits (36.2%)
+- **Développement général** : 3 commits (6.4%)
+- **Correction de bugs** : 3 commits (6.4%)
+- **Documentation** : 1 commits (2.1%)
+- **Refactoring** : 1 commits (2.1%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 98 fichiers modifiés
+- **Python** : 107 fichiers modifiés
 - **HTML** : 58 fichiers modifiés
-- **Documentation** : 31 fichiers modifiés
-- **YAML/Config** : 18 fichiers modifiés
+- **Documentation** : 32 fichiers modifiés
+- **YAML/Config** : 20 fichiers modifiés
 - **JavaScript** : 13 fichiers modifiés
 - **Docker** : 11 fichiers modifiés
 - **CSS** : 8 fichiers modifiés
@@ -557,16 +591,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 6.3 commits/jour
-- **Volume de code :** 190691 modifications totales
-- **Ratio ajouts/suppressions :** 32.99
-- **Moyenne lignes par commit :** 4334
+- **Fréquence de commit :** 6.7 commits/jour
+- **Volume de code :** 191220 modifications totales
+- **Ratio ajouts/suppressions :** 31.59
+- **Moyenne lignes par commit :** 4069
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 185081 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 185352 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 29 August 2025*
