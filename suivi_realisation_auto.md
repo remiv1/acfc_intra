@@ -2,46 +2,21 @@
 
 **Date du rapport :** 29 August 2025  
 **Période analysée :** 22 August 2025 - 29 August 2025 (7 jours)  
-**Nombre de commits :** 66  
+**Nombre de commits :** 69  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 66 commits sur 7 jours  
-**Volume de code :** 194065 lignes ajoutées, 8949 lignes supprimées  
-**Fichiers impactés :** 778 fichiers modifiés  
-**Productivité moyenne :** 27723 lignes/jour
+**Activité de développement :** 69 commits sur 7 jours  
+**Volume de code :** 189904 lignes ajoutées, 10664 lignes supprimées  
+**Fichiers impactés :** 773 fichiers modifiés  
+**Productivité moyenne :** 27129 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 22 August 2025
-
-#### 16:27 - a0e863a - 📊 Mise à jour automatique du rapport de suivi (22/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +46 -21 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Aug 22 16:27:09 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (22/08/2025)`
-- ... et 1 autres fichiers
-
-#### 18:26 - 3966292 - Add unit tests for ACFC routes and security features
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +4635 -58 lignes, 32 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 22 18:26:54 2025 +0200`
-- `    Add unit tests for ACFC routes and security features`
-- ... et 30 autres fichiers
 
 
 ### 23 August 2025
@@ -517,6 +492,61 @@
 
 ### 29 August 2025
 
+#### 19:32 - 1b681ba - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
+
+**Catégorie :** Développement général  
+**Impact :** +37 -40 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Merge: 85293ad 3ccf58d`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 19:32:44 2025 +0200`
+- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
+
+#### 19:32 - 85293ad - fix: Remove obsolete unit tests and improve test structure
+
+**Catégorie :** Correction de bugs  
+**Impact :** +390 -1683 lignes, 15 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 19:32:41 2025 +0200`
+- `    fix: Remove obsolete unit tests and improve test structure`
+- ... et 13 autres fichiers
+
+#### 16:38 - 3ccf58d - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +37 -40 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Aug 29 16:38:18 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
+- ... et 1 autres fichiers
+
+#### 18:38 - 312297a - fix: Nettoyage des imports dans application.py et résolution des imports relatifs et redondants
+
+**Catégorie :** Correction de bugs  
+**Impact :** +0 -9 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 18:38:05 2025 +0200`
+- `    fix: Nettoyage des imports dans application.py et résolution des imports relatifs et redondants`
+- ... et 1 autres fichiers
+
+#### 16:06 - 8e6d915 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +56 -22 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Aug 29 16:06:36 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
+- ... et 1 autres fichiers
+
 #### 18:06 - 91da666 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
 
 **Catégorie :** Développement général  
@@ -784,39 +814,39 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 29 commits (43.9%)
-- **Interface utilisateur** : 23 commits (34.8%)
-- **Développement général** : 9 commits (13.6%)
-- **Correction de bugs** : 3 commits (4.5%)
-- **Documentation** : 1 commits (1.5%)
-- **Refactoring** : 1 commits (1.5%)
+- **Développement de fonctionnalités** : 28 commits (40.6%)
+- **Interface utilisateur** : 24 commits (34.8%)
+- **Développement général** : 10 commits (14.5%)
+- **Correction de bugs** : 5 commits (7.2%)
+- **Documentation** : 1 commits (1.4%)
+- **Refactoring** : 1 commits (1.4%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 173 fichiers modifiés
-- **HTML** : 70 fichiers modifiés
-- **Documentation** : 47 fichiers modifiés
-- **YAML/Config** : 35 fichiers modifiés
-- **JavaScript** : 15 fichiers modifiés
-- **CSS** : 12 fichiers modifiés
+- **Python** : 178 fichiers modifiés
+- **HTML** : 63 fichiers modifiés
+- **Documentation** : 46 fichiers modifiés
+- **YAML/Config** : 34 fichiers modifiés
+- **JavaScript** : 14 fichiers modifiés
 - **Docker** : 11 fichiers modifiés
+- **CSS** : 9 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 9.4 commits/jour
-- **Volume de code :** 203014 modifications totales
-- **Ratio ajouts/suppressions :** 21.69
-- **Moyenne lignes par commit :** 3076
+- **Fréquence de commit :** 9.9 commits/jour
+- **Volume de code :** 200568 modifications totales
+- **Ratio ajouts/suppressions :** 17.81
+- **Moyenne lignes par commit :** 2907
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 194065 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 189904 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 29 August 2025*

@@ -40,6 +40,8 @@ def client() -> Generator[FlaskClient, Any, None]:
     """Client de test Flask."""
     acfc.config['TESTING'] = True
     acfc.config['WTF_CSRF_ENABLED'] = False
+    acfc.config['SECRET_KEY'] = 'test_secret_key_for_testing'
+    acfc.config['SESSION_TYPE'] = 'filesystem'
     with acfc.test_client() as client:
         yield client
 
@@ -90,14 +92,17 @@ class TestAuthenticationSecurity:
         with patch('app_acfc.application.ph_acfc') as mock_ph:
             mock_ph.verify_password.return_value = False
 
-            initial_errors = mock_user.nb_errors
+            initial_errors = 0
+            mock_user.nb_errors = initial_errors
 
-            _ = client.post('/login', data={  # type: ignore
+            response = client.post('/login', data={
                 'username': 'testuser',
                 'password': 'wrongpassword'
             })
             
+            # Vérifier que le compteur a été incrémenté
             assert mock_user.nb_errors == initial_errors + 1
+            assert response.status_code == 200  # Reste sur la page de login
 
     def test_sql_injection_protection_login(self, client: FlaskClient) -> None:
         """Test protection contre injection SQL dans le login."""

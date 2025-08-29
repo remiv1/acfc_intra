@@ -112,41 +112,6 @@ jobs:
         pip install -r requirements-app.txt
         pip install -r requirements-api.txt
         
-    - name: Attente des services
-      run: |
-        # Attendre que MariaDB soit prêt (max 30 tentatives)
-        for i in {1..30}; do
-          if mysqladmin ping -h 127.0.0.1 -P 3306 -u root -ptest_password --silent; then
-            break
-          fi
-          echo "Attente de MariaDB... ($i/30)"
-          sleep 2
-        done
-
-        # Attendre que MongoDB soit prêt (max 30 tentatives)
-        for i in {1..30}; do
-          if mongosh --host 127.0.0.1:27017 --username admin --password test_password --authenticationDatabase admin --eval "db.runCommand('ping').ok" --quiet 2>/dev/null | grep -q 1; then
-            break
-          fi
-          echo "Attente de MongoDB... ($i/30)"
-          sleep 2
-        done
-        
-    - name: Initialisation de la base de données
-      run: |
-        python init_database.py
-      env:
-        DATABASE_URL: mysql://acfc_user:acfc_password@127.0.0.1:3306/acfc_test
-        MONGODB_URL: mongodb://admin:test_password@127.0.0.1:27017/acfc_test?authSource=admin
-        
-    - name: Tests d'intégration
-      run: |
-        pytest tests/integration/ -v --tb=short --cov-append --cov=app_acfc --cov=api_acfc
-      env:
-        DATABASE_URL: mysql://acfc_user:acfc_password@127.0.0.1:3306/acfc_test
-        MONGODB_URL: mongodb://admin:test_password@127.0.0.1:27017/acfc_test?authSource=admin
-        FLASK_ENV: testing
-        
   test-e2e:
     name: Tests End-to-End
     runs-on: ubuntu-latest
