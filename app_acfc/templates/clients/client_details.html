@@ -147,46 +147,51 @@
     <!-- Navigation par onglets -->
     <div class="row">
         <div class="col-12">
-            <ul class="nav nav-tabs nav-fill mb-4" id="clientTabs" role="tablist">
-                <li class="nav-item" role="presentation">
+            <div class="nav nav-tabs nav-fill mb-4" id="clientTabs" role="tablist">
+                <div class="nav-item">
                     <button class="nav-link active" id="infos-tab" data-bs-toggle="tab" 
-                            data-bs-target="#infos" type="button" role="tab">
+                            data-bs-target="#infos" type="button" role="tab"
+                            aria-controls="infos" aria-selected="true">
                         <i class="bi bi-person me-2"></i>Informations
                     </button>
-                </li>
-                <li class="nav-item" role="presentation">
+                </div>
+                <div class="nav-item">
                     <button class="nav-link" id="phones-tab" data-bs-toggle="tab" 
-                            data-bs-target="#phones" type="button" role="tab">
+                            data-bs-target="#phones" type="button" role="tab"
+                            aria-controls="phones" aria-selected="false">
                         <i class="bi bi-telephone me-2"></i>Téléphones
                         {% set principal_phones = phones|selectattr('is_principal')|list %}
                         {% if principal_phones %}
                             <i class="bi bi-star-fill text-warning ms-1">+</i>
                         {% endif %}
                     </button>
-                </li>
-                <li class="nav-item" role="presentation">
+                </div>
+                <div class="nav-item">
                     <button class="nav-link" id="emails-tab" data-bs-toggle="tab" 
-                            data-bs-target="#emails" type="button" role="tab">
+                            data-bs-target="#emails" type="button" role="tab"
+                            aria-controls="emails" aria-selected="false">
                         <i class="bi bi-envelope me-2"></i>Emails
                         {% set principal_emails = mails|selectattr('is_principal')|list %}
                         {% if principal_emails %}
                             <i class="bi bi-star-fill text-warning ms-1">+</i>
                         {% endif %}
                     </button>
-                </li>
-                <li class="nav-item" role="presentation">
+                </div>
+                <div class="nav-item">
                     <button class="nav-link" id="addresses-tab" data-bs-toggle="tab" 
-                            data-bs-target="#addresses" type="button" role="tab">
+                            data-bs-target="#addresses" type="button" role="tab"
+                            aria-controls="addresses" aria-selected="false">
                         <i class="bi bi-geo-alt me-2"></i>Adresses
                         {% set principal_addresses = addresses|selectattr('is_principal')|list %}
                         {% if principal_addresses %}
                             <i class="bi bi-star-fill text-warning ms-1">+</i>
                         {% endif %}
                     </button>
-                </li>
-                <li class="nav-item" role="presentation">
+                </div>
+                <div class="nav-item">
                     <button class="nav-link" id="orders-tab" data-bs-toggle="tab" 
-                            data-bs-target="#orders" type="button" role="tab">
+                            data-bs-target="#orders" type="button" role="tab"
+                            aria-controls="orders" aria-selected="false">
                         <i class="bi bi-cart me-2"></i>Commandes
                         {% set commandes_en_cours = orders|selectattr('is_expedie', 'equalto', false)|selectattr('is_annulee', 'equalto', false)|list %}
                         {% set nb_en_cours = commandes_en_cours|length %}
@@ -194,15 +199,16 @@
                             <span class="badge bg-warning text-dark ms-1">{{ nb_en_cours }} en cours</span>
                         {% endif %}
                     </button>
-                </li>
-                <li class="nav-item" role="presentation">
+                </div>
+                <div class="nav-item">
                     <button class="nav-link" id="invoices-tab" data-bs-toggle="tab" 
-                            data-bs-target="#invoices" type="button" role="tab">
+                            data-bs-target="#invoices" type="button" role="tab"
+                            aria-controls="invoices" aria-selected="false">
                         <i class="bi bi-receipt me-2"></i>Factures
                         <span id="invoices-count" class="badge bg-secondary ms-1">{{ bills|length }}</span>
                     </button>
-                </li>
-            </ul>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -227,31 +233,31 @@
                             {% if client.type_client == 1 and part %}
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label text-muted">Prénom</label>
-                                        <p class="fw-semibold">{{ part.prenom }}</p>
+                                        <label for="prenom" class="form-label text-muted">Prénom</label>
+                                        <p id="prenom" class="fw-semibold">{{ part.prenom }}</p>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label text-muted">Nom</label>
-                                        <p class="fw-semibold">{{ part.nom }}</p>
+                                        <label for="nom" class="form-label text-muted">Nom</label>
+                                        <p id="nom" class="fw-semibold">{{ part.nom }}</p>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label text-muted">Date de naissance</label>
-                                        <p class="fw-semibold">{{ part.date_naissance.strftime('%d/%m/%Y') if part.date_naissance else '' }}</p>
+                                        <label for="date_naissance" class="form-label text-muted">Date de naissance</label>
+                                        <p id="date_naissance" class="fw-semibold">{{ part.date_naissance.strftime('%d/%m/%Y') if part.date_naissance else '' }}</p>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label text-muted">Lieu de naissance</label>
-                                        <p class="fw-semibold">{{ part.lieu_naissance if part.lieu_naissance else '' }}</p>
+                                        <label for="lieu_naissance" class="form-label text-muted">Lieu de naissance</label>
+                                        <p id="lieu_naissance" class="fw-semibold">{{ part.lieu_naissance if part.lieu_naissance else '' }}</p>
                                     </div>
                                 </div>
                             {% elif client.type_client == 2 and pro %}
                                 <div class="row g-3">
                                     <div class="col-md-8">
-                                        <label class="form-label text-muted">Raison sociale</label>
-                                        <p class="fw-semibold">{{ pro.raison_sociale }}</p>
+                                        <label for="raison_sociale" class="form-label text-muted">Raison sociale</label>
+                                        <p id="raison_sociale" class="fw-semibold">{{ pro.raison_sociale }}</p>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label text-muted">Type</label>
-                                        <p class="fw-semibold">
+                                        <label for="type_pro" class="form-label text-muted">Type</label>
+                                        <p id="type_pro" class="fw-semibold">
                                             {% if pro.type_pro == 1 %}
                                                 Entreprise
                                             {% elif pro.type_pro == 2 %}
@@ -263,14 +269,14 @@
                                     </div>
                                     {% if pro.siren %}
                                     <div class="col-md-6">
-                                        <label class="form-label text-muted">SIREN</label>
-                                        <p class="fw-semibold">{{ pro.siren }}</p>
+                                        <label for="siren" class="form-label text-muted">SIREN</label>
+                                        <p id="siren" class="fw-semibold">{{ pro.siren }}</p>
                                     </div>
                                     {% endif %}
                                     {% if pro.rna %}
                                     <div class="col-md-6">
-                                        <label class="form-label text-muted">RNA</label>
-                                        <p class="fw-semibold">{{ pro.rna }}</p>
+                                        <label for="rna" class="form-label text-muted">RNA</label>
+                                        <p id="rna" class="fw-semibold">{{ pro.rna }}</p>
                                     </div>
                                     {% endif %}
                                 </div>
@@ -367,16 +373,16 @@
                                                 {% endif %}
                                             </div>
                                             <div class="dropdown">
-                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-label="Options pour le téléphone">
                                                     <i class="bi bi-three-dots-vertical"></i>
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item" href="#" onclick="editPhone({{ telephone.id }})">
+                                                    <li><button type="button" class="dropdown-item" data-phone-id="{{ telephone.id }}" onclick="editPhone(this.dataset.phoneId)">
                                                         <i class="bi bi-pencil me-2"></i>Modifier
-                                                    </a></li>
-                                                    <li><a class="dropdown-item text-danger" href="#" onclick="deletePhone({{ telephone.id }})">
+                                                    </button></li>
+                                                    <li><button type="button" class="dropdown-item text-danger" data-phone-id="{{ telephone.id }}" onclick="deletePhone(this.dataset.phoneId)">
                                                         <i class="bi bi-trash me-2"></i>Supprimer
-                                                    </a></li>
+                                                    </button></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -432,14 +438,14 @@
                                                 {% endif %}
                                             </div>
                                             <div class="dropdown">
-                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" title="Actions">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-label="Actions pour l'email">
                                                     <i class="bi bi-three-dots-vertical"></i>
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li><button class="dropdown-item" type="button" onclick="editEmail({{ email.id }})">
+                                                    <li><button class="dropdown-item" type="button" data-email-id="{{ email.id }}" onclick="editEmail(this.dataset.emailId)">
                                                         <i class="bi bi-pencil me-2"></i>Modifier
                                                     </button></li>
-                                                    <li><button class="dropdown-item text-danger" type="button" onclick="deleteEmail({{ email.id }})">
+                                                    <li><button class="dropdown-item text-danger" type="button" data-email-id="{{ email.id }}" onclick="deleteEmail(this.dataset.emailId)">
                                                         <i class="bi bi-trash me-2"></i>Supprimer
                                                     </button></li>
                                                 </ul>
@@ -499,14 +505,14 @@
                                                 <small class="text-muted">Créée le {{ adresse.created_at.strftime('%d/%m/%Y') }}</small>
                                             </div>
                                             <div class="dropdown">
-                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" title="Actions">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-label="Actions pour l'adresse">
                                                     <i class="bi bi-three-dots-vertical"></i>
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li><button class="dropdown-item" type="button" onclick="editAddress({{ adresse.id }})">
+                                                    <li><button class="dropdown-item" type="button" data-address-id="{{ adresse.id }}" onclick="editAddress(this.dataset.addressId)">
                                                         <i class="bi bi-pencil me-2"></i>Modifier
                                                     </button></li>
-                                                    <li><button class="dropdown-item text-danger" type="button" onclick="deleteAddress({{ adresse.id }})">
+                                                    <li><button class="dropdown-item text-danger" type="button" data-address-id="{{ adresse.id }}" onclick="deleteAddress(this.dataset.addressId)">
                                                         <i class="bi bi-trash me-2"></i>Supprimer
                                                     </button></li>
                                                 </ul>
@@ -572,7 +578,7 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <div class="btn-group gap-1" role="group" aria-label="Actions commande">
+                                            <fieldset class="btn-group gap-1" role="group" aria-label="Actions commande">
                                                 <a href="{{ url_for('commandes.commande_details', id_client=commande.id_client, id_commande=commande.id) }}" 
                                                    class="btn btn-sm btn-outline-primary" title="Voir les détails">
                                                     <i class="bi bi-eye me-1"></i>Voir
@@ -583,8 +589,8 @@
                                                     <i class="bi bi-pencil me-1"></i>Modifier
                                                 </a>
                                                 {% if not commande.is_expedie %}
-                                                <form method="POST" action="{{ url_for('commandes.annuler_commande', id_client=commande.id_client, id_commande=commande.id) }}" 
-                                                      style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
+                                                <form class="inline-display" method="POST" action="{{ url_for('commandes.annuler_commande', id_client=commande.id_client, id_commande=commande.id) }}" 
+                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
                                                     <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Annuler la commande">
                                                         <i class="bi bi-x-circle me-1"></i>Annuler
                                                     </button>
@@ -595,7 +601,7 @@
                                                     <i class="bi bi-x-circle me-1"></i>Commande annulée
                                                 </span>
                                                 {% endif %}
-                                            </div>
+                                            </fieldset>
                                         </td>
                                     </tr>
                                     {% endfor %}

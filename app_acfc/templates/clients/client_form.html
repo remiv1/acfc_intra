@@ -98,8 +98,8 @@
                         {% if sub_context == 'create' %}
                         <div class="row mb-4">
                             <div class="col-12">
-                                <label class="form-label">Type de client <span class="text-danger">*</span></label>
-                                <div class="d-flex gap-3">
+                                <label for="type_clt" class="form-label">Type de client <span class="text-danger">*</span></label>
+                                <div id="type_clt" class="d-flex gap-3">
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="type_client" 
                                                id="type_particulier" value="1" checked required>
@@ -122,8 +122,8 @@
                         <input type="hidden" name="type_client" value="{{ client.type_client }}">
                         <div class="row mb-4">
                             <div class="col-12">
-                                <label class="form-label">Type de client</label>
-                                <p class="form-control-plaintext">
+                                <label for="tpe_clt" class="form-label">Type de client</label>
+                                <p id="type_clt" class="form-control-plaintext">
                                     {% if client.type_client == 1 %}
                                         <i class="bi bi-person me-1"></i>Particulier
                                     {% else %}

@@ -26,8 +26,8 @@
                 
                 <!-- Type de recherche -->
                 <div class="col-md-4">
-                    <label class="form-label">Type de recherche</label>
-                    <div class="search-type-options">
+                    <label for="search-type" class="form-label">Type de recherche</label>
+                    <div id="search-type" class="search-type-options">
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="search_type" id="type-part" value="part" checked>
                             <label class="form-check-label" for="type-part">
@@ -84,7 +84,7 @@
 
     <!-- État de chargement -->
     <div id="search-loading" class="text-center p-4 d-none">
-        <div class="spinner-border text-primary" role="status">
+        <div class="spinner-border text-primary">
             <span class="visually-hidden">Recherche en cours...</span>
         </div>
         <p class="mt-2 text-muted">Recherche en cours...</p>
