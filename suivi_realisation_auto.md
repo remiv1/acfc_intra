@@ -1,18 +1,18 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 29 August 2025  
-**Période analysée :** 22 August 2025 - 29 August 2025 (7 jours)  
-**Nombre de commits :** 69  
+**Date du rapport :** 30 August 2025  
+**Période analysée :** 23 August 2025 - 30 August 2025 (7 jours)  
+**Nombre de commits :** 73  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 69 commits sur 7 jours  
-**Volume de code :** 189904 lignes ajoutées, 10664 lignes supprimées  
-**Fichiers impactés :** 773 fichiers modifiés  
-**Productivité moyenne :** 27129 lignes/jour
+**Activité de développement :** 73 commits sur 7 jours  
+**Volume de code :** 192134 lignes ajoutées, 12906 lignes supprimées  
+**Fichiers impactés :** 814 fichiers modifiés  
+**Productivité moyenne :** 27447 lignes/jour
 
 ---
 
@@ -492,6 +492,39 @@
 
 ### 29 August 2025
 
+#### 19:38 - 8f00c7d - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
+
+**Catégorie :** Développement général  
+**Impact :** +0 -0 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Merge: 3050336 00ced50`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 19:38:30 2025 +0200`
+- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
+
+#### 19:38 - 3050336 - fix: Remove obsolete unit tests and improve test structure
+
+**Catégorie :** Correction de bugs  
+**Impact :** +467 -1765 lignes, 17 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Aug 29 19:38:27 2025 +0200`
+- `    fix: Remove obsolete unit tests and improve test structure`
+- ... et 15 autres fichiers
+
+#### 17:32 - 00ced50 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +51 -18 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Aug 29 17:32:56 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
+- ... et 1 autres fichiers
+
 #### 19:32 - 1b681ba - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
 
 **Catégorie :** Développement général  
@@ -810,25 +843,39 @@
 - ... et 15 autres fichiers
 
 
+### 30 August 2025
+
+#### 09:19 - 3761abf - Refactor: Récréation complète des tests pour être plus adaptable aux changements futurs.
+
+**Catégorie :** Refactoring  
+**Impact :** +1712 -459 lignes, 16 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Sat Aug 30 09:19:32 2025 +0200`
+- `    Refactor: Récréation complète des tests pour être plus adaptable aux changements futurs.`
+- ... et 15 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 28 commits (40.6%)
-- **Interface utilisateur** : 24 commits (34.8%)
-- **Développement général** : 10 commits (14.5%)
-- **Correction de bugs** : 5 commits (7.2%)
+- **Développement de fonctionnalités** : 28 commits (38.4%)
+- **Interface utilisateur** : 25 commits (34.2%)
+- **Développement général** : 11 commits (15.1%)
+- **Correction de bugs** : 6 commits (8.2%)
+- **Refactoring** : 2 commits (2.7%)
 - **Documentation** : 1 commits (1.4%)
-- **Refactoring** : 1 commits (1.4%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 178 fichiers modifiés
+- **Python** : 192 fichiers modifiés
 - **HTML** : 63 fichiers modifiés
-- **Documentation** : 46 fichiers modifiés
-- **YAML/Config** : 34 fichiers modifiés
+- **Documentation** : 48 fichiers modifiés
+- **YAML/Config** : 35 fichiers modifiés
 - **JavaScript** : 14 fichiers modifiés
 - **Docker** : 11 fichiers modifiés
 - **CSS** : 9 fichiers modifiés
@@ -837,16 +884,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 9.9 commits/jour
-- **Volume de code :** 200568 modifications totales
-- **Ratio ajouts/suppressions :** 17.81
-- **Moyenne lignes par commit :** 2907
+- **Fréquence de commit :** 10.4 commits/jour
+- **Volume de code :** 205040 modifications totales
+- **Ratio ajouts/suppressions :** 14.89
+- **Moyenne lignes par commit :** 2809
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 189904 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 192134 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
-*Rapport généré automatiquement le 29 August 2025*
+*Rapport généré automatiquement le 30 August 2025*
