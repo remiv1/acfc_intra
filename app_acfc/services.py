@@ -19,9 +19,10 @@ from modeles import User
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from flask import Flask, session
+from sqlalchemy.orm import Session as SessionBdDType
 from os import getenv
 from flask import Request
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Tuple
 from logs.logger import acfc_log, INFO
 
 LOG_LOGIN_FILE = 'login.log'
@@ -179,13 +180,27 @@ class AuthenticationService:
     - logout: Déconnecte l'utilisateur
 
     """
-    def __init__(self, request_object: Request):
+    def __init__(self, request_object: Request, chg_mdp: bool = False):
         self.user = request_object.form.get('username', '')
         self.pwd = request_object.form.get('password', '')
+        self.old_pwd = request_object.form.get('old_password', '')
+        self.new_pwd = request_object.form.get('new_password', '')
+        self.confirm_new_pwd = request_object.form.get('confirm_password', '')
         self.authenticated: bool = False
         self.user_dict: Dict[str, Any]
-        self.user_data: User
         self.existing_user: bool
+        self.is_chg_mdp: bool = False
+        self.user_pseudo: str = ""
+        self.pwd_param: Dict[str, bool] = {}
+        self.pwd_param_messages: Dict[str, str] = {
+            'all_field': 'Merci de remplir tous les champs.',
+            'pwd_match': "Les mots de passe ne correspondent pas.",
+            'pwd_changed': "Le nouveau mot de passe ne peut pas être identique à l'ancien.",
+            'authenticated_user': "Merci de renseigner correctement l'ancien mot de passe",
+            'db_unerror': "Erreur lors de la mise à jour en base de données.",
+            'user_found': "Utilisateur non trouvé."
+        }
+
 
     def _create_session(self, user: User):
         """
@@ -200,7 +215,7 @@ class AuthenticationService:
         session['last_name'] = user.nom
         session['first_name'] = user.prenom
         session['email'] = user.email
-        session['tel'] = user.tel
+        session['tel'] = user.telephone
         session['habilitations'] = user.permission
 
     def _log_result(self, message: str, level: int = INFO):
@@ -216,6 +231,7 @@ class AuthenticationService:
                             specific_logger=LOG_LOGIN_FILE,
                             zone_log=LOG_LOGIN_FILE,
                             db_log=True)
+
     def _bad_password(self, user: User):
         """
         Gère un mot de passe incorrect pour un utilisateur existant.
@@ -238,12 +254,23 @@ class AuthenticationService:
         self.existing_user = True
         self.authenticated = True
         self.user_dict = user.to_dict()
-        self.user_data = user
+        # Stocker les propriétés nécessaires avant de détacher l'objet de la session
+        self.is_chg_mdp = user.is_chg_mdp
+        acfc_log.log_to_file(level=INFO,
+                            message=f'Changement de mot de passe requis pour l\'utilisateur: {self.is_chg_mdp}',
+                            specific_logger=LOG_LOGIN_FILE,
+                            zone_log=LOG_LOGIN_FILE,
+                            db_log=True)
+        self.user_pseudo = user.pseudo
         user.nb_errors = 0
         user.is_locked = False
-        user.is_chg_mdp = False
-        if ph_acfc.needs_rehash(user.sha_mdp): user.sha_mdp = ph_acfc.hash_password(user.mot_de_passe)
+        if ph_acfc.needs_rehash(user.sha_mdp): user.sha_mdp = ph_acfc.hash_password(user.sha_mdp)
 
+    def _get_user(self) -> Tuple[User | None, SessionBdDType]:
+        from modeles import SessionBdD
+        session_db = SessionBdD()
+        user = session_db.query(User).filter_by(pseudo=self.user).first()
+        return user, session_db
 
     def authenticate(self) -> bool:
         """
@@ -255,16 +282,14 @@ class AuthenticationService:
         :Returns:
             None
         """
-        from modeles import SessionBdD
-        session_db = SessionBdD()
-        user = session_db.query(User).filter_by(pseudo=self.user).first()
+        user, session_db = self._get_user()
         # Instance du service de gestion des mots de passe (hachage Argon2)
         ph_acfc = PasswordService()
         try:
-            if user and ph_acfc.verify_password(self.pwd, user.mot_de_passe) and (not user.is_locked and user.is_active):
+            if user and ph_acfc.verify_password(self.pwd, user.sha_mdp) and (not user.is_locked and user.is_active):
                 self._good_password(user, ph_acfc)
                 self._create_session(user)
-                self._log_result(message=f'début de session pour l\'utilisateur: {self.user_data.pseudo if self.user_data else "inconnu"}')
+                self._log_result(message=f'début de session pour l\'utilisateur: {self.user_pseudo if self.user_pseudo else "inconnu"}')
                 statement = True
             elif user and user.is_locked:
                 self._log_result(message=f'Utilisateur verrouillé: {self.user}')
@@ -280,14 +305,65 @@ class AuthenticationService:
                 self._log_result(message=f'Utilisateur non trouvé: {self.user}')
                 statement = False
             session_db.commit()
-        except Exception:
+            # Détacher l'objet user de la session si il existe
+            if user is not None:
+                session_db.expunge(user)
+        except Exception as e:
             session_db.rollback()
-            self._log_result(message=f'Erreur lors de l\'authentification de l\'utilisateur: {self.user}', level=40)
+            self._log_result(message=f'Erreur lors de l\'authentification de l\'utilisateur: {self.user}.\nErreur: {e}', level=40)
             statement = False
         finally:
             # Fermeture de la session de base de données
             session_db.close()
         return statement
+    
+    def _validate_chg_pwd_form(self, user: User, pwd_hasher: PasswordService):
+        if not all([self.user, self.old_pwd, self.new_pwd, self.confirm_new_pwd]):
+            self.pwd_param['all_field'] = False
+            return False
+        elif self.new_pwd != self.confirm_new_pwd:
+            self.pwd_param['pwd_match'] = False
+            return False
+        elif self.new_pwd == self.old_pwd:
+            self.pwd_param['pwd_changed'] = False
+            return False
+        elif not pwd_hasher.verify_password(self.old_pwd, user.sha_mdp):
+            self.pwd_param['authenticated_user'] = False
+            return False
+        else:
+            self.pwd_param['all_field'] = True
+            self.pwd_param['pwd_match'] = True
+            self.pwd_param['pwd_changed'] = True
+            self.pwd_param['authenticated_user'] = True
+            return True
+
+    def chg_pwd(self) -> bool:
+        user, session_db = self._get_user()
+        ph_acfc = PasswordService()
+        if not self._validate_chg_pwd_form(user, ph_acfc):
+            return False
+        elif user:
+            try:
+                user.sha_mdp = ph_acfc.hash_password(self.new_pwd)
+                user.is_chg_mdp = False
+                user.nb_errors = 0
+                user.is_locked = False
+                session_db.commit()
+                self._log_result(message=f'Mot de passe changé pour l\'utilisateur: {self.user}.')
+                return True
+
+            except Exception as e:
+                session_db.rollback()
+                self._log_result(message=f'Erreur lors du changement de mot de passe de l\'utilisateur: {self.user}.\nErreur: {e}', level=40)
+                self.pwd_param['db_unerror'] = False
+                return False
+            
+            finally:
+                session_db.close()
+        else:
+            self._log_result(message=f'Utilisateur non trouvé: {self.user}.')
+            self.pwd_param['user_found'] = False
+            return False
 
     def is_authenticated(self) -> bool:
         """
@@ -297,3 +373,4 @@ class AuthenticationService:
             bool: True si l'utilisateur est authentifié, False sinon
         """
         return self.authenticated
+    

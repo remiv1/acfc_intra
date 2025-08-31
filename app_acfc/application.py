@@ -392,9 +392,9 @@ def login() -> Any:
         try:
             if not user_to_authenticate.authenticate():
                 return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
-            elif user_to_authenticate.user_data.is_chg_mdp:
+            elif user_to_authenticate.is_chg_mdp:
                 return render_template(LOGIN['page'], title=LOGIN['title'], context='change_password',
-                                       message="Veuillez changer votre mot de passe.", username=user_to_authenticate.user_data.pseudo)
+                                       message="Veuillez changer votre mot de passe.", username=user_to_authenticate.user_pseudo)
             else:
                 return redirect(url_for('dashboard'))
         except Exception as e:
@@ -639,46 +639,24 @@ def chg_pwd() -> Any:
     """
     Changement de mot de passe utilisateur.
     """
+    def _get_key_message(param: Dict[str, bool]) -> str:
+        for key, value in param.items():
+            if value is False:
+                return key
+        return ''
+
+    # === Gestion de la méthode POST ===
     if request.method == 'POST':
         # Récupération des données du formulaire
-        username = request.form.get('username', '')
-        old_password = request.form.get('old_password', '')
-        new_password = request.form.get('new_password', '')
-        confirm_password = request.form.get('confirm_password', '')
-
-        # Validation des données
-        if not all([username, old_password, new_password, confirm_password]):
+        user_to_chg_pwd = AuthenticationService(request)
+        chg_pwd_is_ok = user_to_chg_pwd.chg_pwd()
+        if not chg_pwd_is_ok:
+            key_message = _get_key_message(user_to_chg_pwd.pwd_param)
             return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
-                                   message='Merci de remplir tous les champs.', username=username)
-
-        if new_password != confirm_password:
-            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
-                                   message="Les mots de passe ne correspondent pas.", username=username)
-
-        if new_password == old_password:
-            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
-                                   message="Le nouveau mot de passe ne peut pas être identique à l'ancien.", username=username)
-
-        # Vérification de l'ancien mot de passe
-        db_session = SessionBdD()
-        user = db_session.query(User).filter_by(pseudo=username).first()
-        if not user or not ph_acfc.verify_password(old_password, user.sha_mdp):
-            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
-                                   message='Ancien mot de passe incorrect.', username=username)
-
-        # Hashage du nouveau mot de passe
-        user.sha_mdp = ph_acfc.hash_password(new_password)
-
-        # retrait de la nécessité de changer le mot de passe
-        user.is_chg_mdp = False
-        try:
-            db_session.commit()
-        except Exception as e:
-            db_session.rollback()
-            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context='500', message=str(e))
-
-        return redirect(url_for('login'))
-
+                                   message=user_to_chg_pwd.pwd_param_messages[key_message], username=user_to_chg_pwd.user)
+        else:
+            return redirect(url_for('login'))
+    # === Gestion de toutes les autres méthodes ===
     return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=INVALID)
 
 # ====================================================================

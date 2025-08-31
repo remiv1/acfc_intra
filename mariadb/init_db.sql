@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `99_users` (
 INSERT INTO `99_users` (
     `prenom`, `nom`, `pseudo`, `sha_mdp`, `is_chg_mdp`, `email`, `telephone`, `is_active`, `permission`, `debut`, `nb_errors`, `is_locked`
 ) VALUES (
-    'Admin', 'istrateur', 'admin', '$argon2id$v=19$m=65536,t=4,p=3$5MRAo5AnOW3LV9gR/jRNFg$uWgIeoC6ZpyBowO/aNLTA2nndXfeGkEnsY+nsfCEzTc', TRUE, 'admin@example.com', '0000000000', TRUE, '1234567', CURRENT_DATE, 0, FALSE
+    'Admin', 'istrateur', 'admin', '$argon2id$v=19$m=65536,t=4,p=3$5MRAo5AnOW3LV9gR/jRNFg$uWgIeoC6ZpyBowO/aNLTA2nndXfeGkEnsY+nsfCEzTc', 1, 'admin@example.com', '0000000000', 1, '1234567', CURRENT_DATE, 0, 0
 )
 ON DUPLICATE KEY UPDATE
     `sha_mdp` = VALUES(`sha_mdp`),
