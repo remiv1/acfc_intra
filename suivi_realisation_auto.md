@@ -10,9 +10,9 @@
 ## Résumé exécutif
 
 **Activité de développement :** 71 commits sur 7 jours  
-**Volume de code :** 189365 lignes ajoutées, 12890 lignes supprimées  
-**Fichiers impactés :** 776 fichiers modifiés  
-**Productivité moyenne :** 27052 lignes/jour
+**Volume de code :** 189357 lignes ajoutées, 12939 lignes supprimées  
+**Fichiers impactés :** 773 fichiers modifiés  
+**Productivité moyenne :** 27051 lignes/jour
 
 ---
 
@@ -86,28 +86,6 @@
 - `Date:   Sun Aug 24 20:36:48 2025 +0200`
 - `    feat: Amélioration de la recherche de clients avec jointures sur Part et Pro`
 - ... et 1 autres fichiers
-
-#### 17:28 - 6d51a02 - 📊 Mise à jour automatique du rapport de suivi (24/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +67 -30 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Sun Aug 24 17:28:50 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (24/08/2025)`
-- ... et 1 autres fichiers
-
-#### 19:28 - d1c2c9e - feat: Ajout de la journalisation détaillée et mise à jour des dépendances. Ajout de relations entre les modèles SQLAlchemy.
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +101 -48 lignes, 11 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Sun Aug 24 19:28:35 2025 +0200`
-- `    feat: Ajout de la journalisation détaillée et mise à jour des dépendances. Ajout de relations entre les modèles SQLAlchemy.`
-- ... et 10 autres fichiers
 
 
 ### 25 August 2025
@@ -823,6 +801,28 @@
 
 ### 31 August 2025
 
+#### 19:48 - 0b44f67 - fix: Correction de la logique de changement de mot de passe et mise à jour des messages d'erreur
+
+**Catégorie :** Correction de bugs  
+**Impact :** +110 -55 lignes, 8 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Sun Aug 31 19:48:58 2025 +0200`
+- `    fix: Correction de la logique de changement de mot de passe et mise à jour des messages d'erreur`
+- ... et 7 autres fichiers
+
+#### 15:02 - 06595c6 - 📊 Mise à jour automatique du rapport de suivi (31/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +50 -72 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Sun Aug 31 15:02:10 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (31/08/2025)`
+- ... et 1 autres fichiers
+
 #### 17:01 - 0fd5c90 - feat: Ajout d'un service d'authentification et d'une méthode to_dict pour l'utilisateur, amélioration des tests de logging
 
 **Catégorie :** Développement de fonctionnalités  
@@ -839,10 +839,10 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 27 commits (38.0%)
+- **Développement de fonctionnalités** : 26 commits (36.6%)
 - **Interface utilisateur** : 25 commits (35.2%)
 - **Développement général** : 11 commits (15.5%)
-- **Correction de bugs** : 5 commits (7.0%)
+- **Correction de bugs** : 6 commits (8.5%)
 - **Refactoring** : 2 commits (2.8%)
 - **Documentation** : 1 commits (1.4%)
 
@@ -850,7 +850,7 @@
 
 ## Technologies et langages utilisés
 
-- **Python** : 188 fichiers modifiés
+- **Python** : 186 fichiers modifiés
 - **HTML** : 55 fichiers modifiés
 - **Documentation** : 46 fichiers modifiés
 - **YAML/Config** : 32 fichiers modifiés
@@ -863,15 +863,15 @@
 ## Métriques de productivité
 
 - **Fréquence de commit :** 10.1 commits/jour
-- **Volume de code :** 202255 modifications totales
-- **Ratio ajouts/suppressions :** 14.69
+- **Volume de code :** 202296 modifications totales
+- **Ratio ajouts/suppressions :** 14.63
 - **Moyenne lignes par commit :** 2849
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 189365 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 189357 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 31 August 2025*
