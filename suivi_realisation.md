@@ -1,8 +1,8 @@
 # Rapport de Suivi de Réalisation - Projet ACFC Intra
 
-**Date du rapport :** 27 août 2025  
-**Période analysée :** 17 août - 27 août 2025  
-**Branche de développement :** `sprint_interface`  
+**Date du rapport :** 31 août 2025  
+**Période analysée :** 17 août - 31 août 2025  
+**Branche de développement :** `sprint_orders`  
 **Développeur :** Rémi Verschuur
 
 ---
@@ -134,44 +134,97 @@
 - JavaScript interactif et CSS responsive
 - **Impact :** +6 000 lignes environ
 
+### Phase 4 : Développement d'interfaces et refactorisation (28-31 août 2025)
+
+#### 28 août 2025 - Gestion des comptes utilisateurs
+
+**Commit bf26cdc** - "feat: Ajout de la gestion des comptes utilisateurs avec validation des formulaires et changement de mot de passe"
+
+- Interface de base pour la gestion des comptes utilisateurs
+- Formulaires de changement de mot de passe
+- Validation côté client avec Bootstrap
+- **Impact :** 1 692 lignes ajoutées, 74 supprimées
+
+#### 29 août 2025 - Refactorisation des tests (en cours)
+
+**Série de commits** - Restructuration et nettoyage
+
+- ⚠️ **Suppression de tests obsolètes** - Tests non fonctionnels supprimés
+- ⚠️ **Restructuration en cours** - Architecture de tests à repenser
+- Correction des imports et dépendances
+- **Impact :** 3 713 lignes ajoutées, 1 430 supprimées
+- **Statut :** Tests actuels non pertinents, à refaire
+
+**Commit 8cafaa9** - "feat: Enhance commande details functionality"
+
+- Améliorations d'interface pour les commandes
+- Validation de formulaires côté client
+- Gestion conditionnelle d'éléments UI
+- **Impact :** Refactoring interface commandes
+
+#### 30 août 2025 - Tentative de reconstruction des tests
+
+**Commit 3761abf** - "Refactor: Récréation complète des tests"
+
+- ⚠️ **Tests expérimentaux** - Architecture de tests en développement
+- Fixtures de test en construction
+- Framework de tests non finalisé
+- **Impact :** 1 712 lignes ajoutées, 459 supprimées
+- **Statut :** Non opérationnel
+
+#### 31 août 2025 - Services d'authentification avancés
+
+**Commit 0fd5c90** - "feat: Ajout d'un service d'authentification"
+
+- Service AuthenticationService (version initiale)
+- Méthode `to_dict()` pour les utilisateurs
+- Tests de logging expérimentaux
+- **Impact :** 474 lignes ajoutées, 105 supprimées
+
+**Commit 0b44f67** - "fix: Correction de la logique de changement de mot de passe"
+
+- Corrections bugs changement de mot de passe
+- Amélioration des messages d'erreur
+- **Impact :** 110 lignes ajoutées, 55 supprimées
+
 ---
 
 ## Statistiques globales du projet
 
 ### Volume de code (depuis l'origine)
 
-- **Total :** 89 810 lignes ajoutées, 52 lignes supprimées
-- **Fichiers :** 169 fichiers créés/modifiés
-- **Commits :** 47 commits sur 11 jours
+- **Total :** 95 525 lignes ajoutées, 3 847 lignes supprimées
+- **Fichiers :** 185+ fichiers créés/modifiés
+- **Commits :** 92 commits sur 15 jours (depuis le 17 août)
 
 ### Répartition par domaine technique
 
-**Backend (Python/Flask/FastAPI) :** ~15 000 lignes
+**Backend (Python/Flask/FastAPI) :** ~18 000 lignes
 
 - Application principale Flask : 817 lignes
 - Modèles SQLAlchemy : 852 lignes  
-- Services et authentification : 400 lignes
+- Services et authentification : 600 lignes
 - API FastAPI : 400 lignes
-- Scripts et utilitaires : 1 000 lignes
+- Scripts et utilitaires : 1 200 lignes
 
-**Frontend (HTML/CSS/JavaScript) :** ~8 000 lignes
+**Frontend (HTML/CSS/JavaScript) :** ~10 000 lignes
 
-- Templates HTML : 4 500 lignes
-- CSS : 2 000 lignes
-- JavaScript : 1 500 lignes
+- Templates HTML : 5 500 lignes
+- CSS : 2 500 lignes
+- JavaScript : 2 000 lignes
 
-**Infrastructure et DevOps :** ~2 000 lignes
+**Infrastructure et DevOps :** ~3 000 lignes
 
 - Docker et orchestration : 500 lignes
-- CI/CD et workflows : 800 lignes
-- Configuration serveurs : 300 lignes
-- Scripts d'automatisation : 400 lignes
+- CI/CD et workflows : 1 200 lignes
+- Configuration serveurs : 400 lignes
+- Scripts d'automatisation : 900 lignes
 
-**Tests et qualité :** ~3 000 lignes
+**Tests et qualité :** ~2 000 lignes (⚠️ **Non fonctionnels**)
 
-- Tests unitaires et intégration : 2 500 lignes
-- Configuration qualité : 200 lignes
-- Mocks et fixtures : 300 lignes
+- Tests unitaires et intégration : 4 000 lignes ⚠️ **À refaire**
+- Configuration qualité : 300 lignes
+- Mocks et fixtures : 700 lignes ⚠️ **Expérimentaux**
 
 **Données métier :** ~70 000 lignes
 
@@ -194,9 +247,10 @@
 
 ### Productivité développeur
 
-- **Moyenne :** ~8 000 lignes/jour
+- **Moyenne :** ~6 400 lignes/jour (sur 15 jours)
 - **Pics de productivité :** 26 août (70 000+ lignes de données)
 - **Régularité :** Commits quotidiens avec fonctionnalités complètes
+- **Dernière période (28-31 août) :** Focus sur qualité et tests
 
 ### Qualité architecturale
 
@@ -204,7 +258,7 @@
 ✅ **Microservices** avec API REST et services spécialisés  
 ✅ **Containerisation** complète avec orchestration Docker  
 ✅ **Sécurité** : Argon2, sessions sécurisées, validation  
-✅ **Tests** : Couverture complète avec tests unitaires et d'intégration  
+⚠️ **Tests** : Suite de tests non opérationnelle, à reconstruire  
 ✅ **CI/CD** : Pipeline automatisé avec GitHub Actions  
 ✅ **Documentation** : Architecture, API, déploiement  
 
@@ -271,6 +325,12 @@
 - **Comptabilité** : Modèles créés
 - **Rapports** : Base automatisée
 
+### ⚠️ Modules à revoir
+
+- **Tests** : Architecture complète à refaire
+- **Validation** : Tests fonctionnels inexistants
+- **Qualité** : Suite de tests non opérationnelle
+
 ### 📋 Données de référence
 
 - **33 500+ villes françaises** avec codes postaux
@@ -305,12 +365,13 @@
 - Intégration continue
 - Gestion de version professionnelle
 
-### Défis relevés
+### Défis en cours
 
-- **Complexité architecturale** : Gestion de 7 services Docker
-- **Volume de données** : Intégration de 70 000+ enregistrements
-- **Sécurité avancée** : Implémentation complète Argon2
-- **Tests exhaustifs** : Couverture complète de l'application
+- **Tests non fonctionnels** : Suite de tests complète à reconstruire
+- **Validation insuffisante** : Pas de tests fonctionnels opérationnels
+- **Architecture de tests** : Framework de tests à redéfinir
+- **Couverture de code** : Métriques non fiables
+- **CI/CD** : Pipeline de tests non validé
 
 ### Perspective technique
 
@@ -327,21 +388,22 @@ Le projet démontre une maîtrise complète du développement full-stack moderne
 
 ### Court terme (semaines à venir)
 
-- Finalisation du module comptabilité
-- Amélioration des performances
-- Tests de charge et optimisation
-- Documentation utilisateur
+- **Reconstruction complète des tests** - Priorité absolue
+- Définition d'une architecture de tests cohérente
+- Création de tests fonctionnels pertinents
+- Validation de l'intégrité des modules existants
+- Mise en place de métriques de qualité fiables
 
 ### Moyen terme
 
-- Module de reporting avancé
-- Intégration API externes
-- Interface mobile responsive
-- Sauvegarde automatisée
+- Finalisation du module comptabilité
+- Amélioration des performances
+- Tests de charge après validation des tests unitaires
+- Documentation utilisateur
 
 ### Long terme
 
-- Déploiement production
+- Déploiement production (après validation complète)
 - Monitoring avancé
 - Analyse de données (BI)
 - Évolutions fonctionnelles métier
@@ -350,19 +412,19 @@ Le projet démontre une maîtrise complète du développement full-stack moderne
 
 ## Conclusion
 
-**Qualification métier :** Développement complet d'une solution de gestion d'entreprise avec architecture microservices et déploiement containerisé.
+**Qualification métier :** Développement d'une solution de gestion d'entreprise avec architecture microservices et déploiement containerisé (en cours de développement).
 
-**Niveau de réalisation :** Les 11 jours de développement correspondent à la création d'une application de production complète avec :
+**Niveau de réalisation :** Les 15 jours de développement correspondent à un prototype avancé avec :
 
-- **89 810 lignes de code** fonctionnel
-- **Architecture microservices** professionnelle  
-- **Infrastructure DevOps** complète
-- **Tests et qualité** industriels
+- **95 525 lignes de code** fonctionnel
+- **Architecture microservices** en place
+- **Infrastructure DevOps** opérationnelle  
+- **⚠️ Tests non validés** - Suite de tests à reconstruire
 
-**Évaluation technique :** Le travail démontre une expertise full-stack complète avec attention particulière à la sécurité, la qualité et la scalabilité. L'application est prête pour un déploiement en environnement de production.
+**Évaluation technique :** Le travail démontre une expertise technique solide avec une architecture bien conçue, mais la **validation fonctionnelle reste à faire**. La suite de tests actuelle n'est pas opérationnelle et doit être entièrement repensée.
 
-**Impact métier :** Solution complète couvrant tous les aspects de la gestion d'entreprise (clients, commandes, comptabilité, stocks) avec des fonctionnalités avancées et une expérience utilisateur moderne.
+**Impact métier :** Prototype fonctionnel couvrant les aspects de base de la gestion d'entreprise, mais **non validé** pour un environnement de production sans tests fonctionnels appropriés.
 
 ---
 Rapport généré automatiquement à partir de l'analyse des commits Git  
-*Dernière mise à jour : 27 août 2025*
+*Dernière mise à jour : 31 août 2025*
