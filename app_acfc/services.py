@@ -15,14 +15,16 @@ Technologies utilisées :
 Auteur : ACFC Development Team
 Version : 1.0
 """
-
+from modeles import User
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from flask import Flask
+from flask import Flask, session
 from os import getenv
-import logging
+from flask import Request
+from typing import Any, Dict, Optional
+from logs.logger import acfc_log, INFO
 
-logging.basicConfig(level=logging.INFO)
+LOG_LOGIN_FILE = 'login.log'
 
 class PasswordService:
     """
@@ -94,10 +96,8 @@ class PasswordService:
         """
         try:
             self.hasher.verify(hashed_pwd, pwd)
-            logging.info("Password verification successful")
             return True
         except VerifyMismatchError:
-            logging.warning("Password verification failed")
             return False
     
     def needs_rehash(self, hashed_pwd: str) -> bool:
@@ -162,3 +162,138 @@ class SecureSessionService:
         
         # === CONFIGURATION DE L'EXPIRATION ===
         self.app.config['PERMANENT_SESSION_LIFETIME'] = 1800  # 30 minutes d'inactivité max
+
+class AuthenticationService:
+    """
+    Service de gestion de l'authentification des utilisateurs.
+
+    Gère la validation des identifiants, la gestion des erreurs de connexion,
+    et l'application des données de session.
+
+    initialisation des données de session :
+    user_to_authenticate = AuthenticationService(request)
+
+    Méthodes :
+    - authenticate: Authentifie un utilisateur
+    - is_authenticated: Vérifie si l'utilisateur est authentifié
+    - logout: Déconnecte l'utilisateur
+
+    """
+    def __init__(self, request_object: Request):
+        self.user = request_object.form.get('username', '')
+        self.pwd = request_object.form.get('password', '')
+        self.authenticated: bool = False
+        self.user_dict: Dict[str, Any]
+        self.user_data: User
+        self.existing_user: bool
+
+    def _create_session(self, user: User):
+        """
+        Crée une session utilisateur.
+
+        Args:
+            user (User): L'utilisateur à authentifier
+        """
+        session.clear()
+        session['user_id'] = user.id
+        session['pseudo'] = user.pseudo
+        session['last_name'] = user.nom
+        session['first_name'] = user.prenom
+        session['email'] = user.email
+        session['tel'] = user.tel
+        session['habilitations'] = user.permission
+
+    def _log_result(self, message: str, level: int = INFO):
+        """
+        Enregistre un message de log.
+
+        Args:
+            message (str): Le message à enregistrer
+            level (int): Le niveau de log (INFO, ERROR, etc.)
+        """
+        acfc_log.log_to_file(level=level,
+                            message=message,
+                            specific_logger=LOG_LOGIN_FILE,
+                            zone_log=LOG_LOGIN_FILE,
+                            db_log=True)
+    def _bad_password(self, user: User):
+        """
+        Gère un mot de passe incorrect pour un utilisateur existant.
+
+        Args:
+            user (User): L'utilisateur concerné
+        """
+        self.existing_user = True
+        user.nb_errors += 1
+        user.is_locked = user.nb_errors >= 3
+        user.is_chg_mdp = user.nb_errors >= 3
+
+    def _good_password(self, user: User, ph_acfc: PasswordService):
+        """
+        Gère un mot de passe correct pour un utilisateur existant.
+
+        Args:
+            user (User): L'utilisateur concerné
+        """
+        self.existing_user = True
+        self.authenticated = True
+        self.user_dict = user.to_dict()
+        self.user_data = user
+        user.nb_errors = 0
+        user.is_locked = False
+        user.is_chg_mdp = False
+        if ph_acfc.needs_rehash(user.sha_mdp): user.sha_mdp = ph_acfc.hash_password(user.mot_de_passe)
+
+
+    def authenticate(self) -> bool:
+        """
+        Authentifie un utilisateur en vérifiant ses identifiants et mot de passe.
+
+        :Args:
+            None
+
+        :Returns:
+            None
+        """
+        from modeles import SessionBdD
+        session_db = SessionBdD()
+        user = session_db.query(User).filter_by(pseudo=self.user).first()
+        # Instance du service de gestion des mots de passe (hachage Argon2)
+        ph_acfc = PasswordService()
+        try:
+            if user and ph_acfc.verify_password(self.pwd, user.mot_de_passe) and (not user.is_locked and user.is_active):
+                self._good_password(user, ph_acfc)
+                self._create_session(user)
+                self._log_result(message=f'début de session pour l\'utilisateur: {self.user_data.pseudo if self.user_data else "inconnu"}')
+                statement = True
+            elif user and user.is_locked:
+                self._log_result(message=f'Utilisateur verrouillé: {self.user}')
+                statement = False
+            elif user and not user.is_active:
+                self._log_result(message=f'Utilisateur inactif: {self.user}')
+                statement = False
+            elif user:
+                self._bad_password(user)
+                self._log_result(message=f'Utilisateur existant: {self.user} et mot de passe incorrect essai n°{user.nb_errors}')
+                statement = False
+            else:
+                self._log_result(message=f'Utilisateur non trouvé: {self.user}')
+                statement = False
+            session_db.commit()
+        except Exception:
+            session_db.rollback()
+            self._log_result(message=f'Erreur lors de l\'authentification de l\'utilisateur: {self.user}', level=40)
+            statement = False
+        finally:
+            # Fermeture de la session de base de données
+            session_db.close()
+        return statement
+
+    def is_authenticated(self) -> bool:
+        """
+        Vérifie si l'utilisateur est authentifié.
+
+        Returns:
+            bool: True si l'utilisateur est authentifié, False sinon
+        """
+        return self.authenticated

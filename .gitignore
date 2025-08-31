@@ -5,3 +5,4 @@
 *.pem
 .env
 /flask_session
+**/*confidential*/*

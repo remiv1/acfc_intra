@@ -252,6 +252,26 @@ class User(Base):
     debut = mapped_column(Date, nullable=False, default=func.now(), comment="Date de début de validité")
     fin = mapped_column(Date, nullable=True, comment="Date de fin de validité (optionnelle)")
     
+    def to_dict(self):
+        """
+        Retourne un dictionnaire représentant l'utilisateur
+        """
+        user_dict: Dict[str, Any] = {
+            'id': self.id,
+            'prenom': self.prenom,
+            'nom': self.nom,
+            'pseudo': self.pseudo,
+            'email': self.email,
+            'telephone': self.telephone,
+            'is_active': self.is_active,
+            'is_locked': self.is_locked,
+            'permission': self.permission,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'debut': self.debut.isoformat() if self.debut else None,
+            'fin': self.fin.isoformat() if self.fin else None
+        }
+        return user_dict
+
     def __repr__(self) -> str:
         return f"<User(id={self.id}, pseudo='{self.pseudo}', active={self.is_active})>"
 

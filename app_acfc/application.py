@@ -29,7 +29,7 @@ from sqlalchemy import text, and_, or_
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy.sql.functions import func
 from logs.logger import acfc_log, INFO, WARNING, ERROR
-from app_acfc.services import PasswordService, SecureSessionService
+from app_acfc.services import SecureSessionService, AuthenticationService, LOG_LOGIN_FILE
 from app_acfc.modeles import SessionBdD, User, Commande, Client, init_database
 from app_acfc.contextes_bp.clients import clients_bp         # Module CRM - Gestion clients
 from app_acfc.contextes_bp.catalogue import catalogue_bp     # Module Catalogue produits
@@ -70,7 +70,6 @@ LOGIN: Dict[str, str] = {
     'context': 'login',                  # Contexte pour CSS/JS spécifiques
     'page': BASE                         # Template HTML à utiliser
 }
-LOG_LOGIN_FILE = 'login.log'
 
 # Configuration module Clients (CRM)
 CLIENT: Dict[str, str] = {
@@ -132,9 +131,6 @@ LOG_COMMERCIAL_FILE = 'commercial.log'
 # Messages d'erreur standardisés pour l'authentification
 INVALID: str = 'Identifiants invalides.'
 WRONG_ROAD: str = 'Méthode non autorisée ou droits insuffisants.'
-
-# Instance du service de gestion des mots de passe (hachage Argon2)
-ph_acfc = PasswordService()
 
 # Création automatique des tables si elles n'existent pas (avec retry)
 try:
@@ -380,27 +376,6 @@ def login() -> Any:
     Returns:
         Any: Template de connexion, redirection vers l'accueil, ou page d'erreur
     """
-
-    def _get_credentials() -> Tuple[str, str]:
-        """Extraction sécurisée des identifiants depuis le formulaire."""
-        return request.form.get('username', ''), request.form.get('password', '')
-
-    def _apply_successful_login(user: User) -> None:
-        """
-        Application des données de session après authentification réussie.
-        
-        Args:
-            user (User): Objet utilisateur authentifié
-        """
-        session.clear()
-        session['user_id'] = user.id
-        session['pseudo'] = user.pseudo
-        session['last_name'] = user.nom
-        session['first_name'] = user.prenom
-        session['email'] = user.email
-        session['habilitations'] = user.permission
-        user.nb_errors = 0  # Remise à zéro du compteur d'erreurs
-
     # === TRAITEMENT GET : Affichage du formulaire de connexion ===
     if request.method == 'GET':
         return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'])
@@ -409,65 +384,24 @@ def login() -> Any:
                              message=f'{request.method} sur route Login par utilisateur {session.get("user_id", "inconnu")}',
                              specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
         return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=WRONG_ROAD)
-
     # === TRAITEMENT POST : Validation des identifiants ===
-    username, password = _get_credentials()
-    db_session = SessionBdD()
-    user = db_session.query(User).filter_by(pseudo=username).first()
-    acfc_log.log_to_file(level=INFO,
-                         message=f'début de session pour l\'utilisateur: {user is not None}',
-                         specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
+    else:
+        user_to_authenticate = AuthenticationService(request)
 
-    # Vérification de l'existence de l'utilisateur
-    if not user:
-        acfc_log.log_to_file(level=WARNING,
-                             message=f'Utilisateur non trouvé: {username}',
-                             specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
-        return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
-
-    # Vérification du mot de passe avec Argon2... si mot de passe faux
-    if not ph_acfc.verify_password(password, user.sha_mdp):
-        user.nb_errors += 1  # Incrémentation du compteur d'erreurs (sécurité)
+        # Schéma de vérification des identifiants
         try:
-            db_session.commit()
-            acfc_log.log_to_file(level=WARNING,
-                                 message=f'Tentative de connexion, mot de passe invalide pour l\'utilisateur: {username}. Reste {3 - user.nb_errors} tentatives.',
-                                 specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
-            return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
+            if not user_to_authenticate.authenticate():
+                return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
+            elif user_to_authenticate.user_data.is_chg_mdp:
+                return render_template(LOGIN['page'], title=LOGIN['title'], context='change_password',
+                                       message="Veuillez changer votre mot de passe.", username=user_to_authenticate.user_data.pseudo)
+            else:
+                return redirect(url_for('dashboard'))
         except Exception as e:
             acfc_log.log_to_file(level=ERROR,
-                                 message=f'Erreur {e} lors de la validation du mot de passe pour l\'utilisateur: {username}',
-                                 specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
-            db_session.rollback()
-            return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=str(e))
-
-    # === AUTHENTIFICATION RÉUSSIE ===
-    _apply_successful_login(user)
-    try:
-        db_session.commit()
-    except Exception as e:
-        db_session.rollback()
-        acfc_log.log_to_file(level=ERROR,
-                             message=f'Erreur lors de la connexion pour l\'utilisateur: {username}, {e}.',
-                             specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
-        return render_template(LOGIN['page'], title=LOGIN['title'], context='500', message=str(e))
-    
-    # Vérification de la nécessité de re-hashage de mot de passe
-    if ph_acfc.needs_rehash(user.sha_mdp):
-        user.sha_mdp = ph_acfc.hash_password(password)
-        try:
-            db_session.commit()
-        except Exception as e:
-            db_session.rollback()
+                                message=f'Erreur lors de l\'authentification pour l\'utilisateur: {user_to_authenticate.user} - {e}',
+                                specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
             return render_template(LOGIN['page'], title=LOGIN['title'], context='500', message=str(e))
-
-    # Fonctionnalité de sécurité pour forcer le renouvellement des mots de passe
-    if user.is_chg_mdp:
-        return render_template(LOGIN['page'], title=LOGIN['title'], context='change_password', 
-                             message="Veuillez changer votre mot de passe.", username=user.pseudo)
-
-    # Redirection vers la page d'accueil (module Clients)
-    return redirect(url_for('dashboard'))
 
 @acfc.route('/logout')
 def logout() -> Any:

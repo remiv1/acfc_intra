@@ -29,13 +29,7 @@ from typing import Dict, Any, Optional, List
 from unittest.mock import Mock, patch
 
 # Import du logger personnalisé
-try:
-    from logs.logger import CustomLogger, ERROR, WARNING, INFO, DEBUG
-except ImportError:
-    # Pour les tests isolés
-    CustomLogger = None
-    ERROR = WARNING = INFO = DEBUG = 40  # Valeurs par défaut # type: ignore
-
+from logs.logger import CustomLogger, ERROR, WARNING, INFO, DEBUG
 
 # ====================================================================
 # CONSTANTES POUR LES TESTS DE LOGGING
@@ -154,8 +148,8 @@ class SQLiteLogDatabase:
             cursor.execute("SELECT * FROM logs")
         else:
             # Construction basique de la requête (peut être étendue)
-            conditions = []
-            params = []
+            conditions: List[str] = []
+            params: List[Any] = []
             for key, value in query.items():
                 conditions.append(f"{key} = ?")
                 params.append(value)
@@ -164,7 +158,7 @@ class SQLiteLogDatabase:
             cursor.execute(f"SELECT * FROM logs WHERE {where_clause}", params)
         
         columns = [desc[0] for desc in cursor.description]
-        results = []
+        results: List[Dict[str, Any]] = []
         for row in cursor.fetchall():
             results.append(dict(zip(columns, row)))
         
@@ -177,8 +171,8 @@ class SQLiteLogDatabase:
         if query is None:
             cursor.execute("SELECT COUNT(*) FROM logs")
         else:
-            conditions = []
-            params = []
+            conditions: List[str] = []
+            params: List[Any] = []
             for key, value in query.items():
                 conditions.append(f"{key} = ?")
                 params.append(value)
@@ -363,7 +357,7 @@ class LogEntryFactory:
         message: str,
         zone: str = "general",
         timestamp: Optional[datetime] = None,
-        **kwargs
+        **kwargs: Any
     ) -> Dict[str, Any]:
         """
         Crée une entrée de log personnalisée.
@@ -378,7 +372,7 @@ class LogEntryFactory:
         Returns:
             Dict: Entrée de log structurée
         """
-        entry = {
+        entry: Dict[str, Any] = {
             'level': level,
             'message': message,
             'timestamp': timestamp or datetime.now(timezone.utc),
@@ -399,7 +393,7 @@ class LogEntryFactory:
         Returns:
             List[Dict]: Liste d'entrées de logs
         """
-        entries = []
+        entries: List[Dict[str, Any]] = []
         levels = [ERROR or 40, WARNING or 30, INFO or 20, DEBUG or 10]
         zones = TEST_LOG_ZONES
         
@@ -471,7 +465,7 @@ class LoggingScenarioFixtures:
     """Fixtures pour des scénarios complets de logging."""
     
     @staticmethod
-    def setup_complete_logging_environment():
+    def setup_complete_logging_environment() -> Dict[str, Any]:
         """
         Configure un environnement de logging complet pour tests.
         
@@ -489,15 +483,16 @@ class LoggingScenarioFixtures:
         for entry in test_entries:
             sqlite_db.insert_one(entry)
         
-        return {
+        return_value: Dict[str, Any] = {
             'logger': logger,
             'database': sqlite_db,
             'temp_directory': temp_dir,
             'test_entries': test_entries
         }
+        return return_value
     
     @staticmethod
-    def setup_error_handling_scenario():
+    def setup_error_handling_scenario() -> Dict[str, Any]:
         """
         Configure un scénario de test pour la gestion d'erreurs.
         
@@ -517,11 +512,12 @@ class LoggingScenarioFixtures:
             LogEntryFixtures.db_error_entry()
         ]
         
-        return {
+        return_values: Dict[str, Any] = {
             'logger': logger,
             'failing_collection': failing_collection,
             'error_entries': error_entries
         }
+        return return_values
 
 
 # ====================================================================
