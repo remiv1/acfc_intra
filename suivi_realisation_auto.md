@@ -1,58 +1,22 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 30 August 2025  
-**Période analysée :** 23 August 2025 - 30 August 2025 (7 jours)  
-**Nombre de commits :** 73  
+**Date du rapport :** 31 August 2025  
+**Période analysée :** 24 August 2025 - 31 August 2025 (7 jours)  
+**Nombre de commits :** 71  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 73 commits sur 7 jours  
-**Volume de code :** 192134 lignes ajoutées, 12906 lignes supprimées  
-**Fichiers impactés :** 814 fichiers modifiés  
-**Productivité moyenne :** 27447 lignes/jour
+**Activité de développement :** 71 commits sur 7 jours  
+**Volume de code :** 189365 lignes ajoutées, 12890 lignes supprimées  
+**Fichiers impactés :** 776 fichiers modifiés  
+**Productivité moyenne :** 27052 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 23 August 2025
-
-#### 11:48 - 6f40906 - fix: Correct database name in Docker CI health check
-
-**Catégorie :** Correction de bugs  
-**Impact :** +1 -1 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Sat Aug 23 11:48:02 2025 +0200`
-- `    fix: Correct database name in Docker CI health check`
-- ... et 1 autres fichiers
-
-#### 09:43 - 1acd512 - 📊 Mise à jour automatique du rapport de suivi (23/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +47 -22 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Sat Aug 23 09:43:10 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (23/08/2025)`
-- ... et 1 autres fichiers
-
-#### 11:42 - 30e9d92 - feat: Implement client details page with tabs and search functionality
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +3114 -46 lignes, 37 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Sat Aug 23 11:42:58 2025 +0200`
-- `    feat: Implement client details page with tabs and search functionality`
-- ... et 35 autres fichiers
 
 
 ### 24 August 2025
@@ -144,17 +108,6 @@
 - `Date:   Sun Aug 24 19:28:35 2025 +0200`
 - `    feat: Ajout de la journalisation détaillée et mise à jour des dépendances. Ajout de relations entre les modèles SQLAlchemy.`
 - ... et 10 autres fichiers
-
-#### 15:51 - 6265cff - feat: Ajout d'un logger personnalisé avec stockage dans MongoDB et fichiers
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +149 -73 lignes, 7 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Sun Aug 24 15:51:56 2025 +0200`
-- `    feat: Ajout d'un logger personnalisé avec stockage dans MongoDB et fichiers`
-- ... et 5 autres fichiers
 
 
 ### 25 August 2025
@@ -845,6 +798,17 @@
 
 ### 30 August 2025
 
+#### 07:19 - d60ca7f - 📊 Mise à jour automatique du rapport de suivi (30/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +68 -21 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Sat Aug 30 07:19:50 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (30/08/2025)`
+- ... et 1 autres fichiers
+
 #### 09:19 - 3761abf - Refactor: Récréation complète des tests pour être plus adaptable aux changements futurs.
 
 **Catégorie :** Refactoring  
@@ -857,43 +821,57 @@
 - ... et 15 autres fichiers
 
 
+### 31 August 2025
+
+#### 17:01 - 0fd5c90 - feat: Ajout d'un service d'authentification et d'une méthode to_dict pour l'utilisateur, amélioration des tests de logging
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +474 -105 lignes, 10 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Sun Aug 31 17:01:00 2025 +0200`
+- `    feat: Ajout d'un service d'authentification et d'une méthode to_dict pour l'utilisateur, amélioration des tests de logging`
+- ... et 8 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 28 commits (38.4%)
-- **Interface utilisateur** : 25 commits (34.2%)
-- **Développement général** : 11 commits (15.1%)
-- **Correction de bugs** : 6 commits (8.2%)
-- **Refactoring** : 2 commits (2.7%)
+- **Développement de fonctionnalités** : 27 commits (38.0%)
+- **Interface utilisateur** : 25 commits (35.2%)
+- **Développement général** : 11 commits (15.5%)
+- **Correction de bugs** : 5 commits (7.0%)
+- **Refactoring** : 2 commits (2.8%)
 - **Documentation** : 1 commits (1.4%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 192 fichiers modifiés
-- **HTML** : 63 fichiers modifiés
-- **Documentation** : 48 fichiers modifiés
-- **YAML/Config** : 35 fichiers modifiés
-- **JavaScript** : 14 fichiers modifiés
-- **Docker** : 11 fichiers modifiés
-- **CSS** : 9 fichiers modifiés
+- **Python** : 188 fichiers modifiés
+- **HTML** : 55 fichiers modifiés
+- **Documentation** : 46 fichiers modifiés
+- **YAML/Config** : 32 fichiers modifiés
+- **JavaScript** : 12 fichiers modifiés
+- **Docker** : 10 fichiers modifiés
+- **CSS** : 7 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 10.4 commits/jour
-- **Volume de code :** 205040 modifications totales
-- **Ratio ajouts/suppressions :** 14.89
-- **Moyenne lignes par commit :** 2809
+- **Fréquence de commit :** 10.1 commits/jour
+- **Volume de code :** 202255 modifications totales
+- **Ratio ajouts/suppressions :** 14.69
+- **Moyenne lignes par commit :** 2849
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 192134 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 189365 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
-*Rapport généré automatiquement le 30 August 2025*
+*Rapport généré automatiquement le 31 August 2025*
