@@ -71,7 +71,7 @@ class UserFixtures:
     
     @staticmethod
     def user_admin() -> Mock:
-        """Utilisateur administrateur avec tous les droits."""
+        """Utilisateur administrateur droits élevés."""
         user = Mock()
         user.id = 1
         user.prenom = "Admin"
@@ -84,13 +84,35 @@ class UserFixtures:
         user.date_chg_mdp = date(2024, 1, 1)
         user.nb_errors = 0
         user.is_locked = False
-        user.permission = "ADMIN"
+        user.permission = "1"
         user.created_at = date(2024, 1, 1)
         user.is_active = True
         user.debut = date(2024, 1, 1)
         user.fin = None
         return user
     
+    @staticmethod
+    def user_compta() -> Mock:
+        """Utilisateur Comptable"""
+        user = Mock()
+        user.id = 4
+        user.prenom = 'Jean'
+        user.nom = 'COMPTABLE'
+        user.pseudo = 'jcomptable'
+        user.email = 'compta@acfc.local'
+        user.telephone = '0123456789'
+        user.sha_mdp = TEST_PASSWORDS['comptable']
+        user.is_chg_mdp = False
+        user.date_chg_mdp = date(2024, 1, 1)
+        user.nb_errors = 2
+        user.is_locked = False
+        user.permission = "4"
+        user.created_at = date(2024, 1, 1)
+        user.is_active = True
+        user.debut = date(2024, 1, 1)
+        user.fin = None
+        return user
+
     @staticmethod
     def user_commercial() -> Mock:
         """Utilisateur commercial standard."""
@@ -106,7 +128,7 @@ class UserFixtures:
         user.date_chg_mdp = date(2024, 6, 1)
         user.nb_errors = 0
         user.is_locked = False
-        user.permission = "COMMERCIAL"
+        user.permission = "37"
         user.created_at = date(2024, 6, 1)
         user.is_active = True
         user.debut = date(2024, 6, 1)
@@ -128,13 +150,35 @@ class UserFixtures:
         user.date_chg_mdp = date(2024, 1, 1)
         user.nb_errors = 5
         user.is_locked = True
-        user.permission = "USER"
+        user.permission = "5"
+        user.created_at = date(2024, 1, 1)
+        user.is_active = True
+        user.debut = date(2024, 1, 1)
+        user.fin = date(2024, 12, 31)
+        return user
+    
+    @staticmethod
+    def user_inactive() -> Mock:
+        """Utilisateur inactif pour tests de filtrage."""
+        user = Mock()
+        user.id = 5
+        user.prenom = "Inactif"
+        user.nom = "UTILISATEUR"
+        user.pseudo = "inactif"
+        user.email = "inactif@acfc.local"
+        user.telephone = "0123456792"
+        user.sha_mdp = TEST_PASSWORDS['user']
+        user.is_chg_mdp = True
+        user.date_chg_mdp = date(2024, 1, 1)
+        user.nb_errors = 0
+        user.is_locked = False
+        user.permission = "2"
         user.created_at = date(2024, 1, 1)
         user.is_active = False
         user.debut = date(2024, 1, 1)
         user.fin = date(2024, 12, 31)
         return user
-    
+
     @staticmethod
     def create_user_with_password(pseudo: str, password_key: str = 'test', **kwargs: Any) -> Mock:
         """

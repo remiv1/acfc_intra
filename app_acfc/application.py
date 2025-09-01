@@ -28,9 +28,12 @@ from datetime import datetime, date
 from sqlalchemy import text, and_, or_
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy.sql.functions import func
-from logs.logger import acfc_log, INFO, WARNING, ERROR
+from logs.logger import acfc_log, WARNING, ERROR
 from app_acfc.services import SecureSessionService, AuthenticationService, LOG_LOGIN_FILE
 from app_acfc.modeles import SessionBdD, User, Commande, Client, init_database
+from app_acfc.habilitations import (
+    validate_habilitation, ADMINISTRATEUR, GESTIONNAIRE
+    )
 from app_acfc.contextes_bp.clients import clients_bp         # Module CRM - Gestion clients
 from app_acfc.contextes_bp.catalogue import catalogue_bp     # Module Catalogue produits
 from app_acfc.contextes_bp.commercial import commercial_bp   # Module Commercial - Devis, commandes
@@ -467,6 +470,8 @@ def dashboard() -> Any:
 # GESTIONNAIRES UTILISATEURS/UTILISATEUR
 # ====================================================================
 
+@validate_habilitation(ADMINISTRATEUR)
+@validate_habilitation(GESTIONNAIRE)
 @acfc.route('/users', methods=['GET', 'POST'])
 def users() -> Any:
     """

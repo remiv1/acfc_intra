@@ -56,7 +56,7 @@ services:
   # ================================================================
   acfc-proxy:
     container_name: acfc-nginx
-    image: nginx:latest                       # Image officielle Nginx
+    image: nginx:1.29.1                       # Image officielle Nginx
     ports:
       - "80:80"                              # Port HTTP standard
       - "443:443"                            # Port HTTPS (certificats à configurer)
@@ -103,7 +103,7 @@ services:
   # ================================================================
   acfc-logs:
     container_name: acfc-logs
-    image: mongo:latest                      # Image officielle MongoDB
+    image: mongo:8.0.13                      # Image officielle MongoDB
     volumes:
       - acfc-logs-data:/data/db              # Persistance des logs
       - ./mongo/mongod.conf:/etc/mongod.conf:ro           # Configuration MongoDB
@@ -167,7 +167,7 @@ services:
   # ================================================================
   acfc-redis:
     container_name: acfc-redis
-    image: redis:latest
+    image: redis:8.2.1
     networks:
       - acfc-network
     volumes:

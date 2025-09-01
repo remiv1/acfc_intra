@@ -24,7 +24,7 @@ Version : 1.0
 from functools import wraps
 from typing import Callable, Any
 from flask import session
-from logs.logger import acfc_log, ERROR, WARNING, INFO, DEBUG
+from logs.logger import acfc_log, WARNING
 from werkzeug.exceptions import Forbidden
 
 # Définition des niveaux d'habilitation

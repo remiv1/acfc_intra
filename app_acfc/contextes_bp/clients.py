@@ -32,10 +32,10 @@ from flask import Blueprint, render_template, jsonify, request, redirect, url_fo
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy import or_, func
 from app_acfc.modeles import SessionBdD, Client, Part, Pro, Telephone, Mail, Commande, Facture, Adresse
-from typing import List, Dict
-from app_acfc.habilitations import validate_habilitation, CLIENTS
+from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE
 from logs.logger import acfc_log, ERROR, DEBUG
 from datetime import datetime
+from typing import List, Dict
 import logging
 
 # ================================================================
@@ -175,8 +175,9 @@ def create_or_modify_pro(request: Request, client: Client, db_session: SessionBd
 # ROUTES - INTERFACE DE RECHERCHE CLIENTS
 # ================================================================
 
-@clients_bp.route('/rechercher', methods=['GET'])
 @validate_habilitation(CLIENTS)
+@validate_habilitation(GESTIONNAIRE)
+@clients_bp.route('/rechercher', methods=['GET'])
 def clients_list():
     """
     Interface de recherche et filtrage des clients.
@@ -202,8 +203,9 @@ def clients_list():
 # API REST - DONNÉES CLIENTS GLOBALES
 # ================================================================
 
-@clients_bp.route('/recherche_avancee', methods=['GET'])
+@validate_habilitation(GESTIONNAIRE)
 @validate_habilitation(CLIENTS)
+@clients_bp.route('/recherche_avancee', methods=['GET'])
 def recherche_avancee():
     """
     API REST : Recherche avancée de clients.
@@ -313,8 +315,9 @@ def recherche_avancee():
     finally:
         db_session.close()
 
-@clients_bp.route('/all_clients', methods=['GET'])
+@validate_habilitation(GESTIONNAIRE)
 @validate_habilitation(CLIENTS)
+@clients_bp.route('/all_clients', methods=['GET'])
 def get_clients():
     """
     API REST : Récupération de la liste des clients.
@@ -362,8 +365,9 @@ def get_clients():
     db_session.close()
     return jsonify(clients_dict)
 
-@clients_bp.route('/list')
+@validate_habilitation(GESTIONNAIRE)
 @validate_habilitation(CLIENTS)
+@clients_bp.route('/list')
 def client_list():
     """
     Page de liste des clients - redirection vers la page principale.

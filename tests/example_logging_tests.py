@@ -16,7 +16,7 @@ Exécution : python tests_rebuild/example_logging_tests.py
 
 import pytest
 from datetime import datetime, timezone
-from tests_rebuild.logging_fixtures import (
+from tests.logging_fixtures import (
     LoggerFixtures, 
     LogEntryFixtures, 
     LogEntryFactory,

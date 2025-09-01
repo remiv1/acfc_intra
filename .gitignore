@@ -1,8 +1,26 @@
+# Environnements virtuels
 /venv
+
+# Fichiers de logs
 *.log
+
+# Fichiers de base de données
 *.sqlite3
+*.db
+
+# Fichiers compilés
 *.pyc
+
+# Fichiers secrets
 *.pem
 .env
-/flask_session
 **/*confidential*/*
+
+# Fichiers de session Flask
+/flask_session
+
+# Fichiers de configuration
+.vscode
+.pytest_cache
+.benchmarks
+**/__pycache__/

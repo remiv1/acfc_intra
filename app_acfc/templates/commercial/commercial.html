@@ -1,2 +1,164 @@
-<h1>Suivi Commercial</h1>
-<p>Bienvenue sur la page de suivi commercial.</p>
+{% if subcontext == 'filter_list' %}
+    {% include 'commercial/clients_liste.html' %}
+{% else %}
+    <!-- Page d'accueil du module commercial -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">
+                    <i class="fas fa-chart-line"></i> Module Commercial
+                </h1>
+                
+                <div class="row">
+                    <!-- Gestion des clients -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-users text-primary"></i> Gestion des Clients
+                                </h5>
+                                <p class="card-text">
+                                    Consultez et gérez votre base clients avec des filtres avancés.
+                                    Recherchez par type, localisation, contact, etc.
+                                </p>
+                                <a href="{{ url_for('commercial.clients_liste') }}" class="btn btn-primary">
+                                    <i class="fas fa-list"></i> Liste des Clients
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Commandes -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-shopping-cart text-success"></i> Commandes
+                                </h5>
+                                <p class="card-text">
+                                    Gérez les commandes de vos clients, créez de nouvelles commandes
+                                    et suivez leur statut.
+                                </p>
+                                <a href="/commandes" class="btn btn-success">
+                                    <i class="fas fa-plus"></i> Nouvelle Commande
+                                </a>
+                                <a href="/commandes/liste" class="btn btn-outline-success ms-2">
+                                    <i class="fas fa-list"></i> Voir toutes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Facturation -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-file-invoice text-warning"></i> Facturation
+                                </h5>
+                                <p class="card-text">
+                                    Consultez les factures, générez de nouveaux documents
+                                    et gérez les paiements.
+                                </p>
+                                <a href="/factures" class="btn btn-warning">
+                                    <i class="fas fa-eye"></i> Voir les Factures
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Statistiques -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-chart-bar text-info"></i> Statistiques
+                                </h5>
+                                <p class="card-text">
+                                    Analysez vos performances commerciales, évolution du CA,
+                                    top clients, etc.
+                                </p>
+                                <a href="/commercial/stats" class="btn btn-info">
+                                    <i class="fas fa-chart-line"></i> Voir les Stats
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Campagnes Marketing -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-bullhorn text-danger"></i> Marketing
+                                </h5>
+                                <p class="card-text">
+                                    Créez et gérez vos campagnes marketing, newsletters
+                                    et communications clients.
+                                </p>
+                                <a href="/commercial/marketing" class="btn btn-danger">
+                                    <i class="fas fa-envelope"></i> Campagnes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rapports -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-file-alt text-secondary"></i> Rapports
+                                </h5>
+                                <p class="card-text">
+                                    Générez des rapports détaillés sur vos activités commerciales
+                                    et performances.
+                                </p>
+                                <a href="/commercial/rapports" class="btn btn-secondary">
+                                    <i class="fas fa-download"></i> Générer un Rapport
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Accès rapides -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h3 class="mb-3">
+                            <i class="fas fa-tachometer-alt"></i> Accès Rapides
+                        </h3>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('commercial.clients_liste') }}?type_client=1&is_active=1" 
+                           class="btn btn-outline-primary btn-block">
+                            <i class="fas fa-user"></i> Clients Particuliers
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('commercial.clients_liste') }}?type_client=2&is_active=1" 
+                           class="btn btn-outline-primary btn-block">
+                            <i class="fas fa-building"></i> Clients Professionnels
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('commercial.clients_liste') }}?has_phone=0&is_active=1" 
+                           class="btn btn-outline-warning btn-block">
+                            <i class="fas fa-phone-slash"></i> Clients sans Téléphone
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('commercial.clients_liste') }}?has_email=0&is_active=1" 
+                           class="btn btn-outline-warning btn-block">
+                            <i class="fas fa-envelope-open"></i> Clients sans Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}

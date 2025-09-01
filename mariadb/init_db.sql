@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS `99_users` (
     `is_locked` BOOLEAN NOT NULL DEFAULT FALSE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- TODO: Modifier le profil de l'admin (uniquement '1') en production
 -- Insertion de l'utilisateur administrateur avec toutes les permissions (MODIFIER EN PROD)
 INSERT INTO `99_users` (
     `prenom`, `nom`, `pseudo`, `sha_mdp`, `is_chg_mdp`, `email`, `telephone`, `is_active`, `permission`, `debut`, `nb_errors`, `is_locked`

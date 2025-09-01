@@ -15,7 +15,7 @@ Technologies utilisées :
 Auteur : ACFC Development Team
 Version : 1.0
 """
-from modeles import User
+from .modeles import User
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from flask import Flask, session

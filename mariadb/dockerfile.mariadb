@@ -22,7 +22,7 @@
 # Utilisation de l'image officielle MariaDB (dernière version stable)
 # MariaDB est un fork performant de MySQL, 100% compatible
 # Avantages : Open source, performances optimisées, développement actif
-FROM mariadb:latest
+FROM mariadb:12.0.2
 
 # Configuration des métadonnées
 LABEL maintainer="Rémi Verschuur"
