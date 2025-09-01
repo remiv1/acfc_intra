@@ -2,17 +2,17 @@
 
 **Date du rapport :** 01 September 2025  
 **Période analysée :** 25 August 2025 - 01 September 2025 (7 jours)  
-**Nombre de commits :** 67  
+**Nombre de commits :** 66  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 67 commits sur 7 jours  
-**Volume de code :** 190265 lignes ajoutées, 19574 lignes supprimées  
-**Fichiers impactés :** 774 fichiers modifiés  
-**Productivité moyenne :** 27180 lignes/jour
+**Activité de développement :** 66 commits sur 7 jours  
+**Volume de code :** 188251 lignes ajoutées, 18155 lignes supprimées  
+**Fichiers impactés :** 745 fichiers modifiés  
+**Productivité moyenne :** 26893 lignes/jour
 
 ---
 
@@ -31,50 +31,6 @@
 - `Date:   Mon Aug 25 19:05:23 2025 +0000`
 - `    📊 Mise à jour automatique du rapport de suivi (25/08/2025)`
 - ... et 1 autres fichiers
-
-#### 21:04 - 5df2fd0 - fix: Correction des journaux de connexion et de création de client pour une meilleure traçabilité
-
-**Catégorie :** Correction de bugs  
-**Impact :** +13 -83 lignes, 9 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Mon Aug 25 21:04:56 2025 +0200`
-- `    fix: Correction des journaux de connexion et de création de client pour une meilleure traçabilité`
-- ... et 6 autres fichiers
-
-#### 18:12 - e78ebb0 - 📊 Mise à jour automatique du rapport de suivi (25/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +83 -59 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Mon Aug 25 18:12:05 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (25/08/2025)`
-- ... et 1 autres fichiers
-
-#### 20:11 - 413b2e6 - chore: Suppression des fichiers README obsolètes pour l'interface clients et la configuration Docker
-
-**Catégorie :** Documentation  
-**Impact :** +0 -686 lignes, 7 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Mon Aug 25 20:11:50 2025 +0200`
-- `    chore: Suppression des fichiers README obsolètes pour l'interface clients et la configuration Docker`
-- ... et 4 autres fichiers
-
-#### 20:10 - cfceac6 - feat: Add client form template and integrate into client management
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +2383 -1501 lignes, 35 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Mon Aug 25 20:10:37 2025 +0200`
-- `    feat: Add client form template and integrate into client management`
-- ... et 33 autres fichiers
 
 
 ### 26 August 2025
@@ -779,6 +735,40 @@
 
 ### 01 September 2025
 
+#### 21:05 - 33a3fe5 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
+
+**Catégorie :** Développement général  
+**Impact :** +50 -116 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Merge: f0ebc56 bf888a3`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Mon Sep 1 21:05:04 2025 +0200`
+- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
+
+#### 21:04 - f0ebc56 - Refactor: - commercial module: Enhance client filtering API and UI
+
+**Catégorie :** Refactoring  
+**Impact :** +365 -678 lignes, 18 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Mon Sep 1 21:04:56 2025 +0200`
+- `    Refactor:`
+- `    - commercial module: Enhance client filtering API and UI`
+- ... et 16 autres fichiers
+
+#### 15:12 - bf888a3 - 📊 Mise à jour automatique du rapport de suivi (01/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +50 -116 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Mon Sep 1 15:12:38 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (01/09/2025)`
+- ... et 1 autres fichiers
+
 #### 17:12 - 1020966 - Add unit tests for authentication scenarios and user fixtures
 
 **Catégorie :** Développement de fonctionnalités  
@@ -795,39 +785,38 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 24 commits (35.8%)
-- **Interface utilisateur** : 24 commits (35.8%)
-- **Développement général** : 11 commits (16.4%)
-- **Correction de bugs** : 6 commits (9.0%)
-- **Refactoring** : 1 commits (1.5%)
-- **Documentation** : 1 commits (1.5%)
+- **Interface utilisateur** : 24 commits (36.4%)
+- **Développement de fonctionnalités** : 23 commits (34.8%)
+- **Développement général** : 12 commits (18.2%)
+- **Correction de bugs** : 5 commits (7.6%)
+- **Refactoring** : 2 commits (3.0%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 204 fichiers modifiés
-- **HTML** : 61 fichiers modifiés
-- **Documentation** : 50 fichiers modifiés
-- **YAML/Config** : 29 fichiers modifiés
+- **Python** : 194 fichiers modifiés
+- **HTML** : 58 fichiers modifiés
+- **Documentation** : 45 fichiers modifiés
+- **YAML/Config** : 28 fichiers modifiés
 - **JavaScript** : 13 fichiers modifiés
-- **CSS** : 8 fichiers modifiés
+- **CSS** : 9 fichiers modifiés
 - **Docker** : 6 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 9.6 commits/jour
-- **Volume de code :** 209839 modifications totales
-- **Ratio ajouts/suppressions :** 9.72
-- **Moyenne lignes par commit :** 3132
+- **Fréquence de commit :** 9.4 commits/jour
+- **Volume de code :** 206406 modifications totales
+- **Ratio ajouts/suppressions :** 10.37
+- **Moyenne lignes par commit :** 3127
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 190265 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 188251 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 01 September 2025*
