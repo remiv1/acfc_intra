@@ -1,8 +1,9 @@
-from flask import Blueprint, jsonify, request, render_template
-from sqlalchemy.orm import joinedload
+from flask import Blueprint, jsonify, request, Request, render_template
 from sqlalchemy import or_, and_, func
+from sqlalchemy.orm import joinedload, Session as SessionBdDType, Query
 from app_acfc.modeles import SessionBdD, Client, Part, Pro, Telephone, Mail, Adresse
 from logs.logger import acfc_log, DEBUG
+from typing import Any, List
 
 commercial_bp = Blueprint('commercial',
                           __name__,
@@ -33,10 +34,133 @@ def clients_liste():
     - Date de création
     """
     return render_template('base.html', 
-                         title='ACFC - Liste des Clients',
+                         title='ACFC - Commercial',
                          context='commercial',
                          subcontext='filter_list')
 
+class ClientsAPI:
+    def __init__(self, req:Request, session: SessionBdDType):
+        self.request = req
+        self.type_client = req.args.get('type_client', type=int)
+        self.has_phone = req.args.get('has_phone', type=int)
+        self.has_email = req.args.get('has_email', type=int)
+        self.departement = req.args.get('departement', '').strip()
+        self.ville = req.args.get('ville', '').strip()
+        self.is_active = req.args.get('is_active', type=int)
+        self.search = req.args.get('search', '').strip()
+        self.limit = req.args.get('limit', default=100, type=int)
+        self.offset = req.args.get('offset', default=0, type=int)
+        self.session = session
+
+    def close_session(self):
+        if self.session:
+            self.session.close()
+
+    def validate_limit(self):
+        if self.limit < 1:
+            self.limit = 1
+        elif self.limit > 500:
+            self.limit = 500
+
+    def validate_offset(self):
+        if self.offset < 0:
+            self.offset = 0
+
+    def filter_part_pro(self):
+        if self.type_client in [1, 2]:
+            self.query.filter(Client.type_client == self.type_client)
+        return self
+    
+    def filter_has_phone(self):
+        if self.has_phone is not None:
+            if self.has_phone == 1:
+                self.query.join(Telephone).filter(Telephone.id_client == Client.id)
+            else:
+                subquery = self.session.query(Telephone.id_client).distinct()
+                self.query.filter(~Client.id.in_(subquery))
+        return self
+
+    def filter_has_email(self):
+        if self.has_email is not None:
+            if self.has_email == 1:
+                self.query.join(Mail).filter(Mail.id_client == Client.id)
+            else:
+                subquery = self.session.query(Mail.id_client).distinct()
+                self.query.filter(~Client.id.in_(subquery))
+        return self
+
+    def filter_by_dpt(self):
+        if self.departement:
+            self.query = self.query.join(Adresse).filter(
+                Adresse.id_client == Client.id,
+                Adresse.is_active == True,
+                Adresse.code_postal.ilike(f"%{self.departement}%")
+            )
+        return self
+    
+    def filter_by_town(self):
+        if self.ville:
+            self.query = self.query.join(Adresse).filter(
+                Adresse.id_client == Client.id,
+                Adresse.is_active == True,
+                Adresse.ville.ilike(f"%{self.ville}%")
+            )
+        return self
+
+    def filter_textual_search(self):
+        # Filtrage par recherche textuelle
+        #TODO: Erreur sur les recherches textuelles à revoir.
+        if self.search:
+            # Pour les particuliers, recherche par nom et prénom
+            # Pour les professionnels, recherche par raison sociale
+            search_conditions: List[Any] = []
+
+            if self.type_client != 2:
+                search_conditions.append(
+                    and_(
+                        Client.type_client == 1,
+                        or_(
+                            Part.prenom.ilike(f"%{self.search}%"),
+                            Part.nom.ilike(f"%{self.search}%")
+                        )
+                    )
+                )
+            if self.type_client != 1:
+                search_conditions.append(
+                    and_(
+                        Client.type_client == 2,
+                        or_(
+                            Pro.raison_sociale.ilike(f"%{self.search}%"),
+                            Pro.siren.ilike(f"%{self.search}%")
+                        )
+                    )
+                )
+            if search_conditions:
+                # Joindre les tables appropriées selon le type de client
+                self.query = self.query.outerjoin(Part).outerjoin(Pro)
+                self.query = self.query.filter(or_(*search_conditions))
+
+            # Tri par nom d'affichage
+            self.query = self.query.outerjoin(Part).outerjoin(Pro).order_by(
+                func.coalesce(
+                    func.concat(Part.prenom, ' ', Part.nom),
+                    func.concat(Pro.raison_sociale, ' ', Pro.siren)
+                )
+            )
+
+        return self
+
+    def get_query(self):
+        self.validate_limit()
+        self.validate_offset()
+        self.query = self.session.query(Client).options(
+            joinedload(Client.part),
+            joinedload(Client.pro),
+            joinedload(Client.tels),
+            joinedload(Client.mails),
+            joinedload(Client.adresses)
+        )
+        return self
 
 @commercial_bp.route('/clients/api/search', methods=['GET'])
 def clients_api_search():
@@ -55,154 +179,66 @@ def clients_api_search():
     - offset : pagination (défaut: 0)
     """
     try:
-        # Récupération des paramètres de filtrage
-        type_client = request.args.get('type_client', type=int)
-        has_phone = request.args.get('has_phone', type=int)
-        has_email = request.args.get('has_email', type=int)
-        departement = request.args.get('departement', '').strip()
-        ville = request.args.get('ville', '').strip()
-        is_active = request.args.get('is_active', type=int)
-        search = request.args.get('search', '').strip()
-        limit = request.args.get('limit', default=100, type=int)
-        offset = request.args.get('offset', default=0, type=int)
+        filtering = ClientsAPI(request, SessionBdD())
         
+
+        filtering.get_query() \
+            .filter_part_pro() \
+            .filter_by_dpt() \
+            .filter_by_town() \
+            .filter_has_phone() \
+            .filter_has_email() \
+            .filter_textual_search()
+
         # Validation des limites
-        limit = min(limit, 500)  # Maximum 500 résultats
+        limit = min(filtering.limit, 500)  # Maximum 500 résultats
+       
+        # Application de la pagination
+        total_count = filtering.query.count()
+        clients = filtering.query.offset(filtering.offset).limit(limit).all()
+
+        # Conversion en format JSON
+        clients_data: List[Any] = []
+        for client in clients:
+            client_dict = client.to_dict()
+            
+            # Ajout des informations de contact
+            client_dict['telephones'] = len(client.tels)
+            client_dict['emails'] = len(client.mails)
+            client_dict['has_phone'] = len(client.tels) > 0
+            client_dict['has_email'] = len(client.mails) > 0
+            
+            # Ajout du département
+            if client.adresses:
+                for adresse in client.adresses:
+                    if adresse.is_active and len(adresse.code_postal) >= 2:
+                        client_dict['departement'] = adresse.code_postal[:2]
+                        break
+            
+            clients_data.append(client_dict)
         
-        with SessionBdD() as db_session:
-            # Construction de la requête de base avec jointures optimisées
-            query = db_session.query(Client).options(
-                joinedload(Client.part),
-                joinedload(Client.pro),
-                joinedload(Client.tels),
-                joinedload(Client.mails),
-                joinedload(Client.adresses)
-            )
-            
-            # Filtre par type de client
-            if type_client in [1, 2]:
-                query = query.filter(Client.type_client == type_client)
-            
-            # Filtre par statut actif/inactif
-            if is_active is not None:
-                query = query.filter(Client.is_active == bool(is_active))
-            
-            # Filtre par présence de téléphone
-            if has_phone is not None:
-                if has_phone == 1:
-                    query = query.join(Telephone).filter(Telephone.id_client == Client.id)
-                else:
-                    subquery = db_session.query(Telephone.id_client).distinct()
-                    query = query.filter(~Client.id.in_(subquery))
-            
-            # Filtre par présence d'email
-            if has_email is not None:
-                if has_email == 1:
-                    query = query.join(Mail).filter(Mail.id_client == Client.id)
-                else:
-                    subquery = db_session.query(Mail.id_client).distinct()
-                    query = query.filter(~Client.id.in_(subquery))
-            
-            # Filtre par département
-            if departement:
-                query = query.join(Adresse).filter(
-                    Adresse.id_client == Client.id,
-                    Adresse.is_active == True,
-                    Adresse.code_postal.like(f"{departement}%")
-                )
-            
-            # Filtre par ville
-            if ville:
-                query = query.join(Adresse).filter(
-                    Adresse.id_client == Client.id,
-                    Adresse.is_active == True,
-                    Adresse.ville.ilike(f"%{ville}%")
-                )
-            
-            # Recherche textuelle libre
-            if search:
-                # Pour les particuliers : recherche dans prénom et nom
-                # Pour les professionnels : recherche dans raison sociale
-                search_conditions = []
-                
-                if type_client != 2:  # Inclure les particuliers
-                    search_conditions.append(
-                        and_(
-                            Client.type_client == 1,
-                            or_(
-                                Part.prenom.ilike(f"%{search}%"),
-                                Part.nom.ilike(f"%{search}%")
-                            )
-                        )
-                    )
-                
-                if type_client != 1:  # Inclure les professionnels
-                    search_conditions.append(
-                        and_(
-                            Client.type_client == 2,
-                            Pro.raison_sociale.ilike(f"%{search}%")
-                        )
-                    )
-                
-                if search_conditions:
-                    # Joindre les tables appropriées selon le type de client
-                    query = query.outerjoin(Part).outerjoin(Pro)
-                    query = query.filter(or_(*search_conditions))
-            
-            # Tri par nom d'affichage
-            query = query.outerjoin(Part).outerjoin(Pro).order_by(
-                func.coalesce(
-                    func.concat(Part.prenom, ' ', Part.nom),
-                    Pro.raison_sociale
-                )
-            )
-            
-            # Application de la pagination
-            total_count = query.count()
-            clients = query.offset(offset).limit(limit).all()
-            
-            # Conversion en format JSON
-            clients_data = []
-            for client in clients:
-                client_dict = client.to_dict()
-                
-                # Ajout des informations de contact
-                client_dict['telephones'] = len(client.tels)
-                client_dict['emails'] = len(client.mails)
-                client_dict['has_phone'] = len(client.tels) > 0
-                client_dict['has_email'] = len(client.mails) > 0
-                
-                # Ajout du département
-                if client.adresses:
-                    for adresse in client.adresses:
-                        if adresse.is_active and len(adresse.code_postal) >= 2:
-                            client_dict['departement'] = adresse.code_postal[:2]
-                            break
-                
-                clients_data.append(client_dict)
-            
-            return jsonify({
-                'success': True,
-                'clients': clients_data,
-                'pagination': {
-                    'total': total_count,
-                    'limit': limit,
-                    'offset': offset,
-                    'has_more': offset + limit < total_count
-                },
-                'filters_applied': {
-                    'type_client': type_client,
-                    'has_phone': has_phone,
-                    'has_email': has_email,
-                    'departement': departement,
-                    'ville': ville,
-                    'is_active': is_active,
-                    'search': search
-                }
-            })
+        return jsonify({
+            'success': True,
+            'clients': clients_data,
+            'pagination': {
+                'total': total_count,
+                'limit': limit,
+                'offset': filtering.offset,
+                'has_more': filtering.offset + limit < total_count
+            },
+            'filters_applied': {
+                'type_client': filtering.type_client,
+                'has_phone': filtering.has_phone,
+                'has_email': filtering.has_email,
+                'departement': filtering.departement,
+                'ville': filtering.ville,
+                'is_active': filtering.is_active,
+                'search': filtering.search
+            }
+        })
             
     except Exception as e:
-        acfc_log(DEBUG, f"Erreur lors de la recherche de clients : {str(e)}")
+        acfc_log.log_to_file(DEBUG, f"Erreur lors de la recherche de clients : {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Erreur lors de la recherche de clients'

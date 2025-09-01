@@ -1,3 +1,6 @@
+/* Import des polices de caractère */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Playwrite+CA:wght@100..400&display=swap');
+
 /* Make the page a column flex layout so footer can stick to bottom */
 html, body {
     height: 100%;
@@ -11,8 +14,6 @@ body {
 main {
     flex: 1 1 auto;
 }
-/* Import des polices de caractère */
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Playwrite+CA:wght@100..400&display=swap');
 
 /* Gestion éléments par défaut */
 :root {
@@ -63,8 +64,9 @@ header.site-header {
 .nav-container .titre { flex: 1 1 auto; text-align: center; }
 .nav-container .titre h1 { font-size: 1.25rem; margin: 0; }
 .nav-actions { display: none; flex: 0 0 auto; }
-.btn { background: var(--bs-primary); color: white; border: none; padding: 0.4rem 0.75rem; border-radius: 4px; cursor: pointer; }
+.btn, .btn-primary { background-color: var(--bs-primary); color: white; border: none; padding: 0.4rem 0.75rem; border-radius: 4px; cursor: pointer; }
 .btn:focus { outline: 2px solid var(--secondary-color); }
+.btn.btn:hover { background-color: darken(var(--bs-primary), 5%); }
 .btn-link {min-width: 150px; padding: 0.4rem 0.75rem; border-radius: 4px; cursor: pointer; margin: 0.25rem 0;}
 .nav-toggle { display: block; background: transparent; border: none; font-size: 1.25rem; cursor: pointer; }
 header li {

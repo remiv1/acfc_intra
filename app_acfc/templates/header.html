@@ -77,12 +77,12 @@
                         <li><a class="dropdown-item" href="/stocks">Rentrer des timbres</a></li>
                         <li><a class="dropdown-item" href="/stocks">Inventorier une valeur</a></li>
                     </ul>
-                </li>{% if 'user_id' not in session -%}
+                </li>
                 <li class="nav-item">
+                    {% if 'user_id' not in session -%}
                     <button class="btn btn-primary ms-2" type="button" onclick="location.href='/login'">Se connecter</button>
-                </li>{% else -%}
-                <li class="nav-item">
-                    <button class="nav-link dropdown-toggle btn btn-link" id="myAccountDropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% else -%}
+                                        <button class="nav-link dropdown-toggle btn btn-link" id="myAccountDropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Mon Compte
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="myAccountDropdown">
@@ -91,7 +91,8 @@
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/logout">Se déconnecter</a></li>
                     </ul>
-                </li>{% endif -%}
+                    {% endif -%}
+                </li>
             </ul>
         </div>
     </div>

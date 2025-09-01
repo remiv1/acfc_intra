@@ -1,0 +1,93 @@
+<script>
+window.COMMERCIAL_SUBCONTEXT = 'filter_list';
+</script>
+
+<div class="container-fluid">
+    <h1><i class="fas fa-users"></i> Liste des Clients</h1>
+    
+    <!-- Formulaire de filtres -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="filtersForm" class="row g-3">
+                <div class="col-md-3">
+                    <label for="type_client">Type de client</label>
+                    <select id="type_client" name="type_client" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="1">Particulier</option>
+                        <option value="2">Professionnel</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="is_active">Statut</label>
+                    <select id="is_active" name="is_active" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="1" selected>Actifs uniquement</option>
+                        <option value="0">Inactifs uniquement</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="has_phone">Téléphone</label>
+                    <select id="has_phone" name="has_phone" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="1">Avec téléphone</option>
+                        <option value="0">Sans téléphone</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="has_email">Email</label>
+                    <select id="has_email" name="has_email" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="1">Avec email</option>
+                        <option value="0">Sans email</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="search">Recherche</label>
+                    <input type="text" id="search" name="search" class="form-control" placeholder="Nom, prénom, raison sociale...">
+                </div>
+                
+                <div class="col-md-2">
+                    <label for="departement">Département</label>
+                    <input type="text" id="departement" name="departement" class="form-control" placeholder="75, 92...">
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="ville">Ville</label>
+                    <input type="text" id="ville" name="ville" class="form-control" placeholder="Paris, Lyon...">
+                </div>
+                
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">Rechercher</button>
+                    <button type="button" id="resetFilters" class="btn btn-secondary">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Résultats -->
+    <div id="resultsSummary" class="alert alert-info hidden"></div>
+    <div id="errorMessage" class="alert alert-danger hidden"></div>
+    <div id="loadingMessage" class="alert alert-primary hidden">Chargement en cours...</div>
+    
+    <!-- Tableau des résultats -->
+    <div id="clientsTableContainer" class="hidden">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Type</th>
+                    <th>Contact</th>
+                    <th>Département</th>
+                    <th>Statut</th>
+                    <th>Date création</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="clientsTableBody"></tbody>
+        </table>
+    </div>
+</div>
