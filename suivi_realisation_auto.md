@@ -1,91 +1,22 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 31 August 2025  
-**Période analysée :** 24 August 2025 - 31 August 2025 (7 jours)  
-**Nombre de commits :** 73  
+**Date du rapport :** 01 September 2025  
+**Période analysée :** 25 August 2025 - 01 September 2025 (7 jours)  
+**Nombre de commits :** 67  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 73 commits sur 7 jours  
-**Volume de code :** 189496 lignes ajoutées, 13283 lignes supprimées  
-**Fichiers impactés :** 783 fichiers modifiés  
-**Productivité moyenne :** 27070 lignes/jour
+**Activité de développement :** 67 commits sur 7 jours  
+**Volume de code :** 190265 lignes ajoutées, 19574 lignes supprimées  
+**Fichiers impactés :** 774 fichiers modifiés  
+**Productivité moyenne :** 27180 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 24 August 2025
-
-#### 20:35 - 27c3cb8 - 📊 Mise à jour automatique du rapport de suivi (24/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +39 -17 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Sun Aug 24 20:35:14 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (24/08/2025)`
-- ... et 1 autres fichiers
-
-#### 22:34 - f539e15 - feat: Ajout de la persistance des logs et mise à jour de la configuration Docker
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +10 -11 lignes, 7 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Sun Aug 24 22:34:36 2025 +0200`
-- `    feat: Ajout de la persistance des logs et mise à jour de la configuration Docker`
-- ... et 5 autres fichiers
-
-#### 20:06 - 78639e4 - 📊 Mise à jour automatique du rapport de suivi (24/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +41 -33 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Sun Aug 24 20:06:29 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (24/08/2025)`
-- ... et 1 autres fichiers
-
-#### 22:05 - 0fffba1 - fix: Enhance Docker Compose and Test Suite
-
-**Catégorie :** Correction de bugs  
-**Impact :** +235 -203 lignes, 14 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Sun Aug 24 22:05:58 2025 +0200`
-- `    fix: Enhance Docker Compose and Test Suite`
-- ... et 12 autres fichiers
-
-#### 18:37 - 78ec0d0 - 📊 Mise à jour automatique du rapport de suivi (24/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +38 -27 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Sun Aug 24 18:37:04 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (24/08/2025)`
-- ... et 1 autres fichiers
-
-#### 20:36 - 927e751 - feat: Amélioration de la recherche de clients avec jointures sur Part et Pro
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +20 -8 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Sun Aug 24 20:36:48 2025 +0200`
-- `    feat: Amélioration de la recherche de clients avec jointures sur Part et Pro`
-- ... et 1 autres fichiers
 
 
 ### 25 August 2025
@@ -144,28 +75,6 @@
 - `Date:   Mon Aug 25 20:10:37 2025 +0200`
 - `    feat: Add client form template and integrate into client management`
 - ... et 33 autres fichiers
-
-#### 11:44 - 1680157 - refactor: Nettoyage des imports et mise à jour des commentaires dans les fichiers application.py et modeles.py
-
-**Catégorie :** Refactoring  
-**Impact :** +7 -6 lignes, 6 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Mon Aug 25 11:44:38 2025 +0200`
-- `    refactor: Nettoyage des imports et mise à jour des commentaires dans les fichiers application.py et modeles.py`
-- ... et 3 autres fichiers
-
-#### 11:39 - c998ee5 - feat(clients): Implement client retrieval and detail routes with database integration
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +590 -145 lignes, 39 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Mon Aug 25 11:39:38 2025 +0200`
-- `    feat(clients): Implement client retrieval and detail routes with database integration`
-- ... et 47 autres fichiers
 
 
 ### 26 August 2025
@@ -801,6 +710,17 @@
 
 ### 31 August 2025
 
+#### 18:04 - 2035c5d - 📊 Mise à jour automatique du rapport de suivi (31/08/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +38 -16 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Sun Aug 31 18:04:10 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (31/08/2025)`
+- ... et 1 autres fichiers
+
 #### 20:03 - 741460d - fix: Mise à jour du rapport de suivi avec les dernières dates et détails de développement, suppression du rapport automatique obsolète
 
 **Catégorie :** Correction de bugs  
@@ -857,43 +777,57 @@
 - ... et 8 autres fichiers
 
 
+### 01 September 2025
+
+#### 17:12 - 1020966 - Add unit tests for authentication scenarios and user fixtures
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +1711 -6725 lignes, 69 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Mon Sep 1 17:12:17 2025 +0200`
+- `    Add unit tests for authentication scenarios and user fixtures`
+- ... et 69 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 26 commits (35.6%)
-- **Développement de fonctionnalités** : 26 commits (35.6%)
-- **Développement général** : 11 commits (15.1%)
-- **Correction de bugs** : 7 commits (9.6%)
-- **Refactoring** : 2 commits (2.7%)
-- **Documentation** : 1 commits (1.4%)
+- **Développement de fonctionnalités** : 24 commits (35.8%)
+- **Interface utilisateur** : 24 commits (35.8%)
+- **Développement général** : 11 commits (16.4%)
+- **Correction de bugs** : 6 commits (9.0%)
+- **Refactoring** : 1 commits (1.5%)
+- **Documentation** : 1 commits (1.5%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 186 fichiers modifiés
-- **HTML** : 55 fichiers modifiés
+- **Python** : 204 fichiers modifiés
+- **HTML** : 61 fichiers modifiés
 - **Documentation** : 50 fichiers modifiés
-- **YAML/Config** : 32 fichiers modifiés
-- **JavaScript** : 12 fichiers modifiés
-- **Docker** : 10 fichiers modifiés
-- **CSS** : 7 fichiers modifiés
+- **YAML/Config** : 29 fichiers modifiés
+- **JavaScript** : 13 fichiers modifiés
+- **CSS** : 8 fichiers modifiés
+- **Docker** : 6 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 10.4 commits/jour
-- **Volume de code :** 202779 modifications totales
-- **Ratio ajouts/suppressions :** 14.27
-- **Moyenne lignes par commit :** 2778
+- **Fréquence de commit :** 9.6 commits/jour
+- **Volume de code :** 209839 modifications totales
+- **Ratio ajouts/suppressions :** 9.72
+- **Moyenne lignes par commit :** 3132
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 189496 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 190265 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
-*Rapport généré automatiquement le 31 August 2025*
+*Rapport généré automatiquement le 01 September 2025*
