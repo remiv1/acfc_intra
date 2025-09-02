@@ -180,7 +180,7 @@ class AuthenticationService:
     - logout: Déconnecte l'utilisateur
 
     """
-    def __init__(self, request_object: Request, chg_mdp: bool = False):
+    def __init__(self, request_object: Request):
         self.user = request_object.form.get('username', '')
         self.pwd = request_object.form.get('password', '')
         self.old_pwd = request_object.form.get('old_password', '')
@@ -189,7 +189,7 @@ class AuthenticationService:
         self.authenticated: bool = False
         self.user_dict: Dict[str, Any]
         self.existing_user: bool
-        self.is_chg_mdp: bool = False
+        self.is_chg_mdp: bool
         self.user_pseudo: str = ""
         self.pwd_param: Dict[str, bool] = {}
         self.pwd_param_messages: Dict[str, str] = {

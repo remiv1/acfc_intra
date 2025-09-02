@@ -28,7 +28,7 @@ from datetime import datetime, date
 from sqlalchemy import text, and_, or_
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy.sql.functions import func
-from logs.logger import acfc_log, WARNING, ERROR
+from logs.logger import acfc_log, WARNING, ERROR, DEBUG
 from app_acfc.services import SecureSessionService, AuthenticationService, LOG_LOGIN_FILE
 from app_acfc.modeles import SessionBdD, User, Commande, Client, init_database
 from app_acfc.habilitations import (
@@ -390,12 +390,13 @@ def login() -> Any:
     # === TRAITEMENT POST : Validation des identifiants ===
     else:
         user_to_authenticate = AuthenticationService(request)
-
+        result_auth = user_to_authenticate.authenticate()
         # Schéma de vérification des identifiants
         try:
-            if not user_to_authenticate.authenticate():
+            if not result_auth:
                 return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
-            elif user_to_authenticate.is_chg_mdp:
+            acfc_log.log_to_file(level=DEBUG, message=f'changement de mot de passe à réaliser : {user_to_authenticate.is_chg_mdp}')
+            if user_to_authenticate.is_chg_mdp:
                 return render_template(LOGIN['page'], title=LOGIN['title'], context='change_password',
                                        message="Veuillez changer votre mot de passe.", username=user_to_authenticate.user_pseudo)
             else:
