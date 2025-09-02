@@ -2,17 +2,17 @@
 
 **Date du rapport :** 02 September 2025  
 **Période analysée :** 26 August 2025 - 02 September 2025 (7 jours)  
-**Nombre de commits :** 70  
+**Nombre de commits :** 72  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 70 commits sur 7 jours  
-**Volume de code :** 120095 lignes ajoutées, 19768 lignes supprimées  
-**Fichiers impactés :** 743 fichiers modifiés  
-**Productivité moyenne :** 17156 lignes/jour
+**Activité de développement :** 72 commits sur 7 jours  
+**Volume de code :** 120141 lignes ajoutées, 19825 lignes supprimées  
+**Fichiers impactés :** 751 fichiers modifiés  
+**Productivité moyenne :** 17163 lignes/jour
 
 ---
 
@@ -736,6 +736,28 @@
 
 ### 02 September 2025
 
+#### 20:58 - 4553a46 - fix: Correction des références aux identifiants SIREN et RNA pour les clients professionnels dans l'impression des factures
+
+**Catégorie :** Correction de bugs  
+**Impact :** +3 -3 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Tue Sep 2 20:58:35 2025 +0200`
+- `    fix: Correction des références aux identifiants SIREN et RNA pour les clients professionnels dans l'impression des factures`
+- ... et 1 autres fichiers
+
+#### 17:24 - 55b9a9c - 📊 Mise à jour automatique du rapport de suivi (02/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +43 -54 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Tue Sep 2 17:24:57 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (02/09/2025)`
+- ... et 1 autres fichiers
+
 #### 19:24 - 3a4a2bb - style: Ajustement des styles CSS pour la facture et mise à jour de la mise en page dans le modèle d'impression
 
 **Catégorie :** Interface utilisateur  
@@ -829,11 +851,11 @@
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 25 commits (35.7%)
-- **Développement de fonctionnalités** : 23 commits (32.9%)
-- **Développement général** : 12 commits (17.1%)
-- **Correction de bugs** : 6 commits (8.6%)
-- **Refactoring** : 3 commits (4.3%)
+- **Interface utilisateur** : 26 commits (36.1%)
+- **Développement de fonctionnalités** : 23 commits (31.9%)
+- **Développement général** : 12 commits (16.7%)
+- **Correction de bugs** : 7 commits (9.7%)
+- **Refactoring** : 3 commits (4.2%)
 - **Tests** : 1 commits (1.4%)
 
 ---
@@ -841,8 +863,8 @@
 ## Technologies et langages utilisés
 
 - **Python** : 194 fichiers modifiés
-- **HTML** : 62 fichiers modifiés
-- **Documentation** : 44 fichiers modifiés
+- **HTML** : 63 fichiers modifiés
+- **Documentation** : 45 fichiers modifiés
 - **YAML/Config** : 28 fichiers modifiés
 - **JavaScript** : 13 fichiers modifiés
 - **CSS** : 10 fichiers modifiés
@@ -852,16 +874,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 10.0 commits/jour
-- **Volume de code :** 139863 modifications totales
-- **Ratio ajouts/suppressions :** 6.08
-- **Moyenne lignes par commit :** 1998
+- **Fréquence de commit :** 10.3 commits/jour
+- **Volume de code :** 139966 modifications totales
+- **Ratio ajouts/suppressions :** 6.06
+- **Moyenne lignes par commit :** 1944
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 120095 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 120141 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 02 September 2025*
