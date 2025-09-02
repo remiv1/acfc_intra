@@ -957,12 +957,32 @@ def facture_impression(id_facture: int):
             facture.is_imprime = True
             facture.date_impression = date.today()
             session_db.commit()
-        
-        return render_template('base.html',
-                               context='commandes',
-                               sub_context='facture_impression',
+
+        # Générer le QR code pointant vers la page de détail de la facture (publique interne)
+        try:
+            facture_url = url_for('commandes.facture_details', id_facture=id_facture, _external=True)
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.ERROR_CORRECT_L,
+                box_size=3,
+                border=1,
+            )
+            qr.add_data(facture_url)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+            buffer = BytesIO()
+            img.save(buffer, 'PNG')
+            qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+        except Exception:
+            qr_code_base64 = None
+            facture_url = None
+
+        return render_template('commandes/facture_impression.html',
                                facture=facture,
                                lignes_facturees=lignes_facturees,
+                               qr_code_base64=qr_code_base64,
+                               facture_url=facture_url,
+                               now=datetime.now(),
                                today=date.today())
         
     except Exception as e:

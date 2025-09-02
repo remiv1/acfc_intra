@@ -242,7 +242,7 @@ class AuthenticationService:
         self.existing_user = True
         user.nb_errors += 1
         user.is_locked = user.nb_errors >= 3
-        user.is_chg_mdp = user.nb_errors >= 3
+        user.is_chg_mdp = user.is_chg_mdp if user.is_chg_mdp else user.nb_errors >= 3
 
     def _good_password(self, user: User, ph_acfc: PasswordService):
         """

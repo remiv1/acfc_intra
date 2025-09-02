@@ -31,17 +31,6 @@
                                 {% endif %}
                             </p>
                         </div>
-                        <div class="d-flex gap-2">
-                            <a href="{{ url_for('commandes.facture_impression', id_facture=facture.id) }}" class="btn btn-outline-primary" target="_blank">
-                                <i class="bi bi-printer me-1"></i>Imprimer
-                            </a>
-                            <a href="{{ url_for('commandes.commande_details', id_commande=facture.id_commande, id_client=facture.id_client) }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-1"></i>Retour à la commande
-                            </a>
-                            <a href="{{ url_for('clients.get_client', id_client=facture.id_client) }}" class="btn btn-outline-primary">
-                                <i class="bi bi-person me-1"></i>Fiche client
-                            </a>
-                        </div>
                     </div>
                 </div>
             </div>

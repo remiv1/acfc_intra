@@ -515,6 +515,7 @@ class Adresse(Base):
     adresse_l2 = mapped_column(String(255), nullable=True)
     code_postal = mapped_column(String(10), nullable=False)
     ville = mapped_column(String(100), nullable=False)
+    pays = mapped_column(String(100), nullable=False, default='France')
 
     # === MÉTADONNÉES ===
     is_principal = mapped_column(Boolean, default=False, nullable=False, 
