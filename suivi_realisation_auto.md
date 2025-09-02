@@ -2,17 +2,17 @@
 
 **Date du rapport :** 02 September 2025  
 **Période analysée :** 26 August 2025 - 02 September 2025 (7 jours)  
-**Nombre de commits :** 71  
+**Nombre de commits :** 70  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 71 commits sur 7 jours  
-**Volume de code :** 120678 lignes ajoutées, 19766 lignes supprimées  
-**Fichiers impactés :** 762 fichiers modifiés  
-**Productivité moyenne :** 17239 lignes/jour
+**Activité de développement :** 70 commits sur 7 jours  
+**Volume de code :** 120095 lignes ajoutées, 19768 lignes supprimées  
+**Fichiers impactés :** 743 fichiers modifiés  
+**Productivité moyenne :** 17156 lignes/jour
 
 ---
 
@@ -42,39 +42,6 @@
 - `Date:   Tue Aug 26 22:20:14 2025 +0200`
 - `    feat: Améliorer le chargement des clients avec eager loading et ajouter la gestion des réductions`
 - ... et 5 autres fichiers
-
-#### 17:09 - 80437c2 - 📊 Mise à jour automatique du rapport de suivi (26/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +63 -60 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Tue Aug 26 17:09:54 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (26/08/2025)`
-- ... et 1 autres fichiers
-
-#### 19:09 - 68f56e0 - feat: Ajouter un champ de réduction appliquée pour les clients avec validation et conversion
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +52 -1 lignes, 6 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Tue Aug 26 19:09:31 2025 +0200`
-- `    feat: Ajouter un champ de réduction appliquée pour les clients avec validation et conversion`
-- ... et 3 autres fichiers
-
-#### 19:02 - 8243e98 - feat: Add Dockerfile and entrypoint for mail management application
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +609 -2 lignes, 18 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Tue Aug 26 19:02:09 2025 +0200`
-- `    feat: Add Dockerfile and entrypoint for mail management application`
-- ... et 16 autres fichiers
 
 
 ### 27 August 2025
@@ -769,6 +736,28 @@
 
 ### 02 September 2025
 
+#### 19:24 - 3a4a2bb - style: Ajustement des styles CSS pour la facture et mise à jour de la mise en page dans le modèle d'impression
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +37 -17 lignes, 5 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Sep 2 19:24:43 2025 +0200`
+- `    style: Ajustement des styles CSS pour la facture et mise à jour de la mise en page dans le modèle d'impression`
+- ... et 2 autres fichiers
+
+#### 16:43 - 0e0451a - 📊 Mise à jour automatique du rapport de suivi (02/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +104 -48 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Tue Sep 2 16:43:09 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (02/09/2025)`
+- ... et 1 autres fichiers
+
 #### 18:42 - 7e1027b - feat: Ajout de la vérification des adresses de facturation et de livraison dans l'impression des factures
 
 **Catégorie :** Développement de fonctionnalités  
@@ -840,39 +829,39 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 25 commits (35.2%)
-- **Interface utilisateur** : 24 commits (33.8%)
-- **Développement général** : 12 commits (16.9%)
-- **Correction de bugs** : 6 commits (8.5%)
-- **Refactoring** : 3 commits (4.2%)
+- **Interface utilisateur** : 25 commits (35.7%)
+- **Développement de fonctionnalités** : 23 commits (32.9%)
+- **Développement général** : 12 commits (17.1%)
+- **Correction de bugs** : 6 commits (8.6%)
+- **Refactoring** : 3 commits (4.3%)
 - **Tests** : 1 commits (1.4%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 197 fichiers modifiés
-- **HTML** : 63 fichiers modifiés
-- **Documentation** : 46 fichiers modifiés
-- **YAML/Config** : 29 fichiers modifiés
+- **Python** : 194 fichiers modifiés
+- **HTML** : 62 fichiers modifiés
+- **Documentation** : 44 fichiers modifiés
+- **YAML/Config** : 28 fichiers modifiés
 - **JavaScript** : 13 fichiers modifiés
-- **CSS** : 9 fichiers modifiés
-- **Docker** : 5 fichiers modifiés
+- **CSS** : 10 fichiers modifiés
+- **Docker** : 2 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 10.1 commits/jour
-- **Volume de code :** 140444 modifications totales
-- **Ratio ajouts/suppressions :** 6.11
-- **Moyenne lignes par commit :** 1978
+- **Fréquence de commit :** 10.0 commits/jour
+- **Volume de code :** 139863 modifications totales
+- **Ratio ajouts/suppressions :** 6.08
+- **Moyenne lignes par commit :** 1998
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 120678 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 120095 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
 *Rapport généré automatiquement le 02 September 2025*
