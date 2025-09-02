@@ -1,16 +1,11 @@
 import pandas as pd
 
 # Lecture du fichier avec encodage correct
-df: pd.DataFrame = pd.read_csv("pcg.csv", encoding="ISO-8859-1", sep=",", header=1) # type: ignore
+df: pd.DataFrame = pd.read_csv("pcg.csv", encoding="ISO-8859-1", sep=",", header=0) # type: ignore
 
-#df = df.iloc[:, -2:]
-
-#df.insert(0, 'Classe', df['Compte'].astype(str).str[:1])    # type: ignore
-#df.insert(1, 'Categorie 1', df['Compte'].astype(str).str[:2])    # type: ignore
-#df.insert(2, 'Categorie 2', df['Compte'].astype(str).str[:3])    # type: ignore
-
-# Enregistrement du DataFrame corrigé en CSV
-#df.to_csv("pcg.csv", index=False, encoding="ISO-8859-1")
+# Compléter la colonne 'Compte' avec des zéros à droite pour avoir 6 chiffres
+df['Compte'] = df['Compte'].apply(lambda x: str(x).ljust(6, '0'))   # type: ignore
+df['Categorie 2'] = df['Categorie 2'].apply(lambda x: str(x).ljust(3, '0'))   # type: ignore
 
 # Génération d'un fichier SQL pour insertion dans une base de données
 with open("pcg.sql", "w", encoding="ISO-8859-1") as f:
