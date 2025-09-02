@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, Request, render_template
 from sqlalchemy import or_, and_, func
-from sqlalchemy.orm import joinedload, Session as SessionBdDType, Query
+from sqlalchemy.orm import joinedload, Session as SessionBdDType, aliased
 from app_acfc.modeles import SessionBdD, Client, Part, Pro, Telephone, Mail, Adresse
 from logs.logger import acfc_log, DEBUG
 from typing import Any, List
@@ -51,45 +51,52 @@ class ClientsAPI:
         self.limit = req.args.get('limit', default=100, type=int)
         self.offset = req.args.get('offset', default=0, type=int)
         self.session = session
+        self.part_alias = aliased(Part)
+        self.pro_alias = aliased(Pro)
+        self.joined_tables: set[str] = set()
 
     def close_session(self):
         if self.session:
             self.session.close()
 
-    def validate_limit(self):
+    def _validate_limit(self):
         if self.limit < 1:
             self.limit = 1
         elif self.limit > 500:
             self.limit = 500
 
-    def validate_offset(self):
+    def _validate_offset(self):
         if self.offset < 0:
             self.offset = 0
 
     def filter_part_pro(self):
+        self.add_joins()
         if self.type_client in [1, 2]:
-            self.query.filter(Client.type_client == self.type_client)
+            self.query = self.query.filter(Client.type_client == self.type_client)
         return self
     
     def filter_has_phone(self):
         if self.has_phone is not None:
+            self.add_joins()
             if self.has_phone == 1:
-                self.query.join(Telephone).filter(Telephone.id_client == Client.id)
+                self.query = self.query.join(Telephone).filter(Telephone.id_client == Client.id)
             else:
                 subquery = self.session.query(Telephone.id_client).distinct()
-                self.query.filter(~Client.id.in_(subquery))
+                self.query = self.query.filter(~Client.id.in_(subquery))
         return self
 
     def filter_has_email(self):
         if self.has_email is not None:
+            self.add_joins()
             if self.has_email == 1:
-                self.query.join(Mail).filter(Mail.id_client == Client.id)
+                self.query = self.query.join(Mail).filter(Mail.id_client == Client.id)
             else:
                 subquery = self.session.query(Mail.id_client).distinct()
-                self.query.filter(~Client.id.in_(subquery))
+                self.query = self.query.filter(~Client.id.in_(subquery))
         return self
 
     def filter_by_dpt(self):
+        self.add_joins()
         if self.departement:
             self.query = self.query.join(Adresse).filter(
                 Adresse.id_client == Client.id,
@@ -99,6 +106,7 @@ class ClientsAPI:
         return self
     
     def filter_by_town(self):
+        self.add_joins()
         if self.ville:
             self.query = self.query.join(Adresse).filter(
                 Adresse.id_client == Client.id,
@@ -106,53 +114,75 @@ class ClientsAPI:
                 Adresse.ville.ilike(f"%{self.ville}%")
             )
         return self
+    
+    def add_joins(self):
+        """Ajoute les jointures nécessaires à la requête."""
+        if 'part' not in self.joined_tables:
+            self.query = self.query.outerjoin(self.part_alias)
+            self.joined_tables.add('part')
+
+        if 'pro' not in self.joined_tables:
+            self.query = self.query.outerjoin(self.pro_alias)
+            self.joined_tables.add('pro')
+
+        if 'adresse' not in self.joined_tables:
+            self.query = self.query.outerjoin(Adresse)
+            self.joined_tables.add('adresse')
+
+        if 'telephone' not in self.joined_tables:
+            self.query = self.query.outerjoin(Telephone)
+            self.joined_tables.add('telephone')
+
+        if 'email' not in self.joined_tables:
+            self.query = self.query.outerjoin(Mail)
+            self.joined_tables.add('email')
 
     def filter_textual_search(self):
         # Filtrage par recherche textuelle
-        #TODO: Erreur sur les recherches textuelles à revoir.
         if self.search:
             # Pour les particuliers, recherche par nom et prénom
             # Pour les professionnels, recherche par raison sociale
-            search_conditions: List[Any] = []
+            self._search_conditions: List[Any] = []
 
             if self.type_client != 2:
-                search_conditions.append(
+                self._search_conditions.append(
                     and_(
                         Client.type_client == 1,
                         or_(
-                            Part.prenom.ilike(f"%{self.search}%"),
-                            Part.nom.ilike(f"%{self.search}%")
+                            self.part_alias.prenom.ilike(f"%{self.search}%"),
+                            self.part_alias.nom.ilike(f"%{self.search}%")
                         )
                     )
                 )
+
             if self.type_client != 1:
-                search_conditions.append(
+                self._search_conditions.append(
                     and_(
                         Client.type_client == 2,
                         or_(
-                            Pro.raison_sociale.ilike(f"%{self.search}%"),
-                            Pro.siren.ilike(f"%{self.search}%")
+                            self.pro_alias.raison_sociale.ilike(f"%{self.search}%"),
+                            self.pro_alias.siren.ilike(f"%{self.search}%")
                         )
                     )
                 )
-            if search_conditions:
-                # Joindre les tables appropriées selon le type de client
-                self.query = self.query.outerjoin(Part).outerjoin(Pro)
-                self.query = self.query.filter(or_(*search_conditions))
+
+            if self._search_conditions:
+                self.add_joins()
+                self.query = self.query.filter(or_(*self._search_conditions))
 
             # Tri par nom d'affichage
-            self.query = self.query.outerjoin(Part).outerjoin(Pro).order_by(
+            self.query = self.query.order_by(
                 func.coalesce(
-                    func.concat(Part.prenom, ' ', Part.nom),
-                    func.concat(Pro.raison_sociale, ' ', Pro.siren)
+                    func.concat(self.part_alias.prenom, ' ', self.part_alias.nom),
+                    func.concat(self.pro_alias.raison_sociale, ' ', self.pro_alias.siren)
                 )
             )
 
         return self
 
     def get_query(self):
-        self.validate_limit()
-        self.validate_offset()
+        self._validate_limit()
+        self._validate_offset()
         self.query = self.session.query(Client).options(
             joinedload(Client.part),
             joinedload(Client.pro),
@@ -199,9 +229,10 @@ def clients_api_search():
 
         # Conversion en format JSON
         clients_data: List[Any] = []
+
         for client in clients:
             client_dict = client.to_dict()
-            
+
             # Ajout des informations de contact
             client_dict['telephones'] = len(client.tels)
             client_dict['emails'] = len(client.mails)
@@ -216,7 +247,7 @@ def clients_api_search():
                         break
             
             clients_data.append(client_dict)
-        
+
         return jsonify({
             'success': True,
             'clients': clients_data,

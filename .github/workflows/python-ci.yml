@@ -168,15 +168,3 @@ jobs:
       with:
         name: pylint-report
         path: pylint-report.json
-                
-  cleanup:
-    name: Nettoyage
-    runs-on: ubuntu-latest
-    needs: [deploy-staging, deploy-production]
-    if: always()
-    
-    steps:
-    - name: Nettoyage des artefacts temporaires
-      run: |
-        echo "Nettoyage des ressources temporaires"
-        # Commandes de nettoyage si nécessaire
