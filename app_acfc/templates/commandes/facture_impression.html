@@ -53,10 +53,10 @@
                                 {% if adresse.pays and adresse.pays != 'FRANCE' %}{{ adresse.pays }}{% endif %}
                             </div>
                         {% endif %}
-                        {% if facture.client.siren or facture.client.rna %}
+                        {% if facture.client.pro.siren or facture.client.pro.rna %}
                             <div class="small-text mt-1">
-                                {% if facture.client.siren %}SIREN : {{ facture.client.siren }}
-                                {% elif facture.client.rna %}RNA : {{ facture.client.rna }}{% endif %}
+                                {% if facture.client.pro.siren %}SIREN : {{ facture.client.pro.siren }}
+                                {% elif facture.client.pro.rna %}RNA : {{ facture.client.pro.rna }}{% endif %}
                             </div>
                         {% endif %}
                     </div>
