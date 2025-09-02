@@ -612,7 +612,7 @@ class Facture(Base):
 
     # === IDENTIFIANT ET LIAISON ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    id_fiscal = mapped_column(String(13), unique=True)
+    id_fiscal = mapped_column(String(20), unique=True)  # Augmenté pour supporter le format YYYY-MM-NNNNNN-C
     id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False)
     client = relationship("Client", back_populates="factures")
     id_commande = mapped_column(Integer, ForeignKey(PK_COMMANDE), nullable=False)

@@ -18,6 +18,10 @@
     {% include 'commandes/commande_form_content.html' %}
 {% elif sub_context == 'details' %}
     {% include 'commandes/commande_details_content.html' %}
+{% elif sub_context == 'facture_details' %}
+    {% include 'commandes/facture_detail.html' %}
+{% elif sub_context == 'facture_impression' %}
+    {% include 'commandes/facture_impression.html' %}
 {% endif %}
 
 <!-- JavaScript spécifique aux commandes -->

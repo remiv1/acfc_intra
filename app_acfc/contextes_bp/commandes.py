@@ -19,7 +19,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from datetime import datetime, date
 from sqlalchemy.orm import Session as SessionBdDType
 from werkzeug.exceptions import NotFound
-from app_acfc.modeles import SessionBdD, Commande, DevisesFactures, Catalogue, Client, Expeditions
+from app_acfc.modeles import SessionBdD, Commande, DevisesFactures, Catalogue, Client, Expeditions, Facture, Operations, Ventilations, PCG
 from app_acfc.habilitations import validate_habilitation, CLIENTS
 from logs.logger import acfc_log, ERROR, DEBUG
 from typing import List, Dict, Optional, Any
@@ -502,7 +502,8 @@ def commande_details(id_commande: int, id_client: int):
                              id_commande=id_commande,
                              commande=commande,
                              devises_factures=devises_factures,
-                             now=datetime.now())
+                             now=datetime.now(),
+                             today=date.today())
         
     except Exception as e:
         acfc_log.log_to_file(level=ERROR, message=f"Erreur lors de l'affichage des détails de commande {id_commande}: {str(e)}", zone_log=LOG_FILE_COMMANDES)
@@ -635,7 +636,7 @@ def traiter_facturation():
             devise.is_facture = True
             devise.date_facturation = date_facturation
             devise.numero_facture = numero_facture
-            devise.facture_by = session.get('username', 'Utilisateur')
+            devise.facture_by = session.get('pseudo', 'Utilisateur')
         
         session_db.commit()
         
@@ -701,7 +702,7 @@ def traiter_expedition():
             devise.is_expedie = True
             devise.date_expedition = date_expedition_obj
             devise.numero_expedition = numero_expedition
-            devise.expedie_by = session.get('username', 'Utilisateur')
+            devise.expedie_by = session.get('pseudo', 'Utilisateur')
             if transporteur:
                 devise.transporteur = transporteur
         
@@ -721,3 +722,253 @@ def traiter_expedition():
         if 'session_db' in locals(): session_db.close()
     
     return redirect(url_for('commandes.consulter_commande', numero_commande=numero_commande))
+
+
+@commandes_bp.route('/facturer_commande', methods=['POST'])
+@validate_habilitation(CLIENTS)
+def facturer_commande():
+    """Facturer les lignes sélectionnées d'une commande"""
+    session_db = SessionBdD()
+    try:
+        # Récupérer les données du formulaire
+        id_commande = request.form.get('id_commande')
+        lignes_selectionnees = request.form.getlist('lignes_facturees')
+        date_facturation_str = request.form.get('date_facturation')
+        
+        if not id_commande or not lignes_selectionnees:
+            flash('Aucune ligne sélectionnée pour la facturation', 'warning')
+            return redirect(request.referrer or url_for('clients.liste_clients'))
+        
+        # Récupérer la commande
+        commande = session_db.query(Commande).filter(Commande.id == int(id_commande)).first()
+        if not commande:
+            flash('Commande non trouvée', 'error')
+            return redirect(request.referrer or url_for('clients.liste_clients'))
+        
+        # Date de facturation
+        if date_facturation_str:
+            date_facturation = datetime.strptime(date_facturation_str, '%Y-%m-%d').date()
+        else:
+            date_facturation = date.today()
+        
+        # Récupérer les lignes à facturer
+        devises_a_facturer = session_db.query(DevisesFactures).filter(
+            DevisesFactures.id.in_([int(x) for x in lignes_selectionnees]),
+            DevisesFactures.id_commande == commande.id,
+            DevisesFactures.is_facture == False
+        ).all()
+        
+        if not devises_a_facturer:
+            flash('Aucune ligne valide trouvée pour la facturation', 'warning')
+            return redirect(url_for('commandes.commande_details', id_commande=commande.id, id_client=commande.id_client))
+        
+        # Créer la facture
+        facture = Facture()
+        facture.id_client = commande.id_client
+        facture.id_commande = commande.id
+        facture.date_facturation = date_facturation
+        facture.id_adresse = commande.id_adresse or commande.client.adresses[0].id if commande.client.adresses else None
+        
+        # Calculer le montant total de la facture
+        montant_total = sum(d.qte * d.prix_unitaire * (1 - d.remise) for d in devises_a_facturer)
+        facture.montant_facture = montant_total
+        
+        session_db.add(facture)
+        session_db.flush()  # Pour obtenir l'ID de la facture
+        
+        # Mettre à jour les lignes facturées
+        for devise in devises_a_facturer:
+            devise.is_facture = True
+            devise.id_facture = facture.id
+            devise.facture_by = session.get('pseudo', 'Utilisateur')
+        
+        # Créer les écritures comptables
+        _creer_ecritures_comptables_facturation(session_db, facture, devises_a_facturer)
+        
+        # Mettre à jour le statut de la commande
+        _mettre_a_jour_statut_commande(session_db, commande)
+        
+        session_db.commit()
+        
+        nb_lignes = len(devises_a_facturer)
+        flash(f'Facture #{facture.id_fiscal} créée avec succès ({nb_lignes} ligne(s) facturée(s))', 'success')
+        
+        acfc_log.log_to_file(
+            level=DEBUG,
+            message=f'Facturation commande {commande.id}: {nb_lignes} lignes, montant {montant_total}€',
+            zone_log=LOG_FILE_COMMANDES
+        )
+        
+        # Rediriger vers les détails de la facture
+        return redirect(url_for('commandes.facture_details', id_facture=facture.id))
+        
+    except Exception as e:
+        session_db.rollback()
+        acfc_log.log_to_file(level=ERROR, message=f"Erreur lors de la facturation: {str(e)}", zone_log=LOG_FILE_COMMANDES)
+        flash('Erreur lors de la facturation', 'error')
+        return redirect(request.referrer or url_for('clients.liste_clients'))
+    
+    finally:
+        if 'session_db' in locals():
+            session_db.close()
+
+
+def _creer_ecritures_comptables_facturation(session_db: SessionBdDType, facture: Facture, devises_facturees: List[DevisesFactures]):
+    """Créer les écritures comptables pour la facturation"""
+    try:
+        # Créer l'opération comptable principale
+        operation = Operations()
+        operation.date_operation = facture.date_facturation
+        operation.libelle_operation = f"Facturation commande #{facture.id_commande} - Facture {facture.id_fiscal}"
+        operation.montant_operation = facture.montant_facture
+        operation.annee_comptable = facture.date_facturation.year
+        
+        session_db.add(operation)
+        session_db.flush()  # Pour obtenir l'ID
+        
+        # Ventilation DÉBIT - Compte client (411000)
+        ventilation_client = Ventilations()
+        ventilation_client.id_operation = operation.id
+        ventilation_client.compte_id = 411000  # Clients
+        ventilation_client.sens = 'DEBIT'
+        ventilation_client.montant_debit = facture.montant_facture
+        ventilation_client.montant_credit = None
+        ventilation_client.id_facture = facture.id
+        
+        session_db.add(ventilation_client)
+        
+        # Ventilation CRÉDIT - Compte de vente (707000) 
+        ventilation_vente = Ventilations()
+        ventilation_vente.id_operation = operation.id
+        ventilation_vente.compte_id = 707000  # Ventes de marchandises
+        ventilation_vente.sens = 'CREDIT'
+        ventilation_vente.montant_debit = None
+        ventilation_vente.montant_credit = facture.montant_facture
+        ventilation_vente.id_facture = facture.id
+        
+        session_db.add(ventilation_vente)
+        
+        acfc_log.log_to_file(
+            level=DEBUG,
+            message=f'Écritures comptables créées pour facture {facture.id_fiscal}',
+            zone_log=LOG_FILE_COMMANDES
+        )
+        
+    except Exception as e:
+        acfc_log.log_to_file(
+            level=ERROR,
+            message=f"Erreur création écritures comptables: {str(e)}",
+            zone_log=LOG_FILE_COMMANDES
+        )
+        raise
+
+
+def _mettre_a_jour_statut_commande(session_db: SessionBdDType, commande: Commande):
+    """Mettre à jour le statut de facturation de la commande"""
+    try:
+        # Compter les lignes totales et facturées
+        total_lignes = session_db.query(DevisesFactures).filter(
+            DevisesFactures.id_commande == commande.id
+        ).count()
+        
+        lignes_facturees = session_db.query(DevisesFactures).filter(
+            DevisesFactures.id_commande == commande.id,
+            DevisesFactures.is_facture == True
+        ).count()
+        
+        # Mettre à jour le statut selon la situation
+        if lignes_facturees == 0:
+            commande.is_facture = False
+        elif lignes_facturees == total_lignes:
+            commande.is_facture = True
+            if not commande.date_facturation:
+                commande.date_facturation = date.today()
+        else:
+            # Facturation partielle - on garde is_facture = False mais on pourrait ajouter un champ spécifique
+            commande.is_facture = False
+        
+        acfc_log.log_to_file(
+            level=DEBUG,
+            message=f'Statut commande {commande.id} mis à jour: {lignes_facturees}/{total_lignes} lignes facturées',
+            zone_log=LOG_FILE_COMMANDES
+        )
+        
+    except Exception as e:
+        acfc_log.log_to_file(
+            level=ERROR,
+            message=f"Erreur mise à jour statut commande: {str(e)}",
+            zone_log=LOG_FILE_COMMANDES
+        )
+        raise
+
+
+@commandes_bp.route('/facture/<int:id_facture>')
+@validate_habilitation(CLIENTS)
+def facture_details(id_facture: int):
+    """Afficher les détails d'une facture"""
+    session_db = SessionBdD()
+    try:
+        # Récupérer la facture avec ses relations
+        facture = session_db.query(Facture).filter(Facture.id == id_facture).first()
+        if not facture:
+            flash('Facture non trouvée', 'error')
+            return redirect(url_for('clients.liste_clients'))
+        
+        # Récupérer les lignes facturées
+        lignes_facturees = session_db.query(DevisesFactures).filter(
+            DevisesFactures.id_facture == facture.id
+        ).all()
+        
+        return render_template('base.html',
+                               context='commandes',
+                               sub_context='facture_details',
+                               facture=facture,
+                               lignes_facturees=lignes_facturees,
+                               today=date.today())
+        
+    except Exception as e:
+        acfc_log.log_to_file(level=ERROR, message=f'Erreur lors de l\'affichage de la facture {id_facture}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
+        flash('Erreur lors de l\'affichage de la facture', 'error')
+        return redirect(url_for('clients.liste_clients'))
+    finally:
+        if 'session_db' in locals():
+            session_db.close()
+
+
+@commandes_bp.route('/facture/<int:id_facture>/impression')
+@validate_habilitation(CLIENTS)
+def facture_impression(id_facture: int):
+    """Afficher la facture pour impression"""
+    session_db = SessionBdD()
+    try:
+        # Récupérer la facture avec ses relations
+        facture = session_db.query(Facture).filter(Facture.id == id_facture).first()
+        if not facture:
+            flash('Facture non trouvée', 'error')
+            return redirect(url_for('clients.liste_clients'))
+        
+        # Récupérer les lignes facturées
+        lignes_facturees = session_db.query(DevisesFactures).filter(
+            DevisesFactures.id_facture == facture.id
+        ).all()
+        
+        # Marquer comme imprimée
+        if not facture.is_imprime:
+            facture.is_imprime = True
+            facture.date_impression = date.today()
+            session_db.commit()
+        
+        return render_template('base.html',
+                               context='commandes',
+                               sub_context='facture_impression',
+                               facture=facture,
+                               lignes_facturees=lignes_facturees,
+                               today=date.today())
+        
+    except Exception as e:
+        acfc_log.log_to_file(level=ERROR, message=f'Erreur lors de l\'impression de la facture {id_facture}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
+        flash('Erreur lors de l\'impression de la facture', 'error')
+        return redirect(url_for('clients.liste_clients'))
+    finally:
+        if 'session_db' in locals():
+            session_db.close()

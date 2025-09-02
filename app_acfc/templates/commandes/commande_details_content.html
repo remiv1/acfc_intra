@@ -146,6 +146,9 @@
                         <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th scope="col" class="text-center" style="width: 50px;">
+                                        <input type="checkbox" id="selectAllLines" class="form-check-input">
+                                    </th>
                                     <th scope="col">Référence</th>
                                     <th scope="col">Désignation</th>
                                     <th scope="col" class="text-center">Quantité</th>
@@ -163,6 +166,13 @@
                                     {% else %}table-light
                                     {% endif %}
                                 ">
+                                    <td class="text-center">
+                                        {% if not devise.is_facture %}
+                                            <input type="checkbox" name="ligne_facturation" value="{{ devise.id }}" class="form-check-input ligne-checkbox">
+                                        {% else %}
+                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                        {% endif %}
+                                    </td>
                                     <td><code>{{ devise.reference }}</code></td>
                                     <td>{{ devise.designation }}</td>
                                     <td class="text-center">{{ devise.qte }}</td>
@@ -250,21 +260,17 @@
                                 <i class="bi bi-pencil me-1"></i>Modifier la commande
                             </a>
                             
-                            {% if not commande.is_facture %}
+                            <!-- Facturation : toujours disponible s'il y a des lignes non facturées -->
+                            {% set has_non_facture = devises_factures|selectattr('is_facture', 'equalto', false)|list %}
+                            {% if has_non_facture|length > 0 %}
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#facturationModal">
-                                    <i class="bi bi-receipt me-1"></i>Facturer la commande
+                                    <i class="bi bi-receipt me-1"></i>Facturer
                                 </button>
                             {% endif %}
                             
                             {% if commande.is_facture and not commande.is_expedie %}
                                 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#expeditionModal">
                                     <i class="bi bi-truck me-1"></i>Expédier la commande
-                                </button>
-                            {% endif %}
-                            
-                            {% if commande.is_facture %}
-                                <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#facturationPartielleModal">
-                                    <i class="bi bi-receipt me-1"></i>Facturation partielle
                                 </button>
                             {% endif %}
                             
@@ -368,167 +374,133 @@
      MODALES DE GESTION FACTURATION ET EXPÉDITION
 ==================================================================== -->
 
-<!-- Modale de facturation complète -->
+<!-- Modale de facturation unifiée -->
 <div class="modal fade" id="facturationModal" tabindex="-1" aria-labelledby="facturationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="facturationModalLabel">
-                    <i class="bi bi-receipt me-2"></i>Facturer la commande
+                    <i class="bi bi-receipt me-2"></i>Facturation de la commande
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body">
-                <form id="facturationForm" method="post" action="{{ url_for('commandes.traiter_facturation') }}">
+                <form id="facturationForm" method="post" action="{{ url_for('commandes.facturer_commande') }}">
                     <input type="hidden" name="id_commande" value="{{ commande.id }}">
                     
-                    <div class="mb-3">
-                        <h6 class="fw-bold mb-2">Lignes à facturer :</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-striped">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="checkbox-col">
-                                            <input type="checkbox" id="selectAllFacturation" class="form-check-input">
-                                        </th>
-                                        <th>Référence</th>
-                                        <th>Désignation</th>
-                                        <th class="text-center">Quantité</th>
-                                        <th class="text-end">Prix Unit.</th>
-                                        <th class="text-end">Total HT</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% set has_non_facture = devises_factures|selectattr('is_facture', 'equalto', false)|list %}
-                                    {% if has_non_facture|length > 0 %}
-                                        {% for devise in has_non_facture %}
-                                        <tr>
-                                            <td>
-                                                <input class="form-check-input ligne-facturation" type="checkbox" 
-                                                       name="lignes_facturer[]" value="{{ devise.id }}" 
-                                                       id="fact_{{ devise.id }}" checked>
-                                            </td>
-                                            <td><code>{{ devise.reference }}</code></td>
-                                            <td>{{ devise.designation }}</td>
-                                            <td class="text-center">{{ devise.qte }}</td>
-                                            <td class="text-end">{{ "%.4f"|format(devise.prix_unitaire) }} €</td>
-                                            <td class="text-end"><strong>{{ "%.2f"|format(devise.qte * devise.prix_unitaire * (1 - devise.remise)) }} €</strong></td>
-                                        </tr>
-                                        {% endfor %}
-                                    {% else %}
-                                        <tr>
-                                            <td colspan="6" class="text-center text-muted">
-                                                Toutes les lignes sont déjà facturées
-                                            </td>
-                                        </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="commentaire_facturation" class="form-label">Commentaire (optionnel)</label>
-                        <textarea class="form-control" id="commentaire_facturation" name="commentaire_facturation" rows="3" 
-                                  placeholder="Commentaire libre sur cette facturation..."></textarea>
-                    </div>
-                    
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Information :</strong> 
-                        Le numéro de facture sera généré automatiquement et la date de facturation sera la date actuelle.
-                    </div>
-                    
-                    {% if has_non_facture|length > 0 %}
-                    <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-receipt me-1"></i>Confirmer la facturation
-                        </button>
-                    </div>
-                    {% endif %}
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modale de facturation partielle -->
-<div class="modal fade" id="facturationPartielleModal" tabindex="-1" aria-labelledby="facturationPartielleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="facturationPartielleModalLabel">
-                    <i class="bi bi-receipt me-2"></i>Facturation partielle
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-            </div>
-            <div class="modal-body">
-                <form id="facturationPartielleForm">
+                    <!-- Informations sur la facturation -->
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="date_facturation_partielle" class="form-label fw-bold">Date de facturation *</label>
-                            <input type="date" class="form-control" id="date_facturation_partielle" 
-                                   value="{{ now|date_input }}" required>
+                            <label for="date_facturation" class="form-label fw-bold">Date de facturation *</label>
+                            <input type="date" class="form-control" id="date_facturation" name="date_facturation" value="{{ today }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="commentaire_facturation_partielle" class="form-label">Commentaire</label>
-                            <input type="text" class="form-control" id="commentaire_facturation_partielle" 
-                                   placeholder="Commentaire sur ce lot...">
+                            <label for="commentaire_facturation" class="form-label">Commentaire (optionnel)</label>
+                            <input type="text" class="form-control" id="commentaire_facturation" name="commentaire_facturation" 
+                                   placeholder="Commentaire sur cette facturation...">
                         </div>
                     </div>
                     
                     <!-- Sélection des lignes à facturer -->
                     <div class="mb-3">
-                        <div class="form-label fw-bold mb-3">Lignes à facturer</div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0">Lignes à facturer</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAllFacturation" checked>
+                                <label class="form-check-label fw-bold" for="selectAllFacturation">
+                                    Tout sélectionner
+                                </label>
+                            </div>
+                        </div>
+                        
                         <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
+                            <table class="table table-sm table-striped">
+                                <thead class="table-light">
                                     <tr>
-                                        <th>Sélectionner</th>
+                                        <th class="text-center" style="width: 50px;">
+                                            <i class="bi bi-check-square"></i>
+                                        </th>
                                         <th>Référence</th>
                                         <th>Désignation</th>
-                                        <th>Qté totale</th>
-                                        <th>Qté à facturer</th>
-                                        <th>Total HT</th>
+                                        <th class="text-center">Qté totale</th>
+                                        <th class="text-center">Qté à facturer</th>
+                                        <th class="text-end">Prix Unit.</th>
+                                        <th class="text-end">Total HT</th>
                                     </tr>
                                 </thead>
-                                <tbody id="lignesFacturationBody">
-                                    {% for devise in devises_factures %}
-                                    {% if not devise.is_facture %}
-                                    <tr>
-                                        <td>
-                                            <input type="checkbox" class="form-check-input ligne-facturation-check" 
-                                                   data-ligne-id="{{ devise.id }}" checked>
-                                        </td>
-                                        <td><code>{{ devise.reference }}</code></td>
-                                        <td>{{ devise.designation }}</td>
-                                        <td>{{ devise.qte }}</td>
-                                        <td>
-                                            <input type="number" class="form-control form-control-sm qte-facturer" 
-                                                   value="{{ devise.qte }}" min="1" max="{{ devise.qte }}" 
-                                                   data-ligne-id="{{ devise.id }}">
-                                        </td>
-                                        <td class="total-ligne-facturation">{{ "%.2f"|format(devise.prix_total) }} €</td>
-                                    </tr>
+                                <tbody id="lignesFacturationTableBody">
+                                    {% set has_non_facture = devises_factures|selectattr('is_facture', 'equalto', false)|list %}
+                                    {% if has_non_facture|length > 0 %}
+                                        {% for devise in has_non_facture %}
+                                        <tr data-ligne-id="{{ devise.id }}">
+                                            <td class="text-center">
+                                                <input class="form-check-input ligne-facturation-checkbox" type="checkbox" 
+                                                       name="lignes_facturees" value="{{ devise.id }}" 
+                                                       id="fact_{{ devise.id }}" checked>
+                                            </td>
+                                            <td><code>{{ devise.reference }}</code></td>
+                                            <td>{{ devise.designation }}</td>
+                                            <td class="text-center">{{ devise.qte }}</td>
+                                            <td class="text-center">
+                                                <input type="number" class="form-control form-control-sm qte-facturer text-center" 
+                                                       value="{{ devise.qte }}" min="1" max="{{ devise.qte }}" 
+                                                       name="qte_{{ devise.id }}" data-ligne-id="{{ devise.id }}" 
+                                                       data-prix-unitaire="{{ devise.prix_unitaire }}" 
+                                                       data-remise="{{ devise.remise }}" style="width: 80px;">
+                                            </td>
+                                            <td class="text-end">{{ "%.4f"|format(devise.prix_unitaire) }} €</td>
+                                            <td class="text-end ligne-total">
+                                                <strong>{{ "%.2f"|format(devise.qte * devise.prix_unitaire * (1 - devise.remise)) }} €</strong>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                <i class="bi bi-info-circle me-2"></i>
+                                                Toutes les lignes sont déjà facturées
+                                            </td>
+                                        </tr>
                                     {% endif %}
-                                    {% endfor %}
                                 </tbody>
+                                {% if has_non_facture|length > 0 %}
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th colspan="6" class="text-end">Total à facturer :</th>
+                                        <th class="text-end">
+                                            <span id="totalFacturation" class="fs-6 text-success">0,00 €</span>
+                                        </th>
+                                    </tr>
+                                </tfoot>
+                                {% endif %}
                             </table>
                         </div>
                     </div>
                     
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Attention :</strong> Les lignes facturées ne pourront plus être modifiées.
+                    <!-- Informations et alertes -->
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Information :</strong> 
+                        <span id="infoFacturation">
+                            Le numéro de facture sera généré automatiquement.
+                        </span>
                     </div>
+                    
+                    <div id="alertFacturationPartielle" class="alert alert-warning" style="display: none;">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Facturation partielle :</strong> 
+                        Les lignes non sélectionnées resteront en attente et pourront être facturées ultérieurement.
+                    </div>
+                    
+                    {% if has_non_facture|length > 0 %}
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-success" id="btnConfirmerFacturation">
+                            <i class="bi bi-receipt me-1"></i>Confirmer la facturation
+                        </button>
+                    </div>
+                    {% endif %}
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-success" id="confirmerFacturationPartielle">
-                    <i class="bi bi-receipt me-1"></i>Facturer les lignes sélectionnées
-                </button>
             </div>
         </div>
     </div>

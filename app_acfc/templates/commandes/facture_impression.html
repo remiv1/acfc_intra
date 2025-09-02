@@ -1,0 +1,254 @@
+<!-- ====================================================================
+     ACFC - Template "Impression Facture" - Modèle d'édition
+     ====================================================================
+     
+     Template d'impression pour les factures ACFC.
+     Optimisé pour l'impression papier avec styles dédiés.
+     
+     Variables Jinja attendues :
+     - facture : Objet Facture SQLAlchemy
+     - lignes_facturees : Liste des lignes facturées (DevisesFactures)
+==================================================================== -->
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facture {{ facture.id_fiscal }} - ACFC</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Styles d'impression -->
+    <style>
+        @media print {
+            body { font-size: 12px; }
+            .no-print { display: none !important; }
+            .page-break { page-break-after: always; }
+            .card { border: 1px solid #dee2e6 !important; box-shadow: none !important; }
+        }
+        
+        .letterhead {
+            background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .facture-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        
+        .client-info {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #0d6efd;
+        }
+        
+        .total-amount {
+            background-color: #d1ecf1;
+            border: 2px solid #0d6efd;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        
+        .signature-box {
+            border: 1px solid #dee2e6;
+            min-height: 100px;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Bouton d'impression (masqué à l'impression) -->
+    <div class="no-print container-fluid py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Aperçu d'impression - Facture {{ facture.id_fiscal }}</h4>
+            <div>
+                <button onclick="window.print()" class="btn btn-primary me-2">
+                    <i class="bi bi-printer me-1"></i>Imprimer
+                </button>
+                <button onclick="window.close()" class="btn btn-secondary">
+                    <i class="bi bi-x me-1"></i>Fermer
+                </button>
+            </div>
+        </div>
+        <hr>
+    </div>
+
+    <!-- Document de facture -->
+    <div class="container">
+        <!-- En-tête société -->
+        <div class="letterhead text-center">
+            <h1 class="mb-2">ACFC</h1>
+            <h2 class="mb-3">Association des Collectionneurs Français de Cartes</h2>
+            <div class="row">
+                <div class="col-md-6 text-md-start">
+                    <p class="mb-1">Siège social : [Adresse de l'association]</p>
+                    <p class="mb-1">Téléphone : [Numéro de téléphone]</p>
+                    <p class="mb-0">Email : contact@acfc.fr</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-1">SIRET : [Numéro SIRET]</p>
+                    <p class="mb-1">TVA Intracommunautaire : [Numéro TVA]</p>
+                    <p class="mb-0">APE : [Code APE]</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations facture et client -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="client-info">
+                    <h5 class="mb-3 text-primary">Facturé à :</h5>
+                    <p class="mb-2"><strong>{{ facture.client.nom_affichage }}</strong></p>
+                    {% if facture.client.adresses %}
+                        {% set adresse = facture.client.adresses[0] %}
+                        <p class="mb-1">{{ adresse.voie }}</p>
+                        {% if adresse.complement %}
+                            <p class="mb-1">{{ adresse.complement }}</p>
+                        {% endif %}
+                        <p class="mb-1">{{ adresse.cp }} {{ adresse.ville }}</p>
+                        {% if adresse.pays and adresse.pays != 'FRANCE' %}
+                            <p class="mb-0">{{ adresse.pays }}</p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-end">
+                    <h3 class="facture-number">FACTURE {{ facture.id_fiscal }}</h3>
+                    <table class="table table-borderless table-sm mt-3">
+                        <tr>
+                            <td class="text-end"><strong>Date d'émission :</strong></td>
+                            <td class="text-end">{{ facture.date_facturation|strftime }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-end"><strong>Commande liée :</strong></td>
+                            <td class="text-end">#{{ facture.id_commande }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-end"><strong>ID Client :</strong></td>
+                            <td class="text-end">{{ facture.id_client }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Détail des prestations -->
+        <div class="mb-4">
+            <h5 class="mb-3 text-primary">Détail des prestations</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-primary">
+                        <tr>
+                            <th scope="col" style="width: 15%;">Référence</th>
+                            <th scope="col" style="width: 35%;">Désignation</th>
+                            <th scope="col" class="text-center" style="width: 10%;">Qté</th>
+                            <th scope="col" class="text-end" style="width: 15%;">Prix Unit. HT</th>
+                            <th scope="col" class="text-center" style="width: 10%;">Remise</th>
+                            <th scope="col" class="text-end" style="width: 15%;">Total HT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ligne in lignes_facturees %}
+                        <tr>
+                            <td><code>{{ ligne.reference }}</code></td>
+                            <td>{{ ligne.designation }}</td>
+                            <td class="text-center">{{ ligne.qte }}</td>
+                            <td class="text-end">{{ "%.4f"|format(ligne.prix_unitaire) }} €</td>
+                            <td class="text-center">{{ "%.1f"|format(ligne.remise * 100) }}%</td>
+                            <td class="text-end"><strong>{{ "%.2f"|format(ligne.qte * ligne.prix_unitaire * (1 - ligne.remise)) }} €</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Récapitulatif financier -->
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Informations de paiement -->
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Conditions de paiement</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2"><strong>Paiement :</strong> À réception de facture</p>
+                        <p class="mb-2"><strong>Mode de règlement :</strong> Chèque ou virement</p>
+                        <p class="mb-0"><strong>TVA :</strong> Non applicable (association)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <!-- Total -->
+                <div class="total-amount">
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <td class="text-end"><strong>Total HT :</strong></td>
+                            <td class="text-end"><strong>{{ "%.2f"|format(facture.montant_facture) }} €</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-end">TVA (0%) :</td>
+                            <td class="text-end">0,00 €</td>
+                        </tr>
+                        <tr class="border-top">
+                            <td class="text-end fs-5"><strong>Total TTC :</strong></td>
+                            <td class="text-end fs-4 text-primary"><strong>{{ "%.2f"|format(facture.montant_facture) }} €</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mentions légales -->
+        <div class="mt-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Mentions légales</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1 small">En cas de retard de paiement, des pénalités de retard seront appliquées.</p>
+                            <p class="mb-1 small">Aucun escompte ne sera accordé en cas de paiement anticipé.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1 small">Association régie par la loi 1901.</p>
+                            <p class="mb-0 small">Document généré le {{ today|strftime }} par le système ACFC.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone de signature (pour l'impression) -->
+        <div class="signature-box mt-4">
+            <div class="row">
+                <div class="col-6">
+                    <p class="mb-2"><strong>Signature du client :</strong></p>
+                    <p class="mb-0 small text-muted">Lu et approuvé, bon pour accord</p>
+                </div>
+                <div class="col-6 text-end">
+                    <p class="mb-2"><strong>Cachet et signature ACFC :</strong></p>
+                    <p class="mb-0 small text-muted">Le {{ facture.date_facturation|strftime }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts Bootstrap (pour les modales si nécessaire) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script d'auto-impression optionnel -->
+    <script>
+        // Optionnel : lancer l'impression automatiquement
+        // window.onload = function() { window.print(); };
+    </script>
+</body>
+</html>

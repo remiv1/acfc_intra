@@ -1,0 +1,213 @@
+<!-- ====================================================================
+     ACFC - Template "Détails Facture" - Contenu principal
+     ====================================================================
+     
+     Page de consultation détaillée d'une facture avec informations complètes
+     et liens vers l'impression. Interface moderne Bootstrap.
+     
+     Variables Jinja attendues :
+     - facture : Objet Facture SQLAlchemy
+     - lignes_facturees : Liste des lignes facturées (DevisesFactures)
+==================================================================== -->
+
+<!-- CSS spécifique aux commandes -->
+<link rel="stylesheet" href="{{ url_for('static', filename='commandes/css/commandes.css') }}">
+
+<div class="container-fluid">
+    <!-- En-tête de la facture -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="mb-1 text-success">
+                                <i class="bi bi-receipt me-2"></i>Facture {{ facture.id_fiscal }}
+                            </h2>
+                            <p class="text-muted mb-0">
+                                Émise le {{ facture.date_facturation|strftime }}
+                                {% if facture.is_imprime %}
+                                    - Imprimée le {{ facture.date_impression|strftime if facture.date_impression }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('commandes.facture_impression', id_facture=facture.id) }}" class="btn btn-outline-primary" target="_blank">
+                                <i class="bi bi-printer me-1"></i>Imprimer
+                            </a>
+                            <a href="{{ url_for('commandes.commande_details', id_commande=facture.id_commande, id_client=facture.id_client) }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Retour à la commande
+                            </a>
+                            <a href="{{ url_for('clients.get_client', id_client=facture.id_client) }}" class="btn btn-outline-primary">
+                                <i class="bi bi-person me-1"></i>Fiche client
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informations principales -->
+        <div class="col-lg-8 mb-4">
+            <!-- Informations client et facturation -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-building me-2"></i>Informations de Facturation</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">CLIENT FACTURÉ</h6>
+                            <p class="mb-1"><strong>{{ facture.client.nom_affichage }}</strong></p>
+                            {% if facture.client.adresses %}
+                                {% set adresse = facture.client.adresses[0] %}
+                                <p class="mb-1">{{ adresse.voie }}</p>
+                                {% if adresse.complement %}
+                                    <p class="mb-1">{{ adresse.complement }}</p>
+                                {% endif %}
+                                <p class="mb-0">{{ adresse.cp }} {{ adresse.ville }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">INFORMATIONS FACTURE</h6>
+                            <p class="mb-1"><strong>Numéro :</strong> {{ facture.id_fiscal }}</p>
+                            <p class="mb-1"><strong>Date d'émission :</strong> {{ facture.date_facturation|strftime }}</p>
+                            <p class="mb-1"><strong>Commande liée :</strong> 
+                                <a href="{{ url_for('commandes.commande_details', id_commande=facture.id_commande, id_client=facture.id_client) }}">#{{ facture.id_commande }}</a>
+                            </p>
+                            <p class="mb-0">
+                                <span class="badge {% if facture.is_imprime %}bg-info{% else %}bg-warning{% endif %}">
+                                    {% if facture.is_imprime %}
+                                        <i class="bi bi-printer-fill me-1"></i>Imprimée
+                                    {% else %}
+                                        <i class="bi bi-printer me-1"></i>Non imprimée
+                                    {% endif %}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lignes facturées -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Détail de la Facture</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Référence</th>
+                                    <th scope="col">Désignation</th>
+                                    <th scope="col" class="text-center">Quantité</th>
+                                    <th scope="col" class="text-end">Prix Unitaire</th>
+                                    <th scope="col" class="text-center">Remise</th>
+                                    <th scope="col" class="text-end">Total HT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ligne in lignes_facturees %}
+                                <tr>
+                                    <td><code>{{ ligne.reference }}</code></td>
+                                    <td>{{ ligne.designation }}</td>
+                                    <td class="text-center">{{ ligne.qte }}</td>
+                                    <td class="text-end">{{ "%.4f"|format(ligne.prix_unitaire) }} €</td>
+                                    <td class="text-center">{{ "%.1f"|format(ligne.remise * 100) }}%</td>
+                                    <td class="text-end"><strong>{{ "%.2f"|format(ligne.qte * ligne.prix_unitaire * (1 - ligne.remise)) }} €</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <th scope="row" colspan="5" class="text-end">Total de la facture :</th>
+                                    <th scope="col" class="text-end">
+                                        <span class="fs-5 text-success">{{ "%.2f"|format(facture.montant_facture) }} €</span>
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau latéral -->
+        <div class="col-lg-4">
+            <!-- Résumé financier -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-currency-euro me-2"></i>Résumé Financier</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <p class="mb-1 text-muted">Montant HT :</p>
+                        </div>
+                        <div class="col-6 text-end">
+                            <p class="mb-1"><strong>{{ "%.2f"|format(facture.montant_facture) }} €</strong></p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <p class="mb-1 text-muted">TVA (0%) :</p>
+                        </div>
+                        <div class="col-6 text-end">
+                            <p class="mb-1">0,00 €</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="mb-0"><strong>Total TTC :</strong></p>
+                        </div>
+                        <div class="col-6 text-end">
+                            <p class="mb-0 fs-5 text-success"><strong>{{ "%.2f"|format(facture.montant_facture) }} €</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions rapides -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('commandes.facture_impression', id_facture=facture.id) }}" class="btn btn-primary" target="_blank">
+                            <i class="bi bi-printer me-1"></i>Imprimer la facture
+                        </a>
+                        <a href="{{ url_for('commandes.commande_details', id_commande=facture.id_commande, id_client=facture.id_client) }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-box-seam me-1"></i>Voir la commande
+                        </a>
+                        <a href="{{ url_for('clients.get_client', id_client=facture.id_client) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-person me-1"></i>Fiche du client
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations techniques -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Informations Techniques</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>ID interne :</strong> {{ facture.id }}</p>
+                    <p class="mb-2"><strong>ID fiscal :</strong> {{ facture.id_fiscal }}</p>
+                    <p class="mb-2"><strong>Lignes facturées :</strong> {{ lignes_facturees|length }}</p>
+                    {% if facture.is_imprime %}
+                        <p class="mb-0"><strong>Première impression :</strong> {{ facture.date_impression|strftime if facture.date_impression else 'N/A' }}</p>
+                    {% else %}
+                        <p class="mb-0 text-warning"><strong>Statut :</strong> Non imprimée</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
