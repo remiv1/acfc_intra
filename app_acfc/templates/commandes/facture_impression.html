@@ -37,7 +37,7 @@
                 <div class="address-sections">
                     <div class="address-facturation">
                         <div class="address-label">
-                            {% if facture.id_adresse == facture.client.adresse.id %}
+                            {% if two_adresses %}
                                 Facturé à :
                             {% else %}
                                 Facturé et livré à :
@@ -60,7 +60,7 @@
                             </div>
                         {% endif %}
                     </div>
-                    {% if facture.is_ad_livraison %}
+                    {% if two_adresses %}
                     <div class="address-livraison">
                         <div class="address-label">Livré à :</div>
                         <div class="client-name">{{ facture.client.nom_affichage }}</div>

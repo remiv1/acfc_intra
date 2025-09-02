@@ -943,6 +943,16 @@ def facture_impression(id_facture: int):
     try:
         # Récupérer la facture avec ses relations
         facture = session_db.query(Facture).filter(Facture.id == id_facture).first()
+        # Vérifier si l'adresse de facturation est différente de l'adresse principale
+        adresse_diff = False
+        if facture and facture.id_adresse:
+            # Récupérer l'adresse principale du client
+            adresse_principale_id = None
+            if facture.client and facture.client.adresses:
+                adresse_principale_id = facture.client.adresses[0].id
+            # Comparer avec l'adresse de la facture
+            if adresse_principale_id and facture.id_adresse != adresse_principale_id:
+                adresse_diff = True
         if not facture:
             flash('Facture non trouvée', 'error')
             return redirect(url_for('clients.liste_clients'))
@@ -983,7 +993,8 @@ def facture_impression(id_facture: int):
                                qr_code_base64=qr_code_base64,
                                facture_url=facture_url,
                                now=datetime.now(),
-                               today=date.today())
+                               today=date.today(),
+                               two_adresses=adresse_diff)
         
     except Exception as e:
         acfc_log.log_to_file(level=ERROR, message=f'Erreur lors de l\'impression de la facture {id_facture}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
