@@ -86,13 +86,9 @@
             <!-- Informations de la facture -->
             <div class="info-row">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <div class="numero-facture mb-2">N° de facture : <strong>{{ facture.id_fiscal }}</strong></div>
                         <div class="numero-commande">N° de commande : <strong>{{ facture.id_commande }}</strong></div>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <div class="montant-highlight">{{ "%.2f"|format(facture.montant_facture) }} €</div>
-                        <div class="small-text">{{ lignes_facturees|length }} article{{ 's' if lignes_facturees|length > 1 else '' }}</div>
                     </div>
                 </div>
             </div>
@@ -148,14 +144,15 @@
                     <div>
                         <div class="small-text mb-2"><strong>Mentions légales :</strong></div>
                         <div class="small-text">TVA : Non Soumis à TVA, Article 261C-3° du Code Général des Impôts.</div>
-                        <div class="economy-info mt-2">
-                            💰 Économie client : 
-                            {{ "%.2f"|format(lignes_facturees|map(attribute='remise_euro')|sum) }} €
-                        </div>
+                        <div class="small-text">{{ lignes_facturees|length }} article{{ 's' if lignes_facturees|length > 1 else '' }}</div>
                     </div>
                     <div class="text-end">
                         <h5 class="mb-2">Total à payer</h5>
                         <h3 class="montant-highlight mb-0">{{ "%.2f"|format(facture.montant_facture) }} € TTC</h3>
+                        <div class="economy-info mt-2">
+                            💰 Économie client : 
+                            {{ "%.2f"|format(lignes_facturees|map(attribute='remise_euro')|sum) }} €
+                        </div>
                     </div>
                 </div>
             </div>
