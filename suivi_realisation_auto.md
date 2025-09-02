@@ -1,36 +1,22 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 01 September 2025  
-**Période analysée :** 25 August 2025 - 01 September 2025 (7 jours)  
-**Nombre de commits :** 66  
+**Date du rapport :** 02 September 2025  
+**Période analysée :** 26 August 2025 - 02 September 2025 (7 jours)  
+**Nombre de commits :** 67  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 66 commits sur 7 jours  
-**Volume de code :** 188251 lignes ajoutées, 18155 lignes supprimées  
-**Fichiers impactés :** 745 fichiers modifiés  
-**Productivité moyenne :** 26893 lignes/jour
+**Activité de développement :** 67 commits sur 7 jours  
+**Volume de code :** 188324 lignes ajoutées, 18525 lignes supprimées  
+**Fichiers impactés :** 752 fichiers modifiés  
+**Productivité moyenne :** 26903 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 25 August 2025
-
-#### 19:05 - 5a2fbf3 - 📊 Mise à jour automatique du rapport de suivi (25/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +39 -17 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Mon Aug 25 19:05:23 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (25/08/2025)`
-- ... et 1 autres fichiers
 
 
 ### 26 August 2025
@@ -735,6 +721,17 @@
 
 ### 01 September 2025
 
+#### 19:05 - deac152 - 📊 Mise à jour automatique du rapport de suivi (01/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +54 -65 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Mon Sep 1 19:05:16 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (01/09/2025)`
+- ... et 1 autres fichiers
+
 #### 21:05 - 33a3fe5 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
 
 **Catégorie :** Développement général  
@@ -781,24 +778,39 @@
 - ... et 69 autres fichiers
 
 
+### 02 September 2025
+
+#### 09:39 - ab1fbae - Supprimer les étapes de nettoyage et les fichiers de tests de logging obsolètes, et améliorer les jointures dans l'API Clients.
+
+**Catégorie :** Tests  
+**Impact :** +58 -322 lignes, 7 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Sep 2 09:39:17 2025 +0200`
+- `    Supprimer les étapes de nettoyage et les fichiers de tests de logging obsolètes, et améliorer les jointures dans l'API Clients.`
+- ... et 4 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 24 commits (36.4%)
-- **Développement de fonctionnalités** : 23 commits (34.8%)
-- **Développement général** : 12 commits (18.2%)
-- **Correction de bugs** : 5 commits (7.6%)
+- **Interface utilisateur** : 24 commits (35.8%)
+- **Développement de fonctionnalités** : 23 commits (34.3%)
+- **Développement général** : 12 commits (17.9%)
+- **Correction de bugs** : 5 commits (7.5%)
 - **Refactoring** : 2 commits (3.0%)
+- **Tests** : 1 commits (1.5%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 194 fichiers modifiés
+- **Python** : 196 fichiers modifiés
 - **HTML** : 58 fichiers modifiés
-- **Documentation** : 45 fichiers modifiés
-- **YAML/Config** : 28 fichiers modifiés
+- **Documentation** : 46 fichiers modifiés
+- **YAML/Config** : 29 fichiers modifiés
 - **JavaScript** : 13 fichiers modifiés
 - **CSS** : 9 fichiers modifiés
 - **Docker** : 6 fichiers modifiés
@@ -807,16 +819,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 9.4 commits/jour
-- **Volume de code :** 206406 modifications totales
-- **Ratio ajouts/suppressions :** 10.37
-- **Moyenne lignes par commit :** 3127
+- **Fréquence de commit :** 9.6 commits/jour
+- **Volume de code :** 206849 modifications totales
+- **Ratio ajouts/suppressions :** 10.17
+- **Moyenne lignes par commit :** 3087
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 188251 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 188324 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
-*Rapport généré automatiquement le 01 September 2025*
+*Rapport généré automatiquement le 02 September 2025*
