@@ -1,36 +1,22 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 01 September 2025  
-**Période analysée :** 25 August 2025 - 01 September 2025 (7 jours)  
-**Nombre de commits :** 66  
+**Date du rapport :** 02 September 2025  
+**Période analysée :** 26 August 2025 - 02 September 2025 (7 jours)  
+**Nombre de commits :** 71  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 66 commits sur 7 jours  
-**Volume de code :** 188251 lignes ajoutées, 18155 lignes supprimées  
-**Fichiers impactés :** 745 fichiers modifiés  
-**Productivité moyenne :** 26893 lignes/jour
+**Activité de développement :** 71 commits sur 7 jours  
+**Volume de code :** 120678 lignes ajoutées, 19766 lignes supprimées  
+**Fichiers impactés :** 762 fichiers modifiés  
+**Productivité moyenne :** 17239 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 25 August 2025
-
-#### 19:05 - 5a2fbf3 - 📊 Mise à jour automatique du rapport de suivi (25/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +39 -17 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Mon Aug 25 19:05:23 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (25/08/2025)`
-- ... et 1 autres fichiers
 
 
 ### 26 August 2025
@@ -89,17 +75,6 @@
 - `Date:   Tue Aug 26 19:02:09 2025 +0200`
 - `    feat: Add Dockerfile and entrypoint for mail management application`
 - ... et 16 autres fichiers
-
-#### 16:26 - 62c1f37 - feat: Add PCG data preparation script and SQL generation
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +70016 -204 lignes, 33 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Tue Aug 26 16:26:51 2025 +0200`
-- `    feat: Add PCG data preparation script and SQL generation`
-- ... et 35 autres fichiers
 
 
 ### 27 August 2025
@@ -735,6 +710,17 @@
 
 ### 01 September 2025
 
+#### 19:05 - deac152 - 📊 Mise à jour automatique du rapport de suivi (01/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +54 -65 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Mon Sep 1 19:05:16 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (01/09/2025)`
+- ... et 1 autres fichiers
+
 #### 21:05 - 33a3fe5 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
 
 **Catégorie :** Développement général  
@@ -781,42 +767,112 @@
 - ... et 69 autres fichiers
 
 
+### 02 September 2025
+
+#### 18:42 - 7e1027b - feat: Ajout de la vérification des adresses de facturation et de livraison dans l'impression des factures
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +14 -3 lignes, 5 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Sep 2 18:42:53 2025 +0200`
+- `    feat: Ajout de la vérification des adresses de facturation et de livraison dans l'impression des factures`
+- ... et 2 autres fichiers
+
+#### 18:34 - 1d13c31 - feat: Ajout d'un QR code et d'un style CSS pour l'impression des factures, mise à jour des modèles de facture et des détails des clients
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +480 -222 lignes, 10 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Sep 2 18:34:04 2025 +0200`
+- `    feat: Ajout d'un QR code et d'un style CSS pour l'impression des factures, mise à jour des modèles de facture et des détails des clients`
+- ... et 7 autres fichiers
+
+#### 12:28 - a15fdbf - feat: Add detailed invoice view and print template
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +1287 -628 lignes, 15 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Sep 2 12:28:04 2025 +0200`
+- `    feat: Add detailed invoice view and print template`
+- ... et 13 autres fichiers
+
+#### 12:27 - 9bb49f3 - fix: Ajout du niveau de journalisation DEBUG et modification de la gestion des changements de mot de passe dans le service d'authentification.
+
+**Catégorie :** Correction de bugs  
+**Impact :** +7 -6 lignes, 5 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Sep 2 12:27:45 2025 +0200`
+- `    fix: Ajout du niveau de journalisation DEBUG et modification de la gestion des changements de mot de passe dans le service d'authentification.`
+- ... et 2 autres fichiers
+
+#### 12:26 - df57581 - Refactor prepare_pcg.py to adjust CSV header and enhance data formatting
+
+**Catégorie :** Refactoring  
+**Impact :** +582 -586 lignes, 8 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Sep 2 12:26:41 2025 +0200`
+- `    Refactor prepare_pcg.py to adjust CSV header and enhance data formatting`
+- ... et 6 autres fichiers
+
+#### 09:39 - ab1fbae - Supprimer les étapes de nettoyage et les fichiers de tests de logging obsolètes, et améliorer les jointures dans l'API Clients.
+
+**Catégorie :** Tests  
+**Impact :** +58 -322 lignes, 7 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Sep 2 09:39:17 2025 +0200`
+- `    Supprimer les étapes de nettoyage et les fichiers de tests de logging obsolètes, et améliorer les jointures dans l'API Clients.`
+- ... et 4 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 24 commits (36.4%)
-- **Développement de fonctionnalités** : 23 commits (34.8%)
-- **Développement général** : 12 commits (18.2%)
-- **Correction de bugs** : 5 commits (7.6%)
-- **Refactoring** : 2 commits (3.0%)
+- **Développement de fonctionnalités** : 25 commits (35.2%)
+- **Interface utilisateur** : 24 commits (33.8%)
+- **Développement général** : 12 commits (16.9%)
+- **Correction de bugs** : 6 commits (8.5%)
+- **Refactoring** : 3 commits (4.2%)
+- **Tests** : 1 commits (1.4%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 194 fichiers modifiés
-- **HTML** : 58 fichiers modifiés
-- **Documentation** : 45 fichiers modifiés
-- **YAML/Config** : 28 fichiers modifiés
+- **Python** : 197 fichiers modifiés
+- **HTML** : 63 fichiers modifiés
+- **Documentation** : 46 fichiers modifiés
+- **YAML/Config** : 29 fichiers modifiés
 - **JavaScript** : 13 fichiers modifiés
 - **CSS** : 9 fichiers modifiés
-- **Docker** : 6 fichiers modifiés
+- **Docker** : 5 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 9.4 commits/jour
-- **Volume de code :** 206406 modifications totales
-- **Ratio ajouts/suppressions :** 10.37
-- **Moyenne lignes par commit :** 3127
+- **Fréquence de commit :** 10.1 commits/jour
+- **Volume de code :** 140444 modifications totales
+- **Ratio ajouts/suppressions :** 6.11
+- **Moyenne lignes par commit :** 1978
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 188251 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 120678 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
-*Rapport généré automatiquement le 01 September 2025*
+*Rapport généré automatiquement le 02 September 2025*
