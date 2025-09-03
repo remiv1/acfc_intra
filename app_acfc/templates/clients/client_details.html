@@ -583,12 +583,12 @@
                                                    class="btn btn-sm btn-outline-primary" title="Voir les détails">
                                                     <i class="bi bi-eye me-1"></i>Voir
                                                 </a>
-                                                {% if not commande.is_annulee %}
+                                                {% if not commande.is_annulee and not commande.is_facture %}
                                                 <a href="{{ url_for('commandes.commande_modify', id_client=commande.id_client, id_commande=commande.id) }}" 
                                                    class="btn btn-sm btn-outline-secondary ms-1" title="Modifier la commande">
                                                     <i class="bi bi-pencil me-1"></i>Modifier
                                                 </a>
-                                                {% if not commande.is_expedie %}
+                                                {% elif not commande.is_expedie and not commande.is_facture and not commande.is_annulee %}
                                                 <form class="inline-display" method="POST" action="{{ url_for('commandes.annuler_commande', id_client=commande.id_client, id_commande=commande.id) }}" 
                                                       onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
                                                     <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Annuler la commande">
@@ -596,10 +596,18 @@
                                                     </button>
                                                 </form>
                                                 {% endif %}
-                                                {% else %}
-                                                <span class="text-muted">
-                                                    <i class="bi bi-x-circle me-1"></i>Commande annulée
-                                                </span>
+                                                {% if commande.is_annulée %}
+                                                    <span class="text-muted">
+                                                        <i class="bi bi-x-circle me-1"></i>Commande annulée
+                                                    </span>
+                                                {% elif commande.is_facture %}
+                                                    <span class="text-muted">
+                                                        <i class="bi bi-check-circle me-1"></i>Commande facturée
+                                                    </span>
+                                                {% elif commande.is_expedie %}
+                                                    <span class="text-muted">
+                                                        <i class="bi bi-truck me-1"></i>Commande expédiée
+                                                    </span>
                                                 {% endif %}
                                             </fieldset>
                                         </td>
@@ -635,7 +643,7 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>N° Facture</th>
+                                        <th class="hidden">N° Facture</th>
                                         <th>ID Fiscal</th>
                                         <th>Date</th>
                                         <th>Montant</th>
@@ -646,7 +654,7 @@
                                 <tbody>
                                     {% for facture in bills %}
                                     <tr>
-                                        <td><strong>#{{ facture.id }}</strong></td>
+                                        <td class="hidden"><strong>#{{ facture.id }}</strong></td>
                                         <td><code>{{ facture.id_fiscal }}</code></td>
                                         <td>{{ facture.date_facturation.strftime('%d/%m/%Y') }}</td>
                                         <td><strong>{{ "%.2f"|format(facture.montant_facture) }} €</strong></td>

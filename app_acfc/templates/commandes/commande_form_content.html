@@ -1,20 +1,23 @@
 <!-- ====================================================================
-     ACFC - Template "Formulaire Commande" (Contenu)
-     ====================================================================
+    ACFC - Template "Formulaire Commande" (Contenu)
+    ====================================================================
      
-     Contenu du formulaire de création/modification de commande.
-     Inclus dans le template principal des commandes via le système de contextes.
+    Contenu du formulaire de création/modification de commande.
+    Inclus dans le template principal des commandes via le système de contextes.
      
-     Variables Jinja attendues :
-     - client : Objet Client SQLAlchemy
-     - commande : Objet Commande SQLAlchemy (None si création)
-     - sub_context : 'create' ou 'edit'
-     - catalogue_filtered : Liste filtrée des produits du catalogue
-     - millesimes, types_produit, geographies : Listes pour les filtres
-     - selected_filters : Dictionnaire des filtres sélectionnés
-     - produits_commande : Dictionnaire des produits dans la commande
-     - produits_id_commandes : Liste des IDs des produits dans la commande
-     - today : Date du jour pour le formulaire
+    Variables Jinja attendues :
+    - client : Objet Client SQLAlchemy (client concerné)
+    - commande : Objet Commande SQLAlchemy (None si création)
+    - form_sub_context : 'create' ou 'edit' (contexte du formulaire)
+    - catalogue_complet : Liste complète des produits du catalogue (pour la modale)
+    - millesimes : Liste des millésimes disponibles (pour filtres)
+    - types_produit : Liste des types de produit (pour filtres)
+    - geographies : Liste des géographies (pour filtres)
+    - error_message : Message d'erreur éventuel à afficher
+    - success_message : Message de succès éventuel à afficher
+    - lignes_devis : Liste des lignes de produits de la commande (pour édition)
+    - current_year : Année courante (pour sélection par défaut)
+    - today : Date du jour pour le formulaire
 ==================================================================== -->
 
 <!-- CSS spécifique aux commandes -->
@@ -65,7 +68,7 @@
         <div class="col-12">
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>{{ error_message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert">X</button>
             </div>
         </div>
     </div>
@@ -76,7 +79,7 @@
         <div class="col-12">
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="fas fa-check-circle me-2"></i>{{ success_message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert">X</button>
             </div>
         </div>
     </div>
@@ -93,10 +96,10 @@
                     </div>
                     <div class="card-body">
                         <!-- Client (affiché en lecture seule) -->
-                        <input type="hidden" name="id_client" value="{{ client.id }}">
+                        <input id="id_client" type="hidden" name="id_client" value="{{ client.id }}">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Client</label>
-                            <div class="form-control-plaintext border p-2 bg-light">
+                            <label for="client_info" class="form-label fw-bold">Client</label>
+                            <div name="client_info" class="form-control-plaintext border p-2 bg-light">
                                 <strong>{{ client.nom_affichage }}</strong>
                                 {% if client.adresses %}
                                     <br><small class="text-muted">{{ client.adresses[0].ville }}</small>
@@ -126,40 +129,46 @@
                                 
                                 {% if client.adresses|length == 1 or (commande and commande.id_adresse == adresse_principale.id) %}
                                     <!-- Une seule adresse ou même adresse pour facturation et livraison -->
-                                    <label class="form-label fw-bold">Adresse de Facturation & Livraison</label>
-                                    <input type="hidden" name="id_adresse" value="{{ adresse_principale.id }}">
+                                    <label for="id_adresse_{{ adresse_principale.id }}" class="form-label fw-bold">Adresse de Facturation & Livraison</label>
+                                    <input type="hidden" name="id_adresse_{{ adresse_principale.id }}" value="{{ adresse_principale.id }}">
                                     <div class="form-control-plaintext border p-2 bg-light">
-                                        <strong>{{ adresse_principale.designation or 'Adresse principale' }}</strong><br>
-                                        {{ adresse_principale.voie }}<br>
-                                        {% if adresse_principale.complement %}{{ adresse_principale.complement }}<br>{% endif %}
-                                        {{ adresse_principale.cp }} {{ adresse_principale.ville }}
+                                        <strong>Adresse principale</strong><br>
+                                        {{ adresse_principale.adresse_l1 }}<br>
+                                        {% if adresse_principale.adresse_l2 %}{{ adresse_principale.adresse_l2 }}<br>{% endif %}
+                                        {{ adresse_principale.code_postal }} {{ adresse_principale.ville }}
                                     </div>
                                 {% else %}
                                     <!-- Adresses différentes pour facturation et livraison -->
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <label class="form-label fw-bold">Adresse de Facturation</label>
-                                            <div class="form-control-plaintext border p-2 bg-light">
-                                                <strong>{{ adresse_principale.designation or 'Adresse principale' }}</strong><br>
-                                                {{ adresse_principale.voie }}<br>
-                                                {% if adresse_principale.complement %}{{ adresse_principale.complement }}<br>{% endif %}
-                                                {{ adresse_principale.cp }} {{ adresse_principale.ville }}
+                                            <label for="adresse_facturation" class="form-label fw-bold">Adresse de Facturation</label>
+                                            <div name="adresse_facturation" class="form-control-plaintext border p-2 bg-light">
+                                                {{ adresse_principale.adresse_l1 }}<br>
+                                                {% if adresse_principale.adresse_l2 %}{{ adresse_principale.adresse_l2 }}<br>{% endif %}
+                                                {{ adresse_principale.code_postal }} {{ adresse_principale.ville }}
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label fw-bold">Adresse de Livraison</label>
-                                            {% for adresse in client.adresses %}
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="id_adresse" id="adresse_{{ adresse.id }}" 
-                                                           value="{{ adresse.id }}" {% if adresse.id == adresse_livraison %}checked{% endif %}>
-                                                    <label class="form-check-label" for="adresse_{{ adresse.id }}">
-                                                        <strong>{{ adresse.designation or 'Adresse principale' }}</strong><br>
-                                                        {{ adresse.voie }}<br>
-                                                        {% if adresse.complement %}{{ adresse.complement }}<br>{% endif %}
-                                                        {{ adresse.cp }} {{ adresse.ville }}
-                                                    </label>
+                                            {% if client.adresses|length > 1 %}
+                                            <label for="nb_adresses" class="form-label fw-bold">Adresse de Livraison</label>
+                                            <input name="nb_adresses" type="hidden" value="{{ client.adresses|length }}" title="Nombre d'adresses disponibles">
+                                                {% for adresse in client.adresses %}
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="id_adresse" id="adresse_{{ adresse.id }}" 
+                                                            value="{{ adresse.id }}" {% if adresse.id == adresse_livraison %}checked{% endif %}>
+                                                        <label class="form-check-label" for="adresse_{{ adresse.id }}">
+                                                            <strong>{{ 'Adresse principale' if adresse.is_principal else 'Autre adresse' }}</strong><br>
+                                                            {{ adresse.adresse_l1 }}<br>
+                                                            {% if adresse.adresse_l2 %}{{ adresse.adresse_l2 }}<br>{% endif %}
+                                                            {{ adresse.code_postal }} {{ adresse.ville }}
+                                                        </label>
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <div class="form-control-plaintext border p-2 bg-light">
+                                                    Identique à l'adresse de facturation
                                                 </div>
-                                            {% endfor %}
+                                            {% endif %}
                                         </div>
                                     </div>
                                 {% endif %}
@@ -180,7 +189,7 @@
                     <div class="card-body">
                         <!-- Montant total (calculé automatiquement) -->
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Montant total</label>
+                            <label for="montant" class="form-label fw-bold">Montant total</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" id="montant" name="montant" 
                                        value="{% if commande and commande.montant %}{{ "%.2f"|format(commande.montant) }}{% else %}0.00{% endif %}" 
@@ -192,8 +201,8 @@
 
                         <!-- Statut de la commande (lecture seule) -->
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Statut de la commande</label>
-                            
+                            <label for="hidden-status" class="form-label fw-bold">Statut de la commande</label>
+                            <input type="hidden" id="hidden-status" name="hidden-status" value=0>
                             {% if not commande %}
                                 <!-- Nouvelle commande - en cours par défaut -->
                                 <div class="alert alert-info">
@@ -279,28 +288,36 @@
                             <table class="table table-hover" id="tableProduitsSelectionnes">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Référence</th>
+                                        <th >Référence</th>
                                         <th>Désignation</th>
                                         <th>Prix unitaire HT</th>
                                         <th>Quantité</th>
                                         <th>Remise</th>
                                         <th>Total HT</th>
-                                        <th width="120">Actions</th>
+                                        <th id="actionsColumn">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="produitsSelectionnesBody">
                                     {% if commande and lignes_devis %}
                                         {% for ligne in lignes_devis %}
-                                        <tr data-produit-id="{{ ligne.produit_id }}" data-ligne-id="{{ ligne.ligne_id }}">
+                                        <tr data-produit-id="{{ ligne.produit_id }}" data-ligne-id="{{ ligne.ligne_id }}" 
+                                            data-db-id="{{ ligne.devise.id if ligne.devise.id else '' }}"
+                                            {% if ligne.is_facture %}data-ligne-facturee="true"{% endif %}>
                                             <td class="reference">{{ ligne.produit.ref_auto }}</td>
-                                            <td class="designation">{{ ligne.produit.des_auto }}</td>
+                                            <td class="designation">
+                                                {{ ligne.produit.des_auto }}
+                                                {% if ligne.is_facture %}
+                                                    <span class="badge bg-success ms-2">Facturée</span>
+                                                {% endif %}
+                                            </td>
                                             <td>
                                                 <div class="input-group input-group-sm">
                                                     <input type="number" class="form-control prix-input" 
                                                            name="prix_{{ ligne.produit_id }}_{{ ligne.ligne_id }}" 
                                                            value="{{ "%.2f"|format(ligne.devise.prix_unitaire) }}" 
                                                            step="0.01" min="0" onchange="calculerTotalLigne(this)"
-                                                           title="Prix unitaire HT">
+                                                           title="Prix unitaire HT"
+                                                           {% if ligne.is_facture %}readonly{% endif %}>
                                                     <span class="input-group-text">€</span>
                                                 </div>
                                             </td>
@@ -309,7 +326,8 @@
                                                        name="qte_{{ ligne.produit_id }}_{{ ligne.ligne_id }}" 
                                                        value="{{ ligne.devise.qte }}" 
                                                        min="1" onchange="calculerTotalLigne(this)"
-                                                       title="Quantité">
+                                                       title="Quantité"
+                                                       {% if ligne.is_facture %}readonly{% endif %}>
                                             </td>
                                             <td>
                                                 <div class="input-group input-group-sm">
@@ -317,7 +335,8 @@
                                                            name="remise_{{ ligne.produit_id }}_{{ ligne.ligne_id }}" 
                                                            value="{{ ((ligne.devise.remise or 0) * 100)|round(1) }}" 
                                                            step="0.1" min="0" max="100" onchange="calculerTotalLigne(this)"
-                                                           title="Remise en pourcentage">
+                                                           title="Remise en pourcentage"
+                                                           {% if ligne.is_facture %}readonly{% endif %}>
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </td>
@@ -328,9 +347,15 @@
                                                 <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="duppliquerLigne(this)" title="Dupliquer">
                                                     <i class="fas fa-copy"></i>
                                                 </button>
+                                                {% if not ligne.is_facture %}
                                                 <button type="button" class="btn btn-sm btn-outline-danger" onclick="supprimerLigne(this)" title="Supprimer">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
+                                                {% else %}
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Ligne facturée, suppression impossible">
+                                                    <i class="fas fa-lock"></i>
+                                                </button>
+                                                {% endif %}
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -374,9 +399,6 @@
         </div>
     </form>
 </div>
-
-<!-- JavaScript spécifique au formulaire de contenu de commande -->
-<script src="{{ url_for('static', filename='commandes/js/commande_form_content.js') }}"></script>
 
 <!-- Modal de sélection des produits -->
 <div class="modal fade" id="selectionProduitsModal" tabindex="-1" aria-labelledby="selectionProduitsModalLabel" aria-hidden="true">
@@ -443,18 +465,18 @@
                 </div>
                 
                 <!-- Tableau des produits du catalogue -->
-                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <div id="modalCatalogueProducts" class="table-responsive">
                     <table class="table table-hover table-sm">
                         <thead class="table-light sticky-top">
                             <tr>
-                                <th style="width: 50px;">Sélection</th>
+                                <th id="selectAllLinesHeader">Sélection</th>
                                 <th>Référence</th>
                                 <th>Désignation</th>
                                 <th>Type</th>
                                 <th>Millésime</th>
                                 <th>Géographie</th>
                                 <th>Prix HT</th>
-                                <th style="width: 80px;">Qté</th>
+                                <th id="qteColumn">Qté</th>
                             </tr>
                         </thead>
                         <tbody id="modalCatalogueBody">
@@ -477,7 +499,7 @@
                                 <td>{{ "%.2f"|format(produit.prix_unitaire_ht) }} €</td>
                                 <td>
                                     <input type="number" class="form-control form-control-sm modal-qte-input" 
-                                           id="modalQte_{{ produit.id }}" value="1" min="1" style="width: 70px;">
+                                           id="modalQte_{{ produit.id }}" value="1" min="1">
                                 </td>
                             </tr>
                             {% endfor %}
@@ -485,7 +507,7 @@
                     </table>
                 </div>
                 
-                <div id="modalAucunProduitMessage" class="text-center text-muted py-4" style="display: none;">
+                <div id="modalAucunProduitMessage" class="text-center text-muted py-4">
                     <i class="fas fa-search fa-2x mb-2"></i>
                     <h5>Aucun produit trouvé</h5>
                     <p>Aucun produit ne correspond à vos critères de recherche.</p>
@@ -500,6 +522,3 @@
         </div>
     </div>
 </div>
-
-<!-- Le script JavaScript Enhanced pour la gestion avancée des commandes -->
-<script src="{{ url_for('static', filename='commandes/js/commande_form_enhanced.js') }}"></script>

@@ -1,15 +1,17 @@
-<!-- ====================================================================
-     ACFC - Template "Détails Commande" (Contenu)
-     ====================================================================
-     
-     Page de consultation détaillée d'une commande avec historique et actions.
-     Inclus dans le template principal des commandes via le système de contextes.
-     
-     Variables Jinja attendues :
-     - commande : Objet Commande SQLAlchemy
-     - devises_factures : Liste des éléments de la commande
-     - now : datetime actuel pour les formulaires
-==================================================================== -->
+<!--
+    ====================================================================
+    ACFC - Template "Détails Commande" (Contenu)
+    ====================================================================
+    
+    Page de consultation détaillée d'une commande avec historique et actions.
+    Inclus dans le template principal des commandes via le système de contextes.
+
+    Variables Jinja attendues :
+    - commande : Objet Commande SQLAlchemy (commande à afficher)
+    - devises_factures : Liste des lignes/éléments de la commande (devise)
+    - now : datetime actuel (pour les formulaires de date)
+    - today : date du jour (pour la facturation)
+    ==================================================================== -->
 
 <!-- CSS spécifique aux commandes -->
 <link rel="stylesheet" href="{{ url_for('static', filename='commandes/css/commandes.css') }}">
@@ -33,30 +35,6 @@
                             </p>
                         </div>
                         <div class="d-flex gap-2">
-                            <!-- Dropdown pour les options d'impression -->
-                            <fieldset class="btn-group" role="group">
-                                <a href="{{ url_for('commandes.commande_bon_impression', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-success" target="_blank">
-                                    <i class="bi bi-printer me-1"></i>Bon de commande
-                                </a>
-                                <button type="button" class="btn btn-outline-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="visually-hidden">Options d'impression</span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="{{ url_for('commandes.commande_bon_impression', id_client=commande.id_client, id_commande=commande.id) }}" target="_blank">
-                                            <i class="bi bi-eye me-2"></i>Aperçu seulement
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ url_for('commandes.commande_bon_impression', id_client=commande.id_client, id_commande=commande.id) }}?auto_print=close" target="_blank">
-                                            <i class="bi bi-printer me-2"></i>Imprimer et fermer
-                                        </a>
-                                    </li>
-                                </ul>
-                            </fieldset>
-                            <a href="{{ url_for('commandes.commande_modify', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-pencil me-1"></i>Modifier
-                            </a>
                             <a href="{{ url_for('clients.get_client', id_client=commande.id_client) }}" class="btn btn-outline-primary">
                                 <i class="bi bi-arrow-left me-1"></i>Retour au client
                             </a>
@@ -82,11 +60,15 @@
                             <p class="mb-1"><strong>{{ commande.client.nom_affichage }}</strong></p>
                             {% if commande.client.adresses %}
                                 {% set adresse = commande.client.adresses|selectattr('is_principal', 'equalto', True)|first %}
-                                <p class="mb-1">{{ adresse.adresse_l1 }}</p>
-                                {% if adresse.adresse_l2 %}
-                                    <p class="mb-1">{{ adresse.adresse_l2 }}</p>
+                                {% if adresse %}
+                                    <p class="mb-1">{{ adresse.adresse_l1 }}</p>
+                                    {% if adresse.adresse_l2 %}
+                                        <p class="mb-1">{{ adresse.adresse_l2 }}</p>
+                                    {% endif %}
+                                    <p class="mb-0">{{ adresse.code_postal }} {{ adresse.ville }}</p>
+                                {% else %}
+                                    <p class="mb-0 text-muted">Aucune adresse principale trouvée</p>
                                 {% endif %}
-                                <p class="mb-0">{{ adresse.code_postal }} {{ adresse.ville }}</p>
                             {% endif %}
                             
                             <!-- Contacts -->
@@ -113,7 +95,8 @@
                         <div class="col-md-6">
                             
                             <h6 class="text-muted mb-2">LIVRAISON</h6>
-                            {% if commande.adresse == commande.client.adresses|selectattr('is_principal', 'equalto', True)|first %}
+                            {% set adresse_principale = commande.client.adresses|selectattr('is_principal', 'equalto', True)|first if commande.client.adresses else none %}
+                            {% if adresse_principale and commande.adresse == adresse_principale %}
                                 <p class="mb-0">
                                     <span class="badge bg-info mb-2">Adresse de facturation</span><br>
                                     Livraison à l'adresse de facturation
@@ -122,12 +105,16 @@
                                 <p class="mb-0">
                                     <span class="badge bg-info mb-2">Adresse spécifique</span><br>
                                     {% if commande.client.adresses %}
-                                {% set adresse = commande.client.adresses|selectattr('id', 'equalto', commande.id_adresse)|selectattr('is_principal', 'equalto', True)|first %}
-                                        <p class="mb-1">{{ adresse.adresse_l1 }}</p>
-                                        {% if adresse.adresse_l2 %}
-                                            <p class="mb-1">{{ adresse.adresse_l2 }}</p>
+                                        {% set adresse = commande.client.adresses|selectattr('id', 'equalto', commande.id_adresse)|first %}
+                                        {% if adresse %}
+                                            <p class="mb-1">{{ adresse.adresse_l1 }}</p>
+                                            {% if adresse.adresse_l2 %}
+                                                <p class="mb-1">{{ adresse.adresse_l2 }}</p>
+                                            {% endif %}
+                                            <p class="mb-0">{{ adresse.code_postal }} {{ adresse.ville }}</p>
+                                        {% else %}
+                                            <p class="mb-0 text-muted">Adresse de livraison non trouvée</p>
                                         {% endif %}
-                                        <p class="mb-0">{{ adresse.code_postal }} {{ adresse.ville }}</p>
                                     {% endif %}
                                 </p>
                             {% endif %}
@@ -146,9 +133,6 @@
                         <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th scope="col" class="text-center" style="width: 50px;">
-                                        <input type="checkbox" id="selectAllLines" class="form-check-input">
-                                    </th>
                                     <th scope="col">Référence</th>
                                     <th scope="col">Désignation</th>
                                     <th scope="col" class="text-center">Quantité</th>
@@ -166,13 +150,6 @@
                                     {% else %}table-light
                                     {% endif %}
                                 ">
-                                    <td class="text-center">
-                                        {% if not devise.is_facture %}
-                                            <input type="checkbox" name="ligne_facturation" value="{{ devise.id }}" class="form-check-input ligne-checkbox">
-                                        {% else %}
-                                            <i class="bi bi-check-circle-fill text-success"></i>
-                                        {% endif %}
-                                    </td>
                                     <td><code>{{ devise.reference }}</code></td>
                                     <td>{{ devise.designation }}</td>
                                     <td class="text-center">{{ devise.qte }}</td>
@@ -256,13 +233,34 @@
                     <!-- Actions disponibles -->
                     <div class="d-grid gap-2">
                         {% if not commande.is_annulee %}
-                            <a href="{{ url_for('commandes.commande_modify', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-pencil me-1"></i>Modifier la commande
-                            </a>
-                            
-                            <!-- Facturation : toujours disponible s'il y a des lignes non facturées -->
-                            {% set has_non_facture = devises_factures|selectattr('is_facture', 'equalto', false)|list %}
+                        
+                        <!-- Facturation : toujours disponible s'il y a des lignes non facturées -->
+                        {% set has_non_facture = devises_factures|selectattr('is_facture', 'equalto', false)|list %}
                             {% if has_non_facture|length > 0 %}
+                                <!-- Dropdown pour les options d'impression -->
+                                <fieldset class="btn-group" role="group">
+                                    <a href="{{ url_for('commandes.commande_bon_impression', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-success" target="_blank">
+                                        <i class="bi bi-printer me-1"></i>Bon de commande
+                                    </a>
+                                    <button type="button" class="btn btn-outline-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">Options d'impression</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="{{ url_for('commandes.commande_bon_impression', id_client=commande.id_client, id_commande=commande.id) }}" target="_blank">
+                                                <i class="bi bi-eye me-2"></i>Aperçu seulement
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ url_for('commandes.commande_bon_impression', id_client=commande.id_client, id_commande=commande.id) }}?auto_print=close" target="_blank">
+                                                <i class="bi bi-printer me-2"></i>Imprimer et fermer
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </fieldset>
+                                <a href="{{ url_for('commandes.commande_modify', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-pencil me-1"></i>Modifier la commande
+                                </a>
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#facturationModal">
                                     <i class="bi bi-receipt me-1"></i>Facturer
                                 </button>
@@ -374,7 +372,7 @@
      MODALES DE GESTION FACTURATION ET EXPÉDITION
 ==================================================================== -->
 
-<!-- Modale de facturation unifiée -->
+<!-- Modale de facturation -->
 <div class="modal fade" id="facturationModal" tabindex="-1" aria-labelledby="facturationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -392,7 +390,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="date_facturation" class="form-label fw-bold">Date de facturation *</label>
-                            <input type="date" class="form-control" id="date_facturation" name="date_facturation" value="{{ today }}" required>
+                            <input type="date" class="form-control" id="date_facturation" name="date_facturation" value="{{ today }}" required disabled readonly>
                         </div>
                         <div class="col-md-6">
                             <label for="commentaire_facturation" class="form-label">Commentaire (optionnel)</label>
@@ -417,15 +415,14 @@
                             <table class="table table-sm table-striped">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="text-center" style="width: 50px;">
+                                        <th class="text-center selectAllLinesHeader" scope="col">
                                             <i class="bi bi-check-square"></i>
                                         </th>
-                                        <th>Référence</th>
-                                        <th>Désignation</th>
-                                        <th class="text-center">Qté totale</th>
-                                        <th class="text-center">Qté à facturer</th>
-                                        <th class="text-end">Prix Unit.</th>
-                                        <th class="text-end">Total HT</th>
+                                        <th scope="col">Référence</th>
+                                        <th scope="col">Désignation</th>
+                                        <th class="text-center" scope="col">Quantité</th>
+                                        <th class="text-end" scope="col">Prix Unit. HT</th>
+                                        <th class="text-end" scope="col">Total HT</th>
                                     </tr>
                                 </thead>
                                 <tbody id="lignesFacturationTableBody">
@@ -441,13 +438,6 @@
                                             <td><code>{{ devise.reference }}</code></td>
                                             <td>{{ devise.designation }}</td>
                                             <td class="text-center">{{ devise.qte }}</td>
-                                            <td class="text-center">
-                                                <input type="number" class="form-control form-control-sm qte-facturer text-center" 
-                                                       value="{{ devise.qte }}" min="1" max="{{ devise.qte }}" 
-                                                       name="qte_{{ devise.id }}" data-ligne-id="{{ devise.id }}" 
-                                                       data-prix-unitaire="{{ devise.prix_unitaire }}" 
-                                                       data-remise="{{ devise.remise }}" style="width: 80px;">
-                                            </td>
                                             <td class="text-end">{{ "%.4f"|format(devise.prix_unitaire) }} €</td>
                                             <td class="text-end ligne-total">
                                                 <strong>{{ "%.2f"|format(devise.qte * devise.prix_unitaire * (1 - devise.remise)) }} €</strong>
@@ -456,7 +446,7 @@
                                         {% endfor %}
                                     {% else %}
                                         <tr>
-                                            <td colspan="7" class="text-center text-muted py-4">
+                                            <td colspan="6" class="text-center text-muted py-4">
                                                 <i class="bi bi-info-circle me-2"></i>
                                                 Toutes les lignes sont déjà facturées
                                             </td>
@@ -466,8 +456,8 @@
                                 {% if has_non_facture|length > 0 %}
                                 <tfoot class="table-light">
                                     <tr>
-                                        <th colspan="6" class="text-end">Total à facturer :</th>
-                                        <th class="text-end">
+                                        <th scope="col" colspan="5" class="text-end">Total à facturer :</th>
+                                        <th scope="col" class="text-end">
                                             <span id="totalFacturation" class="fs-6 text-success">0,00 €</span>
                                         </th>
                                     </tr>
@@ -486,7 +476,7 @@
                         </span>
                     </div>
                     
-                    <div id="alertFacturationPartielle" class="alert alert-warning" style="display: none;">
+                    <div id="alertFacturationPartielle" class="alert alert-warning">
                         <i class="bi bi-exclamation-triangle me-2"></i>
                         <strong>Facturation partielle :</strong> 
                         Les lignes non sélectionnées resteront en attente et pourront être facturées ultérieurement.
@@ -517,12 +507,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body">
-                <form id="expeditionForm" method="post" action="{{ url_for('commandes.traiter_expedition') }}">
+                <form id="expeditionForm" method="post" action="{{ url_for('commandes.traiter_expedition', id_commande=commande.id) }}">
                     <input type="hidden" name="id_commande" value="{{ commande.id }}">
                     
                     <!-- Lignes à expédier -->
                     <div class="mb-4">
-                        <h6 class="fw-bold mb-2">Lignes à expédier :</h6>
+                        <h6 class="fw-bold mb-2">Lignes à expédier * :</h6>
                         <div class="table-responsive">
                             <table class="table table-sm table-striped">
                                 <thead class="table-light">
@@ -565,38 +555,51 @@
                             </table>
                         </div>
                     </div>
-                    
+
+                    <!-- Date d'expédition -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Date d'expédition * :</h6>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <input type="date" class="form-control" id="date_expedition_modale" name="date_expedition" value="{{ now|date_input }}" required>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Mode d'expédition -->
                     <div class="mb-4">
-                        <h6 class="fw-bold mb-3">Mode d'expédition :</h6>
+                        <h6 class="fw-bold mb-3">Mode d'expédition * :</h6>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="mode_expedition" 
-                                           id="remise_main_propre" value="remise_main_propre">
+                                           id="remise_main_propre" value="remise_main_propre" required>
                                     <label class="form-check-label" for="remise_main_propre">
                                         <i class="bi bi-person-check me-1"></i>Remise en main propre
                                     </label>
                                 </div>
                             </div>
+                            {% if commande.montant < 80 %}
                             <div class="col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="mode_expedition" 
-                                           id="envoi_simple" value="envoi_simple" checked>
+                                           id="envoi_simple" value="envoi_simple" required>
                                     <label class="form-check-label" for="envoi_simple">
                                         <i class="bi bi-envelope me-1"></i>Envoi simple
                                     </label>
                                 </div>
                             </div>
+                            {% elif commande.montant >= 80 %}
                             <div class="col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="mode_expedition" 
-                                           id="envoi_suivi" value="envoi_suivi">
+                                           id="envoi_suivi" value="envoi_suivi" required>
                                     <label class="form-check-label" for="envoi_suivi">
                                         <i class="bi bi-truck me-1"></i>Envoi suivi
                                     </label>
                                 </div>
                             </div>
+                            {% endif %}
                         </div>
                         
                         <!-- Numéro de suivi (affiché seulement pour envoi suivi) -->
@@ -608,7 +611,7 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="commentaire_expedition" class="form-label">Commentaire (optionnel)</label>
+                        <label for="commentaire_expedition" class="form-label fw-bold">Commentaire (optionnel)</label>
                         <textarea class="form-control" id="commentaire_expedition" name="commentaire_expedition" rows="3" 
                                   placeholder="Commentaire libre sur cette expédition..."></textarea>
                     </div>
@@ -617,11 +620,6 @@
                     <div id="alert_montant_80" class="alert alert-warning">
                         <i class="bi bi-exclamation-triangle me-2"></i>
                         <strong>Attention :</strong> Pour un montant supérieur à 80€, seuls la remise en main propre ou l'envoi suivi sont autorisés.
-                    </div>
-                    
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Information :</strong> La date d'expédition sera automatiquement définie à la date actuelle.
                     </div>
                     
                     {% if has_facture_non_expedie|length > 0 %}
@@ -637,96 +635,3 @@
         </div>
     </div>
 </div>
-
-<!-- Modale d'expédition partielle -->
-<div class="modal fade" id="expeditionPartielleModal" tabindex="-1" aria-labelledby="expeditionPartielleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="expeditionPartielleModalLabel">
-                    <i class="bi bi-truck me-2"></i>Expédition partielle
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-            </div>
-            <div class="modal-body">
-                <form id="expeditionPartielleForm">
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label for="date_expedition_partielle" class="form-label fw-bold">Date d'expédition *</label>
-                            <input type="date" class="form-control" id="date_expedition_partielle" 
-                                   value="{{ now|date_input }}" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="transporteur_partielle" class="form-label">Transporteur</label>
-                            <input type="text" class="form-control" id="transporteur_partielle" 
-                                   placeholder="Nom du transporteur">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="numero_suivi_partielle" class="form-label">Numéro de suivi</label>
-                            <input type="text" class="form-control" id="numero_suivi_partielle" 
-                                   placeholder="Numéro de suivi">
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="commentaire_expedition_partielle" class="form-label">Commentaire</label>
-                        <input type="text" class="form-control" id="commentaire_expedition_partielle" 
-                               placeholder="Commentaire sur ce lot d'expédition...">
-                    </div>
-                    
-                    <!-- Sélection des lignes à expédier -->
-                    <div class="mb-3">
-                        <div class="form-label fw-bold mb-3">Lignes à expédier</div>
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Sélectionner</th>
-                                        <th>Référence</th>
-                                        <th>Désignation</th>
-                                        <th>Qté totale</th>
-                                        <th>Qté à expédier</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="lignesExpeditionBody">
-                                    {% for devise in devises_factures %}
-                                    {% if devise.is_facture and not devise.is_expedie %}
-                                    <tr>
-                                        <td>
-                                            <input type="checkbox" class="form-check-input ligne-expedition-check" 
-                                                   data-ligne-id="{{ devise.id }}" checked>
-                                        </td>
-                                        <td><code>{{ devise.reference }}</code></td>
-                                        <td>{{ devise.designation }}</td>
-                                        <td>{{ devise.qte }}</td>
-                                        <td>
-                                            <input type="number" class="form-control form-control-sm qte-expedier" 
-                                                   value="{{ devise.qte }}" min="1" max="{{ devise.qte }}" 
-                                                   data-ligne-id="{{ devise.id }}">
-                                        </td>
-                                    </tr>
-                                    {% endif %}
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Attention :</strong> Seules les lignes facturées peuvent être expédiées.
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-info" id="confirmerExpeditionPartielle">
-                    <i class="bi bi-truck me-1"></i>Expédier les lignes sélectionnées
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- JavaScript spécifique aux détails de commande -->
-<script src="{{ url_for('static', filename='commandes/js/commande_details.js') }}"></script>

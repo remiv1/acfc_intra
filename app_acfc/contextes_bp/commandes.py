@@ -96,6 +96,7 @@ def commande_modify(id_client: int, id_commande: int):
             return save_commande(client, commande, request.form, session_db)
         
         # GET - Afficher le formulaire
+        acfc_log.log_to_file(level=DEBUG, message=f'Montant de la commande : {commande.montant}', zone_log=LOG_FILE_COMMANDES)
         return render_commande_form(client, commande, session_db)
         
     except Exception as e:
@@ -150,12 +151,15 @@ def render_commande_form(client: Client, commande: Optional[Commande], session_d
                         produits_id_commandes.append(produit_correspondant.id)
                     
                     # Nouvelle structure pour les lignes de devis
+                    total_ligne_calc = devise.qte * devise.prix_unitaire * (1 - (devise.remise or 0))
                     lignes_devis.append({
                         'ligne_id': ligne_counter,
                         'produit_id': produit_correspondant.id,
                         'produit': produit_correspondant,
                         'devise': devise,
-                        'total_ligne': devise.qte * devise.prix_unitaire * (1 - (devise.remise or 0))
+                        'total_ligne': total_ligne_calc,
+                        'is_facture': devise.is_facture,
+                        'is_expedie': devise.is_expedie
                     })
                     ligne_counter += 1
         else:
@@ -343,8 +347,20 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
         acfc_log.log_to_file(level=DEBUG, message='Traitement des produits avec nouveau format (lignes multiples)', zone_log=LOG_FILE_COMMANDES)
 
         if not is_new:
-            # Supprimer les anciens produits
-            session_db.query(DevisesFactures).filter(DevisesFactures.id_commande == commande.id).delete()
+            # Pour une modification, on va mettre à jour les lignes existantes
+            # au lieu de les supprimer et recréer
+            lignes_existantes = session_db.query(DevisesFactures).filter(
+                DevisesFactures.id_commande == commande.id
+            ).all()
+            
+            # Créer un dictionnaire des lignes existantes par ligne_id pour accès rapide
+            lignes_existantes_dict = {}
+            for ligne in lignes_existantes:
+                # Construire la clé ligne_id à partir des données existantes
+                # On utilise un identifiant temporaire basé sur l'ordre ou l'ID
+                lignes_existantes_dict[str(ligne.id)] = ligne
+            
+            acfc_log.log_to_file(level=DEBUG, message=f'Lignes existantes trouvées: {len(lignes_existantes)}', zone_log=LOG_FILE_COMMANDES)
         
         # Mettre à jour la remise par défaut du client si modifiée
         remise_client_form = form_data.get('remise_client')
@@ -352,7 +368,8 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
             client.reduces = float(remise_client_form) / 100.0
             acfc_log.log_to_file(level=DEBUG, message=f'Remise client mise à jour: {client.reduces}', zone_log=LOG_FILE_COMMANDES)
         
-        montant_total = 0.0
+        from decimal import Decimal
+        montant_total = Decimal('0.00')
         
         # Parcourir tous les champs du formulaire pour trouver les lignes de produits
         # Format: prix_[produit_id]_[ligne_id], qte_[produit_id]_[ligne_id], remise_[produit_id]_[ligne_id]
@@ -377,6 +394,8 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
         acfc_log.log_to_file(level=DEBUG, message=f'Lignes de produits extraites: {len(lignes_produits)} lignes trouvées', zone_log=LOG_FILE_COMMANDES)
         
         # Traiter chaque ligne de produit
+        lignes_a_garder = set()  # Track des IDs de lignes à conserver
+        
         for ligne_id, produits_ligne in lignes_produits.items():
             for produit_id_str, donnees in produits_ligne.items():
                 try:
@@ -392,25 +411,82 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
                         acfc_log.log_to_file(level=ERROR, message=f'Produit {produit_id} non trouvé dans le catalogue', zone_log=LOG_FILE_COMMANDES)
                         continue
                     
-                    # Créer la ligne de devis/facture
-                    devise = DevisesFactures()
-                    devise.id_commande = commande.id
-                    devise.reference = produit.ref_auto
-                    devise.designation = produit.des_auto
-                    devise.qte = int(donnees['qte'])
-                    devise.prix_unitaire = float(donnees['prix'])
-                    devise.remise = float(donnees.get('remise', '0')) / 100.0  # Convertir % en décimal
+                    # Chercher si cette ligne existe déjà dans la base (pour les modifications)
+                    ligne_existante = None
+                    if not is_new:
+                        # Essayer de trouver une ligne existante correspondante
+                        # On cherche par produit_id et ligne_id ou on prend la première correspondance
+                        lignes_candidats = session_db.query(DevisesFactures).filter(
+                            DevisesFactures.id_commande == commande.id,
+                            DevisesFactures.reference == produit.ref_auto
+                        ).all()
+                        
+                        for candidat in lignes_candidats:
+                            if candidat.id not in lignes_a_garder:
+                                ligne_existante = candidat
+                                lignes_a_garder.add(candidat.id)
+                                break
                     
-                    # Calculer le montant total côté application
-                    prix_ligne = devise.qte * devise.prix_unitaire * (1 - devise.remise)
-                    montant_total += prix_ligne
-                    
-                    session_db.add(devise)
-                    acfc_log.log_to_file(level=DEBUG, message=f'Ligne ajoutée: {devise.designation}, QTE: {devise.qte}, Prix: {devise.prix_unitaire}€, Remise: {devise.remise*100}%, Total: {prix_ligne:.2f}€', zone_log=LOG_FILE_COMMANDES)
+                    if ligne_existante and not ligne_existante.is_facture:
+                        # Modifier la ligne existante (seulement si pas facturée)
+                        ligne_existante.qte = int(donnees['qte'])
+                        ligne_existante.prix_unitaire = Decimal(str(donnees['prix']))
+                        ligne_existante.remise = Decimal(str(float(donnees.get('remise', '0')) / 100.0))
+                        
+                        # Calculer le montant 
+                        prix_ligne = Decimal(str(ligne_existante.qte)) * ligne_existante.prix_unitaire * (Decimal('1') - ligne_existante.remise)
+                        montant_total += prix_ligne
+                        
+                        acfc_log.log_to_file(level=DEBUG, message=f'Ligne modifiée: {ligne_existante.designation}, QTE: {ligne_existante.qte}, Prix: {ligne_existante.prix_unitaire}€', zone_log=LOG_FILE_COMMANDES)
+                        
+                    elif ligne_existante and ligne_existante.is_facture:
+                        # Ligne facturée - on la garde telle quelle et on compte son montant
+                        prix_ligne = ligne_existante.qte * ligne_existante.prix_unitaire * (Decimal('1') - ligne_existante.remise)
+                        montant_total += prix_ligne
+                        
+                        acfc_log.log_to_file(level=DEBUG, message=f'Ligne facturée conservée: {ligne_existante.designation}, Total: {prix_ligne:.2f}€', zone_log=LOG_FILE_COMMANDES)
+                        
+                    else:
+                        # Créer une nouvelle ligne
+                        devise = DevisesFactures()
+                        devise.id_commande = commande.id
+                        devise.reference = produit.ref_auto
+                        devise.designation = produit.des_auto
+                        devise.qte = int(donnees['qte'])
+                        devise.prix_unitaire = Decimal(str(donnees['prix']))
+                        devise.remise = Decimal(str(float(donnees.get('remise', '0')) / 100.0))
+                        
+                        # Calculer le montant total côté application
+                        prix_ligne = Decimal(str(devise.qte)) * devise.prix_unitaire * (Decimal('1') - devise.remise)
+                        montant_total += prix_ligne
+                        
+                        session_db.add(devise)
+                        acfc_log.log_to_file(level=DEBUG, message=f'Nouvelle ligne ajoutée: {devise.designation}, QTE: {devise.qte}, Prix: {devise.prix_unitaire}€', zone_log=LOG_FILE_COMMANDES)
                     
                 except (ValueError, TypeError) as ve:
                     acfc_log.log_to_file(level=ERROR, message=f'Erreur lors du traitement de la ligne {ligne_id}, produit {produit_id_str}: {str(ve)}', zone_log=LOG_FILE_COMMANDES)
                     continue
+        
+        # Supprimer les lignes qui ne sont plus dans le formulaire (mais seulement les non facturées)
+        if not is_new and lignes_a_garder:
+            lignes_a_supprimer = session_db.query(DevisesFactures).filter(
+                DevisesFactures.id_commande == commande.id,
+                DevisesFactures.is_facture == False,
+                ~DevisesFactures.id.in_(lignes_a_garder)
+            ).all()
+            
+            for ligne_sup in lignes_a_supprimer:
+                acfc_log.log_to_file(level=DEBUG, message=f'Suppression ligne non facturée: {ligne_sup.designation}', zone_log=LOG_FILE_COMMANDES)
+                session_db.delete(ligne_sup)
+        elif not is_new:  # Si aucune ligne à garder, supprimer toutes les non facturées
+            lignes_a_supprimer = session_db.query(DevisesFactures).filter(
+                DevisesFactures.id_commande == commande.id,
+                DevisesFactures.is_facture == False
+            ).all()
+            
+            for ligne_sup in lignes_a_supprimer:
+                acfc_log.log_to_file(level=DEBUG, message=f'Suppression ligne non facturée: {ligne_sup.designation}', zone_log=LOG_FILE_COMMANDES)
+                session_db.delete(ligne_sup)
         
         # Mettre à jour le montant total
         commande.montant = montant_total
@@ -500,6 +576,7 @@ def commande_details(id_commande: int, id_client: int):
                              context='commandes',
                              sub_context='details',
                              id_commande=id_commande,
+                             id_client=id_client,
                              commande=commande,
                              devises_factures=devises_factures,
                              now=datetime.now(),
@@ -597,39 +674,43 @@ def traiter_facturation():
     """Traiter la facturation de lignes sélectionnées"""
     session_db = SessionBdD()
     try:
-        numero_commande = request.form.get('numero_commande')
+        id_commande = request.form.get('id_commande')
         lignes_facturer = request.form.getlist('lignes_facturer[]')
         numero_facture = request.form.get('numero_facture')
         date_facture = request.form.get('date_facture')
         
-        if not all([numero_commande, lignes_facturer, numero_facture, date_facture]):
+        if not all([id_commande, lignes_facturer, numero_facture, date_facture]):
             flash('Données manquantes pour la facturation', 'error')
-            return redirect(url_for('commandes.consulter_commande', numero_commande=numero_commande))
+            # Essayer de récupérer id_client depuis le form pour la redirection
+            id_client = request.form.get('id_client')
+            if id_client:
+                return redirect(url_for('commandes.commande_details', id_commande=id_commande, id_client=id_client))
+            else:
+                return redirect(url_for('dashboard', message='Données manquantes pour la facturation'))
         
         # Récupérer la commande
-        commande = session_db.query(Commande).filter(Commande.numero_commande == numero_commande).first()
+        commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
         if not commande:
-            flash('Commande non trouvée', 'error')
-            return redirect(url_for('commandes.liste_commandes'))
+            return redirect(url_for('dashboard', message='Commande non trouvée'))
         
         # Mettre à jour les lignes sélectionnées
         lignes_ids = [int(ligne_id) for ligne_id in lignes_facturer]
         devises_a_facturer = session_db.query(DevisesFactures).filter(
             DevisesFactures.id.in_(lignes_ids),
-            DevisesFactures.numero_commande == numero_commande,
+            DevisesFactures.id_commande == id_commande,
             DevisesFactures.is_facture == False
         ).all()
         
         if not devises_a_facturer:
             flash('Aucune ligne valide à facturer', 'warning')
-            return redirect(url_for('commandes.consulter_commande', numero_commande=numero_commande))
+            return redirect(url_for('commandes.commande_details', id_commande=commande.id, id_client=commande.id_client))
         
         # Convertir la date
         try:
             date_facturation = datetime.strptime(date_facture, '%Y-%m-%d').date()
         except ValueError:
             flash('Format de date invalide', 'error')
-            return redirect(url_for('commandes.consulter_commande', numero_commande=numero_commande))
+            return redirect(url_for('commandes.commande_details', id_commande=commande.id, id_client=commande.id_client))
         
         # Facturer les lignes
         for devise in devises_a_facturer:
@@ -643,7 +724,7 @@ def traiter_facturation():
         nb_lignes = len(devises_a_facturer)
         flash(f'{nb_lignes} ligne(s) facturée(s) avec succès (Facture: {numero_facture})', 'success')
         
-        acfc_log.log_to_file(level=DEBUG, message=f'Facturation de {nb_lignes} lignes pour commande {numero_commande}', zone_log=LOG_FILE_COMMANDES)
+        acfc_log.log_to_file(level=DEBUG, message=f'Facturation de {nb_lignes} lignes pour commande {id_commande}', zone_log=LOG_FILE_COMMANDES)
         
     except Exception as e:
         session_db.rollback()
@@ -653,49 +734,53 @@ def traiter_facturation():
     finally:
         if 'session_db' in locals(): session_db.close()
     
-    return redirect(url_for('commandes.consulter_commande', numero_commande=numero_commande))
+    # Retourner aux détails de la commande si on a les informations
+    if 'commande' in locals() and commande:
+        return redirect(url_for('commandes.commande_details', id_commande=commande.id, id_client=commande.id_client))
+    else:
+        return redirect(url_for('dashboard', message='Commande non trouvée'))
 
 
 @commandes_bp.route('/traiter_expedition', methods=['POST'])
 @validate_habilitation(CLIENTS)
 def traiter_expedition():
+    #TODO: Revoir complètement la fonction
     """Traiter l'expédition de lignes sélectionnées"""
     session_db = SessionBdD()
     try:
-        numero_commande = request.form.get('numero_commande')
+        id_commande = request.form.get('id_commande')
         lignes_expedier = request.form.getlist('lignes_expedier[]')
-        numero_expedition = request.form.get('numero_expedition')
-        date_expedition = request.form.get('date_expedition')
-        transporteur = request.form.get('transporteur', '')
+        numero_expedition = request.form.get('numero_suivi')
+        date_expedition = request.form.get('date_expedition', date.today().strftime('%Y-%m-%d'))
+        commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
+        id_client = commande.id_client if commande else None
         
-        if not all([numero_commande, lignes_expedier, numero_expedition, date_expedition]):
+        if not all([id_commande, lignes_expedier, numero_expedition, date_expedition]):
             flash('Données manquantes pour l\'expédition', 'error')
-            return redirect(url_for('commandes.consulter_commande', numero_commande=numero_commande))
+            return redirect(url_for('commandes.commande_details', id_commande=id_commande, id_client=id_client))
         
         # Récupérer la commande
-        commande = session_db.query(Commande).filter(Commande.numero_commande == numero_commande).first()
         if not commande:
-            flash('Commande non trouvée', 'error')
-            return redirect(url_for('commandes.liste_commandes'))
+            return redirect(url_for('dashboard', message='Commande non trouvée'))
         
         # Mettre à jour les lignes sélectionnées
         lignes_ids = [int(ligne_id) for ligne_id in lignes_expedier]
         devises_a_expedier = session_db.query(DevisesFactures).filter(
             DevisesFactures.id.in_(lignes_ids),
-            DevisesFactures.numero_commande == numero_commande,
+            DevisesFactures.id_commande == id_commande,
             DevisesFactures.is_expedie == False
         ).all()
         
         if not devises_a_expedier:
             flash('Aucune ligne valide à expédier', 'warning')
-            return redirect(url_for('commandes.consulter_commande', numero_commande=numero_commande))
+            return redirect(url_for('commandes.commande_details', id_commande=id_commande, id_client=id_client))
         
         # Convertir la date
         try:
             date_expedition_obj = datetime.strptime(date_expedition, '%Y-%m-%d').date()
         except ValueError:
             flash('Format de date invalide', 'error')
-            return redirect(url_for('commandes.consulter_commande', numero_commande=numero_commande))
+            return redirect(url_for('commandes.commande_details', id_commande=id_commande, id_client=id_client))
         
         # Expédier les lignes
         for devise in devises_a_expedier:
@@ -703,15 +788,13 @@ def traiter_expedition():
             devise.date_expedition = date_expedition_obj
             devise.numero_expedition = numero_expedition
             devise.expedie_by = session.get('pseudo', 'Utilisateur')
-            if transporteur:
-                devise.transporteur = transporteur
         
         session_db.commit()
         
         nb_lignes = len(devises_a_expedier)
         flash(f'{nb_lignes} ligne(s) expédiée(s) avec succès (Expédition: {numero_expedition})', 'success')
         
-        acfc_log.log_to_file(level=DEBUG, message=f'Expédition de {nb_lignes} lignes pour commande {numero_commande}', zone_log=LOG_FILE_COMMANDES)
+        acfc_log.log_to_file(level=DEBUG, message=f'Expédition de {nb_lignes} lignes pour commande {id_commande}', zone_log=LOG_FILE_COMMANDES)
         
     except Exception as e:
         session_db.rollback()
@@ -721,7 +804,21 @@ def traiter_expedition():
     finally:
         if 'session_db' in locals(): session_db.close()
     
-    return redirect(url_for('commandes.consulter_commande', numero_commande=numero_commande))
+    # Récupérer l'id_client depuis la base de données
+    try:
+        session_db_read = SessionBdD()
+        id_commande = request.form.get('id_commande')
+        commande = session_db_read.query(Commande).filter_by(id=id_commande).first()
+        id_client = commande.id_client if commande else None
+        session_db_read.close()
+    except Exception as e:
+        id_client = None
+    
+    if id_client:
+        id_commande = request.form.get('id_commande')
+        return redirect(url_for('commandes.commande_details', id_commande=id_commande, id_client=id_client))
+    else:
+        return redirect(url_for('dashboard', message='Commande non trouvée'))
 
 
 @commandes_bp.route('/facturer_commande', methods=['POST'])

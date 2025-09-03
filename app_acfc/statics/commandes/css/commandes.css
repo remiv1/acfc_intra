@@ -413,6 +413,14 @@
     border-left: 4px solid #f0ad4e;
 }
 
+.selectAllLinesHeader {width: 50px;}
+#alertFacturationPartielle {display: none;}
+#actionsColumn {width: 120px;}
+#modalCatalogueProducts {max-height: 400px; overflow-y: auto;}
+#qteColumn {width: 80px;}
+[id^="modalQte_"] {width: 70px;}
+#modalAucunProduitMessage {display: none;}
+
 /* Amélioration de l'apparence des tables dans les modales */
 .modal-body .table th {
     border-top: none;
@@ -420,9 +428,7 @@
     font-size: 0.875rem;
 }
 
-.modal-body .table th.checkbox-col {
-    width: 5%;
-}
+.modal-body .table th.checkbox-col {width: 5%;}
 
 .modal-body .table td {
     vertical-align: middle;
@@ -433,6 +439,14 @@
 .form-check-input:checked {
     background-color: #0d6efd;
     border-color: #0d6efd;
+}
+
+/* Style pour table de facturation */
+#selectAllFacturationHeader {width: 50%;}
+
+/* Styles pour les éléments dont l'id ou la classe commence par 'qte_commade_' */
+[id^="qte_commade_"] {
+    width: 80px;
 }
 
 /* ====================================================================

@@ -14,7 +14,10 @@
 
         <div class="collapse navbar-collapse justify-content-end" id="navbarCollapse">
             <ul class="navbar-nav align-items-center">
-                <li class="nav-item dropdown">
+                <li class="nav-item">
+                    {% if 'user_id' not in session -%}
+                    <button class="btn btn-primary ms-2" type="button" onclick="location.href='/login'">Se connecter</button>
+                    {% else -%}
                     <button class="nav-link dropdown-toggle btn btn-link" id="clientsDropdown" data-bs-toggle="dropdown" aria-expanded="false" type="button">
                         Clients
                     </button>
@@ -79,10 +82,7 @@
                     </ul>
                 </li>
                 <li class="nav-item">
-                    {% if 'user_id' not in session -%}
-                    <button class="btn btn-primary ms-2" type="button" onclick="location.href='/login'">Se connecter</button>
-                    {% else -%}
-                                        <button class="nav-link dropdown-toggle btn btn-link" id="myAccountDropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="nav-link dropdown-toggle btn btn-link" id="myAccountDropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Mon Compte
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="myAccountDropdown">
@@ -91,7 +91,7 @@
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/logout">Se déconnecter</a></li>
                     </ul>
-                    {% endif -%}
+                {% endif -%}
                 </li>
             </ul>
         </div>
