@@ -1,140 +1,22 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 02 September 2025  
-**Période analysée :** 26 August 2025 - 02 September 2025 (7 jours)  
-**Nombre de commits :** 72  
+**Date du rapport :** 03 September 2025  
+**Période analysée :** 27 August 2025 - 03 September 2025 (7 jours)  
+**Nombre de commits :** 64  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 72 commits sur 7 jours  
-**Volume de code :** 120141 lignes ajoutées, 19825 lignes supprimées  
-**Fichiers impactés :** 751 fichiers modifiés  
-**Productivité moyenne :** 17163 lignes/jour
+**Activité de développement :** 64 commits sur 7 jours  
+**Volume de code :** 25713 lignes ajoutées, 19399 lignes supprimées  
+**Fichiers impactés :** 667 fichiers modifiés  
+**Productivité moyenne :** 3673 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 26 August 2025
-
-#### 20:20 - 2c87a69 - 📊 Mise à jour automatique du rapport de suivi (26/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +38 -52 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Tue Aug 26 20:20:40 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (26/08/2025)`
-- ... et 1 autres fichiers
-
-#### 22:20 - 571d738 - feat: Améliorer le chargement des clients avec eager loading et ajouter la gestion des réductions
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +95 -34 lignes, 7 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Tue Aug 26 22:20:14 2025 +0200`
-- `    feat: Améliorer le chargement des clients avec eager loading et ajouter la gestion des réductions`
-- ... et 5 autres fichiers
-
-
-### 27 August 2025
-
-#### 19:46 - 6d2ba8b - Merge pull request #1 from remiv1/sprint_interface
-
-**Catégorie :** Développement général  
-**Impact :** +90092 -52 lignes, 6 fichiers
-
-**Fichiers modifiés :**
-- `Merge: fd93f77 31da6f7`
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Wed Aug 27 19:46:13 2025 +0200`
-- `    Merge pull request #1 from remiv1/sprint_interface`
-- ... et 3 autres fichiers
-
-#### 17:43 - 31da6f7 - 📊 Mise à jour automatique du rapport de suivi (27/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +51 -17 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Wed Aug 27 17:43:55 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (27/08/2025)`
-- ... et 1 autres fichiers
-
-#### 19:43 - cda4b59 - fix: Améliorer l'insertion des données dans le script prepare_pcg.py pour éviter les erreurs de formatage feat: Ajouter une fonction pour vérifier l'installation de pytest dans run_tests.py fix: Corriger la logique d'attente pour Flask dans test-docker-ci.ps1 refactor: Utiliser des variables dans les commandes Docker du script test-docker-ci.sh
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +20 -13 lignes, 10 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Wed Aug 27 19:43:40 2025 +0200`
-- `    fix: Améliorer l'insertion des données dans le script prepare_pcg.py pour éviter les erreurs de formatage`
-- `    feat: Ajouter une fonction pour vérifier l'installation de pytest dans run_tests.py`
-- ... et 7 autres fichiers
-
-#### 19:35 - a026f08 - 📊 Mise à jour du rapport de suivi avec les dates et périodes révisées, ajout d'analyses chronologiques détaillées des réalisations et mise à jour des statistiques globales du projet.
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +305 -64 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Wed Aug 27 19:35:28 2025 +0200`
-- `    📊 Mise à jour du rapport de suivi avec les dates et périodes révisées, ajout d'analyses chronologiques détaillées des réalisations et mise à jour des statistiques globales du projet.`
-- ... et 1 autres fichiers
-
-#### 17:26 - 95f18c6 - 📊 Mise à jour automatique du rapport de suivi (27/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +71 -24 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Wed Aug 27 17:26:57 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (27/08/2025)`
-- ... et 1 autres fichiers
-
-#### 19:26 - 625c28f - Add scripts for preparing and populating database tables
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +2281 -948 lignes, 46 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Wed Aug 27 19:26:38 2025 +0200`
-- `    Add scripts for preparing and populating database tables`
-- ... et 46 autres fichiers
-
-#### 14:04 - a185ed3 - Add templates for command management: create/edit forms and command list
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +2906 -8 lignes, 15 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Wed Aug 27 14:04:48 2025 +0200`
-- `    Add templates for command management: create/edit forms and command list`
-- ... et 13 autres fichiers
-
-#### 11:31 - 3a66b33 - feat: Réorganiser et améliorer la gestion des clients avec ajout de la logique de création/modification et mise à jour des formulaires
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +189 -185 lignes, 8 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Wed Aug 27 11:31:31 2025 +0200`
-- `    feat: Réorganiser et améliorer la gestion des clients avec ajout de la logique de création/modification et mise à jour des formulaires`
-- ... et 5 autres fichiers
 
 
 ### 28 August 2025
@@ -736,6 +618,17 @@
 
 ### 02 September 2025
 
+#### 18:59 - 311e7dc - 📊 Mise à jour automatique du rapport de suivi (02/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +39 -17 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Tue Sep 2 18:59:11 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (02/09/2025)`
+- ... et 1 autres fichiers
+
 #### 20:58 - 4553a46 - fix: Correction des références aux identifiants SIREN et RNA pour les clients professionnels dans l'impression des factures
 
 **Catégorie :** Correction de bugs  
@@ -847,43 +740,57 @@
 - ... et 4 autres fichiers
 
 
+### 03 September 2025
+
+#### 20:22 - 9463709 - Refactor command form templates and unify JavaScript files
+
+**Catégorie :** Refactoring  
+**Impact :** +1581 -954 lignes, 20 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Sep 3 20:22:20 2025 +0200`
+- `    Refactor command form templates and unify JavaScript files`
+- ... et 18 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 26 commits (36.1%)
-- **Développement de fonctionnalités** : 23 commits (31.9%)
-- **Développement général** : 12 commits (16.7%)
-- **Correction de bugs** : 7 commits (9.7%)
-- **Refactoring** : 3 commits (4.2%)
-- **Tests** : 1 commits (1.4%)
+- **Interface utilisateur** : 23 commits (35.9%)
+- **Développement de fonctionnalités** : 18 commits (28.1%)
+- **Développement général** : 11 commits (17.2%)
+- **Correction de bugs** : 7 commits (10.9%)
+- **Refactoring** : 4 commits (6.2%)
+- **Tests** : 1 commits (1.6%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 194 fichiers modifiés
-- **HTML** : 63 fichiers modifiés
-- **Documentation** : 45 fichiers modifiés
-- **YAML/Config** : 28 fichiers modifiés
-- **JavaScript** : 13 fichiers modifiés
+- **Python** : 180 fichiers modifiés
+- **HTML** : 53 fichiers modifiés
+- **Documentation** : 41 fichiers modifiés
+- **YAML/Config** : 27 fichiers modifiés
 - **CSS** : 10 fichiers modifiés
-- **Docker** : 2 fichiers modifiés
+- **JavaScript** : 10 fichiers modifiés
+- **Docker** : 1 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 10.3 commits/jour
-- **Volume de code :** 139966 modifications totales
-- **Ratio ajouts/suppressions :** 6.06
-- **Moyenne lignes par commit :** 1944
+- **Fréquence de commit :** 9.1 commits/jour
+- **Volume de code :** 45112 modifications totales
+- **Ratio ajouts/suppressions :** 1.33
+- **Moyenne lignes par commit :** 705
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 120141 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 25713 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 02 September 2025*
+*Rapport généré automatiquement le 03 September 2025*
