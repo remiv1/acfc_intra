@@ -179,8 +179,7 @@ class CustomLogger:
             # En cas d'erreur MongoDB, on continue sans interrompre l'application
             print(f"Erreur lors de l'écriture du log en base: {e}")
 
-    def log_to_file(self, level: int, message: str, specific_logger: str | None = None,
-                    zone_log: str = "general", db_log: bool = False):
+    def log_to_file(self, level: int, message: str, specific_logger: str='general.log', db_log: bool = False):
         """
         Enregistre un log dans les fichiers appropriés selon le niveau de criticité.
         
@@ -203,7 +202,7 @@ class CustomLogger:
         """
         # Log dans la base de données si demandé
         if db_log: 
-            self._log_to_db(level, message, zone_log)
+            self._log_to_db(level, message, specific_logger)
         
         # Distribution vers les fichiers de logs par niveau
         if level == logging.ERROR:
@@ -215,9 +214,8 @@ class CustomLogger:
         elif level == logging.DEBUG:
             self.debug_logger.debug(message)
 
-        # Log additionnel dans un fichier spécifique si demandé
-        if specific_logger:
-            self._create_specific_logger(specific_logger).log(level, message)
+        # Log additionnel dans un fichier spécifique
+        self._create_specific_logger(specific_logger)
 
 # Création du logger personnalisé
 acfc_log = CustomLogger(

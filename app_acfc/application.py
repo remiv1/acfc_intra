@@ -19,18 +19,18 @@ Auteur : ACFC Development Team
 Version : 1.0
 '''
 
-from flask import Flask, Response, render_template, request, Request, Blueprint, session, url_for, redirect, jsonify
+from flask import Flask, Response, render_template, request, Blueprint, session, url_for, redirect, jsonify, g
 from flask_session import Session
 from waitress import serve
-from typing import Any, Dict, Tuple, List
-from werkzeug.exceptions import HTTPException, Forbidden, Unauthorized
+from typing import Any, Dict, Tuple, List, Optional
+from werkzeug.exceptions import HTTPException, Unauthorized
 from datetime import datetime, date
 from sqlalchemy import text, and_, or_
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy.sql.functions import func
 from logs.logger import acfc_log, WARNING, ERROR, DEBUG
 from app_acfc.services import SecureSessionService, AuthenticationService, LOG_LOGIN_FILE
-from app_acfc.modeles import SessionBdD, User, Commande, Client, init_database
+from app_acfc.modeles import MyAccount, PrepareTemplates, Constants, User, Commande, Client, init_database, get_db_session
 from app_acfc.habilitations import (
     validate_habilitation, ADMINISTRATEUR, GESTIONNAIRE
     )
@@ -57,79 +57,8 @@ SecureSessionService(acfc)
 # Activation du gestionnaire de sessions Flask-Session (stockage filesystem)
 Session(acfc)
 
-# ====================================================================
-# CONSTANTES DE CONFIGURATION DES PAGES
-# ====================================================================
-BASE: str = 'base.html'  # Template de base pour toutes les pages
-
 # Regroupement des blueprints pour faciliter l'enregistrement en masse
 acfc_blueprints: Tuple[Blueprint, ...] = (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp, stocks_bp, admin_bp, commandes_bp)
-
-# Dictionnaires de configuration pour standardiser le rendu des pages
-# Structure : title (titre affiché), context (identifiant CSS/JS), page (template base)
-# Configuration page de connexion
-LOGIN: Dict[str, str] = {
-    'title': 'ACFC - Authentification',  # Titre affiché dans l'onglet navigateur
-    'context': 'login',                  # Contexte pour CSS/JS spécifiques
-    'page': BASE                         # Template HTML à utiliser
-}
-
-# Configuration module Clients (CRM)
-CLIENT: Dict[str, str] = {
-    'title': 'ACFC - Gestion Clients',
-    'context': 'clients',
-    'page': BASE
-}
-
-LOG_CLIENT_FILE = 'clients.log'
-
-# Configuration administration utilisateurs
-USERS: Dict[str, str] = {
-    'title': 'ACFC - Administration Utilisateurs',
-    'context': 'user',
-    'page': BASE
-}
-LOG_USERS_FILE = 'users.log'
-
-# Configuration changement de mot de passe
-CHG_PWD: Dict[str, str] = {
-    'title': 'ACFC - Changement de Mot de Passe',
-    'context': 'change_password',
-    'page': BASE
-}
-LOG_SECURITY_FILE = 'security.log'
-
-# Configuration changement de mot de passe
-USER: Dict[str, str] = {
-    'title': 'ACFC - Mon Compte',
-    'context': 'user_account',
-    'page': BASE
-}
-
-# Configuration de la page par défaut
-DEFAULT: Dict[str, str] = {
-    'title': 'ACFC - Accueil',
-    'context': 'default',
-    'page': BASE
-}
-
-# Configuration erreur 400
-ERROR400: Dict[str, str] = {
-    'title': 'ACFC - Erreur chez vous',
-    'context': '400',
-    'page': BASE
-}
-
-# Configuration erreur 500
-ERROR500: Dict[str, str] = {
-    'title': 'ACFC - Erreur chez nous',
-    'context': '500',
-    'page': BASE
-}
-LOG_500_FILE = '500.log'
-
-# Configuration commerciale
-LOG_COMMERCIAL_FILE = 'commercial.log'
 
 # Messages d'erreur standardisés pour l'authentification
 INVALID: str = 'Identifiants invalides.'
@@ -173,6 +102,7 @@ def before_request() -> Any:
     # Si l'utilisateur n'est pas connecté, rediriger vers la page de login
     return redirect(url_for('login'))
 
+
 @acfc.after_request
 def after_request(response: Response) -> Response:
     """
@@ -187,8 +117,25 @@ def after_request(response: Response) -> Response:
     Returns:
         Response: Réponse modifiée si nécessaire
     """
-    print("After request")  # Log basique - à remplacer par un logger professionnel
     return response
+
+
+@acfc.teardown_appcontext
+def teardown_appcontext(exception: Optional[BaseException]=None) -> None:
+    """
+    Middleware exécuté à la fin de chaque contexte d'application.
+    
+    Permet de libérer les ressources, de fermer les connexions, ou de gérer les erreurs.
+    
+    Args:
+        exception (Exception | None): Exception levée pendant le traitement de la requête, si elle existe
+    """
+    db_session = g.pop('db_session', None)
+    if db_session is not None:
+        if exception is not None:
+            db_session.rollback()
+        db_session.close()
+
 
 @acfc.template_filter('strftime')
 def format_datetime(value: datetime | date | None, fmt: str='%d/%m/%Y'):
@@ -206,12 +153,14 @@ def format_datetime(value: datetime | date | None, fmt: str='%d/%m/%Y'):
         return value.strftime(fmt)
     return value
 
+
 @acfc.template_filter('date_input')
 def format_date_input(value: datetime | date | None):
     """Filtre spécifique pour les champs input[type=date] qui attendent le format ISO (YYYY-MM-DD)"""
     if isinstance(value, (datetime, date)):
         return value.strftime('%Y-%m-%d')
     return value
+
 
 # ====================================================================
 # FONCTIONS DE RECHERCHES - HORS ROUTES
@@ -228,12 +177,12 @@ def get_current_orders(id_client: int = 0) -> List[Commande]:
         List[Commande]: Liste des commandes en cours
     """
     # Ouverture de la session
-    db_session_orders: SessionBdDType = SessionBdD()
+    db_session: SessionBdDType = get_db_session()
 
     # Récupération des commandes en cours sans notion de client
     if id_client == 0:
         commandes: List[Commande] = (
-            db_session_orders.query(Commande)
+            db_session.query(Commande)
             .options(
                 joinedload(Commande.client).joinedload(Client.part),  # Eager loading du client particulier
                 joinedload(Commande.client).joinedload(Client.pro)    # Eager loading du client professionnel
@@ -248,7 +197,7 @@ def get_current_orders(id_client: int = 0) -> List[Commande]:
     # Récupération des commandes en cours pour un client spécifique
     else:
         commandes: List[Commande] = (
-            db_session_orders.query(Commande)
+            db_session.query(Commande)
             .options(
                 joinedload(Commande.client).joinedload(Client.part),  # Eager loading du client particulier
                 joinedload(Commande.client).joinedload(Client.pro)    # Eager loading du client professionnel
@@ -263,10 +212,8 @@ def get_current_orders(id_client: int = 0) -> List[Commande]:
             .all()
         )
 
-    # Fermeture de la session
-    db_session_orders.close()
-
     return commandes
+
 
 def get_commercial_indicators() -> Dict[str, Any] | None:
     """
@@ -281,7 +228,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
         Dict[str, Any]: Dictionnaire des indicateurs commerciaux
     """
     # Ouverture de la session
-    db_session_commercial: SessionBdDType = SessionBdD()
+    db_session: SessionBdDType = get_db_session()
 
     # Récupération des dates de référence
     today = date.today()
@@ -293,7 +240,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
         indicators: Dict[str, List[Any]] | None = {
             # Chiffre d'affaire total facturé pour le mois en cours
             "ca_current_month": [
-                db_session_commercial.query(func.sum(Commande.montant))
+                db_session.query(func.sum(Commande.montant))
                 .filter(
                     Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_month
@@ -303,7 +250,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
 
             # Chiffre d'affaire total facturé pour l'année en cours
             "ca_current_year": [
-                db_session_commercial.query(func.sum(Commande.montant))
+                db_session.query(func.sum(Commande.montant))
                 .filter(
                     Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_year
@@ -313,7 +260,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
 
             # Panier moyen annuel
             "average_basket": [
-                db_session_commercial.query(func.avg(Commande.montant))
+                db_session.query(func.avg(Commande.montant))
                 .filter(
                     Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_year
@@ -323,7 +270,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
 
             # Clients actifs
             "active_clients": [
-                db_session_commercial.query(func.count(func.distinct(Commande.id_client)))
+                db_session.query(func.count(func.distinct(Commande.id_client)))
                 .filter(
                     Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_year
@@ -333,7 +280,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
 
             # Nombre de commandes par an
             "orders_per_year": [
-                db_session_commercial.query(func.count(Commande.id))
+                db_session.query(func.count(Commande.id))
                 .filter(
                     Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_year
@@ -344,10 +291,6 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
     except Exception as e:
         acfc_log.log_to_file(level=ERROR, message=str(e), specific_logger=LOG_COMMERCIAL_FILE, zone_log='commercial', db_log=False)
         indicators = None
-    finally:
-        # Rollback et fermeture de la session
-        db_session_commercial.rollback()
-        db_session_commercial.close()
     return indicators
 
 # ====================================================================
@@ -361,11 +304,15 @@ def index() -> Any:
     
     Redirige automatiquement vers le module Clients après authentification.
     Point d'entrée principal de l'interface utilisateur.
+
+    Possibilité par la suite de créer des dashboards personnalisés en fonction
+    des habilitations utilisateur.
     
     Returns:
         str: Template HTML du module Clients
     """
     return redirect(url_for('dashboard'))
+
 
 @acfc.route('/login', methods=['GET', 'POST'])
 def login() -> Any:
@@ -380,32 +327,35 @@ def login() -> Any:
         Any: Template de connexion, redirection vers l'accueil, ou page d'erreur
     """
     # === TRAITEMENT GET : Affichage du formulaire de connexion ===
-    if request.method == 'GET':
-        return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'])
+    if request.method == 'GET': return PrepareTemplates.login()
     elif request.method != 'POST':
-        acfc_log.log_to_file(level=WARNING,
-                             message=f'{request.method} sur route Login par utilisateur {session.get("user_id", "inconnu")}',
-                             specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
-        return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=WRONG_ROAD)
+        message = Constants.messages('error_400', 'wrong_road') + f' Méthode {request.method} non autorisée.' \
+                  + f' Utilisateur : {session.get("user_id", "inconnu")}'
+        acfc_log.log_to_file(level=WARNING, message=message, specific_logger=Constants.log_files('user'), db_log=True)
+        return PrepareTemplates.error_4xx(message=message)
     # === TRAITEMENT POST : Validation des identifiants ===
     else:
         user_to_authenticate = AuthenticationService(request)
         result_auth = user_to_authenticate.authenticate()
         # Schéma de vérification des identifiants
         try:
+            # Si échec de l'authentification, retour au formulaire avec message d'erreur
             if not result_auth:
-                return render_template(LOGIN['page'], title=LOGIN['title'], context=LOGIN['context'], message=INVALID)
-            acfc_log.log_to_file(level=DEBUG, message=f'changement de mot de passe à réaliser : {user_to_authenticate.is_chg_mdp}')
+                return PrepareTemplates.login(message=INVALID)
+            # Si succès, mais mot de passe à changer, redirection vers la page de changement
             if user_to_authenticate.is_chg_mdp:
-                return render_template(LOGIN['page'], title=LOGIN['title'], context='change_password',
-                                       message="Veuillez changer votre mot de passe.", username=user_to_authenticate.user_pseudo)
+                acfc_log.log_to_file(level=DEBUG, message=f'changement de mot de passe à réaliser : {user_to_authenticate.is_chg_mdp}')
+                return PrepareTemplates.login(context='change_password',
+                                              message="Veuillez changer votre mot de passe.",
+                                              username=user_to_authenticate.user_pseudo)
+            # Si succès, création de la session et redirection vers l'accueil
             else:
                 return redirect(url_for('dashboard'))
         except Exception as e:
             acfc_log.log_to_file(level=ERROR,
                                 message=f'Erreur lors de l\'authentification pour l\'utilisateur: {user_to_authenticate.user} - {e}',
                                 specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
-            return render_template(LOGIN['page'], title=LOGIN['title'], context='500', message=str(e))
+            return PrepareTemplates.error_5xx(message=str(e))
 
 @acfc.route('/logout')
 def logout() -> Any:
@@ -430,9 +380,8 @@ def health() -> Any:
         # Vérification de la base de données
         db_status = "ok"
         try:
-            db_session = SessionBdD()
+            db_session = get_db_session()
             db_session.execute(text("SELECT 1"))
-            db_session.close()
         except Exception as e:
             db_status = f"error: {str(e)}"
         
@@ -503,53 +452,9 @@ def users() -> Any:
     elif request.method == 'GET':
         # TODO: Récupération et affichage de la liste des utilisateurs
         # Devra inclure: pagination, filtrage, contrôle des autorisations
-        return render_template(USERS['page'], title=USERS['title'], context=USERS['context'])
+        return prepare_template_users()
     else:
         return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=WRONG_ROAD)
-
-class MyAccount:
-    """
-    Classe de gestion du compte utilisateur.
-    """
-    @staticmethod
-    def get_user_or_error(db_session: SessionBdDType, pseudo: str) -> Any:
-        user: User = db_session.query(User).filter_by(pseudo=pseudo).first()
-        if not user:
-            return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'])
-        return user
-
-    @staticmethod
-    def check_user_permission(pseudo: str) -> Any:
-        if session.get('pseudo') != pseudo:
-            raise Forbidden("Vous n'êtes pas autorisé à accéder à ce compte.")
-
-    @staticmethod
-    def get_request_form(request: Request):
-        new_prenom = request.form.get('prenom', '').strip()
-        new_nom = request.form.get('nom', '').strip()
-        new_email = request.form.get('email', '').strip()
-        new_telephone = request.form.get('telephone', '').strip()
-        return [new_prenom, new_nom, new_email, new_telephone]
-
-    @staticmethod
-    def valid_mail(mail: str, user:User, db_session: SessionBdDType) -> Any:
-        """
-        Validation de l'adresse email. Retour de la page de paramètre avec un message si invalide.
-        Validation que l'email n'est pas déjà utilisé par un autre compte.
-        """
-        import re
-        email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
-        if not re.match(email_pattern, mail): return render_template(USER['page'], title=USER['title'],
-                                                                        context=USER['context'],
-                                                                        subcontext='parameters',
-                                                                        objects=[user], 
-                                                                        message="Le format de l'adresse email n'est pas valide.")
-        elif mail != user.email:
-            existing_user = db_session.query(User).filter_by(email=mail).first()
-            if existing_user: return render_template(USER['page'], title=USER['title'], context=USER['context'],
-                                                        subcontext='parameters', objects=[user],
-                                                        message="Cette adresse email est déjà utilisée par un autre compte.")
-        return re.match(email_pattern, mail) is not None
 
 @acfc.route('/user/<pseudo>', methods=['GET', 'POST'])
 def my_account(pseudo: str) -> Any:
@@ -559,7 +464,7 @@ def my_account(pseudo: str) -> Any:
     Returns:
         Any: Template de la page "Mon Compte"
     """
-    db_session = SessionBdD()
+    db_session = get_db_session()
 
     # Vérification des autorisations
     MyAccount.check_user_permission(pseudo)
@@ -612,8 +517,6 @@ def my_account(pseudo: str) -> Any:
             return render_template(USER['page'], title=USER['title'], context=USER['context'], 
                                  subcontext='parameters', objects=[user], 
                                  message=f"Erreur lors de la mise à jour : {str(e)}")
-        finally:
-            db_session.close()
     
     #=== Gestion de toutes les autres méthodes ===
     else: raise Unauthorized("Méthode non autorisée.")
@@ -629,7 +532,7 @@ def user_parameters(pseudo: str) -> Any:
     """
     # === Gestion de la requête GET ===
     if request.method == 'GET':
-        db_session = SessionBdD()
+        db_session = get_db_session()
         user = db_session.query(User).filter_by(pseudo=pseudo).first()
         if not user: return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'])
         return render_template(USER['page'], title=USER['title'], context=USER['context'], subcontext='parameters', objects=[user])
@@ -658,8 +561,9 @@ def chg_pwd() -> Any:
         chg_pwd_is_ok = user_to_chg_pwd.chg_pwd()
         if not chg_pwd_is_ok:
             key_message = _get_key_message(user_to_chg_pwd.pwd_param)
-            return render_template(CHG_PWD['page'], title=CHG_PWD['title'], context=CHG_PWD['context'],
-                                   message=user_to_chg_pwd.pwd_param_messages[key_message], username=user_to_chg_pwd.user)
+            return prepare_template_login(context='change_password',
+                                          message=user_to_chg_pwd.pwd_param_messages[key_message],
+                                          username=user_to_chg_pwd.user_pseudo)
         else:
             return redirect(url_for('login'))
     # === Gestion de toutes les autres méthodes ===

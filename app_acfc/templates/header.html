@@ -1,9 +1,11 @@
 <nav class="navbar navbar-expand-md navbar-light bg-light">
     <div class="container-fluid">
         <div class="d-flex align-items-center">
-            <div class="logo me-2">
-                <img src="{{ url_for('static', filename='common/img/Logo.svg') }}" alt="Logo ACFC" height="36">
-            </div>
+            <a href="{{ url_for('index') }}">
+                <div class="logo me-2">
+                    <img src="{{ url_for('static', filename='common/img/Logo.svg') }}" alt="Logo ACFC" height="36">
+                </div>
+            </a>
         </div>
 
         <span class="navbar-text mx-auto h5 mb-0">{{ title }}</span>

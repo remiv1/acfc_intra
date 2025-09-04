@@ -31,7 +31,7 @@ Version : 1.0
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, Request, session
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy import or_, func
-from app_acfc.modeles import SessionBdD, Client, Part, Pro, Telephone, Mail, Commande, Facture, Adresse
+from app_acfc.modeles import get_db_session, Client, Part, Pro, Telephone, Mail, Commande, Facture, Adresse
 from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE
 from logs.logger import acfc_log, ERROR, DEBUG
 from datetime import datetime
@@ -228,7 +228,7 @@ def recherche_avancee():
     if len(search_term) < 3:
         return jsonify([])
     
-    db_session: SessionBdDType = SessionBdD()
+    db_session: SessionBdDType = get_db_session()
     
     try:
         clients = []
@@ -349,7 +349,7 @@ def get_clients():
         de données via les modèles SQLAlchemy (Client, Part, Pro).
     """
     # Ouverture d'une session vers la base de données
-    db_session: SessionBdDType = SessionBdD()
+    db_session: SessionBdDType = get_db_session()
 
     # Recherche de la liste de clients
     clients: List[Client] = (
@@ -361,8 +361,7 @@ def get_clients():
     # Conversion en dictionnaire pour le retour
     clients_dict = [c.to_dict() for c in clients]
 
-    # Fermeture de la session et retour de la route
-    db_session.close()
+    # Retour de la route
     return jsonify(clients_dict)
 
 @validate_habilitation(GESTIONNAIRE)
@@ -396,7 +395,7 @@ def get_client(id_client: int):
     Pour le moment, retour sous forme de dictionnaire, mais par la suite, intégration dans une page.
     """
     # Ouverture d'une session vers la base de données
-    db_session: SessionBdDType = SessionBdD()
+    db_session: SessionBdDType = get_db_session()
 
     # Recherche du client par ID avec eager loading
     client: Client | None = db_session.query(Client).options(
@@ -420,13 +419,11 @@ def get_client(id_client: int):
         orders: List[Commande] = sorted(client.commandes, key=lambda x: x.id, reverse=True)
         bills: List[Facture] = client.factures
         nom_affichage = client.nom_affichage
-        db_session.close()
         return render_template(CLIENT_PARAM_PAGE['page'],
                                title=CLIENT_PARAM_PAGE['title'],
                                context=CLIENT_PARAM_PAGE['context'],
                                objects=[client, part, pro, addresses, phones, mails, orders, bills, nom_affichage])
     else:
-        db_session.close()
         return jsonify({"error": ERROR_CLIENT_NOT_FOUND}), 404
 
 @clients_bp.route('/<id_client>/commandes/en-cours')
@@ -435,13 +432,12 @@ def get_commandes_en_cours(id_client: int):
     """
     Route de récupération des commandes en cours
     """
-    db_session: SessionBdDType = SessionBdD()
+    db_session: SessionBdDType = get_db_session()
     commandes: List[Commande] = (
         db_session.query(Commande)
         .filter(Commande.id_client == id_client, Commande.status == "en_cours")
         .all()
     )
-    db_session.close()
     return jsonify([c.to_dict() for c in commandes])
 
 @clients_bp.route('/<int:id_client>/modifier')
@@ -450,7 +446,7 @@ def edit_client(id_client: int):
     """
     Route d'affichage du formulaire de modification d'un client existant.
     """
-    db_session: SessionBdDType = SessionBdD()
+    db_session: SessionBdDType = get_db_session()
     client: Client | None = db_session.query(Client).options(
         joinedload(Client.part),
         joinedload(Client.pro)
@@ -460,7 +456,6 @@ def edit_client(id_client: int):
         # Récupération du nom d'affichage avant de fermer la session
         nom_affichage = client.nom_affichage
         id_client = client.id
-        db_session.close()
         return render_template(CLIENT_FORM['page'],
                                title=f"ACFC - Modifier {nom_affichage}",
                                context=CLIENT_FORM['context'],
@@ -469,7 +464,6 @@ def edit_client(id_client: int):
                                id_client=id_client,
                                nom_affichage=nom_affichage)
     else:
-        db_session.close()
         return jsonify({"error": ERROR_CLIENT_NOT_FOUND}), 404
 
 @clients_bp.route('/nouveau', methods=['GET', 'POST'])
@@ -486,7 +480,7 @@ def create_client():
                                context=CLIENT_FORM['context'],
                                sub_context='create')
     # Traitement POST
-    db_session = SessionBdD()
+    db_session = get_db_session()
     try:
         # Validation des données requises
         type_client_str = request.form.get('type_client')
@@ -516,16 +510,7 @@ def create_client():
                              zone_log="clients.log")
         
         return redirect(url_for(CLIENT_DETAIL, id_client=nouveau_client.id, success_message='Prospect créé avec succès.'))
-    except ValueError as e:
-        if 'db_session' in locals():
-            db_session.rollback()
-        return render_template(CLIENT_FORM['page'],
-                               title=TITLE_NEW_CLIENT,
-                               context=CLIENT_FORM['context'],
-                               sub_context='create',
-                               error_message=str(e))
     except Exception as e:
-        if 'db_session' in locals(): db_session.rollback()
         acfc_log.log_to_file(level=logging.ERROR,
                               message=f'Erreur lors de la création du client : {str(e)} par {session['pseudo']}.',
                               db_log=True,
@@ -535,8 +520,6 @@ def create_client():
                                context=CLIENT_FORM['context'],
                                sub_context='create',
                                error_message=f"Une erreur est survenue lors de la création du client: {e}")
-    finally:
-        if 'db_session' in locals(): db_session.close()
 
 @clients_bp.route('/<int:id_client>/edit', methods=['GET'])
 @validate_habilitation(CLIENTS)
@@ -544,7 +527,7 @@ def edit_client_form(id_client: int):
     """
     Affiche le formulaire d'édition d'un client.
     """
-    db_session = SessionBdD()
+    db_session = get_db_session()
     try:
         client = db_session.query(Client).options(
             joinedload(Client.part),
@@ -569,8 +552,6 @@ def edit_client_form(id_client: int):
                                client=client,
                                id_client=id_client,
                                nom_affichage=nom_affichage)
-    finally:
-        db_session.close()
 
 @clients_bp.route('/<int:id_client>/update', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -578,7 +559,7 @@ def update_client(id_client: int):
     """
     Mise à jour des informations d'un client existant.
     """
-    db_session = SessionBdD()
+    db_session = get_db_session()
     client = None
     nom_affichage = None
     
@@ -615,7 +596,6 @@ def update_client(id_client: int):
         # Redirection vers la page de détails du client avec message de succès
         return redirect(url_for(CLIENT_DETAIL, id_client=client.id, success_message="Client modifié avec succès"))
     except Exception as e:
-        if 'db_session' in locals(): db_session.rollback()
         acfc_log.log_to_file(level=logging.ERROR,
                              message=f'Erreur lors de la modification du client {id_client} par {session['pseudo']} : {str(e)}',
                              db_log=True,
@@ -628,8 +608,6 @@ def update_client(id_client: int):
                                id_client=client.id if client else id_client,
                                nom_affichage=nom_affichage if nom_affichage else f"Client {id_client}",
                                error_message=f"Erreur lors de la modification : {str(e)}")
-    finally:
-        if 'db_session' in locals(): db_session.close()
 
 @clients_bp.route('/add_phone/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -651,7 +629,7 @@ def clients_add_phone():
     Returns:
         JSON: Message de succès ou d'erreur avec code HTTP approprié
     """
-    db_session = SessionBdD()
+    db_session = get_db_session()
     client = None
     id_client = None
 
@@ -697,14 +675,9 @@ def clients_add_phone():
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message="Téléphone ajouté avec succès"))
 
     except Exception as e:
-        if 'db_session' in locals():
-            db_session.rollback()
         error_msg = f"Erreur lors de l'ajout du téléphone pour le client {id_client}" if id_client else "Erreur lors de l'ajout du téléphone"
         acfc_log.log_to_file(logging.ERROR, f"{error_msg} : {str(e)}")
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, error_message=f"Erreur lors de l'ajout du téléphone : {e}"))
-    finally:
-        if 'db_session' in locals():
-            db_session.close()
 
 @clients_bp.route('/add_email/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -725,7 +698,7 @@ def clients_add_email():
     Returns:
         JSON: Message de succès ou d'erreur avec code HTTP approprié
     """
-    db_session = SessionBdD()
+    db_session = get_db_session()
     client = None
     id_client = None
 
@@ -773,13 +746,8 @@ def clients_add_email():
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message="Email ajouté avec succès"))
 
     except Exception as e:
-        if 'db_session' in locals():
-            db_session.rollback()
         acfc_log.log_to_file(logging.ERROR, f"Erreur lors de l'ajout de l'email pour le client {id_client} : {str(e)}")
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, error_message=f"Erreur lors de l'ajout de l'email : {e}"))
-    finally:
-        if 'db_session' in locals():
-            db_session.close()
 
 @clients_bp.route('/add_address/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -801,7 +769,7 @@ def clients_add_address():
     Returns:
         JSON: Message de succès ou d'erreur avec code HTTP approprié
     """
-    db_session = SessionBdD()
+    db_session = get_db_session()
     client = None
     id_client = None
 
@@ -853,10 +821,5 @@ def clients_add_address():
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message="Adresse ajoutée avec succès"))
 
     except Exception as e:
-        if 'db_session' in locals():
-            db_session.rollback()
         acfc_log.log_to_file(logging.ERROR, f"Erreur lors de l'ajout de l'adresse pour le client {id_client} : {str(e)}")
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, error_message=f"Erreur lors de l'ajout de l'adresse : {e}"))
-    finally:
-        if 'db_session' in locals():
-            db_session.close()

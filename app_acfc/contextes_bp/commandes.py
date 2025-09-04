@@ -19,7 +19,8 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from datetime import datetime, date
 from sqlalchemy.orm import Session as SessionBdDType
 from werkzeug.exceptions import NotFound
-from app_acfc.modeles import SessionBdD, Commande, DevisesFactures, Catalogue, Client, Expeditions, Facture, Operations, Ventilations, PCG
+from app_acfc.modeles import (Commande, DevisesFactures, Catalogue, Client,
+                              Expeditions, Facture, Operations, Ventilations, PCG, get_db_session)
 from app_acfc.habilitations import validate_habilitation, CLIENTS
 from logs.logger import acfc_log, ERROR, DEBUG
 from typing import List, Dict, Optional, Any
@@ -40,7 +41,7 @@ LOG_FILE_COMMANDES = 'commandes.log'
 @validate_habilitation(CLIENTS)
 def nouvelle_commande(id_client: int):
     """Créer une nouvelle commande pour un client"""
-    session_db = SessionBdD()
+    session_db = get_db_session()
     try:
         # Récupérer le client
         client = session_db.query(Client).filter(Client.id == id_client).first()
@@ -65,17 +66,14 @@ def nouvelle_commande(id_client: int):
         
     except Exception as e:
         acfc_log.log_to_file(level=ERROR, message=f'Erreur lors de la création de commande pour client {id_client}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
-        flash('Erreur lors de la création de la commande', 'error')
         return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
-    finally:
-        if 'session_db' in locals(): session_db.close()
 
 
 @commandes_bp.route('/client/<int:id_client>/commandes/<int:id_commande>/modifier', methods=['GET', 'POST'])
 @validate_habilitation(CLIENTS)
 def commande_modify(id_client: int, id_commande: int):
     """Modifier une commande existante"""
-    session_db = SessionBdD()
+    session_db = get_db_session()
     try:
         # Récupérer la commande et le client
         commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
@@ -102,9 +100,6 @@ def commande_modify(id_client: int, id_commande: int):
     except Exception as e:
         acfc_log.log_to_file(level=ERROR, message=f'Erreur lors de la modification de commande {id_commande}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
         return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
-    finally:
-        if 'session_db' in locals(): session_db.close()
-
 
 def render_commande_form(client: Client, commande: Optional[Commande], session_db: SessionBdDType):
     """Rendre le formulaire de commande avec toutes les données nécessaires"""
@@ -297,9 +292,7 @@ def handle_special_action(client: Client, commande: Optional[Commande], action: 
         return redirect(url_for(DETAIL_CLIENT, id_client=client.id))
         
     except Exception as e:
-        session_db.rollback()
         acfc_log.log_to_file(level=ERROR, message=f'Erreur lors de l\'action {action}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
-        flash(f'Erreur lors de l\'action {action}', 'error')
         return render_commande_form(client, commande, session_db)
 
 
@@ -504,17 +497,14 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
         
         # Message de succès
         if is_new:
-            flash(f'Commande créée avec succès pour {client.nom_affichage}', 'success')
             acfc_log.log_to_file(level=DEBUG, message=f'Nouvelle commande créée (ID: {commande.id}) pour le client {client.nom_affichage}', zone_log=LOG_FILE_COMMANDES)
         else:
-            flash(f'Commande #{commande.id} modifiée avec succès', 'success')
             acfc_log.log_to_file(level=DEBUG, message=f'Commande {commande.id} modifiée pour le client {client.nom_affichage}', zone_log=LOG_FILE_COMMANDES)
 
         # Rediriger vers la fiche client
         return redirect(url_for('clients.get_client', id_client=client.id))
         
     except Exception as e:
-        session_db.rollback()
         acfc_log.log_to_file(level=ERROR, message=f"Erreur lors de la sauvegarde de commande: {str(e)}", zone_log=LOG_FILE_COMMANDES)
         return render_commande_form(client, commande, session_db)
 
@@ -523,7 +513,7 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
 @validate_habilitation(CLIENTS)
 def annuler_commande(id_commande: int, id_client: int):
     """Annuler une commande (soft delete)"""
-    session_db = SessionBdD()
+    session_db = get_db_session()
     try:
         commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
         if not commande:
@@ -550,19 +540,15 @@ def annuler_commande(id_commande: int, id_client: int):
         return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
         
     except Exception as e:
-        session_db.rollback()
         acfc_log.log_to_file(level=ERROR, message=f'Erreur lors de l\'annulation de commande {id_commande}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
         return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
-    finally:
-        if 'session_db' in locals():
-            session_db.close()
 
 
 @commandes_bp.route('/client/<int:id_client>/commandes/<int:id_commande>/details')
 @validate_habilitation(CLIENTS)
 def commande_details(id_commande: int, id_client: int):
     """Afficher les détails d'une commande"""
-    session_db = SessionBdD()
+    session_db = get_db_session()
     try:
         commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
         if not commande:
@@ -585,15 +571,13 @@ def commande_details(id_commande: int, id_client: int):
     except Exception as e:
         acfc_log.log_to_file(level=ERROR, message=f"Erreur lors de l'affichage des détails de commande {id_commande}: {str(e)}", zone_log=LOG_FILE_COMMANDES)
         raise NotFound("Erreur lors de l'affichage des détails de la commande")
-    finally:
-        if 'session_db' in locals(): session_db.close()
 
 
 @commandes_bp.route('/client/<int:id_client>/commandes/<int:id_commande>/bon-impression')
 @validate_habilitation(CLIENTS)
 def commande_bon_impression(id_commande: int, id_client: int):
     """Afficher le bon de commande pour impression"""
-    session_db = SessionBdD()
+    session_db = get_db_session()
     try:
         commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
         if not commande:
@@ -619,7 +603,7 @@ def commande_bon_impression(id_commande: int, id_client: int):
         # Générer l'image QR code en base64
         img = qr.make_image(fill_color="black", back_color="white")
         buffer = BytesIO()
-        img.save(buffer, format='PNG')
+        img.save(buffer, 'PNG')
         qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
         
         return render_template('commandes/commande_bon_impression.html',
@@ -632,8 +616,6 @@ def commande_bon_impression(id_commande: int, id_client: int):
     except Exception as e:
         acfc_log.log_to_file(level=ERROR, message=f"Erreur lors de la génération du bon de commande {id_commande}: {str(e)}", zone_log=LOG_FILE_COMMANDES)
         raise NotFound("Erreur lors de la génération du bon de commande")
-    finally:
-        if 'session_db' in locals(): session_db.close()
 
 
 # Route pour obtenir les adresses d'un client (AJAX)
@@ -641,7 +623,7 @@ def commande_bon_impression(id_commande: int, id_client: int):
 @validate_habilitation(CLIENTS)
 def get_client_adresses(id_client: int):
     """API pour récupérer les adresses d'un client"""
-    session_db = SessionBdD()
+    session_db = get_db_session()
     try:
         client = session_db.query(Client).filter(Client.id == id_client).first()
         if not client:
@@ -664,15 +646,13 @@ def get_client_adresses(id_client: int):
     except Exception as e:
         acfc_log.log_to_file(level=ERROR, message=f"Erreur lors de la récupération des adresses du client {id_client}: {str(e)}", zone_log=LOG_FILE_COMMANDES)
         return jsonify({'error': 'Erreur lors de la récupération des adresses'}), 500
-    finally:
-        if 'session_db' in locals(): session_db.close()
 
 
 @commandes_bp.route('/traiter_facturation', methods=['POST'])
 @validate_habilitation(CLIENTS)
 def traiter_facturation():
     """Traiter la facturation de lignes sélectionnées"""
-    session_db = SessionBdD()
+    session_db = get_db_session()
     try:
         id_commande = request.form.get('id_commande')
         lignes_facturer = request.form.getlist('lignes_facturer[]')
@@ -727,12 +707,8 @@ def traiter_facturation():
         acfc_log.log_to_file(level=DEBUG, message=f'Facturation de {nb_lignes} lignes pour commande {id_commande}', zone_log=LOG_FILE_COMMANDES)
         
     except Exception as e:
-        session_db.rollback()
         acfc_log.log_to_file(level=ERROR, message=f"Erreur lors de la facturation: {str(e)}", zone_log=LOG_FILE_COMMANDES)
-        flash('Erreur lors de la facturation', 'error')
     
-    finally:
-        if 'session_db' in locals(): session_db.close()
     
     # Retourner aux détails de la commande si on a les informations
     if 'commande' in locals() and commande:
@@ -746,7 +722,7 @@ def traiter_facturation():
 def traiter_expedition():
     #TODO: Revoir complètement la fonction
     """Traiter l'expédition de lignes sélectionnées"""
-    session_db = SessionBdD()
+    session_db = get_db_session()
     try:
         id_commande = request.form.get('id_commande')
         lignes_expedier = request.form.getlist('lignes_expedier[]')
@@ -797,20 +773,15 @@ def traiter_expedition():
         acfc_log.log_to_file(level=DEBUG, message=f'Expédition de {nb_lignes} lignes pour commande {id_commande}', zone_log=LOG_FILE_COMMANDES)
         
     except Exception as e:
-        session_db.rollback()
         acfc_log.log_to_file(level=ERROR, message=f"Erreur lors de l'expédition: {str(e)}", zone_log=LOG_FILE_COMMANDES)
         flash('Erreur lors de l\'expédition', 'error')
-    
-    finally:
-        if 'session_db' in locals(): session_db.close()
-    
+        
     # Récupérer l'id_client depuis la base de données
     try:
-        session_db_read = SessionBdD()
+        session_db_read = get_db_session()
         id_commande = request.form.get('id_commande')
         commande = session_db_read.query(Commande).filter_by(id=id_commande).first()
         id_client = commande.id_client if commande else None
-        session_db_read.close()
     except Exception as e:
         id_client = None
     
@@ -825,7 +796,7 @@ def traiter_expedition():
 @validate_habilitation(CLIENTS)
 def facturer_commande():
     """Facturer les lignes sélectionnées d'une commande"""
-    session_db = SessionBdD()
+    session_db = get_db_session()
     try:
         # Récupérer les données du formulaire
         id_commande = request.form.get('id_commande')
@@ -900,14 +871,8 @@ def facturer_commande():
         return redirect(url_for('commandes.facture_details', id_facture=facture.id))
         
     except Exception as e:
-        session_db.rollback()
         acfc_log.log_to_file(level=ERROR, message=f"Erreur lors de la facturation: {str(e)}", zone_log=LOG_FILE_COMMANDES)
-        flash('Erreur lors de la facturation', 'error')
         return redirect(request.referrer or url_for('clients.liste_clients'))
-    
-    finally:
-        if 'session_db' in locals():
-            session_db.close()
 
 
 def _creer_ecritures_comptables_facturation(session_db: SessionBdDType, facture: Facture, devises_facturees: List[DevisesFactures]):
@@ -1003,7 +968,7 @@ def _mettre_a_jour_statut_commande(session_db: SessionBdDType, commande: Command
 @validate_habilitation(CLIENTS)
 def facture_details(id_facture: int):
     """Afficher les détails d'une facture"""
-    session_db = SessionBdD()
+    session_db = get_db_session()
     try:
         # Récupérer la facture avec ses relations
         facture = session_db.query(Facture).filter(Facture.id == id_facture).first()
@@ -1027,16 +992,13 @@ def facture_details(id_facture: int):
         acfc_log.log_to_file(level=ERROR, message=f'Erreur lors de l\'affichage de la facture {id_facture}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
         flash('Erreur lors de l\'affichage de la facture', 'error')
         return redirect(url_for('clients.liste_clients'))
-    finally:
-        if 'session_db' in locals():
-            session_db.close()
 
 
 @commandes_bp.route('/facture/<int:id_facture>/impression')
 @validate_habilitation(CLIENTS)
 def facture_impression(id_facture: int):
     """Afficher la facture pour impression"""
-    session_db = SessionBdD()
+    session_db = get_db_session()
     try:
         # Récupérer la facture avec ses relations
         facture = session_db.query(Facture).filter(Facture.id == id_facture).first()
@@ -1095,8 +1057,4 @@ def facture_impression(id_facture: int):
         
     except Exception as e:
         acfc_log.log_to_file(level=ERROR, message=f'Erreur lors de l\'impression de la facture {id_facture}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
-        flash('Erreur lors de l\'impression de la facture', 'error')
         return redirect(url_for('clients.liste_clients'))
-    finally:
-        if 'session_db' in locals():
-            session_db.close()

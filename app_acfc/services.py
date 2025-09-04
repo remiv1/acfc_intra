@@ -267,8 +267,8 @@ class AuthenticationService:
         if ph_acfc.needs_rehash(user.sha_mdp): user.sha_mdp = ph_acfc.hash_password(user.sha_mdp)
 
     def _get_user(self) -> Tuple[User | None, SessionBdDType]:
-        from modeles import SessionBdD
-        session_db = SessionBdD()
+        from application import get_db_session
+        session_db = get_db_session()
         user = session_db.query(User).filter_by(pseudo=self.user).first()
         return user, session_db
 
@@ -309,12 +309,8 @@ class AuthenticationService:
             if user is not None:
                 session_db.expunge(user)
         except Exception as e:
-            session_db.rollback()
             self._log_result(message=f'Erreur lors de l\'authentification de l\'utilisateur: {self.user}.\nErreur: {e}', level=40)
             statement = False
-        finally:
-            # Fermeture de la session de base de données
-            session_db.close()
         return statement
     
     def _validate_chg_pwd_form(self, user: User, pwd_hasher: PasswordService):
@@ -353,13 +349,9 @@ class AuthenticationService:
                 return True
 
             except Exception as e:
-                session_db.rollback()
                 self._log_result(message=f'Erreur lors du changement de mot de passe de l\'utilisateur: {self.user}.\nErreur: {e}', level=40)
                 self.pwd_param['db_unerror'] = False
                 return False
-            
-            finally:
-                session_db.close()
         else:
             self._log_result(message=f'Utilisateur non trouvé: {self.user}.')
             self.pwd_param['user_found'] = False

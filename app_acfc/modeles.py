@@ -1,13 +1,18 @@
-from sqlalchemy import Integer, String, Date, DateTime, Boolean, Text, Numeric, event, Computed, LargeBinary, ForeignKey, text
+from sqlalchemy import (
+    Integer, String, Date, DateTime, Boolean, Text, Numeric, event, Computed,
+    LargeBinary, ForeignKey, text)
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Mapper, relationship, mapped_column
-from typing import Any, Dict
+from sqlalchemy.orm import Session as SessionBdDType, scoped_session, sessionmaker, Mapper, relationship, mapped_column
+from sqlalchemy.orm.session import Session as SessionBdDType
+from typing import Any, Dict, List, Optional
 from sqlalchemy.engine import Connection
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
+from flask import Request, g, render_template, session
 from dotenv import load_dotenv
 from os import getenv
+from werkzeug.exceptions import Forbidden
 
 """
 ACFC - Modèles de Données et Configuration Base de Données
@@ -177,11 +182,23 @@ engine = create_engine(
 )
 
 # Factory de sessions pour l'accès aux données
-SessionBdD = sessionmaker(
+SessionBdD = scoped_session(sessionmaker(
     autocommit=False,                   # Transactions manuelles pour meilleur contrôle
     autoflush=False,                    # Flush manuel pour optimiser les performances
     bind=engine                         # Liaison à l'engine configuré
-)
+))
+
+def get_db_session() -> SessionBdDType:
+    """
+    Récupère la session de base de données pour la requête en cours.
+    Utilise une session scoped pour garantir l'isolation entre les requêtes.
+    
+    Returns:
+        SessionBdDType: Session SQLAlchemy pour la base de données
+    """
+    if 'db_session' not in g:
+        g.db_session = SessionBdD()
+    return g.db_session
 
 # ====================================================================
 # CONSTANTES DE CLÉS PRIMAIRES POUR RÉFÉRENCES ÉTRANGÈRES
@@ -959,3 +976,422 @@ def init_database(max_retries: int = 30, retry_delay: int = 2) -> None:
             print(f"🕒 Nouvelle tentative dans {retry_delay}s...")
             time.sleep(retry_delay)
 
+
+class MyAccount:
+    """
+    Classe de gestion du compte utilisateur et des paramètres.
+
+    Fournit des méthodes pour récupérer les informations utilisateur,
+    vérifier les permissions, valider les entrées de formulaire et gérer
+    les paramètres du compte.
+    """
+    @staticmethod
+    def get_user_or_error(db_session: SessionBdDType, pseudo: str) -> Any:
+        """
+        Récupère l'utilisateur par son pseudo ou retourne une page d'erreur 400 si non trouvé.
+        Args:
+            db_session (SessionBdDType): Session de base de données
+            pseudo (str): Pseudo de l'utilisateur à récupérer
+        Returns:
+            User ou page d'erreur 400 si non trouvé
+        """
+        user: User = db_session.query(User).filter_by(pseudo=pseudo).first()
+        if not user:
+            return PrepareTemplates.error_4xx(message='Utilisateur non trouvé.')
+        return user
+
+    @staticmethod
+    def check_user_permission(pseudo: str) -> Any:
+        """
+        Vérifie que l'utilisateur connecté a la permission d'accéder au compte demandé.
+        Args:
+            pseudo (str): Pseudo de l'utilisateur à vérifier
+        Raises:
+            Forbidden: Si l'utilisateur n'a pas la permission d'accéder au compte
+        """
+        if session.get('pseudo') != pseudo:
+            raise Forbidden("Vous n'êtes pas autorisé à accéder à ce compte.")
+
+    @staticmethod
+    def get_request_form(request: Request):
+        """
+        Récupère les données du formulaire de la requête.
+        Args:
+            request (Request): Objet de requête Flask
+        Returns:
+            Liste des valeurs du formulaire [prenom, nom, email, telephone]
+        """
+        first_name = request.form.get('prenom', '').strip()
+        last_name = request.form.get('nom', '').strip()
+        mail = request.form.get('email', '').strip()
+        phone = request.form.get('telephone', '').strip()
+        return [first_name, last_name, mail, phone]
+
+    @staticmethod
+    def valid_mail(mail: str, user:User, db_session: SessionBdDType) -> Any:
+        """
+        Validation de l'adresse email. Retour de la page de paramètre avec un message si invalide.
+        Validation que l'email n'est pas déjà utilisé par un autre compte.
+        Args:
+            mail (str): Adresse email à valider
+            user (User): Instance de l'utilisateur actuel
+            db_session (SessionBdDType): Session de base de données
+        Returns:
+            True si l'email est valide et non utilisé, sinon page de paramètre avec message d'erreur
+                1. Format invalide
+                2. Email déjà utilisé
+        """
+        import re
+        email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+
+        if not re.match(email_pattern, mail): return PrepareTemplates.users(
+            message="Le format de l'adresse email n'est pas valide.",
+            objects=[user],
+            subcontext='parameters'
+        )
+        elif mail != user.email:
+            existing_user = db_session.query(User).filter_by(email=mail).first()
+            if existing_user: return PrepareTemplates.users(
+                message="Cette adresse email est déjà utilisée par un autre compte.",
+                objects=[user],
+                subcontext='parameters'
+            )
+        return re.match(email_pattern, mail) is not None
+
+
+class Constants:
+    '''
+    Classe contenant des constantes utilisées dans l'application.
+        - log_files(type_log: str) -> str
+    '''
+    @staticmethod
+    def messages(type_msg: str, second_type_message: str)
+        '''
+        Retourne le message en fonction du type.
+
+        Args:
+            type_msg (str): second_type_message (str):
+                - 'error_400': 'wrong_road' + 'not_found' + 'default'
+                - 'error_500': 'default'
+                - 'client': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                - 'user': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                - 'security': 'default'
+                - 'commandes': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                - 'factures': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                - 'comptabilite': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                - 'stock': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                - 'commercial': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                - 'warning': 'default'
+                - 'debug': 'default'
+                - 'info': 'default'
+        Returns:
+            str: Message formaté
+        '''
+        messages = {
+            'error_400': {
+                'wrong_road': "Erreur 403 ou 405 : Méthode non autorisée ou droits insuffisants.",
+                'not_found': "Erreur 400 ou 404 : La ressource demandée est introuvable.",
+                'default': "Erreur 400 : Requête incorrecte."
+            },
+            'error_500': {
+                'default': "Erreur 500 : Une erreur interne est survenue. Veuillez réessayer plus tard."
+            },
+            'client': {
+                'create': "Nouveau client créé avec succès.",
+                'update': "Client mis à jour avec succès.",
+                'delete': "Client supprimé avec succès.",
+                'not_found': "Client non trouvé.",
+                'exists': "Le client existe déjà.",
+                'list': "Liste des clients chargée avec succès.",
+                'detail': "Détails du client affichés avec succès.",
+                'form': "Formulaire de client prêt à être rempli.",
+                'search': "Résultats de la recherche de clients affichés."
+            },
+            'user': {
+                'create': "Nouvel utilisateur créé avec succès.",
+                'update': "Utilisateur mis à jour avec succès.",
+                'delete': "Utilisateur supprimé avec succès.",
+                'not_found': "Utilisateur non trouvé.",
+                'exists': "Le nom d'utilisateur ou l'email existe déjà.",
+                'list': "Liste des utilisateurs chargée avec succès.",
+                'detail': "Détails de l'utilisateur affichés avec succès.",
+                'form': "Formulaire d'utilisateur prêt à être rempli.",
+                'search': "Résultats de la recherche d'utilisateurs affichés."
+            },
+            'security': {
+                'default': "Action de sécurité enregistrée."
+            },
+            'commandes': {
+                'create': "Nouvelle commande créée avec succès.",
+                'update': "Commande mise à jour avec succès.",
+                'delete': "Commande supprimée avec succès.",
+                'not_found': "Commande non trouvée.",
+                'exists': "La commande existe déjà.",
+                'list': "Liste des commandes chargée avec succès.",
+                'detail': "Détails de la commande affichés avec succès.",
+                'form': "Formulaire de commande prêt à être rempli.",
+                'search': "Résultats de la recherche de commandes affichés."
+            },
+            'factures': {
+                'create': "Nouvelle facture créée avec succès.",
+                'update': "Facture mise à jour avec succès.",
+                'delete': "Facture supprimée avec succès.",
+                'not_found': "Facture non trouvée.",
+                'exists': "La facture existe déjà.",
+                'list': "Liste des factures chargée avec succès.",
+                'detail': "Détails de la facture affichés avec succès.",
+                'form': "Formulaire de facture prêt à être rempli.",
+                'search': "Résultats de la recherche de factures affichés."
+            },
+            'comptabilite': {
+                'create': "Nouvelle opération comptable créée avec succès.",
+                'update': "Opération comptable mise à jour avec succès.",
+                'delete': "Opération comptable supprimée avec succès.",
+                'not_found': "Opération comptable non trouvée.",
+                'exists': "L'opération comptable existe déjà.",
+                'list': "Liste des opérations comptables chargée avec succès.",
+                'detail': "Détails de l'opération comptable affichés avec succès.",
+                'form': "Formulaire d'opération comptable prêt à être rempli.",
+                'search': "Résultats de la recherche d'opérations comptables affichés."
+            },
+            'stock': {
+                'update': "Stock mis à jour avec succès.",
+                'not_found': "Produit en stock non trouvé.",
+                'list': "Liste des produits en stock chargée avec succès.",
+                'detail': "Détails du produit en stock affichés avec succès.",
+                'form': "Formulaire de produit en stock prêt à être rempli.",
+                'search': "Résultats de la recherche de produits en stock affichés."
+            },
+            'commercial': {
+                'create': "Nouvelle cible commerciale créée avec succès.",
+                'update': "Cible commerciale mise à jour avec succès.",
+                'delete': "Cible commerciale supprimée avec succès.",
+                'not_found': "Cible commerciale non trouvée.",
+                'exists': "La cible commerciale existe déjà.",
+                'list': "Liste des cibles commerciales chargée avec succès.",
+                'detail': "Détails de la cible commerciale affichés avec succès.",
+                'form': "Formulaire de cible commerciale prêt à être rempli.",
+                'search': "Résultats de la recherche de cibles commerciales affichés."
+            },
+            'warning': {
+                'default': "Avertissement : Veuillez vérifier les informations fournies."
+            },
+            'debug': {
+                'default': "Debug : Informations de débogage enregistrées."
+            },
+            'info': {
+                'default': "Info : Opération effectuée avec succès."
+            }
+        }
+        type_messages = messages.get(type_msg, {})
+        return type_messages.get(second_type_message, "Action effectuée.")
+
+    @staticmethod
+    def log_files(type_log: str) -> str:
+        '''
+        Retourne le nom du fichier de log en fonction du type.
+
+        Args:
+            type_log (str):
+                - '400'
+                - '500'
+                - 'client'
+                - 'user'
+                - 'security'
+                - 'commandes'
+                - 'factures'
+                - 'comptabilite'
+                - 'stock'
+                - 'commercial'
+                - 'warning'
+                - 'debug'
+                - 'info'
+        Returns:
+            str: Nom du fichier de log
+        '''
+        log_files = {
+            '400': 'error_400.log',
+            '500': 'error_500.log',
+            'client': 'client.log',
+            'user': 'users.log',
+            'security': 'security.log',
+            'commandes': 'commandes.log',
+            'factures': 'factures.log',
+            'comptabilite': 'comptabilite.log',
+            'stock': 'stock.log',
+            'commercial': 'commercial.log',
+            'warning': 'warning.log',
+            'debug': 'debug.log',
+            'info': 'info.log'
+        }
+        return log_files.get(type_log, 'general.log')
+    
+    @staticmethod
+    def templates(name: str) -> str:
+        '''
+        Retourne le nom du template en fonction du nom fourni.
+
+        Args:
+            name (str):
+                - 'base' + '400' + '500' + 'default' + 'footer' + 'header' + 'login' + 'main'
+                - 'admin' + 'adm-chg-pwd' + 'adm-users'
+                - 'catalogue'
+                - 'clients' + 'client-detail' + 'client-form' + 'client-search'
+                - 'commandes' + 'commande-detail' + 'commande-form' + 'commande-print' + 'factures' + 'facture-print'
+                - 'commercial' + 'commercial-clt-target'
+                - 'comptabilite'
+                - 'dashboard' + 'dashboard-cmd' + 'dashboard-fact' + 'dashboard-stock' + 'dashboard-commercial'
+                - 'users'
+        Returns:
+            str: Nom du template
+        '''
+        templates = {
+            'base': 'base.html',
+                '400': '400.html',
+                '500': '500.html',
+                'default': 'default.html',
+                'footer': 'footer.html',
+                'header': 'header.html',
+                'login': 'login.html',
+                'main': 'main.html',
+            'admin': 'admin/admin.html',
+                'adm-chg-pwd': 'admin/change_password.html',
+                'adm-users': 'admin/users.html',
+            'catalogue': 'catalogue/catalogue.html',
+            'clients': 'clients/clients.html',
+                'client-detail': 'clients/client_detail.html',
+                'client-form': 'clients/client_form.html',
+                'client-search': 'clients/client_search.html',
+            'commandes': 'commandes/commandes.html',
+                'commande-detail': 'commandes/commande_detail_content.html',
+                'commande-form': 'commandes/commande_form_content.html',
+                'commande-print': 'commandes/commande_bon_impression.html',
+                'factures': 'commandes/factures_details.html',
+                'facture-print': 'commandes/facture_impression.html',
+            'commercial': 'commercial/commercial.html',
+                'commercial-clt-target': 'commercial/commercial_clients_target.html',
+            'comptabilite': 'comptabilite/comptabilite.html',
+            'dashboard': 'default.html',
+                'dashboard-cmd': 'dashboard/commandes_en_cours.html',
+                'dashboard-fact': 'dashboard/factures_en_cours.html',
+                'dashboard-stock': 'dashboard/stock_alert.html',
+                'dashboard-commercial': 'dashboard/indicateurs_commerciaux.html',
+            'users': 'users.html',
+        }
+        return templates.get(name, '')
+
+
+class PrepareTemplates:
+    '''
+    Classe statique pour la préparation des templates de pages.
+    Fournit des méthodes pour générer les templates de différentes pages.
+    Utilisation:
+        - PrepareTemplates.login(message="Bienvenue", context="login")
+        - PrepareTemplates.clients(message="Liste des clients")
+        - PrepareTemplates.users(message="Gestion des utilisateurs", objects=user_list)
+    '''
+    BASE: str = Constants.templates('base')
+
+
+    @staticmethod
+    def login(message: Optional[str]=None, subcontext: str='login', username: Optional[str]=None) -> str:
+        '''
+        Génère le template de la page de login.
+
+        Args:
+            message (Optional[str]): Message à afficher sur la page de login.
+        Returns:
+            str: Template de la page de login
+        '''
+        return render_template(PrepareTemplates.BASE,
+                               title='ACFC - Authentification',
+                               context='login',
+                               subcontext=subcontext,
+                               message=message,
+                               username=username)
+
+
+    @staticmethod
+    def clients(message: Optional[str]=None) -> str:
+        '''
+        Génère le template de la page clients.
+
+        Args:
+            message (Optional[str]): Message à afficher sur la page clients.
+        Returns:
+            str: Template de la page clients
+        '''
+        return render_template(PrepareTemplates.BASE,
+                               title='ACFC - Gestion Clients',
+                               context='clients',
+                               message=message)
+
+
+    @staticmethod
+    def users(message: Optional[str]=None, objects: Optional[List[Any]]=None, subcontext: Optional[str]=None) -> str:
+        '''
+        Génère le template de la page utilisateurs.
+
+        Args:
+            message (Optional[str]): Message à afficher sur la page utilisateurs.
+        Returns:
+            str: Template de la page utilisateurs
+        '''
+        return render_template(PrepareTemplates.BASE,
+                               title='ACFC - Administration Utilisateurs',
+                               context='user',
+                               message=message,
+                               objects=objects, subcontext=subcontext)
+
+
+    @staticmethod
+    def default(message: Optional[str]=None) -> str:
+        '''
+        Génère le template de la page par défaut.
+
+        Args:
+            message (Optional[str]): Message à afficher sur la page par défaut.
+        Returns:
+            str: Template de la page par défaut
+        '''
+        return render_template(PrepareTemplates.BASE,
+                               title='ACFC - Accueil',
+                               context='default',
+                               message=message)
+
+
+    @staticmethod
+    def error_4xx(message: Optional[str]=None) -> str:
+        '''
+        Génère le template de la page d'erreur 4xx.
+
+        Args:
+            message (Optional[str]): Message à afficher sur la page d'erreur.
+        Returns:
+            str: Template de la page d'erreur 4xx
+        '''
+        if message is None:
+            message = Constants.messages('error_400', 'default')
+        return render_template(PrepareTemplates.BASE,
+                               title='ACFC - Erreur chez vous',
+                               context='400',
+                               message=message)
+    
+
+    @staticmethod
+    def error_5xx(message: Optional[str]=None) -> str:
+        '''
+        Génère le template de la page d'erreur 5xx.
+
+        Args:
+            message (Optional[str]): Message à afficher sur la page d'erreur.
+        Returns:
+            str: Template de la page d'erreur 5xx
+        '''
+        if message is None:
+            message = Constants.messages('error_500', 'default')
+        return render_template(PrepareTemplates.BASE,
+                               title='ACFC - Erreur chez nous',
+                               context='500',
+                               message=message)
+    
