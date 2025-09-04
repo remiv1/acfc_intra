@@ -1,0 +1,318 @@
+{% if subcontext == 'users' %}
+    {% include 'admin/users.html' %}
+{% elif subcontext == 'users_details' %}
+    {% include 'admin/users_details.html' %}
+{% elif subcontext == 'logs_dashboard' %}
+    {% include 'admin/logs_dashboard.html' %}
+{% else %}
+    <!-- Dashboard principal de l'administration -->
+    <div class="container-fluid py-4">
+        <!-- En-tête Administration -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-0">
+                            <i class="fas fa-cogs text-primary me-2"></i>Administration ACFC
+                        </h1>
+                        <p class="text-muted mb-0">Gestion et surveillance du système</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('default') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-1"></i>Accueil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+
+        <!-- Statistiques rapides -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <h4 class="mb-0">{{ stats.total_users or 'N/A' }}</h4>
+                        <small>Utilisateurs actifs</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-alt fa-2x mb-2"></i>
+                        <h4 class="mb-0">{{ stats.total_logs or 'N/A' }}</h4>
+                        <small>Logs (24h)</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                        <h4 class="mb-0">{{ stats.total_errors or 'N/A' }}</h4>
+                        <small>Erreurs (24h)</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h4 class="mb-0">{{ 'OK' if stats.system_status else 'KO' }}</h4>
+                        <small>Statut système</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modules d'administration -->
+        <div class="row">
+            <!-- Gestion des logs -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>Logs et Surveillance
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Visualisation et analyse des logs du système. 
+                            Surveillance des erreurs, alertes et événements.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-1"></i> Dashboard temps réel</li>
+                            <li><i class="fas fa-check text-success me-1"></i> Filtrage avancé</li>
+                            <li><i class="fas fa-check text-success me-1"></i> Export CSV</li>
+                            <li><i class="fas fa-check text-success me-1"></i> Statistiques</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ url_for('admin.logs_dashboard') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-eye me-1"></i>Voir les logs
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestion des utilisateurs -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users me-2"></i>Gestion des Utilisateurs
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Administration des comptes utilisateurs, 
+                            permissions et sécurité.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-clock text-warning me-1"></i> Création/modification</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Gestion des droits</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Sécurité avancée</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Historique connexions</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-info w-100 disabled">
+                            <i class="fas fa-user-cog me-1"></i>Gérer utilisateurs
+                            <small class="d-block">(Prochainement)</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration système -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cog me-2"></i>Configuration Système
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Paramètres généraux de l'application,
+                            configuration et maintenance.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-clock text-warning me-1"></i> Paramètres globaux</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Maintenance DB</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Sauvegarde</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Diagnostics</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-warning w-100 disabled">
+                            <i class="fas fa-tools me-1"></i>Configuration
+                            <small class="d-block">(Prochainement)</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Base de données -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-database me-2"></i>Base de Données
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Gestion et surveillance de la base de données
+                            MariaDB et MongoDB.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-clock text-warning me-1"></i> État des connexions</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Performance</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Optimisation</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Maintenance</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-secondary w-100 disabled">
+                            <i class="fas fa-database me-1"></i>Gérer BDD
+                            <small class="d-block">(Prochainement)</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sécurité -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shield-alt me-2"></i>Sécurité
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Surveillance des événements de sécurité
+                            et gestion des accès.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-clock text-warning me-1"></i> Tentatives intrusion</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Sessions actives</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Audit trail</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Alertes sécurité</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-danger w-100 disabled">
+                            <i class="fas fa-lock me-1"></i>Sécurité
+                            <small class="d-block">(Prochainement)</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rapports -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Rapports
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Génération de rapports d'activité,
+                            statistiques et analyses.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-clock text-warning me-1"></i> Rapports automatiques</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Statistiques d'usage</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Export données</li>
+                            <li><i class="fas fa-clock text-warning me-1"></i> Tableaux de bord</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-success w-100 disabled">
+                            <i class="fas fa-file-export me-1"></i>Rapports
+                            <small class="d-block">(Prochainement)</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>Actions Rapides
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ url_for('admin.logs_dashboard') }}?level=ERROR" class="btn btn-outline-danger">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Erreurs récentes
+                            </a>
+                            <a href="{{ url_for('admin.logs_dashboard') }}?date_from={{ today }}" class="btn btn-outline-info">
+                                <i class="fas fa-calendar me-1"></i>Logs du jour
+                            </a>
+                            <a href="{{ url_for('admin.logs_dashboard') }}?level=WARNING" class="btn btn-outline-warning">
+                                <i class="fas fa-exclamation-circle me-1"></i>Alertes
+                            </a>
+                            <button type="button" class="btn btn-outline-secondary" disabled>
+                                <i class="fas fa-sync me-1"></i>Redémarrer services
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    .card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .card-header {
+        border-bottom: none;
+        font-weight: 600;
+    }
+
+    .list-unstyled li {
+        padding: 0.25rem 0;
+    }
+
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+
+    .btn.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .alert {
+        border: none;
+        border-radius: 0.5rem;
+    }
+    </style>
+{% endif %}
+{% endblock %}

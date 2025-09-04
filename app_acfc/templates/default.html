@@ -7,6 +7,11 @@
                 <div class="col-12">
                     <h2 class="display-4 fw-bold text-primary mb-3">Bienvenue sur l'Intranet ACFC</h2>
                     <p class="lead text-muted">Votre plateforme de gestion commerciale et administrative</p>
+                    {% if message %}
+                        <div class="alert alert-info mt-3" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

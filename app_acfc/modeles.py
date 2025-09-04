@@ -13,6 +13,8 @@ from flask import Request, g, render_template, session
 from dotenv import load_dotenv
 from os import getenv
 from werkzeug.exceptions import Forbidden
+from logs.logger import acfc_log, INFO, ERROR
+from datetime import datetime
 
 """
 ACFC - Modèles de Données et Configuration Base de Données
@@ -976,7 +978,6 @@ def init_database(max_retries: int = 30, retry_delay: int = 2) -> None:
             print(f"🕒 Nouvelle tentative dans {retry_delay}s...")
             time.sleep(retry_delay)
 
-
 class MyAccount:
     """
     Classe de gestion du compte utilisateur et des paramètres.
@@ -1013,7 +1014,7 @@ class MyAccount:
             raise Forbidden("Vous n'êtes pas autorisé à accéder à ce compte.")
 
     @staticmethod
-    def get_request_form(request: Request):
+    def get_request_form(request: Request, user: User) -> str | List[str]:
         """
         Récupère les données du formulaire de la requête.
         Args:
@@ -1025,6 +1026,12 @@ class MyAccount:
         last_name = request.form.get('nom', '').strip()
         mail = request.form.get('email', '').strip()
         phone = request.form.get('telephone', '').strip()
+        _form_return = [first_name, last_name, mail, phone]
+
+        # Retour à la page de paramètres si des champs obligatoires sont vides
+        if '' in _form_return:
+            return PrepareTemplates.users(subcontext='parameters', objects=[user],
+                                              message="Tous les champs sont obligatoires.")
         return [first_name, last_name, mail, phone]
 
     @staticmethod
@@ -1057,7 +1064,22 @@ class MyAccount:
                 subcontext='parameters'
             )
         return re.match(email_pattern, mail) is not None
-
+    
+    @staticmethod
+    def update_user_settings(user: User, data_list: str | List[str]):
+        """
+        Met à jour les paramètres de l'utilisateur connecté avec les données du formulaire.
+        Retourne la page de paramètres avec un message de succès ou d'erreur.
+        Returns:
+            Page de paramètres avec message de succès ou d'erreur
+        """
+        # Mise à jour des données utilisateur et de la session
+        session['first_name'] = user.prenom = data_list[0]
+        session['last_name'] = user.nom = data_list[1]
+        session['email'] = user.email = data_list[2]
+        session['telephone'] = user.telephone = data_list[3]
+    
+        return user
 
 class Constants:
     '''
@@ -1065,7 +1087,7 @@ class Constants:
         - log_files(type_log: str) -> str
     '''
     @staticmethod
-    def messages(type_msg: str, second_type_message: str)
+    def messages(type_msg: str, second_type_message: str):
         '''
         Retourne le message en fonction du type.
 
@@ -1074,7 +1096,7 @@ class Constants:
                 - 'error_400': 'wrong_road' + 'not_found' + 'default'
                 - 'error_500': 'default'
                 - 'client': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
-                - 'user': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                - 'user': 'create', 'update', 'to_update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
                 - 'security': 'default'
                 - 'commandes': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
                 - 'factures': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
@@ -1110,6 +1132,7 @@ class Constants:
             'user': {
                 'create': "Nouvel utilisateur créé avec succès.",
                 'update': "Utilisateur mis à jour avec succès.",
+                'to_update': "L'utilisation doit être mis à jour.",
                 'delete': "Utilisateur supprimé avec succès.",
                 'not_found': "Utilisateur non trouvé.",
                 'exists': "Le nom d'utilisateur ou l'email existe déjà.",
@@ -1280,7 +1303,6 @@ class Constants:
         }
         return templates.get(name, '')
 
-
 class PrepareTemplates:
     '''
     Classe statique pour la préparation des templates de pages.
@@ -1294,7 +1316,7 @@ class PrepareTemplates:
 
 
     @staticmethod
-    def login(message: Optional[str]=None, subcontext: str='login', username: Optional[str]=None) -> str:
+    def login(message: Optional[str]=None, subcontext: str='login', username: Optional[str]=None, log: bool=False) -> str:
         '''
         Génère le template de la page de login.
 
@@ -1303,6 +1325,10 @@ class PrepareTemplates:
         Returns:
             str: Template de la page de login
         '''
+        if log:
+            acfc_log.log(level=INFO, message=message or '',
+                         specific_logger=Constants.log_files('user'),
+                         user=username or 'N/A', db_log=True)
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Authentification',
                                context='login',
@@ -1310,6 +1336,27 @@ class PrepareTemplates:
                                message=message,
                                username=username)
 
+
+    @staticmethod
+    def admin(message: Optional[str]=None,
+              log: bool=False, **kwargs: Any) -> str:
+        '''
+        Génère le template de la page d'administration.
+
+        Args:
+            message (Optional[str]): Message à afficher sur la page d'administration.
+        Returns:
+            str: Template de la page d'administration
+        '''
+        if log:
+            acfc_log.log(level=INFO, message=message or '',
+                         specific_logger=Constants.log_files('security'),
+                         user=session.get('pseudo', 'N/A'), db_log=True)
+        return render_template(PrepareTemplates.BASE,
+                               title='ACFC - Administration',
+                               context='admin',
+                               today=datetime.now().strftime('%Y-%m-%d'),
+                               **kwargs)
 
     @staticmethod
     def clients(message: Optional[str]=None) -> str:
@@ -1328,7 +1375,7 @@ class PrepareTemplates:
 
 
     @staticmethod
-    def users(message: Optional[str]=None, objects: Optional[List[Any]]=None, subcontext: Optional[str]=None) -> str:
+    def users(subcontext: Optional[str]=None, message: Optional[str]=None, **kwargs: Any) -> str:
         '''
         Génère le template de la page utilisateurs.
 
@@ -1341,11 +1388,12 @@ class PrepareTemplates:
                                title='ACFC - Administration Utilisateurs',
                                context='user',
                                message=message,
-                               objects=objects, subcontext=subcontext)
+                               subcontext=subcontext,
+                               **kwargs)
 
 
     @staticmethod
-    def default(message: Optional[str]=None) -> str:
+    def default(objects: Optional[List[Any]], message: Optional[str]=None) -> str:
         '''
         Génère le template de la page par défaut.
 
@@ -1357,11 +1405,12 @@ class PrepareTemplates:
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Accueil',
                                context='default',
-                               message=message)
+                               message=message,
+                               objects=objects)
 
 
     @staticmethod
-    def error_4xx(message: Optional[str]=None) -> str:
+    def error_4xx(message: Optional[str]=None, log: bool=False, username: Optional[str]=None, **kwargs: Any) -> str:
         '''
         Génère le template de la page d'erreur 4xx.
 
@@ -1371,15 +1420,20 @@ class PrepareTemplates:
             str: Template de la page d'erreur 4xx
         '''
         if message is None:
-            message = Constants.messages('error_400', 'default')
+            message = Constants.messages('error_400', 'default') \
+                        + f'\n{kwargs.get("error_code", "")} : {kwargs.get("error_message", "")}'
+        if log:
+            acfc_log.log(level=ERROR, message=message or '',
+                         specific_logger=Constants.log_files('400'),
+                         db_log=True, user=username or 'N/A')
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Erreur chez vous',
                                context='400',
-                               message=message)
-    
+                               message=message,
+                               **kwargs)
 
     @staticmethod
-    def error_5xx(message: Optional[str]=None) -> str:
+    def error_5xx(message: Optional[str]=None, log: bool=False, user: Optional[str]=None, **kwargs: Any) -> str:
         '''
         Génère le template de la page d'erreur 5xx.
 
@@ -1389,9 +1443,14 @@ class PrepareTemplates:
             str: Template de la page d'erreur 5xx
         '''
         if message is None:
-            message = Constants.messages('error_500', 'default')
+            message = Constants.messages('error_500', 'default') + \
+                        f'\n{kwargs.get("error_code", "")} : {kwargs.get("error_message", "")}'
+        if log:
+            acfc_log.log(level=ERROR, message=message or '',
+                         specific_logger=Constants.log_files('500'),
+                         db_log=True, user=user or 'N/A')
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Erreur chez nous',
                                context='500',
-                               message=message)
-    
+                               message=message,
+                               **kwargs)

@@ -1,0 +1,7 @@
+{% if subcontext == 'users' %}
+    {% include 'admin/users.html' %}
+{% elif subcontext == 'users_details' %}
+    {% include 'admin/users_details.html' %}
+{% else %}
+    {% include 'admin/admin_dashboard.html' %}
+{% endif %}

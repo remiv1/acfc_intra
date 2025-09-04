@@ -19,7 +19,7 @@ Auteur : ACFC Development Team
 Version : 1.0
 '''
 
-from flask import Flask, Response, render_template, request, Blueprint, session, url_for, redirect, jsonify, g
+from flask import Flask, Response, request, Blueprint, session, url_for, redirect, jsonify, g
 from flask_session import Session
 from waitress import serve
 from typing import Any, Dict, Tuple, List, Optional
@@ -28,12 +28,9 @@ from datetime import datetime, date
 from sqlalchemy import text, and_, or_
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy.sql.functions import func
-from logs.logger import acfc_log, WARNING, ERROR, DEBUG
-from app_acfc.services import SecureSessionService, AuthenticationService, LOG_LOGIN_FILE
+from logs.logger import acfc_log, ERROR
+from app_acfc.services import SecureSessionService, AuthenticationService
 from app_acfc.modeles import MyAccount, PrepareTemplates, Constants, User, Commande, Client, init_database, get_db_session
-from app_acfc.habilitations import (
-    validate_habilitation, ADMINISTRATEUR, GESTIONNAIRE
-    )
 from app_acfc.contextes_bp.clients import clients_bp         # Module CRM - Gestion clients
 from app_acfc.contextes_bp.catalogue import catalogue_bp     # Module Catalogue produits
 from app_acfc.contextes_bp.commercial import commercial_bp   # Module Commercial - Devis, commandes
@@ -135,7 +132,13 @@ def teardown_appcontext(exception: Optional[BaseException]=None) -> None:
         if exception is not None:
             db_session.rollback()
         db_session.close()
+    
+    if exception:
+        acfc_log.log(level=ERROR, message=str(exception), specific_logger=Constants.log_files('warming'))
 
+# ====================================================================
+# FILTRES JINJA2 PERSONNALISÉS
+# ====================================================================
 
 @acfc.template_filter('strftime')
 def format_datetime(value: datetime | date | None, fmt: str='%d/%m/%Y'):
@@ -288,8 +291,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
                 'Commandes Annuelles'
             ]
         }
-    except Exception as e:
-        acfc_log.log_to_file(level=ERROR, message=str(e), specific_logger=LOG_COMMERCIAL_FILE, zone_log='commercial', db_log=False)
+    except Exception:
         indicators = None
     return indicators
 
@@ -329,10 +331,10 @@ def login() -> Any:
     # === TRAITEMENT GET : Affichage du formulaire de connexion ===
     if request.method == 'GET': return PrepareTemplates.login()
     elif request.method != 'POST':
-        message = Constants.messages('error_400', 'wrong_road') + f' Méthode {request.method} non autorisée.' \
-                  + f' Utilisateur : {session.get("user_id", "inconnu")}'
-        acfc_log.log_to_file(level=WARNING, message=message, specific_logger=Constants.log_files('user'), db_log=True)
-        return PrepareTemplates.error_4xx(message=message)
+        message = Constants.messages('error_400', 'wrong_road') \
+                  + f'\nMéthode {request.method} non autorisée.' \
+                  + f'\nUtilisateur : {session.get("user_id", "inconnu")}'
+        return PrepareTemplates.error_4xx(message=message, log=True)
     # === TRAITEMENT POST : Validation des identifiants ===
     else:
         user_to_authenticate = AuthenticationService(request)
@@ -340,22 +342,22 @@ def login() -> Any:
         # Schéma de vérification des identifiants
         try:
             # Si échec de l'authentification, retour au formulaire avec message d'erreur
-            if not result_auth:
-                return PrepareTemplates.login(message=INVALID)
+            if not result_auth: return PrepareTemplates.login(message=INVALID)
             # Si succès, mais mot de passe à changer, redirection vers la page de changement
-            if user_to_authenticate.is_chg_mdp:
-                acfc_log.log_to_file(level=DEBUG, message=f'changement de mot de passe à réaliser : {user_to_authenticate.is_chg_mdp}')
-                return PrepareTemplates.login(context='change_password',
-                                              message="Veuillez changer votre mot de passe.",
-                                              username=user_to_authenticate.user_pseudo)
-            # Si succès, création de la session et redirection vers l'accueil
-            else:
-                return redirect(url_for('dashboard'))
+            
+            return \
+                PrepareTemplates.login(subcontext='change_password',
+                                       message=Constants.messages('user', 'to_update'),
+                                       username=user_to_authenticate.user_pseudo,
+                                       log=True)  \
+                if user_to_authenticate.is_chg_mdp \
+                else redirect(url_for('dashboard'))
         except Exception as e:
-            acfc_log.log_to_file(level=ERROR,
-                                message=f'Erreur lors de l\'authentification pour l\'utilisateur: {user_to_authenticate.user} - {e}',
-                                specific_logger=LOG_LOGIN_FILE, zone_log=LOG_LOGIN_FILE, db_log=True)
-            return PrepareTemplates.error_5xx(message=str(e))
+            message = Constants.messages('error_500', 'default') + 'context : auth' \
+                      + f' Utilisateur : {user_to_authenticate.user_pseudo if user_to_authenticate else "inconnu"}' + \
+                        f' Détail : {str(e)}'
+            return PrepareTemplates.error_5xx(message=str(e), log=True,
+                                              user=user_to_authenticate.user_pseudo if user_to_authenticate else 'N/A')
 
 @acfc.route('/logout')
 def logout() -> Any:
@@ -414,47 +416,7 @@ def dashboard() -> Any:
     """
     current_orders = get_current_orders()
     commercial_indicators = get_commercial_indicators()
-    return render_template(DEFAULT['page'], title=DEFAULT['title'], context=DEFAULT['context'], objects=[current_orders, commercial_indicators])
-
-# ====================================================================
-# GESTIONNAIRES UTILISATEURS/UTILISATEUR
-# ====================================================================
-
-@validate_habilitation(ADMINISTRATEUR)
-@validate_habilitation(GESTIONNAIRE)
-@acfc.route('/users', methods=['GET', 'POST'])
-def users() -> Any:
-    """
-    Gestion des utilisateurs de l'application.
-    
-    Route d'administration permettant la création, modification et consultation
-    des comptes utilisateurs. Réservée aux administrateurs.
-    
-    Methods:
-        GET: Affichage de la liste des utilisateurs existants
-        POST: Création ou modification d'un utilisateur
-    
-    Returns:
-        Any: Template de gestion des utilisateurs ou message d'erreur
-        
-    TODO: 
-        Fonctionnalité en développement - nécessite l'implémentation complète 
-        de la logique de gestion des utilisateurs et des contrôles d'autorisation.
-    """
-    # Traitement de la création/modification d'utilisateur
-    if request.method == 'POST':
-        # TODO: Logique de création d'utilisateur à implémenter
-        # Devra inclure: validation des données, hashage du mot de passe,
-        # vérification des autorisations, sauvegarde en base
-        pass
-    
-    # Traitement de l'affichage de la liste des utilisateurs
-    elif request.method == 'GET':
-        # TODO: Récupération et affichage de la liste des utilisateurs
-        # Devra inclure: pagination, filtrage, contrôle des autorisations
-        return prepare_template_users()
-    else:
-        return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=WRONG_ROAD)
+    return PrepareTemplates.default(objects=[current_orders, commercial_indicators])
 
 @acfc.route('/user/<pseudo>', methods=['GET', 'POST'])
 def my_account(pseudo: str) -> Any:
@@ -474,49 +436,32 @@ def my_account(pseudo: str) -> Any:
 
     #=== Gestion de la requête GET ===
     if request.method == 'GET':
-        return render_template(USER['page'], title=USER['title'], context=USER['context'], objects=[user])
+        PrepareTemplates.users(objects=[user])
     
     #=== Gestion de la requête POST ===
     elif request.method == 'POST':
         try:
             # Récupération des données du formulaire
-            _form_return = MyAccount.get_request_form(request)
-
-            # Validation des données obligatoires
-            if '' in _form_return: return render_template(USER['page'], title=USER['title'],
-                                                                                                context=USER['context'], subcontext='parameters',
-                                                                                                objects=[user], message="Tous les champs sont obligatoires.")
+            _form_return = MyAccount.get_request_form(request=request, user=user)
 
             # Validation de l'email (format basique)
-            MyAccount.valid_mail(_form_return[2], user, db_session)
+            MyAccount.valid_mail(mail=_form_return[2], user=user, db_session=db_session)
 
-            # Mise à jour des données utilisateur
-            user.prenom = _form_return[0]
-            user.nom = _form_return[1]
-            user.email = _form_return[2]
-            user.telephone = _form_return[3]
-
-            # Mise à jour de la session si les données affichées changent
-            session['first_name'] = _form_return[0]
-            session['last_name'] = _form_return[1]
-            session['email'] = _form_return[2]
-            session['telephone'] = _form_return[3]
+            # Mise à jour des données utilisateur et de la session
+            user = MyAccount.update_user_settings(user=user, data_list=_form_return)
 
             # Sauvegarde en base de données
             db_session.commit()
 
             # Redirection vers la page de consultation avec message de succès
-            return render_template(USER['page'], title=USER['title'], context=USER['context'], 
-                                 objects=[user], success_message="Vos informations ont été mises à jour avec succès.")
+            message = "Vos informations ont été mises à jour avec succès."
+            return PrepareTemplates.users(objects=[user], success_message=message)
         except Exception as e:
-            db_session.rollback()
             # Si user n'a pas pu être récupéré, on crée un objet vide pour le template
             if ('user' not in locals()) or (not user):
                 user = User()
                 user.pseudo = pseudo  # Au moins le pseudo pour le template
-            return render_template(USER['page'], title=USER['title'], context=USER['context'], 
-                                 subcontext='parameters', objects=[user], 
-                                 message=f"Erreur lors de la mise à jour : {str(e)}")
+            return PrepareTemplates.error_5xx(message=str(e), log=True, user=session.get('pseudo', 'N/A'))
     
     #=== Gestion de toutes les autres méthodes ===
     else: raise Unauthorized("Méthode non autorisée.")
@@ -534,14 +479,15 @@ def user_parameters(pseudo: str) -> Any:
     if request.method == 'GET':
         db_session = get_db_session()
         user = db_session.query(User).filter_by(pseudo=pseudo).first()
-        if not user: return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'])
-        return render_template(USER['page'], title=USER['title'], context=USER['context'], subcontext='parameters', objects=[user])
+        if not user: return PrepareTemplates.error_4xx(message=f"Utilisateur '{pseudo}' introuvable.", log=True)
+        return PrepareTemplates.users(subcontext='parameters', objects=[user])
     elif request.method == 'POST':
-        # Redirection vers my_account qui gère la logique POST
-        # car le formulaire pointe vers my_account, pas vers user_parameters
         return redirect(url_for('my_account', pseudo=pseudo))
     else:
-        return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'])
+        message = Constants.messages('error_400', 'wrong_road') \
+                  + f'\nMéthode {request.method} non autorisée.' \
+                  + f'\nUtilisateur : {session.get("user_id", "inconnu")}'
+        return PrepareTemplates.error_4xx(message=message, log=True, username=session.get('pseudo', 'N/A'))
 
 @acfc.route('/chg_pwd', methods=['POST'])
 def chg_pwd() -> Any:
@@ -556,18 +502,25 @@ def chg_pwd() -> Any:
 
     # === Gestion de la méthode POST ===
     if request.method == 'POST':
-        # Récupération des données du formulaire
+        # Initialisation du service d'authentification
         user_to_chg_pwd = AuthenticationService(request)
+
+        # Validation des données du formulaire
         chg_pwd_is_ok = user_to_chg_pwd.chg_pwd()
+
+        # Si échec, retour au formulaire avec message d'erreur
         if not chg_pwd_is_ok:
+            # Récupération de la clé du message d'erreur
             key_message = _get_key_message(user_to_chg_pwd.pwd_param)
-            return prepare_template_login(context='change_password',
+
+            # Le message d'erreur est retourné dans le template
+            return PrepareTemplates.login(subcontext='change_password',
                                           message=user_to_chg_pwd.pwd_param_messages[key_message],
                                           username=user_to_chg_pwd.user_pseudo)
         else:
             return redirect(url_for('login'))
     # === Gestion de toutes les autres méthodes ===
-    return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], message=INVALID)
+    return PrepareTemplates.error_4xx(message=Constants.messages('error_400', 'wrong_road'))
 
 # ====================================================================
 # GESTIONNAIRES D'ERREURS HTTP
@@ -605,8 +558,7 @@ def handle_4xx_errors(error: HTTPException) -> str:
         case _:
             message_error = f'Erreur inconnue, {error.name}'
 
-    return render_template(ERROR400['page'], title=ERROR400['title'], context=ERROR400['context'], 
-                         status_code=error.code, status_message=message_error)
+    return PrepareTemplates.error_4xx(message=message_error, status_code=error.code)
 
 @acfc.errorhandler(500)
 @acfc.errorhandler(502)
@@ -640,8 +592,7 @@ def handle_5xx_errors(error: HTTPException) -> str:
         case _:
             message_error = f'Erreur inconnue, {error.name}'
 
-    return render_template(BASE, title='ACFC - Erreur Serveur', context='500', 
-                         status_code=error.code, status_message=message_error)
+    return PrepareTemplates.error_5xx(message=message_error, status_code=error.code)
 
 # ====================================================================
 # ENREGISTREMENT DES MODULES MÉTIERS

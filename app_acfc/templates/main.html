@@ -15,10 +15,8 @@
     {% include '500.html' %}
 {% elif context == 'login' %}
     {% include 'login.html' %}
-{% elif context == 'user' %}
-    {% include 'admin/users.html' %}
-{% elif context == 'change_password' %}
-    {% include 'admin/change_password.html' %}
+{% elif context == 'admin' %}
+    {% include 'admin/admin.html' %}
 {% elif context == 'user_account' %}
     {% include 'utilisateurs/account.html' %}
 {% elif context == 'default' %}

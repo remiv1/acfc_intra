@@ -310,7 +310,7 @@ def recherche_avancee():
         return jsonify([client.to_dict() for client in clients[:20]])  # Limite à 20 résultats
         
     except Exception as e:
-        acfc_log.log_to_file(ERROR, f"Erreur lors de la recherche avancée : {str(e)}")
+        acfc_log.log(ERROR, f"Erreur lors de la recherche avancée : {str(e)}")
         return jsonify([])
     finally:
         db_session.close()
@@ -407,7 +407,7 @@ def get_client(id_client: int):
         joinedload(Client.commandes),
         joinedload(Client.factures)
     ).get(id_client)
-    acfc_log.log_to_file(DEBUG, f'{client}')
+    acfc_log.log(DEBUG, f'{client}')
 
     # Récupération du contexte du client et retour
     if client:
@@ -504,14 +504,14 @@ def create_client():
         db_session.commit()        
         
         # Log de l'opération
-        acfc_log.log_to_file(level=logging.INFO,
+        acfc_log.log(level=logging.INFO,
                              message=f'Nouveau client créé : ID {nouveau_client.id} par l\'utilisateur {session['pseudo']}',
                              db_log=True,
                              zone_log="clients.log")
         
         return redirect(url_for(CLIENT_DETAIL, id_client=nouveau_client.id, success_message='Prospect créé avec succès.'))
     except Exception as e:
-        acfc_log.log_to_file(level=logging.ERROR,
+        acfc_log.log(level=logging.ERROR,
                               message=f'Erreur lors de la création du client : {str(e)} par {session['pseudo']}.',
                               db_log=True,
                               zone_log=LOG_CLIENTS_FILE)
@@ -588,7 +588,7 @@ def update_client(id_client: int):
         
         # Intégration dans la base de données et log des opérations 
         db_session.commit()
-        acfc_log.log_to_file(level=logging.INFO,
+        acfc_log.log(level=logging.INFO,
                              message=f'Client modifié : ID {client.id} par {session['pseudo']}.',
                              db_log=True,
                              zone_log=LOG_CLIENTS_FILE)
@@ -596,7 +596,7 @@ def update_client(id_client: int):
         # Redirection vers la page de détails du client avec message de succès
         return redirect(url_for(CLIENT_DETAIL, id_client=client.id, success_message="Client modifié avec succès"))
     except Exception as e:
-        acfc_log.log_to_file(level=logging.ERROR,
+        acfc_log.log(level=logging.ERROR,
                              message=f'Erreur lors de la modification du client {id_client} par {session['pseudo']} : {str(e)}',
                              db_log=True,
                              zone_log=LOG_CLIENTS_FILE)
@@ -671,12 +671,12 @@ def clients_add_phone():
         db_session.add(new_telephone)
         db_session.commit()
 
-        acfc_log.log_to_file(logging.INFO, f"Téléphone ajouté avec succès pour le client {id_client}", specific_logger=LOG_CLIENTS_FILE, zone_log=LOG_CLIENTS_FILE, db_log=False)
+        acfc_log.log(logging.INFO, f"Téléphone ajouté avec succès pour le client {id_client}", specific_logger=LOG_CLIENTS_FILE, zone_log=LOG_CLIENTS_FILE, db_log=False)
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message="Téléphone ajouté avec succès"))
 
     except Exception as e:
         error_msg = f"Erreur lors de l'ajout du téléphone pour le client {id_client}" if id_client else "Erreur lors de l'ajout du téléphone"
-        acfc_log.log_to_file(logging.ERROR, f"{error_msg} : {str(e)}")
+        acfc_log.log(logging.ERROR, f"{error_msg} : {str(e)}")
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, error_message=f"Erreur lors de l'ajout du téléphone : {e}"))
 
 @clients_bp.route('/add_email/', methods=['POST'])
@@ -742,11 +742,11 @@ def clients_add_email():
         db_session.add(new_mail)
         db_session.commit()
 
-        acfc_log.log_to_file(logging.INFO, f"Email ajouté avec succès pour le client {id_client}")
+        acfc_log.log(logging.INFO, f"Email ajouté avec succès pour le client {id_client}")
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message="Email ajouté avec succès"))
 
     except Exception as e:
-        acfc_log.log_to_file(logging.ERROR, f"Erreur lors de l'ajout de l'email pour le client {id_client} : {str(e)}")
+        acfc_log.log(logging.ERROR, f"Erreur lors de l'ajout de l'email pour le client {id_client} : {str(e)}")
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, error_message=f"Erreur lors de l'ajout de l'email : {e}"))
 
 @clients_bp.route('/add_address/', methods=['POST'])
@@ -817,9 +817,9 @@ def clients_add_address():
         db_session.add(new_adresse)
         db_session.commit()
 
-        acfc_log.log_to_file(logging.INFO, f"Adresse ajoutée avec succès pour le client {id_client}")
+        acfc_log.log(logging.INFO, f"Adresse ajoutée avec succès pour le client {id_client}")
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message="Adresse ajoutée avec succès"))
 
     except Exception as e:
-        acfc_log.log_to_file(logging.ERROR, f"Erreur lors de l'ajout de l'adresse pour le client {id_client} : {str(e)}")
+        acfc_log.log(logging.ERROR, f"Erreur lors de l'ajout de l'adresse pour le client {id_client} : {str(e)}")
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, error_message=f"Erreur lors de l'ajout de l'adresse : {e}"))

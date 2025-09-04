@@ -226,7 +226,7 @@ class AuthenticationService:
             message (str): Le message à enregistrer
             level (int): Le niveau de log (INFO, ERROR, etc.)
         """
-        acfc_log.log_to_file(level=level,
+        acfc_log.log(level=level,
                             message=message,
                             specific_logger=LOG_LOGIN_FILE,
                             zone_log=LOG_LOGIN_FILE,
@@ -256,7 +256,7 @@ class AuthenticationService:
         self.user_dict = user.to_dict()
         # Stocker les propriétés nécessaires avant de détacher l'objet de la session
         self.is_chg_mdp = user.is_chg_mdp
-        acfc_log.log_to_file(level=INFO,
+        acfc_log.log(level=INFO,
                             message=f'Changement de mot de passe requis pour l\'utilisateur: {self.is_chg_mdp}',
                             specific_logger=LOG_LOGIN_FILE,
                             zone_log=LOG_LOGIN_FILE,

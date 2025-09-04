@@ -1,7 +1,14 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, request, make_response
 from app_acfc.habilitations import (
     validate_habilitation, ADMINISTRATEUR
     )
+from pymongo import MongoClient
+from flask import session
+from datetime import datetime, timedelta
+from logs.logger import acfc_log, DB_URI, DB_NAME, COLLECTION_NAME, QueryLogs
+from app_acfc.modeles import Constants, PrepareTemplates, get_db_session, User
+from sqlalchemy.orm import Session as SessionBdDType
+from typing import Any, Dict
 
 admin_bp = Blueprint('admin',
                      __name__,
@@ -11,9 +18,109 @@ admin_bp = Blueprint('admin',
 @validate_habilitation(ADMINISTRATEUR)
 @admin_bp.route('/')
 def admin_list():
-    return jsonify({'admins': []})
+    """
+    Page d'accueil de l'administration avec statistiques générales.
+    """
+    try:
+        # Connexion à MongoDB pour les statistiques des logs
+        client: MongoClient[Any] = MongoClient(DB_URI)
+        db = client[DB_NAME]
+        collection = db[COLLECTION_NAME]
+        
+        # Statistiques des dernières 24h
+        yesterday = datetime.now() - timedelta(days=1)
+        stats_query = {'timestamp': {'$gte': yesterday}}
+
+        # Récupération du nombre total d'utilisateurs
+        db_session: SessionBdDType = get_db_session()
+        total_users: int = db_session.query(User).count()
+        
+        # Compilation des statistiques
+        stats: Dict[str, Any] = {
+            'total_logs': collection.count_documents(stats_query),
+            'total_errors': collection.count_documents({**stats_query, 'level': 'ERROR'}),
+            'total_warnings': collection.count_documents({**stats_query, 'level': 'WARNING'}),
+            'total_users': total_users,
+            'system_status': True
+        }
+        
+        return PrepareTemplates.admin(subcontext='dashboard', stats=stats)
+                             
+    except Exception as e:
+        message = Constants.messages('error_500', 'default') \
+                    + f" (Détails techniques: {str(e)})"
+        return PrepareTemplates.error_5xx(message=message, log=True)
 
 @validate_habilitation(ADMINISTRATEUR)
-@admin_bp.route('/hello')
-def admin_hello():
-    return 'Admin blueprint: hello'
+@admin_bp.route('/logs')
+def logs_dashboard():
+    """
+    Dashboard principal des logs avec filtrage côté serveur.
+    Utilise MongoDB pour récupérer et filtrer les logs.
+    """
+    try:
+        # Instanciation de la classe de requête des logs
+        query_logs = QueryLogs(request)
+
+        # Construction de la requête MongoDB
+        query_logs.get_log_form_filter() \
+            .construct_query() \
+            .construct_pagination() \
+            .construct_stats()
+        
+        # Pagination simple
+        pagination: Dict[str, Any] = {
+            'page': query_logs.page,
+            'pages': query_logs.total_pages,
+            'has_prev': query_logs.has_previous,
+            'has_next': query_logs.has_next,
+            'prev_num': query_logs.page - 1 if query_logs.has_previous else None,
+            'next_num': query_logs.page + 1 if query_logs.has_next else None,
+            'iter_pages': lambda: range(max(1, query_logs.page - 2), min(query_logs.total_pages + 1, query_logs.page + 3))
+        }
+        
+        # Rendu du template avec les logs et les filtres
+        return PrepareTemplates.admin(logs=query_logs.logs,
+                                      total_logs=query_logs.total_logs,
+                                      stats=query_logs.stats,
+                                      pagination=pagination,
+                                      available_zones=sorted(query_logs.available_zones),   # type: ignore
+                                      available_users=sorted(query_logs.available_users),   # type: ignore
+                                      log=True)
+
+    except Exception as e:
+        message = Constants.messages('error_500', 'default') \
+                    + f" (Détails techniques: {str(e)})"
+        return PrepareTemplates.error_5xx(message=message, log=True, user=session.get('pseudo', 'N/A'))
+
+@validate_habilitation(ADMINISTRATEUR)
+@admin_bp.route('/logs/export', methods=['POST'])
+def logs_export():
+    """
+    Export des logs filtrés en CSV.
+    Utilise les mêmes filtres que le dashboard.
+    """
+    try:
+        # Instanciation de la classe de requête des logs
+        query_logs = QueryLogs(request)
+        
+        # Opérations de filtrage de données
+        query_logs.get_log_form_filter() \
+            .construct_query() \
+            .construct_list() \
+            .build_csv()
+
+        # Nom du fichier avec timestamp
+        filename = f"logs_acfc_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        
+        # Création de la réponse HTTP
+        response = make_response(query_logs.output.getvalue())
+        response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+        response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+        
+        return response
+        
+    except Exception as e:
+        acfc_log.log(40, f"Erreur export logs: {str(e)}", 
+                    specific_logger='admin.log', zone_log='admin', db_log=True, user="admin")
+        return "Erreur lors de l'export des logs", 500

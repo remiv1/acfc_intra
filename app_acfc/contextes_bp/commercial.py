@@ -269,7 +269,7 @@ def clients_api_search():
         })
             
     except Exception as e:
-        acfc_log.log_to_file(DEBUG, f"Erreur lors de la recherche de clients : {str(e)}")
+        acfc_log.log(DEBUG, f"Erreur lors de la recherche de clients : {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Erreur lors de la recherche de clients'

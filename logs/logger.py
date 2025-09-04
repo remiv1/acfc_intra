@@ -1,10 +1,12 @@
 import logging
 from logging.handlers import RotatingFileHandler
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
-from typing import Any
+from typing import Any, Dict, List
 from datetime import datetime, timezone
 from os.path import dirname, join as join_os, abspath
+from flask import Request
+from datetime import datetime, timedelta
 
 """
 ACFC - Système de Logging Hybride
@@ -146,7 +148,7 @@ class CustomLogger:
         logger.addHandler(handler)
         return logger
 
-    def _log_to_db(self, level: int, message: str, specific_logger: str | None = None, zone_log: str = "general"):
+    def _log_to_db(self, level: int, message: str, zone_log: str = "general", user: str = "N/A"):
         """
         Enregistre un log dans la base de données MongoDB avec métadonnées.
         
@@ -169,17 +171,18 @@ class CustomLogger:
             
         try:
             log_entry: dict[str, Any] = {
-                "level": level,
+                "level": logging.getLevelName(level),  # Convertit le niveau numérique en nom (ERROR, WARNING, etc.)
                 "message": message,
                 "timestamp": datetime.now(timezone.utc),
-                "zone": zone_log
+                "zone_log": zone_log,  # Zone fonctionnelle (admin, security, client, etc.)
+                "user": user
             }
             self.collection.insert_one(log_entry)
         except Exception as e:
             # En cas d'erreur MongoDB, on continue sans interrompre l'application
             print(f"Erreur lors de l'écriture du log en base: {e}")
 
-    def log_to_file(self, level: int, message: str, specific_logger: str='general.log', db_log: bool = False):
+    def log(self, level: int, message: str, specific_logger: str='general.log', zone_log: str | None = None, db_log: bool = False, user: str = "N/A"):
         """
         Enregistre un log dans les fichiers appropriés selon le niveau de criticité.
         
@@ -189,9 +192,10 @@ class CustomLogger:
         Args:
             level (int): Niveau de criticité (ERROR, WARNING, INFO, DEBUG)
             message (str): Message à enregistrer
-            specific_logger (str | None): Nom du logger spécifique (optionnel)
-            zone_log (str): Zone fonctionnelle (défaut: "general")
+            specific_logger (str): Nom du fichier de log spécifique (défaut: 'general.log')
+            zone_log (str): Zone fonctionnelle (défaut: specific_logger sans extension)
             db_log (bool): Si True, enregistre aussi en base MongoDB (défaut: False)
+            user (str): Utilisateur associé au log (défaut: "N/A")
             
         Comportement :
         - ERROR : Écrit dans error.log
@@ -201,8 +205,10 @@ class CustomLogger:
         - Si specific_logger fourni : Écrit aussi dans le fichier spécifique
         """
         # Log dans la base de données si demandé
-        if db_log: 
-            self._log_to_db(level, message, specific_logger)
+        if db_log:
+            if zone_log is None:
+                zone_log = specific_logger.split('.')[0]
+            self._log_to_db(level=level, message=message, zone_log=zone_log, user=user)
         
         # Distribution vers les fichiers de logs par niveau
         if level == logging.ERROR:
@@ -217,9 +223,154 @@ class CustomLogger:
         # Log additionnel dans un fichier spécifique
         self._create_specific_logger(specific_logger)
 
+class QueryLogs:
+    """
+    Classe pour la construction de requêtes de recherche de logs.
+    
+    Cette classe fournit des méthodes pour construire des requêtes complexes
+    basées sur divers critères tels que le niveau de log, la zone fonctionnelle,
+    l'utilisateur, les mots-clés, et les plages de dates.
+    
+    Attributes:
+        None
+    """
+    def __init__(self, request: Request):
+        """
+        Initialise la classe QueryLogs.
+        """
+        self.request = request
+        self.client: MongoClient[Any] = MongoClient(DB_URI)
+        self.db = self.client[DB_NAME]
+        self.collection = self.db[COLLECTION_NAME]
+
+    def get_log_form_filter(self):
+        """
+        Extrait les paramètres de filtrage des logs depuis la requête.
+        """
+        # Extraction des paramètres de filtrage
+        self.page = int(self.request.args.get('page', 1))
+        self.limit = int(self.request.args.get('limit', 25))
+        self.level = self.request.args.get('level', '')
+        self.zone_log = self.request.args.get('zone_log', '')
+        self.user = self.request.args.get('user', '')
+        self.search = self.request.args.get('search', '')
+        self.date_from = self.request.args.get('date_from', '')
+        self.date_to = self.request.args.get('date_to', '')
+
+        return self
+
+    def construct_query(self):
+        """
+        Construit une requête MongoDB basée sur les paramètres extraits.
+        """
+        self.query: Dict[str, Any] = {}
+
+        if self.level:
+            self.query['level'] = self.level
+
+        if self.zone_log:
+            self.query['zone_log'] = self.zone_log
+
+        if self.user and self.user != 'N/A':
+            self.query['user'] = self.user
+
+        if self.search:
+            self.query['message'] = {'$regex': self.search, '$options': 'i'}
+
+        # Filtrage par date
+        if self.date_from or self.date_to:
+            date_query = {}
+            if self.date_from:
+                date_query['$gte'] = datetime.strptime(self.date_from, '%Y-%m-%d')
+            if self.date_to:
+                # Ajouter 23:59:59 pour inclure toute la journée
+                end_date = datetime.strptime(self.date_to, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
+                date_query['$lte'] = end_date
+            self.query['timestamp'] = date_query
+
+        return self
+
+    def construct_list(self):
+        """
+        Construit la liste des logs selon la requête et la pagination.
+        """
+        logs_cursor = self.collection.find(self.query).sort('timestamp', DESCENDING).limit(10000)
+        self.logs = list(logs_cursor)
+        return self
+    
+    def build_csv(self):
+        """
+        Construit un CSV des logs selon la requête.
+        """
+        import csv
+        from io import StringIO
+
+        self.output = StringIO()
+        writer = csv.writer(self.output)
+        writer.writerow(['Timestamp', 'Niveau', 'Zone', 'Utilisateur', 'Message'])
+
+        for log in self.logs:
+            writer.writerow([
+                log.get('timestamp', '').isoformat() if log.get('timestamp') else '',
+                log.get('level', ''),
+                log.get('zone_log', ''),
+                log.get('user', ''),
+                log.get('message', '')
+            ])
+        
+        # Préparation de la réponse
+        self.output.seek(0)
+        return self
+
+    def construct_pagination(self):
+        """
+        Construit les paramètres de pagination pour la requête MongoDB.
+        """
+        # Calcul du total de pagination
+        self.total_logs = self.collection.count_documents(self.query)
+        skip = (self.page - 1) * self.limit
+
+        # Récupération des logs avec pagination
+        logs_cursor = self.collection.find(self.query).sort('timestamp', DESCENDING) \
+                            .skip(skip).limit(self.limit)
+        self.logs = list(logs_cursor)
+
+        # Calcul des pages
+        self.total_pages = (self.total_logs + self.limit - 1) // self.limit
+        self.has_previous = self.page > 1
+        self.has_next = self.page < self.total_pages
+
+        return self
+    
+    def construct_stats(self):
+        """
+        Construit les statistiques des logs par niveau.
+        """
+        yesterday = datetime.now() - timedelta(days=1)
+        stats_query = {'timestamp': {'$gte': yesterday}}
+        self.stats: Dict[str, int] = {
+            'total_errors': self.collection.count_documents({**stats_query, 'level': 'ERROR'}),
+            'total_warnings': self.collection.count_documents({**stats_query, 'level': 'WARNING'}),
+            'total_info': self.collection.count_documents({**stats_query, 'level': 'INFO'}),
+        }
+        return self
+    
+    def get_filters(self):
+        """
+        Retourne les filtres actuels sous forme de dictionnaire.
+        """
+        self.available_zones: List[Any] = self.collection.distinct('zone_log')  # type: ignore
+        self.available_users: List[Any] = self.collection.distinct('user')  # type: ignore
+        return self
+
+
+DB_URI = "mongodb://acfc-logs:27017/"
+DB_NAME = "logDB"
+COLLECTION_NAME = "traces"
+
 # Création du logger personnalisé
 acfc_log = CustomLogger(
-    db_uri="mongodb://acfc-logs:27017/",
-    db_name="logDB",
-    collection_name="traces"
+    db_uri=DB_URI,
+    db_name=DB_NAME,
+    collection_name=COLLECTION_NAME
 )

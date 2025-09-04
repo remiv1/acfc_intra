@@ -52,7 +52,7 @@ def validate_habilitation(required_habilitation: str) -> Callable[[Callable[...,
             # Vérifie si l'utilisateur est connecté et possède une habilitation
             habilitations = session.get('habilitations', '')  # Exemple : '1,2,3'
             if required_habilitation not in habilitations:
-                acfc_log.log_to_file(level=WARNING,
+                acfc_log.log(level=WARNING,
                                      message=f'{session.get("username", "Anonyme")} a tenté d\'accéder à une ressource sans avoir l\'habilitation requise : {required_habilitation} (actuellement {session.get('habilitation', 'inconnu')})',
                                      zone_log='habilitation',
                                      db_log=True
