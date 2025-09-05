@@ -164,6 +164,10 @@ def format_date_input(value: datetime | date | None):
         return value.strftime('%Y-%m-%d')
     return value
 
+@acfc.template_filter('jinja_page_title')
+def jinja_page_title(title_and_subtitle: Tuple[str, str]) -> str:
+    """Filtre pour générer le titre de la page dans le format Jinja2."""
+    return Constants.return_pages(title_and_subtitle[0], title_and_subtitle[1])
 
 # ====================================================================
 # FONCTIONS DE RECHERCHES - HORS ROUTES
@@ -459,7 +463,8 @@ def my_account(pseudo: str) -> Any:
             if ('user' not in locals()) or (not user):
                 user = User()
                 user.pseudo = pseudo  # Au moins le pseudo pour le template
-            return PrepareTemplates.error_5xx(status_code=500, status_message=str(e), log=True)
+            return PrepareTemplates.error_5xx(status_code=500, status_message=str(e),
+                                              log=True, specific_log=Constants.log_files('user'))
 
     #=== Gestion de toutes les autres méthodes ===
     else: return PrepareTemplates.error_4xx(status_code=405,
@@ -567,7 +572,7 @@ def handle_5xx_errors(error: HTTPException) -> str:
     Returns:
         str: Template d'erreur personnalisé avec code et message
     """
-    return PrepareTemplates.error_5xx(status_code=error.code or 500, log=True,
+    return PrepareTemplates.error_5xx(status_code=error.code or 500, log=True, specific_log=Constants.log_files('500'),
                                       status_message=error.description or Constants.messages('error_500', 'default'))
 
 # ====================================================================

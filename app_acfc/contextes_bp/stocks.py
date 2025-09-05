@@ -9,8 +9,3 @@ stocks_bp = Blueprint('stocks',
 @stocks_bp.route('/')
 def stocks_index():
     return jsonify({'stocks': []})
-
-
-@stocks_bp.route('/hello')
-def hello_stocks():
-    return 'Stocks blueprint: hello'

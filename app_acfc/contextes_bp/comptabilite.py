@@ -10,7 +10,3 @@ comptabilite_bp = Blueprint('comptabilite',
 def comptabilite_index():
     return jsonify({'entries': []})
 
-
-@comptabilite_bp.route('/hello')
-def hello_compta():
-    return 'Comptabilité blueprint: hello'

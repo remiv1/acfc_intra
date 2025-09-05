@@ -50,7 +50,8 @@ def admin_list():
         message = Constants.messages('error_500', 'default') \
                     + '\ncode erreur : 500' \
                     + f'\ndétail erreur : {str(e)}'
-        return PrepareTemplates.error_5xx(status_code=500, status_message=message, log=True)
+        return PrepareTemplates.error_5xx(status_code=500, status_message=message,
+                                          log=True, specific_log=Constants.log_files('security'))
 
 @validate_habilitation(ADMINISTRATEUR)
 @admin_bp.route('/logs')
@@ -93,7 +94,8 @@ def logs_dashboard():
         message = Constants.messages('error_500', 'default') \
                     + '\ncode erreur : 500' \
                     + f'\ndétail erreur : {str(e)}'
-        return PrepareTemplates.error_5xx(status_code=500, status_message=message, log=True)
+        return PrepareTemplates.error_5xx(status_code=500, status_message=message,
+                                          log=True, specific_log=Constants.log_files('security'))
 
 @validate_habilitation(ADMINISTRATEUR)
 @admin_bp.route('/logs/export', methods=['POST'])

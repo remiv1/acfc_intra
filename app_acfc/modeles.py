@@ -1390,8 +1390,10 @@ class Constants:
             'clients': {
                 'recherche': 'clients.clients_list',
                 'recherche-api': 'clients.recherche_avancee',
+                'creation': 'clients.create_client',
                 'detail': 'clients.get_client',
-                'modifier': 'clients.edit_client',
+                'modifier-get': 'clients.edit_client',
+                'modifier-post': 'clients.update_client',
             },
             'commandes': {
                 'commande-detail': 'commandes.commande_detail',
@@ -1400,12 +1402,22 @@ class Constants:
                 'factures': 'commandes.factures',
             },
             'commercial': {
-                'commercial-clt-target': 'commercial.commercial_clients_target',
+                'accueil': 'commercial.commercial_index',
+                'filtrage': 'commercial.clients_liste',
+                'filtrage-api': 'commercial.clients_api_search',
+
             },
-            'comptabilite': {},
+            'comptabilite': {
+                'accueil': 'comptabilite.comptabilite_index',
+            },
             'factures': {},
-            'stock': {},
+            'stocks': {
+                'accueil': 'stocks.stocks_index',
+            },
             'users': {},
+            'catalogue':{
+                'liste': 'catalogue.catalogue_list',
+            }
         }
         return pages.get(domain, {}).get(sub_domain, '')
 
@@ -1522,7 +1534,7 @@ class PrepareTemplates:
 
 
     @staticmethod
-    def error_4xx(status_code: int, status_message: str, log: bool=False) -> str:
+    def error_4xx(status_code: int, status_message: str, log: bool=False, specific_log: Optional[str]=None) -> str:
         '''
         Génère le template de la page d'erreur 4xx.
 
@@ -1537,7 +1549,7 @@ class PrepareTemplates:
                     + f'\ndescription : {status_message}'
         if log:
             acfc_log.log(level=ERROR, message=message,
-                         specific_logger=Constants.log_files('400'),
+                         specific_logger=Constants.log_files(specific_log or '400'),
                          db_log=True, user=username or 'N/A')
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Erreur chez vous',
@@ -1546,7 +1558,7 @@ class PrepareTemplates:
                                status_message=status_message)
 
     @staticmethod
-    def error_5xx(status_code: int, status_message: str, log: bool=False) -> str:
+    def error_5xx(status_code: int, status_message: str, log: bool=False, specific_log: Optional[str]=None) -> str:
         '''
         Génère le template de la page d'erreur 5xx.
 
@@ -1561,7 +1573,7 @@ class PrepareTemplates:
                     + f'\ndescription : {status_message}'
         if log:
             acfc_log.log(level=ERROR, message=message or '',
-                         specific_logger=Constants.log_files('500'),
+                         specific_logger=Constants.log_files(specific_log or '500'),
                          db_log=True, user=username)
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Erreur chez nous',

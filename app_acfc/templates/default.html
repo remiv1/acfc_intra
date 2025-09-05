@@ -83,7 +83,7 @@
             <div class="row g-3">
                 <!-- Liens vers les différentes sections -->
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a href="{{ url_for('catalogue.catalogue_list') }}" class="text-decoration-none">
+                    <a href="{{ url_for(('catalogue', 'liste') | jinja_page_title) }}" class="text-decoration-none">
                         <div class="card text-center h-100 quick-link-card">
                             <div class="card-body">
                                 <i class="fas fa-book fa-2x text-primary mb-2"></i>
@@ -93,7 +93,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a href="{{ url_for('clients.clients_list') }}" class="text-decoration-none">
+                    <a href="{{ url_for(('clients', 'recherche') | jinja_page_title) }}" class="text-decoration-none">
                         <div class="card text-center h-100 quick-link-card">
                             <div class="card-body">
                                 <i class="fas fa-users fa-2x text-info mb-2"></i>
@@ -103,7 +103,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a href="{{ url_for('commercial.commercial_index') }}" class="text-decoration-none">
+                    <a href="{{ url_for(('commercial', 'accueil') | jinja_page_title) }}" class="text-decoration-none">
                         <div class="card text-center h-100 quick-link-card">
                             <div class="card-body">
                                 <i class="fas fa-handshake fa-2x text-warning mb-2"></i>
@@ -113,7 +113,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a href="{{ url_for('comptabilite.comptabilite_index') }}" class="text-decoration-none">
+                    <a href="{{ url_for(('comptabilite', 'accueil') | jinja_page_title) }}" class="text-decoration-none">
                         <div class="card text-center h-100 quick-link-card">
                             <div class="card-body">
                                 <i class="fas fa-calculator fa-2x text-success mb-2"></i>
@@ -123,7 +123,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a href="{{ url_for('stocks.stocks_index') }}" class="text-decoration-none">
+                    <a href="{{ url_for(('stocks', 'accueil') | jinja_page_title) }}" class="text-decoration-none">
                         <div class="card text-center h-100 quick-link-card">
                             <div class="card-body">
                                 <i class="fas fa-boxes fa-2x text-danger mb-2"></i>
@@ -133,7 +133,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a href="{{ url_for('admin.admin_list') }}" class="text-decoration-none">
+                    <a href="{{ url_for(('admin', 'accueil') | jinja_page_title) }}" class="text-decoration-none">
                         <div class="card text-center h-100 quick-link-card">
                             <div class="card-body">
                                 <i class="fas fa-cog fa-2x text-secondary mb-2"></i>

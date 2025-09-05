@@ -283,12 +283,59 @@ def recherche_avancee():
         return jsonify([client.to_dict() for client in clients[:20]])  # Limite à 20 résultats
         
     except Exception as e:
-        return PrepareTemplates.error_5xx(status_code=500, status_message=str(e), log=True)
+        return PrepareTemplates.error_5xx(status_code=500, status_message=str(e),
+                                          log=True, specific_log=Constants.log_files('client'))
 
 
 # ================================================================
 # DONNÉES CLIENTS INDIVIDUELLES
 # ================================================================
+
+@clients_bp.route('/nouveau', methods=['GET', 'POST'])
+@validate_habilitation(CLIENTS)
+def create_client():
+    """
+    Création d'un nouveau client (particulier ou professionnel).
+    
+    GET : Affiche le formulaire de création
+    POST : Traite les données et crée le client
+    """
+    # === L'utilisateur demande le formulaire ===
+    if request.method == 'GET':
+        return PrepareTemplates.clients(sub_context='create')
+    
+    # === L'utilisateur soumet le formulaire ===
+    db_session = get_db_session()
+    try:
+        # Validation des données requises
+        type_client = int(request.form.get('type_client', -1)) or -1
+        if type_client == -1: raise ValueError("Le type de client est obligatoire")
+        notes = request.form.get('notes', '')
+        reduces = ClientMethods.get_reduces(request)
+        
+        # Création du client de base
+        nouveau_client = Client(
+            type_client=type_client,
+            notes=notes,
+            reduces=reduces,
+            created_by=session.get('pseudo', 'N/A')
+        )
+        db_session.add(nouveau_client)
+        db_session.flush()  # Pour obtenir l'ID
+        
+        # Création du client particulier ou professionnel suivant type
+        ClientMethods.create_or_modify_client(request, type_client, nouveau_client, db_session)
+
+        # Envoi du client en base de données
+        db_session.commit()        
+        
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                id_client=nouveau_client.id,
+                                success_message=Constants.messages('client', 'create')))
+    except Exception as e:
+        return PrepareTemplates.error_5xx(status_code=500, status_message=str(e),
+                                          log=True, specific_log=Constants.log_files('client'))
+
 @clients_bp.route('/<int:id_client>', methods=['GET'])
 @validate_habilitation(CLIENTS)
 def get_client(id_client: int):
@@ -355,91 +402,6 @@ def edit_client(id_client: int):
         return PrepareTemplates.error_4xx(status_code=404, log=True,
                                           status_message=Constants.messages('client', 'not_found'))
 
-@clients_bp.route('/nouveau', methods=['GET', 'POST'])
-@validate_habilitation(CLIENTS)
-def create_client():
-    """
-    Création d'un nouveau client (particulier ou professionnel).
-    
-    GET : Affiche le formulaire de création
-    POST : Traite les données et crée le client
-    """
-    # === L'utilisateur demande le formulaire ===
-    if request.method == 'GET':
-        return PrepareTemplates.clients(sub_context='create')
-    
-    # === L'utilisateur soumet le formulaire ===
-    db_session = get_db_session()
-    try:
-        # Validation des données requises
-        type_client = int(request.form.get('type_client', -1)) or -1
-        if type_client == -1: raise ValueError("Le type de client est obligatoire")
-        notes = request.form.get('notes', '')
-        reduces = ClientMethods.get_reduces(request)
-        
-        # Création du client de base
-        nouveau_client = Client(
-            type_client=type_client,
-            notes=notes,
-            reduces=reduces,
-            created_by=session.get('pseudo', 'N/A')
-        )
-        db_session.add(nouveau_client)
-        db_session.flush()  # Pour obtenir l'ID
-        
-        # Création du client particulier ou professionnel suivant type
-        ClientMethods.create_or_modify_client(request, type_client, nouveau_client, db_session)
-
-        # Envoi du client en base de données
-        db_session.commit()        
-        
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=nouveau_client.id,
-                                success_message=Constants.messages('client', 'create')))
-    except Exception as e:
-        acfc_log.log(level=logging.ERROR,
-                              message=f'Erreur lors de la création du client : {str(e)} par {session['pseudo']}.',
-                              db_log=True)
-        return render_template(CLIENT_FORM['page'],
-                               title=TITLE_NEW_CLIENT,
-                               context=CLIENT_FORM['context'],
-                               sub_context='create',
-                               error_message=f"Une erreur est survenue lors de la création du client: {e}")
-
-@clients_bp.route('/<int:id_client>/edit', methods=['GET'])
-@validate_habilitation(CLIENTS)
-def edit_client_form(id_client: int):
-    """
-    Affiche le formulaire d'édition d'un client.
-    """
-    db_session = get_db_session()
-    try:
-        client = db_session.query(Client).options(
-            joinedload(Client.part),
-            joinedload(Client.pro)
-        ).get(id_client)
-        
-        if not client:
-            return render_template("errors/404.html",
-                                   title="ACFC - Client introuvable",
-                                   sub_context="error",
-                                   error_message=ERROR_CLIENT_NOT_FOUND)
-        
-        # Récupération du nom d'affichage avant de fermer la session
-        nom_affichage = client.nom_affichage
-        id_client = client.id
-        title = f"ACFC - Modifier {nom_affichage}"
-        
-        return render_template(CLIENT_FORM['page'],
-                               title=title,
-                               context=CLIENT_FORM['context'],
-                               sub_context='edit',
-                               client=client,
-                               id_client=id_client,
-                               nom_affichage=nom_affichage)
-    except Exception as e:
-        PrepareTemplates.error_5xx(status_code=500, status_message=str(e), log=True)
-
 @validate_habilitation(CLIENTS)
 @clients_bp.route('/<int:id_client>/update', methods=['POST'])
 def update_client(id_client: int):
@@ -458,7 +420,8 @@ def update_client(id_client: int):
         ).get(id_client)
         
         # Gestion de l'absence de retours
-        if not client: return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message=f'Nous n\'avons pas pu identifier le client {id_client}'))
+        if not client:
+            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
         
         # Récupération du nom d'affichage au début pour éviter les problèmes de session
         nom_affichage = client.nom_affichage
