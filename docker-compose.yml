@@ -42,6 +42,12 @@ services:
       # Configuration sécurisée pour Docker
       - FLASK_HOST=${FLASK_HOST}              # Nécessaire dans le conteneur Docker
       - FLASK_PORT=${FLASK_PORT}
+      # Variables MongoDB pour logging
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+      - MONGO_APP_USER=${MONGO_APP_USER}
+      - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
     networks:
       - acfc-network                          # Réseau privé inter-services
     depends_on:
@@ -103,15 +109,12 @@ services:
   # ================================================================
   acfc-logs:
     container_name: acfc-logs
-    image: mongo:8.0.13                      # Image officielle MongoDB
+    build:
+      context: .                              # Dossier contenant Dockerfile et scripts
+      dockerfile: mongo/dockerfile.mongo      # Dockerfile spécialisé MongoDB
     volumes:
       - acfc-logs-data:/data/db              # Persistance des logs
       - ./mongo/mongod.conf:/etc/mongod.conf:ro           # Configuration MongoDB
-      - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro  # Script d'initialisation
-    networks:
-      - acfc-network
-    restart: always
-    command: ['mongod', '--config', '/etc/mongod.conf']  # Démarrage avec config personnalisée
     environment:
       # Configuration d'authentification MongoDB
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
@@ -119,6 +122,11 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
       MONGO_HOST: ${MONGO_HOST}
       MONGO_PORT: ${MONGO_PORT}
+      MONGO_APP_USER: ${MONGO_APP_USER}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
+    networks:
+      - acfc-network
+    restart: always
     healthcheck:
       # Test de connectivité MongoDB (compatible avec différentes versions)
       test: ["CMD-SHELL", "mongo --eval 'db.adminCommand({ping: 1})' --quiet || mongosh --eval 'db.adminCommand({ping: 1})' --quiet"]

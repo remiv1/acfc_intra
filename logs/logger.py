@@ -5,6 +5,7 @@ from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 from typing import Any, Dict, List
 from datetime import datetime, timezone
 from os.path import dirname, join as join_os, abspath
+from os import getenv
 from flask import Request
 from datetime import datetime, timedelta
 
@@ -182,7 +183,7 @@ class CustomLogger:
             # En cas d'erreur MongoDB, on continue sans interrompre l'application
             print(f"Erreur lors de l'écriture du log en base: {e}")
 
-    def log(self, level: int, message: str, specific_logger: str='general.log', zone_log: str | None = None, db_log: bool = False, user: str = "N/A"):
+    def log(self, level: int, message: str, specific_logger: str='general.log', db_log: bool = False, user: str = "N/A"):
         """
         Enregistre un log dans les fichiers appropriés selon le niveau de criticité.
         
@@ -206,8 +207,9 @@ class CustomLogger:
         """
         # Log dans la base de données si demandé
         if db_log:
-            if zone_log is None:
-                zone_log = specific_logger.split('.')[0]
+            zone_log: str = "N/A"
+            if specific_logger != 'general.log':
+                zone_log: str = specific_logger.split('.')[0]
             self._log_to_db(level=level, message=message, zone_log=zone_log, user=user)
         
         # Distribution vers les fichiers de logs par niveau
@@ -219,9 +221,11 @@ class CustomLogger:
             self.info_logger.info(message)
         elif level == logging.DEBUG:
             self.debug_logger.debug(message)
+        else:
+            self.debug_logger.log(level, message)
 
         # Log additionnel dans un fichier spécifique
-        self._create_specific_logger(specific_logger)
+        self._create_specific_logger(specific_logger).log(level, message)
 
 class QueryLogs:
     """
@@ -362,11 +366,19 @@ class QueryLogs:
         self.available_zones: List[Any] = self.collection.distinct('zone_log')  # type: ignore
         self.available_users: List[Any] = self.collection.distinct('user')  # type: ignore
         return self
+    
+    def __repr__(self) -> str:
+        return f"<QueryLogs page={self.page} limit={self.limit} total_logs={self.total_logs} available_zones={len(self.available_zones)} available_users={len(self.available_users)}>"
 
 
-DB_URI = "mongodb://acfc-logs:27017/"
-DB_NAME = "logDB"
+MONGO_USER = getenv('MONGO_APP_USER', 'user')
+MONGO_PASSWORD = getenv('MONGO_APP_PASSWORD', 'motdepasse')
+MONGO_HOST = getenv('MONGO_HOST', 'localhost')
+MONGO_PORT = getenv('MONGO_PORT', '27017')
+DB_NAME = getenv('MONGO_INITDB_DATABASE', 'logDB')
 COLLECTION_NAME = "traces"
+DB_URI = f'mongodb://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/{DB_NAME}?authSource={DB_NAME}'
+
 
 # Création du logger personnalisé
 acfc_log = CustomLogger(

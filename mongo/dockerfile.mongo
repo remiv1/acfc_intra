@@ -1,0 +1,15 @@
+FROM mongo:8.0.13
+
+# Installe gettext pour utiliser envsubst
+RUN apt-get update && apt-get install -y gettext-base
+
+# Copie le template JS et le fichier de configuration
+COPY mongo/init-mongo.template.js /docker-entrypoint-initdb.d/init-mongo.template.js
+COPY mongo/mongod.conf /etc/mongod.conf
+
+# Copie le script shell qui génère le JS final
+COPY mongo/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Utilise le script shell comme entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
