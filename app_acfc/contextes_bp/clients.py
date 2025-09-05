@@ -35,7 +35,7 @@ from app_acfc.modeles import (
     get_db_session, Client, Part, Pro, Telephone, Mail, Commande,
     Facture, Adresse, PrepareTemplates, Constants)
 from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE
-from logs.logger import acfc_log, ERROR
+from logs.logger import acfc_log
 from datetime import datetime
 from typing import List
 import logging
@@ -82,7 +82,7 @@ class ClientMethods:
             return 10.0  # Valeur par défaut : 10%
 
     @staticmethod
-    def test_part_pro(request: Request, type_client: int, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
+    def create_or_modify_client(request: Request, type_client: int, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
         '''
         Teste la création d'un client particulier ou professionnel.
         Création du client suivant le type.
@@ -170,9 +170,7 @@ def clients_list():
         - Tri par colonnes
         - Recherche textuelle libre
     """
-    return render_template('base.html', 
-                         context='clients',           # Context CSS/JS pour styling et page contextuelle
-                         sub_context='research')      # Sous-context personnalisation du contexte
+    return PrepareTemplates.clients(sub_context='research')
 
 # ================================================================
 # API REST - DONNÉES CLIENTS GLOBALES
@@ -285,10 +283,8 @@ def recherche_avancee():
         return jsonify([client.to_dict() for client in clients[:20]])  # Limite à 20 résultats
         
     except Exception as e:
-        acfc_log.log(ERROR, f"Erreur lors de la recherche avancée : {str(e)}")
-        return jsonify([])
-    finally:
-        db_session.close()
+        return PrepareTemplates.error_5xx(status_code=500, status_message=str(e), log=True)
+
 
 # ================================================================
 # DONNÉES CLIENTS INDIVIDUELLES
@@ -336,21 +332,7 @@ def get_client(id_client: int):
         return PrepareTemplates.error_4xx(status_code=404, log=True,
                                           status_message=Constants.messages('client', 'not_found'))
 
-@clients_bp.route('/<id_client>/commandes/en-cours')
-@validate_habilitation(CLIENTS)
-def get_commandes_en_cours(id_client: int):
-    """
-    Route de récupération des commandes en cours
-    """
-    db_session: SessionBdDType = get_db_session()
-    commandes: List[Commande] = (
-        db_session.query(Commande)
-        .filter(Commande.id_client == id_client, Commande.status == "en_cours")
-        .all()
-    )
-    return jsonify([c.to_dict() for c in commandes])
-
-@clients_bp.route('/<int:id_client>/modifier')
+@clients_bp.route('/<int:id_client>/modifier', methods=['GET'])
 @validate_habilitation(CLIENTS)
 def edit_client(id_client: int):
     """
@@ -366,15 +348,12 @@ def edit_client(id_client: int):
         # Récupération du nom d'affichage avant de fermer la session
         nom_affichage = client.nom_affichage
         id_client = client.id
-        return render_template(CLIENT_FORM['page'],
-                               title=f"ACFC - Modifier {nom_affichage}",
-                               context=CLIENT_FORM['context'],
-                               sub_context='edit',
-                               client=client,
-                               id_client=id_client,
-                               nom_affichage=nom_affichage)
+        return PrepareTemplates.clients(sub_context='edit', client=client,
+                                        id_client=id_client,
+                                        nom_affichage=nom_affichage)
     else:
-        return jsonify({"error": ERROR_CLIENT_NOT_FOUND}), 404
+        return PrepareTemplates.error_4xx(status_code=404, log=True,
+                                          status_message=Constants.messages('client', 'not_found'))
 
 @clients_bp.route('/nouveau', methods=['GET', 'POST'])
 @validate_habilitation(CLIENTS)
@@ -385,40 +364,38 @@ def create_client():
     GET : Affiche le formulaire de création
     POST : Traite les données et crée le client
     """
-    if request.method == 'GET': return render_template(CLIENT_FORM['page'],
-                               title=TITLE_NEW_CLIENT,
-                               context=CLIENT_FORM['context'],
-                               sub_context='create')
-    # Traitement POST
+    # === L'utilisateur demande le formulaire ===
+    if request.method == 'GET':
+        return PrepareTemplates.clients(sub_context='create')
+    
+    # === L'utilisateur soumet le formulaire ===
     db_session = get_db_session()
     try:
         # Validation des données requises
-        type_client_str = request.form.get('type_client')
-        if not type_client_str: raise ValueError("Le type de client est obligatoire")
-        type_client = int(type_client_str)
+        type_client = int(request.form.get('type_client', -1)) or -1
+        if type_client == -1: raise ValueError("Le type de client est obligatoire")
         notes = request.form.get('notes', '')
-        reduces = get_reduces(request)
+        reduces = ClientMethods.get_reduces(request)
         
         # Création du client de base
         nouveau_client = Client(
             type_client=type_client,
             notes=notes,
-            reduces=reduces
+            reduces=reduces,
+            created_by=session.get('pseudo', 'N/A')
         )
         db_session.add(nouveau_client)
         db_session.flush()  # Pour obtenir l'ID
         
-        # Création du client particulier ou professionnel
-        test_part_pro(request, type_client, nouveau_client, db_session)
+        # Création du client particulier ou professionnel suivant type
+        ClientMethods.create_or_modify_client(request, type_client, nouveau_client, db_session)
 
+        # Envoi du client en base de données
         db_session.commit()        
         
-        # Log de l'opération
-        acfc_log.log(level=logging.INFO,
-                             message=f'Nouveau client créé : ID {nouveau_client.id} par l\'utilisateur {session['pseudo']}',
-                             db_log=True)
-        
-        return redirect(url_for(CLIENT_DETAIL, id_client=nouveau_client.id, success_message='Prospect créé avec succès.'))
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                id_client=nouveau_client.id,
+                                success_message=Constants.messages('client', 'create')))
     except Exception as e:
         acfc_log.log(level=logging.ERROR,
                               message=f'Erreur lors de la création du client : {str(e)} par {session['pseudo']}.',
