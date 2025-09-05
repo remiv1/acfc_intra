@@ -10,5 +10,5 @@ catalogue_bp = Blueprint('catalogue',
 
 @validate_habilitation(GESTIONNAIRE)
 @catalogue_bp.route('/')
-def catalogue_list():
+def index():
     return jsonify({'products': []})

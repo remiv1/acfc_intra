@@ -1148,15 +1148,35 @@ class Constants:
         - log_files(type_log: str) -> str
     '''
     @staticmethod
-    def messages(type_msg: str, second_type_message: str):
+    def messages(type_msg: str, second_type_message: str) -> str:
         '''
         Retourne le message en fonction du type.
 
         Args:
-            type_msg (str): second_type_message (str):
+            type_msg (str):
+                - 'error_400'
+                - 'error_500'
+                - 'client'
+                - 'phone'
+                - 'email'
+                - 'address'
+                - 'user'
+                - 'security'
+                - 'commandes'
+                - 'factures'
+                - 'comptabilite'
+                - 'stock'
+                - 'commercial'
+                - 'warning'
+                - 'debug'
+                - 'info'
+            second_type_message (str):
                 - 'error_400': 'wrong_road' + 'not_found' + 'default'
                 - 'error_500': 'default'
                 - 'client': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                - 'phone': 'missing', 'invalid', 'exists', 'valid', 'default'
+                - 'email': 'missing', 'invalid', 'exists', 'valid', 'default'
+                - 'address': 'missing', 'invalid', 'exists', 'valid', 'default'
                 - 'user': 'create', 'update', 'to_update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
                 - 'security': 'default'
                 - 'commandes': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
@@ -1189,6 +1209,27 @@ class Constants:
                 'detail': "Détails du client affichés avec succès.",
                 'form': "Formulaire de client prêt à être rempli.",
                 'search': "Résultats de la recherche de clients affichés."
+            },
+            'phone': {
+                'missing': "Le numéro de téléphone est obligatoire.",
+                'invalid': "Le format du numéro de téléphone est invalide.",
+                'exists': "Le numéro de téléphone existe déjà.",
+                'valid': "Le numéro de téléphone est valide.",
+                'default': "Vérification du numéro de téléphone effectuée."
+            },
+            'email': {
+                'missing': "L'adresse email est obligatoire.",
+                'invalid': "Le format de l'adresse email est invalide.",
+                'exists': "L'adresse email existe déjà.",
+                'valid': "L'adresse email est valide.",
+                'default': "Vérification de l'adresse email effectuée."
+            },
+            'address': {
+                'missing': "L'adresse est obligatoire.",
+                'invalid': "Le format de l'adresse est invalide.",
+                'exists': "L'adresse existe déjà.",
+                'valid': "L'adresse est valide.",
+                'default': "Vérification de l'adresse effectuée."
             },
             'user': {
                 'create': "Nouvel utilisateur créé avec succès.",
@@ -1371,13 +1412,46 @@ class Constants:
 
         Args:
             domain (str):
-                - 'admin' + 'clients' + 'commandes' + 'comptabilite' + 'commercial' + 'factures' + 'stock' + 'users'
+                - 'admin'
+                - 'clients'
+                - 'commandes'
+                - 'comptabilite'
+                - 'commercial'
+                - 'factures'
+                - 'stock'
+                - 'users'
             sub_domain (str):
-                - 'accueil' + 'logs-dashboard'
-                - 'client-detail' + 'client-form' + 'client-search'
-                - 'commande-detail' + 'commande-form' + 'commande-print'
-                - 'factures' 
-                - 'commercial-clt-target'
+                - admin :
+                    - 'accueil'
+                    - 'logs-dashboard'
+                    - 'logs-export'
+                - clients :
+                    - 'recherche'
+                    - 'recherche-api'
+                    - 'creation'
+                    - 'detail'
+                    - 'modifier-get'
+                    - 'modifier-post'
+                    - 'phone-add'
+                    - 'mail-add'
+                - commandes :
+                    - 'commande-detail'
+                    - 'commande-form'
+                    - 'commande-print'
+                    - 'factures'
+                    - 'commercial-clt-target'
+                - commercial :
+                    - 'accueil'
+                    - 'filtrage'
+                    - 'filtrage-api'
+                - comptabilite :
+                    - 'accueil'
+                - factures : {}
+                - stocks :
+                    - 'accueil'
+                - users : {}
+                - catalogue :
+                    - 'accueil'
         Returns:
             str: Nom du template de la page
         '''
@@ -1394,6 +1468,9 @@ class Constants:
                 'detail': 'clients.get_client',
                 'modifier-get': 'clients.edit_client',
                 'modifier-post': 'clients.update_client',
+                'phone-add': 'clients.add_phone',
+                'mail-add': 'clients.add_email',
+                'address-add': 'clients.add_address',
             },
             'commandes': {
                 'commande-detail': 'commandes.commande_detail',
@@ -1405,7 +1482,6 @@ class Constants:
                 'accueil': 'commercial.commercial_index',
                 'filtrage': 'commercial.clients_liste',
                 'filtrage-api': 'commercial.clients_api_search',
-
             },
             'comptabilite': {
                 'accueil': 'comptabilite.comptabilite_index',
@@ -1416,7 +1492,7 @@ class Constants:
             },
             'users': {},
             'catalogue':{
-                'liste': 'catalogue.catalogue_list',
+                'accueil': 'catalogue.index',
             }
         }
         return pages.get(domain, {}).get(sub_domain, '')
@@ -1432,9 +1508,8 @@ class PrepareTemplates:
     '''
     BASE: str = Constants.templates('base')
 
-
     @staticmethod
-    def login(message: Optional[str]=None, subcontext: str='login', username: Optional[str]=None, log: bool=False) -> str:
+    def login(message: Optional[str]=None, subcontext: str='login', log: bool=False, **kwargs: Any) -> str:
         '''
         Génère le template de la page de login.
 
@@ -1446,18 +1521,16 @@ class PrepareTemplates:
         if log:
             acfc_log.log(level=INFO, message=message or '',
                          specific_logger=Constants.log_files('user'),
-                         user=username or 'N/A', db_log=True)
+                         user=session.get('pseudo', 'N/A'), db_log=True)
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Authentification',
                                context='login',
                                subcontext=subcontext,
                                message=message,
-                               username=username)
-
+                               **kwargs)
 
     @staticmethod
-    def admin(message: Optional[str]=None,
-              log: bool=False, **kwargs: Any) -> str:
+    def admin(message: Optional[str]=None, log: bool=False, **kwargs: Any) -> str:
         '''
         Génère le template de la page d'administration.
 
@@ -1497,9 +1570,8 @@ class PrepareTemplates:
                                subcontext=sub_context,
                                **kwargs)
 
-
     @staticmethod
-    def users(subcontext: Optional[str]=None, message: Optional[str]=None, **kwargs: Any) -> str:
+    def users(subcontext: Optional[str]=None, message: Optional[str]=None, log: bool=False, **kwargs: Any) -> str:
         '''
         Génère le template de la page utilisateurs.
 
@@ -1508,13 +1580,16 @@ class PrepareTemplates:
         Returns:
             str: Template de la page utilisateurs
         '''
+        if log:
+            acfc_log.log(level=INFO, message=message or '',
+                         specific_logger=Constants.log_files('user'),
+                         user=session.get('pseudo', 'N/A'), db_log=True)
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Administration Utilisateurs',
                                context='user',
                                message=message,
                                subcontext=subcontext,
                                **kwargs)
-
 
     @staticmethod
     def default(objects: Optional[List[Any]], message: Optional[str]=None) -> str:
@@ -1531,7 +1606,6 @@ class PrepareTemplates:
                                context='default',
                                message=message,
                                objects=objects)
-
 
     @staticmethod
     def error_4xx(status_code: int, status_message: str, log: bool=False, specific_log: Optional[str]=None) -> str:

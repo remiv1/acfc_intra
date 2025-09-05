@@ -27,18 +27,16 @@ Sécurité :
 Auteur : Rémi Verschuur - Module CRM
 Version : 1.0
 """
-
-from flask import Blueprint, render_template, jsonify, request, redirect, url_for, Request, session
+from flask import Blueprint, jsonify, request, redirect, url_for, Request, session
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy import or_, func
+from werkzeug import Response as ResponseWerkzeug
 from app_acfc.modeles import (
     get_db_session, Client, Part, Pro, Telephone, Mail, Commande,
     Facture, Adresse, PrepareTemplates, Constants)
 from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE
-from logs.logger import acfc_log
 from datetime import datetime
 from typing import List
-import logging
 
 # ================================================================
 # CONFIGURATION DU BLUEPRINT CRM CLIENTS
@@ -82,7 +80,8 @@ class ClientMethods:
             return 10.0  # Valeur par défaut : 10%
 
     @staticmethod
-    def create_or_modify_client(request: Request, type_client: int, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
+    def create_or_modify_client(request: Request, type_client: int, client: Client,
+                                db_session: SessionBdDType, type_test: str = 'create') -> None:
         '''
         Teste la création d'un client particulier ou professionnel.
         Création du client suivant le type.
@@ -94,7 +93,8 @@ class ClientMethods:
             ClientMethods.create_or_modify_pro(request, client, db_session, type_test)
 
     @staticmethod
-    def create_or_modify_part(request: Request, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
+    def create_or_modify_part(request: Request, client: Client, db_session: SessionBdDType,
+                              type_test: str = 'create') -> None:
         """
         Crée ou modifie un client particulier.
 
@@ -120,7 +120,8 @@ class ClientMethods:
         db_session.add(part) if type_test == 'create' else db_session.merge(part)
 
     @staticmethod
-    def create_or_modify_pro(request: Request, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
+    def create_or_modify_pro(request: Request, client: Client,
+                             db_session: SessionBdDType, type_test: str = 'create') -> None:
         """
         Crée ou modifie un client professionnel.
 
@@ -153,7 +154,7 @@ class ClientMethods:
 @validate_habilitation(CLIENTS)
 @validate_habilitation(GESTIONNAIRE)
 @clients_bp.route('/rechercher', methods=['GET'])
-def clients_list():
+def clients_list() -> str:
     """
     Interface de recherche et filtrage des clients.
     
@@ -179,7 +180,7 @@ def clients_list():
 @validate_habilitation(GESTIONNAIRE)
 @validate_habilitation(CLIENTS)
 @clients_bp.route('/recherche_avancee', methods=['GET'])
-def recherche_avancee():
+def recherche_avancee() -> ResponseWerkzeug | str:
     """
     API REST : Recherche avancée de clients.
     
@@ -293,7 +294,7 @@ def recherche_avancee():
 
 @clients_bp.route('/nouveau', methods=['GET', 'POST'])
 @validate_habilitation(CLIENTS)
-def create_client():
+def create_client() -> str | ResponseWerkzeug:
     """
     Création d'un nouveau client (particulier ou professionnel).
     
@@ -338,12 +339,13 @@ def create_client():
 
 @clients_bp.route('/<int:id_client>', methods=['GET'])
 @validate_habilitation(CLIENTS)
-def get_client(id_client: int):
+def get_client(id_client: int) -> str:
     """
     Route de récupération d'un client et de tout son contexte par son ID.
     Contexte du client :
         - Téléphones
         - Mails
+        - Adresses
         - Commandes
         - Factures
     Pour le moment, retour sous forme de dictionnaire, mais par la suite, intégration dans une page.
@@ -381,9 +383,14 @@ def get_client(id_client: int):
 
 @clients_bp.route('/<int:id_client>/modifier', methods=['GET'])
 @validate_habilitation(CLIENTS)
-def edit_client(id_client: int):
+def edit_client(id_client: int) -> str:
     """
     Route d'affichage du formulaire de modification d'un client existant.
+    Récupère les informations actuelles du client et les affiche dans un formulaire.
+    Args:
+        id_client (int): ID du client à modifier
+    Returns:
+        str: Template HTML du formulaire de modification avec les données pré-remplies
     """
     db_session: SessionBdDType = get_db_session()
     client: Client | None = db_session.query(Client).options(
@@ -404,9 +411,19 @@ def edit_client(id_client: int):
 
 @validate_habilitation(CLIENTS)
 @clients_bp.route('/<int:id_client>/update', methods=['POST'])
-def update_client(id_client: int):
+def update_client(id_client: int) -> ResponseWerkzeug | str:
     """
     Mise à jour des informations d'un client existant.
+    Endpoint REST pour modifier les informations d'un client.
+    Accepte les données via un formulaire POST.
+    Form Data:
+        - id_client (int): ID du client à modifier
+        - type_client (int): Type de client (1=particulier, 2=professionnel)
+        - notes (str): Notes internes
+        - reduces (float): Taux de réduction en pourcentage (ex: 10 pour 10%)
+        - Données spécifiques au type de client (particulier ou professionnel)
+    Returns:
+        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
     """
     db_session = get_db_session()
     client = None
@@ -432,34 +449,27 @@ def update_client(id_client: int):
         reduces = request.form.get('reduces', '10')
         client.reduces = float(reduces) / 100
         type_client = client.type_client
+        client.modified_by = session.get('pseudo', 'N/A')
 
         # Création du client part ou pro suivant le context
-        test_part_pro(request, type_client, client, db_session, type_test='update')
-        
-        # Intégration dans la base de données et log des opérations 
+        ClientMethods.create_or_modify_client(request=request, type_client=type_client,
+                                              client=client, db_session=db_session,
+                                              type_test='update')
+
+        # Intégration dans la base de données
         db_session.commit()
-        acfc_log.log(level=logging.INFO,
-                             message=f'Client modifié : ID {client.id} par {session['pseudo']}.',
-                             db_log=True)
         
         # Redirection vers la page de détails du client avec message de succès
-        return redirect(url_for(CLIENT_DETAIL, id_client=client.id, success_message="Client modifié avec succès"))
+        return PrepareTemplates.clients(success_message=Constants.messages('client', 'update'), id_client=client.id)
     except Exception as e:
-        acfc_log.log(level=logging.ERROR,
-                             message=f'Erreur lors de la modification du client {id_client} par {session['pseudo']} : {str(e)}',
-                             db_log=True)
-        return render_template(CLIENT_FORM['page'],
-                               title=TITLE_EDIT_CLIENT,
-                               context=CLIENT_FORM['context'],
-                               sub_context='edit',
-                               client=client,
-                               id_client=client.id if client else id_client,
-                               nom_affichage=nom_affichage if nom_affichage else f"Client {id_client}",
-                               error_message=f"Erreur lors de la modification : {str(e)}")
+        return PrepareTemplates.clients(sub_context='edit', client=client, log=True,
+                                        id_client=client.id if client else id_client,
+                                        nom_affichage=nom_affichage if nom_affichage else f"Client {id_client}",
+                                        error_message=Constants.messages('error_500', 'default') + f" : {e}")
 
-@clients_bp.route('/add_phone/', methods=['POST'])
+@clients_bp.route('<int:id_client>/add_phone/', methods=['POST'])
 @validate_habilitation(CLIENTS)
-def clients_add_phone():
+def add_phone(id_client: int) -> ResponseWerkzeug:
     """
     Ajout d'un numéro de téléphone pour un client.
     
@@ -475,26 +485,21 @@ def clients_add_phone():
         - is_principal (bool, optional): Téléphone principal
     
     Returns:
-        JSON: Message de succès ou d'erreur avec code HTTP approprié
+        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
     """
     db_session = get_db_session()
     client = None
-    id_client = None
 
     try:
         # Récupération et validation des données
-        id_client = request.form.get('id_client')
-        if not id_client:
-            return jsonify({"error": ERROR_CLIENT_ID_MISSING}), 400
-            
         client = db_session.query(Client).get(id_client)
-        if not client:
-            return jsonify({"error": ERROR_CLIENT_NOT_FOUND}), 404
+        if not client: return redirect(url_for(Constants.return_pages('clients', 'client-search')))
 
         # Validation du numéro de téléphone
         telephone = request.form.get('telephone', '').strip()
-        if not telephone:
-            return jsonify({"error": ERROR_PHONE_MISSING}), 400
+        if not telephone: return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+                                                  id_client=id_client,
+                                                  error_message=Constants.messages('phone', 'missing')))
 
         # Récupération des autres données
         type_telephone = request.form.get('type_telephone', 'mobile_pro')
@@ -503,8 +508,9 @@ def clients_add_phone():
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
 
         # Si c'est le téléphone principal, désactiver les autres
-        if is_principal:
-            db_session.query(Telephone).filter_by(id_client=client.id, is_principal=True).update({'is_principal': False})
+        if is_principal: db_session.query(Telephone).filter_by(
+            id_client=client.id, is_principal=True
+            ).update({'is_principal': False})
 
         # Création du nouveau téléphone
         new_telephone = Telephone(
@@ -516,20 +522,23 @@ def clients_add_phone():
             is_principal=is_principal
         )
         
+        # Enregistrement en base de données
         db_session.add(new_telephone)
         db_session.commit()
 
-        acfc_log.log(logging.INFO, f"Téléphone ajouté avec succès pour le client {id_client}", specific_logger=LOG_CLIENTS_FILE, db_log=False)
-        return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message="Téléphone ajouté avec succès"))
+        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+                                id_client=id_client, success_message=Constants.messages('phone', 'valid')))
 
     except Exception as e:
-        error_msg = f"Erreur lors de l'ajout du téléphone pour le client {id_client}" if id_client else "Erreur lors de l'ajout du téléphone"
-        acfc_log.log(logging.ERROR, f"{error_msg} : {str(e)}")
-        return redirect(url_for(CLIENT_DETAIL, id_client=id_client, error_message=f"Erreur lors de l'ajout du téléphone : {e}"))
+        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+                                 id_client=id_client, log=True,
+                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
-@clients_bp.route('/add_email/', methods=['POST'])
+# TODO: Faire une méthode modifier/supprimer pour les téléphones, emails et adresses
+
+@clients_bp.route('/<int:id_client>/add_email/', methods=['POST'])
 @validate_habilitation(CLIENTS)
-def clients_add_email():
+def add_email(id_client: int) -> ResponseWerkzeug:
     """
     Ajout d'un email pour un client.
     
@@ -544,30 +553,27 @@ def clients_add_email():
         - is_principal (bool, optional): Email principal
     
     Returns:
-        JSON: Message de succès ou d'erreur avec code HTTP approprié
+        Page redirection avec message de succès ou d'erreur
     """
     db_session = get_db_session()
     client = None
-    id_client = None
 
     try:
         # Récupération et validation des données
-        id_client = request.form.get('id_client')
-        if not id_client:
-            return jsonify({"error": ERROR_CLIENT_ID_MISSING}), 400
-            
         client = db_session.query(Client).get(id_client)
-        if not client:
-            return jsonify({"error": ERROR_CLIENT_NOT_FOUND}), 404
+        if not client: return redirect(url_for(Constants.return_pages('clients', 'client-search')))
 
         # Validation de l'email
         email = request.form.get('mail', '').strip()
-        if not email:
-            return jsonify({"error": ERROR_EMAIL_MISSING}), 400
+        if not email: return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+                                                  id_client=id_client,
+                                                  error_message=Constants.messages('email', 'missing')))
 
         # Validation basique du format email
         if '@' not in email or '.' not in email.split('@')[-1]:
-            return jsonify({"error": ERROR_EMAIL_INVALID}), 400
+            return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+                                                  id_client=id_client,
+                                                  error_message=Constants.messages('email', 'invalid')))
 
         # Récupération des autres données
         type_mail = request.form.get('type_mail', 'professionnel')
@@ -575,8 +581,9 @@ def clients_add_email():
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
 
         # Si c'est l'email principal, désactiver les autres
-        if is_principal:
-            db_session.query(Mail).filter_by(id_client=client.id, is_principal=True).update({'is_principal': False})
+        if is_principal: db_session.query(Mail).filter_by(
+            id_client=client.id, is_principal=True
+            ).update({'is_principal': False})
 
         # Création du nouvel email
         new_mail = Mail(
@@ -584,22 +591,25 @@ def clients_add_email():
             mail=email,
             type_mail=type_mail,
             detail=detail if detail else None,
-            is_principal=is_principal
+            is_principal=is_principal,
+            created_by=session.get('pseudo', 'N/A')
         )
         
+        # Enregistrement en base de données
         db_session.add(new_mail)
         db_session.commit()
 
-        acfc_log.log(logging.INFO, f"Email ajouté avec succès pour le client {id_client}")
-        return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message="Email ajouté avec succès"))
+        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+                                id_client=id_client, success_message="Email ajouté avec succès"))
 
     except Exception as e:
-        acfc_log.log(logging.ERROR, f"Erreur lors de l'ajout de l'email pour le client {id_client} : {str(e)}")
-        return redirect(url_for(CLIENT_DETAIL, id_client=id_client, error_message=f"Erreur lors de l'ajout de l'email : {e}"))
+        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+                                id_client=id_client, log=True,
+                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
-@clients_bp.route('/add_address/', methods=['POST'])
+@clients_bp.route('/<int:id_client>/add_address/', methods=['POST'])
 @validate_habilitation(CLIENTS)
-def clients_add_address():
+def add_address(id_client: int) -> ResponseWerkzeug:
     """
     Ajout d'une adresse pour un client.
     
@@ -615,42 +625,34 @@ def clients_add_address():
         - is_principal (bool, optional): Si c'est l'adresse principale
     
     Returns:
-        JSON: Message de succès ou d'erreur avec code HTTP approprié
+        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
     """
     db_session = get_db_session()
     client = None
-    id_client = None
 
     try:
         # Récupération et validation des données
-        id_client = request.form.get('id_client')
-        if not id_client:
-            return jsonify({"error": ERROR_CLIENT_ID_MISSING}), 400
-            
         client = db_session.query(Client).get(id_client)
         if not client:
-            return jsonify({"error": ERROR_CLIENT_NOT_FOUND}), 404
+            return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+                                    id_client=id_client, error_message=Constants.messages('client', 'not_found')))
 
         # Validation des données d'adresse
         adresse_l1 = request.form.get('adresse_l1', '').strip()
-        if not adresse_l1:
-            return jsonify({"error": ERROR_ADDRESS_MISSING}), 400
-
         code_postal = request.form.get('code_postal', '').strip()
-        if not code_postal:
-            return jsonify({"error": ERROR_POSTAL_CODE_MISSING}), 400
-
         ville = request.form.get('ville', '').strip()
-        if not ville:
-            return jsonify({"error": ERROR_CITY_MISSING}), 400
-
-        # Récupération des données optionnelles
         adresse_l2 = request.form.get('adresse_l2', '').strip()
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
+        if not adresse_l1 or not code_postal or not ville: return redirect(
+            url_for(Constants.return_pages('clients', 'client-detail'),
+                    id_client=id_client, error_message=Constants.messages('address', 'missing')
+                    )
+            )
 
         # Si c'est l'adresse principale, désactiver les autres
-        if is_principal:
-            db_session.query(Adresse).filter_by(id_client=client.id, is_principal=True).update({'is_principal': False})
+        if is_principal: db_session.query(Adresse).filter_by(
+            id_client=client.id, is_principal=True
+            ).update({'is_principal': False})
 
         # Création de la nouvelle adresse
         new_adresse = Adresse(
@@ -659,15 +661,17 @@ def clients_add_address():
             adresse_l2=adresse_l2 if adresse_l2 else None,
             code_postal=code_postal,
             ville=ville,
-            is_principal=is_principal
+            is_principal=is_principal,
+            created_by=session.get('pseudo', 'N/A')
         )
         
+        # Enregistrement en base de données
         db_session.add(new_adresse)
         db_session.commit()
 
-        acfc_log.log(logging.INFO, f"Adresse ajoutée avec succès pour le client {id_client}")
-        return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message="Adresse ajoutée avec succès"))
+        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+                                id_client=id_client, success_message=Constants.messages('address', 'valid')))
 
     except Exception as e:
-        acfc_log.log(logging.ERROR, f"Erreur lors de l'ajout de l'adresse pour le client {id_client} : {str(e)}")
-        return redirect(url_for(CLIENT_DETAIL, id_client=id_client, error_message=f"Erreur lors de l'ajout de l'adresse : {e}"))
+        return redirect(url_for(Constants.return_pages('clients', 'client-detail'), id_client=id_client,
+                                error_message=Constants.messages('error_500', 'default') + f" : {e}", log=True))
