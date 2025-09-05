@@ -5,15 +5,18 @@
 **Branche de développement :** `sprint_orders`  
 **Développeur :** Rémi Verschuur
 
----
-
 ## Vue d'ensemble du projet
 
 **ACFC Intranet** est une application web de gestion d'entreprise développée avec Flask, utilisant une architecture containerisée avec Docker et une base de données relationnelle. L'application couvre plusieurs domaines fonctionnels : gestion des clients, catalogue produits, activité commerciale, comptabilité et gestion des stocks.
 
 **Architecture :** Application full-stack avec FastAPI pour l'API, Flask pour l'interface web, MariaDB/MongoDB pour les données, Nginx comme reverse proxy, et un système de messagerie intégré.
 
----
+### Statistiques de volume de code par langage (au 4 septembre 2025)
+
+- **Python** : 2 268 537 lignes
+- **CSS** : 3 272 lignes
+- **JavaScript** : 7 359 lignes
+- **HTML** : 13 224 lignes
 
 ## Analyse chronologique des réalisations
 
