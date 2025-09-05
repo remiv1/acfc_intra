@@ -326,6 +326,9 @@ class Client(Base):
     
     # === MÉTADONNÉES ===
     created_at = mapped_column(Date, default=func.now(), nullable=False, comment="Date de création du client")
+    created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé le client")
+    modified_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False, comment="Date de modification du client")
+    modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié le client")
     is_active = mapped_column(Boolean, default=True, nullable=False, comment="Client actif/inactif")
     notes = mapped_column(Text, nullable=True, comment="Notes libres sur le client")
     reduces = mapped_column(Numeric(4,3), default=0.10, nullable=False, comment="Réduction appliquée au client")
@@ -474,6 +477,13 @@ class Mail(Base):
     is_principal = mapped_column(Boolean, default=False, nullable=False, 
                                 comment="Email principal pour ce client (un seul par client)")
     
+    # === MÉTADONNÉES ===
+    created_at = mapped_column(Date, default=func.now(), nullable=False)
+    created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé l'email")
+    modified_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False)
+    modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié l'email")
+    is_inactive = mapped_column(Boolean, default=False, nullable=False)
+    
     def __repr__(self) -> str:
         principal = " (Principal)" if self.is_principal else ""
         return f"<Mail(id={self.id}, client_id={self.id_client}, email='{self.mail}'{principal})>"
@@ -514,6 +524,13 @@ class Telephone(Base):
     indicatif = mapped_column(String(5), nullable=True, comment="Indicatif pays (ex: +33, +1, +49)")
     telephone = mapped_column(String(255), nullable=False, comment="Numéro de téléphone local")
     is_principal = mapped_column(Boolean, default=False, nullable=False)
+
+    # === MÉTADONNÉES ===
+    created_at = mapped_column(Date, default=func.now(), nullable=False)
+    created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé le téléphone")
+    modified_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False, comment="Date de modification du téléphone")
+    modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié le téléphone")
+    is_inactive = mapped_column(Boolean, default=False, nullable=False)
     
     def __repr__(self) -> str:
         numero_complet = f"{self.indicatif}{self.telephone}" if self.indicatif else self.telephone
@@ -540,7 +557,10 @@ class Adresse(Base):
     is_principal = mapped_column(Boolean, default=False, nullable=False, 
                                 comment="Adresse principale pour ce client (une seule par client)")
     created_at = mapped_column(Date, default=func.now(), nullable=False)
-    is_active = mapped_column(Boolean, default=True, nullable=False)
+    created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé l'adresse")
+    modified_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False)
+    modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié l'adresse")
+    is_inactive = mapped_column(Boolean, default=False, nullable=False)
 
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE GESTION DES COMMANDES ET FACTURATION
@@ -579,6 +599,12 @@ class Commande(Base):
                                    comment="Date de première expédition (compatibilité)")
     id_suivi = mapped_column(String(100), nullable=True,
                             comment="Premier numéro de suivi (compatibilité)")
+
+    # === MÉTADONNÉES ===
+    created_at = mapped_column(DateTime, default=func.now(), nullable=False)
+    created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé la commande")
+    modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié la commande")
 
 class DevisesFactures(Base):
     '''Représente les éléments des commandes et des factures dans le système.'''
@@ -621,9 +647,9 @@ class DevisesFactures(Base):
                               comment="Utilisateur qui a créé cette ligne")
     created_at = mapped_column(DateTime, default=func.now(), nullable=False,
                               comment="Date de création de cette ligne")
-    updated_by = mapped_column(String(100), nullable=True,
+    modified_by = mapped_column(String(100), nullable=True,
                               comment="Utilisateur qui a modifié cette ligne")
-    updated_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False,
+    modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False,
                               comment="Date de dernière modification")
 
 class Facture(Base):
@@ -650,6 +676,10 @@ class Facture(Base):
     is_prestation_facturee = mapped_column(Boolean, default=False, nullable=False)
     composantes_factures = relationship("DevisesFactures", primaryjoin="Facture.id == foreign(DevisesFactures.id_facture)",
                                         back_populates="facture")
+
+    # === MÉTADONNÉES ===
+    created_at = mapped_column(DateTime, default=func.now(), nullable=False)
+    created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé la facture")
 
     # --- Méthodes de la classe Facture
     def generate_fiscal_id(self) -> str:
@@ -696,14 +726,21 @@ class Expeditions(Base):
     """Table des expéditions simplifiée"""
     __tablename__ = '14_expeditions'
     
+    # === IDENTIFIANT ET LIAISON ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_commande = mapped_column(Integer, ForeignKey('11_commandes.id'), nullable=False)
     devises = relationship("DevisesFactures", back_populates="expedition")
+
+    # === DONNÉES DE L'EXPÉDITION ===
     is_main_propre = mapped_column(Boolean, default=False, nullable=False)
     numero_expedition = mapped_column(String(50), nullable=False)
     date_expedition_remise = mapped_column(Date, nullable=False)
+
+    # === MÉTADONNÉES ===
     created_by = mapped_column(String(50), nullable=True)
-    created_at = mapped_column(DateTime, default=func.now)
+    created_at = mapped_column(DateTime, default=func.now())
+    modified_by = mapped_column(String(50), nullable=True)
+    modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now())
 
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE GESTION DES PRODUITS
@@ -732,9 +769,11 @@ class Catalogue(Base):
     geographie = mapped_column(String(10), Computed("UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(stype_produit, ' ', 4), ' ', -1))", persisted=True))
     poids = mapped_column(String(5), Computed("SUBSTRING_INDEX(SUBSTRING_INDEX(stype_produit, ' ', 3), ' ', -1)", persisted=True))
 
-    # === DATES DE CREATION ET DE MISE A JOUR ===
+    # === MÉTADONNÉES ===
     created_at = mapped_column(Date, server_default=func.current_date(), nullable=False)
-    updated_at = mapped_column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp(), nullable=False)
+    created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé le produit")
+    modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié le produit")
 
     # === PROPRIÉTÉS CALCULÉES (ref_auto et des_auto) ===
     @property
@@ -788,6 +827,13 @@ class Operations(Base):
     ventilations = relationship("Ventilations", back_populates="operation")
     documents = relationship("Documents", back_populates="operation")
 
+    # === MÉTADONNÉES ===
+    created_at = mapped_column(DateTime, default=func.now(), nullable=False)
+    created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé l'opération")
+    modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié l'opération")
+    is_inactive = mapped_column(Boolean, default=False, nullable=False, comment="Opération inactive (soft delete)")
+
 class Ventilations(Base):
     """Classe représentant les ventilations comptables."""
     __tablename__ = '32_ventilations'
@@ -809,6 +855,13 @@ class Ventilations(Base):
     compte = relationship('PCG', primaryjoin='Ventilations.compte_id == PCG.compte')
     operation = relationship("Operations", back_populates="ventilations")
 
+    # === MÉTADONNÉES ===
+    created_at = mapped_column(DateTime, default=func.now(), nullable=False)
+    created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé la ventilation")
+    modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié la ventilation")
+    is_inactive = mapped_column(Boolean, default=False, nullable=False, comment="Ventilation inactive (soft delete)")
+
 class Documents(Base):
     """Classe représentant les documents comptables."""
     __tablename__ = '33_documents'
@@ -825,6 +878,13 @@ class Documents(Base):
 
     # === RELATIONS ===
     operation = relationship("Operations", back_populates="documents")
+
+    # === MÉTADONNÉES ===
+    created_at = mapped_column(DateTime, default=func.now(), nullable=False)
+    created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé le document")
+    modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié le document")
+    is_inactive = mapped_column(Boolean, default=False, nullable=False, comment="Document inactif (soft delete)")
 
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE GESTION DES STOCKS
@@ -998,7 +1058,8 @@ class MyAccount:
         """
         user: User = db_session.query(User).filter_by(pseudo=pseudo).first()
         if not user:
-            return PrepareTemplates.error_4xx(message='Utilisateur non trouvé.')
+            return PrepareTemplates.error_4xx(status_code=404, log=True,
+                                              status_message=Constants.messages('user', 'not_found'))
         return user
 
     @staticmethod
@@ -1302,6 +1363,51 @@ class Constants:
             'users': 'users.html',
         }
         return templates.get(name, '')
+    
+    @staticmethod
+    def return_pages(domain: str, sub_domain: str) -> str:
+        '''
+        Retourne le nom du template de la page en fonction du domaine et du sous-domaine.
+
+        Args:
+            domain (str):
+                - 'admin' + 'clients' + 'commandes' + 'comptabilite' + 'commercial' + 'factures' + 'stock' + 'users'
+            sub_domain (str):
+                - 'accueil' + 'logs-dashboard'
+                - 'client-detail' + 'client-form' + 'client-search'
+                - 'commande-detail' + 'commande-form' + 'commande-print'
+                - 'factures' 
+                - 'commercial-clt-target'
+        Returns:
+            str: Nom du template de la page
+        '''
+        pages: Dict[str, Dict[str, str]] = {
+            'admin': {
+                'accueil': 'admin.admin_list',
+                'logs-dashboard': 'admin.logs_dashboard',
+                'logs-export': 'admin.logs_export',
+            },
+            'clients': {
+                'recherche': 'clients.clients_list',
+                'recherche-api': 'clients.recherche_avancee',
+                'detail': 'clients.get_client',
+                'modifier': 'clients.edit_client',
+            },
+            'commandes': {
+                'commande-detail': 'commandes.commande_detail',
+                'commande-form': 'commandes.commande_form',
+                'commande-print': 'commandes.commande_print',
+                'factures': 'commandes.factures',
+            },
+            'commercial': {
+                'commercial-clt-target': 'commercial.commercial_clients_target',
+            },
+            'comptabilite': {},
+            'factures': {},
+            'stock': {},
+            'users': {},
+        }
+        return pages.get(domain, {}).get(sub_domain, '')
 
 class PrepareTemplates:
     '''
@@ -1359,7 +1465,7 @@ class PrepareTemplates:
                                **kwargs)
 
     @staticmethod
-    def clients(message: Optional[str]=None) -> str:
+    def clients(sub_context: Optional[str]=None, message: Optional[str]=None, log: bool=False, **kwargs: Any) -> str:
         '''
         Génère le template de la page clients.
 
@@ -1368,10 +1474,16 @@ class PrepareTemplates:
         Returns:
             str: Template de la page clients
         '''
+        if log:
+            acfc_log.log(level=INFO, message=message or '',
+                         specific_logger=Constants.log_files('client'),
+                         user=session.get('pseudo', 'N/A'), db_log=True)
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Gestion Clients',
                                context='clients',
-                               message=message)
+                               message=message,
+                               subcontext=sub_context,
+                               **kwargs)
 
 
     @staticmethod
@@ -1410,7 +1522,7 @@ class PrepareTemplates:
 
 
     @staticmethod
-    def error_4xx(message: Optional[str]=None, log: bool=False, username: Optional[str]=None, **kwargs: Any) -> str:
+    def error_4xx(status_code: int, status_message: str, log: bool=False) -> str:
         '''
         Génère le template de la page d'erreur 4xx.
 
@@ -1419,21 +1531,22 @@ class PrepareTemplates:
         Returns:
             str: Template de la page d'erreur 4xx
         '''
-        if message is None:
-            message = Constants.messages('error_400', 'default') \
-                        + f'\n{kwargs.get("error_code", "")} : {kwargs.get("error_message", "")}'
+        username = session.get('pseudo', 'N/A')
+        message = Constants.messages('error_400', 'default') \
+                    + f'\ncode erreur : {status_code}' \
+                    + f'\ndescription : {status_message}'
         if log:
-            acfc_log.log(level=ERROR, message=message or '',
+            acfc_log.log(level=ERROR, message=message,
                          specific_logger=Constants.log_files('400'),
                          db_log=True, user=username or 'N/A')
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Erreur chez vous',
-                               context='400',
-                               message=message,
-                               **kwargs)
+                               context='400', message=message,
+                               status_code=status_code,
+                               status_message=status_message)
 
     @staticmethod
-    def error_5xx(message: Optional[str]=None, log: bool=False, user: Optional[str]=None, **kwargs: Any) -> str:
+    def error_5xx(status_code: int, status_message: str, log: bool=False) -> str:
         '''
         Génère le template de la page d'erreur 5xx.
 
@@ -1442,15 +1555,16 @@ class PrepareTemplates:
         Returns:
             str: Template de la page d'erreur 5xx
         '''
-        if message is None:
-            message = Constants.messages('error_500', 'default') + \
-                        f'\n{kwargs.get("error_code", "")} : {kwargs.get("error_message", "")}'
+        username = session.get('pseudo', 'N/A')
+        message = Constants.messages('error_500', 'default') \
+                    + f'\ncode erreur : {status_code}' \
+                    + f'\ndescription : {status_message}'
         if log:
             acfc_log.log(level=ERROR, message=message or '',
                          specific_logger=Constants.log_files('500'),
-                         db_log=True, user=user or 'N/A')
+                         db_log=True, user=username)
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Erreur chez nous',
-                               context='500',
-                               message=message,
-                               **kwargs)
+                               context='500', message=message,
+                               status_code=status_code,
+                               status_message=status_message)
