@@ -1,91 +1,22 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 04 September 2025  
-**Période analysée :** 28 August 2025 - 04 September 2025 (7 jours)  
-**Nombre de commits :** 65  
+**Date du rapport :** 05 September 2025  
+**Période analysée :** 29 August 2025 - 05 September 2025 (7 jours)  
+**Nombre de commits :** 41  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 65 commits sur 7 jours  
-**Volume de code :** 21211 lignes ajoutées, 19525 lignes supprimées  
-**Fichiers impactés :** 663 fichiers modifiés  
-**Productivité moyenne :** 3030 lignes/jour
+**Activité de développement :** 41 commits sur 7 jours  
+**Volume de code :** 13419 lignes ajoutées, 16774 lignes supprimées  
+**Fichiers impactés :** 423 fichiers modifiés  
+**Productivité moyenne :** 1917 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 28 August 2025
-
-#### 22:10 - b8d9519 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
-
-**Catégorie :** Développement général  
-**Impact :** +0 -0 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Merge: 729eb4c 2d4a531`
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Thu Aug 28 22:10:05 2025 +0200`
-- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
-
-#### 22:09 - 729eb4c - feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +37 -37 lignes, 7 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Thu Aug 28 22:09:49 2025 +0200`
-- `    feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker`
-- ... et 4 autres fichiers
-
-#### 20:03 - 2d4a531 - 📊 Mise à jour automatique du rapport de suivi (28/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +32 -32 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Thu Aug 28 20:03:12 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (28/08/2025)`
-- ... et 1 autres fichiers
-
-#### 22:02 - 07051d4 - feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +2 -2 lignes, 6 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Thu Aug 28 22:02:40 2025 +0200`
-- `    feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker`
-- ... et 3 autres fichiers
-
-#### 19:52 - 1c94c8f - 📊 Mise à jour automatique du rapport de suivi (28/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +33 -33 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Thu Aug 28 19:52:16 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (28/08/2025)`
-- ... et 1 autres fichiers
-
-#### 21:51 - bf26cdc - feat: Ajout de la gestion des comptes utilisateurs avec validation des formulaires et changement de mot de passe
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +64 -55 lignes, 10 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Thu Aug 28 21:51:43 2025 +0200`
-- `    feat: Ajout de la gestion des comptes utilisateurs avec validation des formulaires et changement de mot de passe`
-- ... et 8 autres fichiers
 
 
 ### 29 August 2025
@@ -144,301 +75,6 @@
 - `Date:   Fri Aug 29 19:32:41 2025 +0200`
 - `    fix: Remove obsolete unit tests and improve test structure`
 - ... et 13 autres fichiers
-
-#### 16:38 - 3ccf58d - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +37 -40 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Aug 29 16:38:18 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
-- ... et 1 autres fichiers
-
-#### 18:38 - 312297a - fix: Nettoyage des imports dans application.py et résolution des imports relatifs et redondants
-
-**Catégorie :** Correction de bugs  
-**Impact :** +0 -9 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 18:38:05 2025 +0200`
-- `    fix: Nettoyage des imports dans application.py et résolution des imports relatifs et redondants`
-- ... et 1 autres fichiers
-
-#### 16:06 - 8e6d915 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +56 -22 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Aug 29 16:06:36 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
-- ... et 1 autres fichiers
-
-#### 18:06 - 91da666 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
-
-**Catégorie :** Développement général  
-**Impact :** +1159 -1 lignes, 6 fichiers
-
-**Fichiers modifiés :**
-- `Merge: 5978662 71e2f83`
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 18:06:22 2025 +0200`
-- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
-- ... et 3 autres fichiers
-
-#### 18:00 - 5978662 - fix:Add unit tests and mocking for ACFC application
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +3713 -1430 lignes, 55 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 18:00:28 2025 +0200`
-- `    fix:Add unit tests and mocking for ACFC application`
-- ... et 53 autres fichiers
-
-#### 11:58 - 71e2f83 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +54 -20 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Aug 29 11:58:19 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
-- ... et 1 autres fichiers
-
-#### 13:58 - 92cf644 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
-
-**Catégorie :** Développement général  
-**Impact :** +53 -19 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Merge: 8cafaa9 15a3a21`
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 13:58:06 2025 +0200`
-- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
-
-#### 13:57 - 8cafaa9 - feat: Enhance commande details functionality with conditional elements and form validation fix: Improve accessibility and maintainability in client and commande templates - Added management for conditional elements such as tracking number and alerts based on order amount in commande_details.js. - Implemented "Select All" checkboxes for billing and shipping sections. - Improved form validation to ensure at least one line is selected for billing and shipping. - Updated client_details.html to improve accessibility with aria attributes and structured navigation. - Refactored client_form.html and client_research.html for better semantic HTML and accessibility. - Removed inline styles from commande_details.html and moved them to external CSS for better maintainability. - Cleaned up unused styles and scripts from commande_details_content.html. - Integrated auto-print functionality in commande_bon_impression.html with improved error handling.
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +582 -663 lignes, 21 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 13:57:30 2025 +0200`
-- `    feat: Enhance commande details functionality with conditional elements and form validation`
-- `    fix: Improve accessibility and maintainability in client and commande templates`
-- ... et 18 autres fichiers
-
-#### 09:56 - 15a3a21 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +53 -19 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Aug 29 09:56:37 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
-- ... et 1 autres fichiers
-
-#### 11:56 - 10e4a38 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
-
-**Catégorie :** Développement général  
-**Impact :** +64 -19 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Merge: 6ac4392 7f2bb41`
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 11:56:15 2025 +0200`
-- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
-
-#### 11:55 - 6ac4392 - feat: Ajout de la configuration pour le développement et les tests, y compris le fichier setup.py et les tests d'import fix: Correction des imports conditionnels dans conftest.py pour éviter les erreurs en CI/CD refactor: Refactorisation des fixtures de test pour une meilleure clarté et maintenabilité
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +158 -4 lignes, 15 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 11:55:59 2025 +0200`
-- `    feat: Ajout de la configuration pour le développement et les tests, y compris le fichier setup.py et les tests d'import`
-- `    fix: Correction des imports conditionnels dans conftest.py pour éviter les erreurs en CI/CD`
-- ... et 12 autres fichiers
-
-#### 09:30 - 7f2bb41 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +64 -19 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Aug 29 09:30:49 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
-- ... et 1 autres fichiers
-
-#### 11:30 - 313bf82 - Add comprehensive unit tests to enhance application coverage
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +1692 -74 lignes, 24 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 11:30:29 2025 +0200`
-- `    Add comprehensive unit tests to enhance application coverage`
-- ... et 22 autres fichiers
-
-#### 10:11 - d960c31 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
-
-**Catégorie :** Développement général  
-**Impact :** +0 -0 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Merge: ff0e1fe 8a5b0ca`
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 10:11:00 2025 +0200`
-- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
-
-#### 10:10 - ff0e1fe - feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker fix: Correction de l'importation des variables d'environnement dans les tests refactor: Refactorisation du chargement des variables d'environnement pour une meilleure maintenabilité
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +345 -239 lignes, 21 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 10:10:57 2025 +0200`
-- `    feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker`
-- `    fix: Correction de l'importation des variables d'environnement dans les tests`
-- ... et 18 autres fichiers
-
-#### 08:04 - 8a5b0ca - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +53 -19 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Aug 29 08:04:38 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
-- ... et 1 autres fichiers
-
-#### 10:04 - c0d39a3 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
-
-**Catégorie :** Développement général  
-**Impact :** +54 -19 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Merge: 944aea1 8442689`
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 10:04:22 2025 +0200`
-- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
-
-#### 10:02 - 944aea1 - feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker fix: Correction de l'importation des variables d'environnement dans les tests refactor: Refactorisation du chargement des variables d'environnement pour une meilleure maintenabilité
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +270 -238 lignes, 21 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 10:02:13 2025 +0200`
-- `    feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker`
-- `    fix: Correction de l'importation des variables d'environnement dans les tests`
-- ... et 18 autres fichiers
-
-#### 07:59 - 8442689 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +54 -19 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Aug 29 07:59:35 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
-- ... et 1 autres fichiers
-
-#### 09:59 - 52affd1 - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
-
-**Catégorie :** Développement général  
-**Impact :** +61 -23 lignes, 6 fichiers
-
-**Fichiers modifiés :**
-- `Merge: 2a8916b b9c9801`
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 09:59:21 2025 +0200`
-- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
-- ... et 3 autres fichiers
-
-#### 09:51 - 2a8916b - feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker fix: Correction de l'importation des variables d'environnement dans les tests refactor: Refactorisation du chargement des variables d'environnement pour une meilleure maintenabilité
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +231 -237 lignes, 21 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 09:51:39 2025 +0200`
-- `    feat: Mise à jour de la configuration CI/CD et déplacement de scripts de test pour Docker`
-- `    fix: Correction de l'importation des variables d'environnement dans les tests`
-- ... et 18 autres fichiers
-
-#### 07:40 - b9c9801 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +53 -19 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Aug 29 07:40:47 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
-- ... et 1 autres fichiers
-
-#### 09:40 - b6c869e - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
-
-**Catégorie :** Développement général  
-**Impact :** +69 -46 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Merge: 4e3b5a2 bbfe3e0`
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 09:40:34 2025 +0200`
-- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
-
-#### 09:40 - 4e3b5a2 - feat: Amélioration des tests d'intégration et d'unité avec des annotations de type et des corrections de format - Ajout d'annotations de type pour une meilleure lisibilité et maintenabilité du code. - Correction des erreurs de formatage pour se conformer aux normes PEP 8. - Amélioration de la couverture des tests d'intégration et d'unité pour garantir la fiabilité du code. - Mise à jour des workflows CI/CD pour inclure les nouvelles pratiques de test et assurer une intégration continue fluide.
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +133 -166 lignes, 19 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 09:40:32 2025 +0200`
-- `    feat: Amélioration des tests d'intégration et d'unité avec des annotations de type et des corrections de format`
-- `    - Ajout d'annotations de type pour une meilleure lisibilité et maintenabilité du code.`
-- ... et 16 autres fichiers
-
-#### 07:34 - bbfe3e0 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +69 -46 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Aug 29 07:34:33 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
-- ... et 1 autres fichiers
-
-#### 09:34 - 0d83c5f - feat: Amélioration des tests d'intégration et d'unité avec des annotations de type et des corrections de format - Ajout d'annotations de type pour une meilleure lisibilité et maintenabilité du code. - Correction des erreurs de formatage pour se conformer aux normes PEP 8. - Amélioration de la couverture des tests d'intégration et d'unité pour garantir la fiabilité du code. - Mise à jour des workflows CI/CD pour inclure les nouvelles pratiques de test et assurer une intégration continue fluide.
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +127 -142 lignes, 18 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 09:34:18 2025 +0200`
-- `    feat: Amélioration des tests d'intégration et d'unité avec des annotations de type et des corrections de format`
-- `    - Ajout d'annotations de type pour une meilleure lisibilité et maintenabilité du code.`
-- ... et 15 autres fichiers
 
 
 ### 30 August 2025
@@ -745,6 +381,17 @@
 
 ### 04 September 2025
 
+#### 17:44 - d11d234 - 📊 Mise à jour automatique du rapport de suivi (04/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +60 -46 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Thu Sep 4 17:44:08 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (04/09/2025)`
+- ... et 1 autres fichiers
+
 #### 19:43 - 6425504 - Refactor logging methods and enhance admin dashboard
 
 **Catégorie :** Refactoring  
@@ -768,43 +415,126 @@
 - ... et 17 autres fichiers
 
 
+### 05 September 2025
+
+#### 19:24 - cc67d57 - refactor: - Ajout d'un filtre Jinja pour générer le titre de la page et centraliser les modifications - Amélioration des messages d'erreur avec des journaux spécifiques, et création d'une nouvelle route pour la création de clients. - Mise à jour des liens dans les templates pour utiliser le nouveau filtre Jinja.
+
+**Catégorie :** Refactoring  
+**Impact :** +90 -117 lignes, 15 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Sep 5 19:24:19 2025 +0200`
+- `    refactor:`
+- `    - Ajout d'un filtre Jinja pour générer le titre de la page et centraliser les modifications`
+- ... et 12 autres fichiers
+
+#### 17:18 - 8bd0405 - Refactor des méthodes de gestion des clients pour améliorer la lisibilité et la modularité, en remplaçant les appels de rendu par des templates préparés et en renommant des fonctions pour mieux refléter leur fonctionnalité.
+
+**Catégorie :** Refactoring  
+**Impact :** +27 -50 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Sep 5 17:18:28 2025 +0200`
+- `    Refactor des méthodes de gestion des clients pour améliorer la lisibilité et la modularité, en remplaçant les appels de rendu par des templates préparés et en renommant des fonctions pour mieux refléter leur fonctionnalité.`
+- ... et 1 autres fichiers
+
+#### 17:18 - c8944b4 - Ajout des métadonnées `created_by`, `modified_at`, `modified_by` et `is_inactive` dans plusieurs tables, mise à jour des colonnes `created_at` et `modified_at` pour utiliser `func.now()`, et modification du modèle Python et SQLAlchemy pour refléter ces changements.
+
+**Catégorie :** Développement général  
+**Impact :** +197 -25 lignes, 5 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Sep 5 17:18:13 2025 +0200`
+- `    Ajout des métadonnées `created_by`, `modified_at`, `modified_by` et `is_inactive` dans plusieurs tables, mise à jour des colonnes `created_at` et `modified_at` pour utiliser `func.now()`, et modification du modèle Python et SQLAlchemy pour refléter ces changements.`
+- ... et 2 autres fichiers
+
+#### 15:54 - b4a7a34 - Refactor logs dashboard and templates
+
+**Catégorie :** Refactoring  
+**Impact :** +1074 -560 lignes, 21 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Sep 5 15:54:24 2025 +0200`
+- `    Refactor logs dashboard and templates`
+- ... et 19 autres fichiers
+
+#### 11:46 - 118e849 - fix: - Correction des niveaux de journalisation, amélioration de la gestion des exceptions et mise à jour des modèles de données dans plusieurs fichiers.
+
+**Catégorie :** Correction de bugs  
+**Impact :** +65 -140 lignes, 14 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Sep 5 11:46:03 2025 +0200`
+- `    fix:`
+- `    - Correction des niveaux de journalisation, amélioration de la gestion des exceptions et mise à jour des modèles de données dans plusieurs fichiers.`
+- ... et 11 autres fichiers
+
+#### 11:40 - 9c7bf4e - fix: - Ajout de la configuration MongoDB pour le logging et mise à jour des scripts d'initialisation - Suppression des logs de débogage superflus dans les routes - Correction de la gestion des exceptions pour afficher les erreurs dans la console - Rationnalisation des logs dans l'application.
+
+**Catégorie :** Correction de bugs  
+**Impact :** +61 -19 lignes, 15 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Sep 5 11:40:59 2025 +0200`
+- `    fix:`
+- `    - Ajout de la configuration MongoDB pour le logging et mise à jour des scripts d'initialisation`
+- ... et 12 autres fichiers
+
+#### 07:42 - 62ea850 - Mise à jour des statistiques de volume de code par langage dans le rapport de suivi
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +6 -3 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Fri Sep 5 07:42:56 2025 +0200`
+- `    Mise à jour des statistiques de volume de code par langage dans le rapport de suivi`
+- ... et 1 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 23 commits (35.4%)
-- **Développement de fonctionnalités** : 17 commits (26.2%)
-- **Développement général** : 11 commits (16.9%)
-- **Correction de bugs** : 7 commits (10.8%)
-- **Refactoring** : 6 commits (9.2%)
-- **Tests** : 1 commits (1.5%)
+- **Interface utilisateur** : 14 commits (34.1%)
+- **Refactoring** : 9 commits (22.0%)
+- **Correction de bugs** : 8 commits (19.5%)
+- **Développement de fonctionnalités** : 5 commits (12.2%)
+- **Développement général** : 4 commits (9.8%)
+- **Tests** : 1 commits (2.4%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 178 fichiers modifiés
-- **HTML** : 54 fichiers modifiés
-- **Documentation** : 39 fichiers modifiés
-- **YAML/Config** : 25 fichiers modifiés
-- **CSS** : 10 fichiers modifiés
-- **JavaScript** : 8 fichiers modifiés
-- **Docker** : 1 fichiers modifiés
+- **Python** : 115 fichiers modifiés
+- **HTML** : 48 fichiers modifiés
+- **Documentation** : 21 fichiers modifiés
+- **JavaScript** : 7 fichiers modifiés
+- **CSS** : 6 fichiers modifiés
+- **YAML/Config** : 5 fichiers modifiés
+- **Docker** : 2 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 9.3 commits/jour
-- **Volume de code :** 40736 modifications totales
-- **Ratio ajouts/suppressions :** 1.09
-- **Moyenne lignes par commit :** 627
+- **Fréquence de commit :** 5.9 commits/jour
+- **Volume de code :** 30193 modifications totales
+- **Ratio ajouts/suppressions :** 0.80
+- **Moyenne lignes par commit :** 736
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 21211 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 13419 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 04 September 2025*
+*Rapport généré automatiquement le 05 September 2025*
