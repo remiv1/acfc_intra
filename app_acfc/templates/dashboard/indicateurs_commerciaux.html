@@ -10,7 +10,12 @@
                         <div class="col-12">
                             <div class="card border-0 bg-light">
                                 <div class="card-body p-2 text-center">
-                                    <h6 class="card-title text-success mb-1">{{ value[0] }}€</h6>
+                                    <!--TODO: Faire un formatage des montants en euros-->
+                                    {% if value[0] is float %}
+                                        <h6 class="card-title text-success mb-1">{{ value[0] }}€</h6>
+                                    {% else %}
+                                        <h6 class="card-title text-success mb-1">{{ value[0] }}</h6>
+                                    {% endif %}
                                     <small class="text-muted">{{ value[1] }}</small>
                                 </div>
                             </div>

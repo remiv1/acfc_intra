@@ -25,7 +25,7 @@ from functools import wraps
 from typing import Callable, Any
 from flask import session
 from logs.logger import acfc_log, WARNING
-from werkzeug.exceptions import Forbidden
+from app_acfc.modeles import PrepareTemplates, Constants
 
 # Définition des niveaux d'habilitation
 ADMINISTRATEUR = '1'
@@ -50,14 +50,22 @@ def validate_habilitation(required_habilitation: str) -> Callable[[Callable[...,
         @wraps(function)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Vérifie si l'utilisateur est connecté et possède une habilitation
-            habilitations = session.get('habilitations', '')  # Exemple : '1,2,3'
-            if required_habilitation not in habilitations:
+            habilitations = session.get('habilitations', '')  # Exemple : '123'
+            validate_habilitation = False
+            for habilitation in habilitations:
+                if habilitation == required_habilitation:
+                    validate_habilitation = True
+                    break
+            if not validate_habilitation:
+                message = f"Accès refusé. Habilitation requise : {required_habilitation}." \
+                            + f" Votre habilitation actuelle : {session.get('habilitations', 'inconnu')}." \
+                            + f' Utilisateur : {session.get("username", "Anonyme")}.'
                 acfc_log.log(level=WARNING,
-                                     message=f'{session.get("username", "Anonyme")} a tenté d\'accéder à une ressource sans avoir l\'habilitation requise : {required_habilitation} (actuellement {session.get('habilitation', 'inconnu')})',
-                                     zone_log='habilitation',
+                                     message=message,
+                                     specific_logger=Constants.log_files('security'),
                                      db_log=True
                                      )
-                raise Forbidden("Accès refusé. Habilitation insuffisante.")
+                return PrepareTemplates.error_4xx(message=message, log=True, username=session.get('pseudo', 'Anonyme'))
             return function(*args, **kwargs)
         return wrapper
     return decorator

@@ -46,26 +46,23 @@ def nouvelle_commande(id_client: int):
         # Récupérer le client
         client = session_db.query(Client).filter(Client.id == id_client).first()
         if not client:
-            acfc_log.log(level=ERROR, message=f'Client {id_client} non trouvé')
             return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
         
         if request.method == 'POST':
             action = request.form.get('action', 'save')
-            acfc_log.log(level=DEBUG, message=f'Action reçue: {action}', zone_log=LOG_FILE_COMMANDES)
-            
+            print(f'Action reçue: {action}')
+
             # Actions spéciales pour facturation et expédition
             if action in ['facturer', 'expedier']:
                 return handle_special_action(client=client, commande=None, action=action, form_data=request.form, session_db=session_db)
             
             # Sauvegarde de commande (toutes les autres actions)
-            acfc_log.log(level=DEBUG, message='Sauvegarde de la commande en cours', zone_log=LOG_FILE_COMMANDES)
             return save_commande(client=client, commande=None, form_data=request.form, session_db=session_db)
 
         # GET - Afficher le formulaire
         return render_commande_form(client=client, commande=None, session_db=session_db)
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f'Erreur lors de la création de commande pour client {id_client}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
         return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
 
 
@@ -78,7 +75,6 @@ def commande_modify(id_client: int, id_commande: int):
         # Récupérer la commande et le client
         commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
         if not commande:
-            acfc_log.log(level=ERROR, message=f'Commande {id_commande} non trouvée', zone_log=LOG_FILE_COMMANDES)
             return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
 
         client = commande.client
@@ -94,11 +90,10 @@ def commande_modify(id_client: int, id_commande: int):
             return save_commande(client, commande, request.form, session_db)
         
         # GET - Afficher le formulaire
-        acfc_log.log(level=DEBUG, message=f'Montant de la commande : {commande.montant}', zone_log=LOG_FILE_COMMANDES)
         return render_commande_form(client, commande, session_db)
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f'Erreur lors de la modification de commande {id_commande}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
+        print(e)
         return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
 
 def render_commande_form(client: Client, commande: Optional[Commande], session_db: SessionBdDType):
@@ -109,7 +104,6 @@ def render_commande_form(client: Client, commande: Optional[Commande], session_d
         
         # Récupérer TOUT le catalogue - filtrage côté JavaScript
         catalogue_complet = session_db.query(Catalogue).order_by(Catalogue.id.desc()).all()
-        acfc_log.log(level=DEBUG, message=f'Catalogue complet chargé: {len(catalogue_complet)} produits', zone_log=LOG_FILE_COMMANDES)
         
         # Récupérer les valeurs distinctes pour les filtres
         millesimes = session_db.query(Catalogue.millesime).distinct().filter(Catalogue.millesime.isnot(None)).order_by(Catalogue.millesime.desc()).all()
@@ -121,7 +115,6 @@ def render_commande_form(client: Client, commande: Optional[Commande], session_d
         geographies = session_db.query(Catalogue.geographie).distinct().filter(Catalogue.geographie.isnot(None)).order_by(Catalogue.geographie).all()
         geographies = [g[0] for g in geographies if g[0]]
         
-        acfc_log.log(level=DEBUG, message=f'Valeurs distinctes pour les filtres: millésimes={millesimes}, types_produit={types_produit}, geographies={geographies}', zone_log=LOG_FILE_COMMANDES)
         # Si on modifie une commande, récupérer les produits déjà sélectionnés
         produits_commande: Dict[int, Any] = {}
         produits_id_commandes: List[int] = []
@@ -174,12 +167,10 @@ def render_commande_form(client: Client, commande: Optional[Commande], session_d
                 
                 produits_commande[produit_id_int] = TempDevise()
             
-            acfc_log.log(level=DEBUG, message=f'Sélections temporaires restaurées: {temp_produits}', zone_log=LOG_FILE_COMMANDES)
         
         # Déterminer le sous-contexte
         sub_context = 'form'
         form_sub_context = 'create' if commande is None else 'edit'
-        acfc_log.log(level=DEBUG, message=f'Sous-contexte de commande: {sub_context}', zone_log=LOG_FILE_COMMANDES)
 
         return render_template('base.html',
                                context='commandes',
@@ -198,7 +189,6 @@ def render_commande_form(client: Client, commande: Optional[Commande], session_d
                                today=date.today())
     
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f'Erreur lors du rendu du formulaire de commande: {str(e)}', zone_log=LOG_FILE_COMMANDES)
         raise
 
 
@@ -224,7 +214,6 @@ def handle_filters(client: Client, commande: Optional[Commande], form_data: Any,
                 if form_data.get(prix_key):
                     temp_data[prix_key] = form_data.get(prix_key)
             session['temp_commande_data'] = temp_data
-            acfc_log.log(level=DEBUG, message=f'Sélections temporaires sauvées: {produits_selectionnes}', zone_log=LOG_FILE_COMMANDES)
         
         if action == 'clear_filters':
             # Remettre les filtres par défaut
@@ -241,7 +230,6 @@ def handle_filters(client: Client, commande: Optional[Commande], form_data: Any,
         return render_commande_form(client, commande, session_db)
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f'Erreur lors de la gestion des filtres: {str(e)}', zone_log=LOG_FILE_COMMANDES)
         return render_commande_form(client, commande, session_db)
 
 
@@ -260,7 +248,6 @@ def handle_special_action(client: Client, commande: Optional[Commande], action: 
             session_db.commit()
             
             flash(f'Commande #{commande.id} facturée avec succès', 'success')
-            acfc_log.log(level=DEBUG, message=f'Commande {commande.id} facturée', zone_log=LOG_FILE_COMMANDES)
             
         elif action == 'expedier':
             # Pour une nouvelle commande, il faut d'abord la sauvegarder
@@ -287,12 +274,10 @@ def handle_special_action(client: Client, commande: Optional[Commande], action: 
             session_db.commit()
             
             flash(f'Commande #{commande.id} expédiée avec succès', 'success')
-            acfc_log.log(level=DEBUG, message=f'Commande {commande.id} expédiée', zone_log=LOG_FILE_COMMANDES)
         
         return redirect(url_for(DETAIL_CLIENT, id_client=client.id))
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f'Erreur lors de l\'action {action}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
         return render_commande_form(client, commande, session_db)
 
 
@@ -306,13 +291,11 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
             commande.id_client = client.id
         
         # Récupérer les données du formulaire
-        acfc_log.log(level=DEBUG, message='Récupération des données du formulaire pour sauvegarde de commande', zone_log=LOG_FILE_COMMANDES)
         commande.date_commande = datetime.strptime(form_data.get('date_commande'), '%Y-%m-%d').date()
         commande.descriptif = form_data.get('descriptif', '')
         commande.id_adresse = int(form_data.get('id_adresse')) if form_data.get('id_adresse') else None
         
         # États de la commande
-        acfc_log.log(level=DEBUG, message='Mise à jour des états de la commande', zone_log=LOG_FILE_COMMANDES)
         commande.is_facture = 'is_facture' in form_data
         commande.is_expedie = 'is_expedie' in form_data
         
@@ -332,13 +315,9 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
         # Sauvegarder la commande pour obtenir l'ID
         if is_new:
             session_db.add(commande)
-            acfc_log.log(level=DEBUG, message='Nouvelle commande ajoutée à la session', zone_log=LOG_FILE_COMMANDES)
             session_db.flush()  # Pour obtenir l'ID
-            acfc_log.log(level=DEBUG, message=f'ID de la nouvelle commande: {commande.id}', zone_log=LOG_FILE_COMMANDES)
 
         # Traiter les produits sélectionnés avec le nouveau format
-        acfc_log.log(level=DEBUG, message='Traitement des produits avec nouveau format (lignes multiples)', zone_log=LOG_FILE_COMMANDES)
-
         if not is_new:
             # Pour une modification, on va mettre à jour les lignes existantes
             # au lieu de les supprimer et recréer
@@ -353,13 +332,11 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
                 # On utilise un identifiant temporaire basé sur l'ordre ou l'ID
                 lignes_existantes_dict[str(ligne.id)] = ligne
             
-            acfc_log.log(level=DEBUG, message=f'Lignes existantes trouvées: {len(lignes_existantes)}', zone_log=LOG_FILE_COMMANDES)
         
         # Mettre à jour la remise par défaut du client si modifiée
         remise_client_form = form_data.get('remise_client')
         if remise_client_form:
             client.reduces = float(remise_client_form) / 100.0
-            acfc_log.log(level=DEBUG, message=f'Remise client mise à jour: {client.reduces}', zone_log=LOG_FILE_COMMANDES)
         
         from decimal import Decimal
         montant_total = Decimal('0.00')
@@ -384,7 +361,6 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
                     
                     lignes_produits[ligne_id][produit_id][field_type] = form_data.get(key)
         
-        acfc_log.log(level=DEBUG, message=f'Lignes de produits extraites: {len(lignes_produits)} lignes trouvées', zone_log=LOG_FILE_COMMANDES)
         
         # Traiter chaque ligne de produit
         lignes_a_garder = set()  # Track des IDs de lignes à conserver
@@ -401,7 +377,6 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
                     # Récupérer les infos du produit depuis le catalogue
                     produit = session_db.query(Catalogue).filter(Catalogue.id == produit_id).first()
                     if not produit:
-                        acfc_log.log(level=ERROR, message=f'Produit {produit_id} non trouvé dans le catalogue', zone_log=LOG_FILE_COMMANDES)
                         continue
                     
                     # Chercher si cette ligne existe déjà dans la base (pour les modifications)
@@ -430,14 +405,12 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
                         prix_ligne = Decimal(str(ligne_existante.qte)) * ligne_existante.prix_unitaire * (Decimal('1') - ligne_existante.remise)
                         montant_total += prix_ligne
                         
-                        acfc_log.log(level=DEBUG, message=f'Ligne modifiée: {ligne_existante.designation}, QTE: {ligne_existante.qte}, Prix: {ligne_existante.prix_unitaire}€', zone_log=LOG_FILE_COMMANDES)
                         
                     elif ligne_existante and ligne_existante.is_facture:
                         # Ligne facturée - on la garde telle quelle et on compte son montant
                         prix_ligne = ligne_existante.qte * ligne_existante.prix_unitaire * (Decimal('1') - ligne_existante.remise)
                         montant_total += prix_ligne
                         
-                        acfc_log.log(level=DEBUG, message=f'Ligne facturée conservée: {ligne_existante.designation}, Total: {prix_ligne:.2f}€', zone_log=LOG_FILE_COMMANDES)
                         
                     else:
                         # Créer une nouvelle ligne
@@ -454,10 +427,8 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
                         montant_total += prix_ligne
                         
                         session_db.add(devise)
-                        acfc_log.log(level=DEBUG, message=f'Nouvelle ligne ajoutée: {devise.designation}, QTE: {devise.qte}, Prix: {devise.prix_unitaire}€', zone_log=LOG_FILE_COMMANDES)
                     
                 except (ValueError, TypeError) as ve:
-                    acfc_log.log(level=ERROR, message=f'Erreur lors du traitement de la ligne {ligne_id}, produit {produit_id_str}: {str(ve)}', zone_log=LOG_FILE_COMMANDES)
                     continue
         
         # Supprimer les lignes qui ne sont plus dans le formulaire (mais seulement les non facturées)
@@ -469,7 +440,6 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
             ).all()
             
             for ligne_sup in lignes_a_supprimer:
-                acfc_log.log(level=DEBUG, message=f'Suppression ligne non facturée: {ligne_sup.designation}', zone_log=LOG_FILE_COMMANDES)
                 session_db.delete(ligne_sup)
         elif not is_new:  # Si aucune ligne à garder, supprimer toutes les non facturées
             lignes_a_supprimer = session_db.query(DevisesFactures).filter(
@@ -478,34 +448,22 @@ def save_commande(client: Client, commande: Optional[Commande], form_data: Any, 
             ).all()
             
             for ligne_sup in lignes_a_supprimer:
-                acfc_log.log(level=DEBUG, message=f'Suppression ligne non facturée: {ligne_sup.designation}', zone_log=LOG_FILE_COMMANDES)
                 session_db.delete(ligne_sup)
         
         # Mettre à jour le montant total
         commande.montant = montant_total
-        acfc_log.log(level=DEBUG, message=f'Montant total de la commande mis à jour: {commande.montant}', zone_log=LOG_FILE_COMMANDES)
         
         # Sauvegarder tout
         session_db.commit()
-        acfc_log.log(level=DEBUG, message='Commande et produits sauvegardés avec succès', zone_log=LOG_FILE_COMMANDES)
         
         # Nettoyer les données temporaires après succès
         if is_new:
             session.pop('temp_produits_selectionnes', None)
             session.pop('temp_commande_data', None)
-            acfc_log.log(level=DEBUG, message='Données temporaires nettoyées', zone_log=LOG_FILE_COMMANDES)
-        
-        # Message de succès
-        if is_new:
-            acfc_log.log(level=DEBUG, message=f'Nouvelle commande créée (ID: {commande.id}) pour le client {client.nom_affichage}', zone_log=LOG_FILE_COMMANDES)
-        else:
-            acfc_log.log(level=DEBUG, message=f'Commande {commande.id} modifiée pour le client {client.nom_affichage}', zone_log=LOG_FILE_COMMANDES)
-
         # Rediriger vers la fiche client
         return redirect(url_for('clients.get_client', id_client=client.id))
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f"Erreur lors de la sauvegarde de commande: {str(e)}", zone_log=LOG_FILE_COMMANDES)
         return render_commande_form(client, commande, session_db)
 
 
@@ -517,30 +475,23 @@ def annuler_commande(id_commande: int, id_client: int):
     try:
         commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
         if not commande:
-            acfc_log.log(level=ERROR, message=f'Commande {id_commande} non trouvée', zone_log=LOG_FILE_COMMANDES)
-            flash('Commande non trouvée', 'error')
             return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
         
         # Vérifier que la commande n'est pas déjà annulée
         if commande.is_annulee:
-            flash('Cette commande est déjà annulée', 'warning')
             return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
         
         # Vérifier que la commande n'est pas expédiée (on ne peut pas annuler une commande expédiée)
         if commande.is_expedie:
-            flash('Impossible d\'annuler une commande déjà expédiée', 'error')
             return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
         
         # Marquer la commande comme annulée
         commande.is_annulee = True
         session_db.commit()
         
-        acfc_log.log(level=DEBUG, message=f'Commande {id_commande} annulée par utilisateur', zone_log=LOG_FILE_COMMANDES)
-        
         return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f'Erreur lors de l\'annulation de commande {id_commande}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
         return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
 
 
@@ -552,7 +503,6 @@ def commande_details(id_commande: int, id_client: int):
     try:
         commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
         if not commande:
-            acfc_log.log(level=ERROR, message=f"Commande {id_commande} non trouvée", zone_log=LOG_FILE_COMMANDES)
             raise NotFound("Commande non trouvée")
 
         # Récupérer les produits de la commande
@@ -569,7 +519,6 @@ def commande_details(id_commande: int, id_client: int):
                              today=date.today())
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f"Erreur lors de l'affichage des détails de commande {id_commande}: {str(e)}", zone_log=LOG_FILE_COMMANDES)
         raise NotFound("Erreur lors de l'affichage des détails de la commande")
 
 
@@ -581,7 +530,6 @@ def commande_bon_impression(id_commande: int, id_client: int):
     try:
         commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
         if not commande:
-            acfc_log.log(level=ERROR, message=f"Commande {id_commande} non trouvée pour impression", zone_log=LOG_FILE_COMMANDES)
             raise NotFound("Commande non trouvée")
 
         # Récupérer les produits de la commande
@@ -614,7 +562,6 @@ def commande_bon_impression(id_commande: int, id_client: int):
                              now=datetime.now())
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f"Erreur lors de la génération du bon de commande {id_commande}: {str(e)}", zone_log=LOG_FILE_COMMANDES)
         raise NotFound("Erreur lors de la génération du bon de commande")
 
 
@@ -644,7 +591,6 @@ def get_client_adresses(id_client: int):
         return jsonify({'adresses': adresses})
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f"Erreur lors de la récupération des adresses du client {id_client}: {str(e)}", zone_log=LOG_FILE_COMMANDES)
         return jsonify({'error': 'Erreur lors de la récupération des adresses'}), 500
 
 
@@ -704,11 +650,9 @@ def traiter_facturation():
         nb_lignes = len(devises_a_facturer)
         flash(f'{nb_lignes} ligne(s) facturée(s) avec succès (Facture: {numero_facture})', 'success')
         
-        acfc_log.log(level=DEBUG, message=f'Facturation de {nb_lignes} lignes pour commande {id_commande}', zone_log=LOG_FILE_COMMANDES)
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f"Erreur lors de la facturation: {str(e)}", zone_log=LOG_FILE_COMMANDES)
-    
+        print(e)
     
     # Retourner aux détails de la commande si on a les informations
     if 'commande' in locals() and commande:
@@ -770,11 +714,9 @@ def traiter_expedition():
         nb_lignes = len(devises_a_expedier)
         flash(f'{nb_lignes} ligne(s) expédiée(s) avec succès (Expédition: {numero_expedition})', 'success')
         
-        acfc_log.log(level=DEBUG, message=f'Expédition de {nb_lignes} lignes pour commande {id_commande}', zone_log=LOG_FILE_COMMANDES)
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f"Erreur lors de l'expédition: {str(e)}", zone_log=LOG_FILE_COMMANDES)
-        flash('Erreur lors de l\'expédition', 'error')
+        flash(f'Erreur lors de l\'expédition {e}', 'error')
         
     # Récupérer l'id_client depuis la base de données
     try:
@@ -861,17 +803,11 @@ def facturer_commande():
         nb_lignes = len(devises_a_facturer)
         flash(f'Facture #{facture.id_fiscal} créée avec succès ({nb_lignes} ligne(s) facturée(s))', 'success')
         
-        acfc_log.log(
-            level=DEBUG,
-            message=f'Facturation commande {commande.id}: {nb_lignes} lignes, montant {montant_total}€',
-            zone_log=LOG_FILE_COMMANDES
-        )
-        
         # Rediriger vers les détails de la facture
         return redirect(url_for('commandes.facture_details', id_facture=facture.id))
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f"Erreur lors de la facturation: {str(e)}", zone_log=LOG_FILE_COMMANDES)
+        print(e)
         return redirect(request.referrer or url_for('clients.liste_clients'))
 
 
@@ -910,18 +846,8 @@ def _creer_ecritures_comptables_facturation(session_db: SessionBdDType, facture:
         
         session_db.add(ventilation_vente)
         
-        acfc_log.log(
-            level=DEBUG,
-            message=f'Écritures comptables créées pour facture {facture.id_fiscal}',
-            zone_log=LOG_FILE_COMMANDES
-        )
-        
     except Exception as e:
-        acfc_log.log(
-            level=ERROR,
-            message=f"Erreur création écritures comptables: {str(e)}",
-            zone_log=LOG_FILE_COMMANDES
-        )
+        print(e)
         raise
 
 
@@ -949,18 +875,9 @@ def _mettre_a_jour_statut_commande(session_db: SessionBdDType, commande: Command
             # Facturation partielle - on garde is_facture = False mais on pourrait ajouter un champ spécifique
             commande.is_facture = False
         
-        acfc_log.log(
-            level=DEBUG,
-            message=f'Statut commande {commande.id} mis à jour: {lignes_facturees}/{total_lignes} lignes facturées',
-            zone_log=LOG_FILE_COMMANDES
-        )
         
     except Exception as e:
-        acfc_log.log(
-            level=ERROR,
-            message=f"Erreur mise à jour statut commande: {str(e)}",
-            zone_log=LOG_FILE_COMMANDES
-        )
+        print(e)
         raise
 
 
@@ -989,8 +906,7 @@ def facture_details(id_facture: int):
                                today=date.today())
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f'Erreur lors de l\'affichage de la facture {id_facture}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
-        flash('Erreur lors de l\'affichage de la facture', 'error')
+        flash(f'Erreur lors de l\'affichage de la facture {id_facture}: {str(e)}', 'error')
         return redirect(url_for('clients.liste_clients'))
 
 
@@ -1056,5 +972,5 @@ def facture_impression(id_facture: int):
                                two_adresses=adresse_diff)
         
     except Exception as e:
-        acfc_log.log(level=ERROR, message=f'Erreur lors de l\'impression de la facture {id_facture}: {str(e)}', zone_log=LOG_FILE_COMMANDES)
+        flash(f'Erreur lors de l\'affichage de la facture {id_facture}: {str(e)}', 'error')
         return redirect(url_for('clients.liste_clients'))

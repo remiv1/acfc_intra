@@ -5,7 +5,7 @@ from app_acfc.habilitations import (
 from pymongo import MongoClient
 from flask import session
 from datetime import datetime, timedelta
-from logs.logger import acfc_log, DB_URI, DB_NAME, COLLECTION_NAME, QueryLogs
+from logs.logger import acfc_log, DB_URI, DB_NAME, COLLECTION_NAME, QueryLogs, DEBUG
 from app_acfc.modeles import Constants, PrepareTemplates, get_db_session, User
 from sqlalchemy.orm import Session as SessionBdDType
 from typing import Any, Dict
@@ -78,7 +78,7 @@ def logs_dashboard():
             'next_num': query_logs.page + 1 if query_logs.has_next else None,
             'iter_pages': lambda: range(max(1, query_logs.page - 2), min(query_logs.total_pages + 1, query_logs.page + 3))
         }
-        
+        acfc_log.log(DEBUG, f'{query_logs}', specific_logger=Constants.log_files('security'), db_log=False, user=session.get('pseudo', 'N/A'))
         # Rendu du template avec les logs et les filtres
         return PrepareTemplates.admin(logs=query_logs.logs,
                                       total_logs=query_logs.total_logs,
@@ -122,5 +122,5 @@ def logs_export():
         
     except Exception as e:
         acfc_log.log(40, f"Erreur export logs: {str(e)}", 
-                    specific_logger='admin.log', zone_log='admin', db_log=True, user="admin")
+                    specific_logger=Constants.log_files('security'), db_log=True, user=session.get('pseudo', 'N/A'))
         return "Erreur lors de l'export des logs", 500

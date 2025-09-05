@@ -24,8 +24,7 @@ from os import getenv
 from flask import Request
 from typing import Any, Dict, Tuple
 from logs.logger import acfc_log, INFO
-
-LOG_LOGIN_FILE = 'login.log'
+from app_acfc.modeles import Constants
 
 class PasswordService:
     """
@@ -228,8 +227,7 @@ class AuthenticationService:
         """
         acfc_log.log(level=level,
                             message=message,
-                            specific_logger=LOG_LOGIN_FILE,
-                            zone_log=LOG_LOGIN_FILE,
+                            specific_logger=Constants.log_files('user'),
                             db_log=True)
 
     def _bad_password(self, user: User):
@@ -258,8 +256,7 @@ class AuthenticationService:
         self.is_chg_mdp = user.is_chg_mdp
         acfc_log.log(level=INFO,
                             message=f'Changement de mot de passe requis pour l\'utilisateur: {self.is_chg_mdp}',
-                            specific_logger=LOG_LOGIN_FILE,
-                            zone_log=LOG_LOGIN_FILE,
+                            specific_logger=Constants.log_files('security'),
                             db_log=True)
         self.user_pseudo = user.pseudo
         user.nb_errors = 0

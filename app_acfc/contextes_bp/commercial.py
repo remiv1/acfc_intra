@@ -2,7 +2,6 @@ from flask import Blueprint, jsonify, request, Request, render_template
 from sqlalchemy import or_, and_, func
 from sqlalchemy.orm import joinedload, Session as SessionBdDType, aliased
 from app_acfc.modeles import SessionBdD, Client, Part, Pro, Telephone, Mail, Adresse
-from logs.logger import acfc_log, DEBUG
 from typing import Any, List
 
 commercial_bp = Blueprint('commercial',
@@ -268,8 +267,7 @@ def clients_api_search():
             }
         })
             
-    except Exception as e:
-        acfc_log.log(DEBUG, f"Erreur lors de la recherche de clients : {str(e)}")
+    except Exception:
         return jsonify({
             'success': False,
             'error': 'Erreur lors de la recherche de clients'

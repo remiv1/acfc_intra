@@ -134,7 +134,7 @@ def teardown_appcontext(exception: Optional[BaseException]=None) -> None:
         db_session.close()
     
     if exception:
-        acfc_log.log(level=ERROR, message=str(exception), specific_logger=Constants.log_files('warming'))
+        acfc_log.log(level=ERROR, message=str(exception), specific_logger=Constants.log_files('warning'))
 
 # ====================================================================
 # FILTRES JINJA2 PERSONNALISÉS
@@ -240,34 +240,34 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
 
     # Récupération des indicateurs commerciaux et gestion des exceptions
     try:
-        indicators: Dict[str, List[Any]] | None = {
+        indicators: Dict[str, List[int | float | str]] | None = {
             # Chiffre d'affaire total facturé pour le mois en cours
             "ca_current_month": [
-                db_session.query(func.sum(Commande.montant))
+                round(db_session.query(func.sum(Commande.montant))
                 .filter(
                     Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_month
-                ).scalar() or 0,
+                ).scalar() or 0.0, 2),
                 'CA Mensuel'
             ],
 
             # Chiffre d'affaire total facturé pour l'année en cours
             "ca_current_year": [
-                db_session.query(func.sum(Commande.montant))
+                round(db_session.query(func.sum(Commande.montant))
                 .filter(
                     Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_year
-                ).scalar() or 0,
+                ).scalar() or 0.0, 2),
                 'CA Annuel'
             ],
 
             # Panier moyen annuel
             "average_basket": [
-                db_session.query(func.avg(Commande.montant))
+                round(db_session.query(func.avg(Commande.montant))
                 .filter(
                     Commande.is_facture.is_(True),
                     Commande.date_commande >= first_day_of_year
-                ).scalar() or 0,
+                ).scalar() or 0.0, 2),
                 'Panier Moyen'
             ],
 
@@ -314,7 +314,6 @@ def index() -> Any:
         str: Template HTML du module Clients
     """
     return redirect(url_for('dashboard'))
-
 
 @acfc.route('/login', methods=['GET', 'POST'])
 def login() -> Any:

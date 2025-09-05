@@ -31,7 +31,7 @@ Version : 1.0
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, Request, session
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy import or_, func
-from app_acfc.modeles import get_db_session, Client, Part, Pro, Telephone, Mail, Commande, Facture, Adresse
+from app_acfc.modeles import get_db_session, Client, Part, Pro, Telephone, Mail, Commande, Facture, Adresse, PrepareTemplates
 from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE
 from logs.logger import acfc_log, ERROR, DEBUG
 from datetime import datetime
@@ -506,15 +506,13 @@ def create_client():
         # Log de l'opération
         acfc_log.log(level=logging.INFO,
                              message=f'Nouveau client créé : ID {nouveau_client.id} par l\'utilisateur {session['pseudo']}',
-                             db_log=True,
-                             zone_log="clients.log")
+                             db_log=True)
         
         return redirect(url_for(CLIENT_DETAIL, id_client=nouveau_client.id, success_message='Prospect créé avec succès.'))
     except Exception as e:
         acfc_log.log(level=logging.ERROR,
                               message=f'Erreur lors de la création du client : {str(e)} par {session['pseudo']}.',
-                              db_log=True,
-                              zone_log=LOG_CLIENTS_FILE)
+                              db_log=True)
         return render_template(CLIENT_FORM['page'],
                                title=TITLE_NEW_CLIENT,
                                context=CLIENT_FORM['context'],
@@ -552,9 +550,11 @@ def edit_client_form(id_client: int):
                                client=client,
                                id_client=id_client,
                                nom_affichage=nom_affichage)
+    except Exception as e:
+        PrepareTemplates.error_5xx(message=str(e), log=True, user=session.get('pseudo', 'unknown'), error_message=str(e))
 
-@clients_bp.route('/<int:id_client>/update', methods=['POST'])
 @validate_habilitation(CLIENTS)
+@clients_bp.route('/<int:id_client>/update', methods=['POST'])
 def update_client(id_client: int):
     """
     Mise à jour des informations d'un client existant.
@@ -590,16 +590,14 @@ def update_client(id_client: int):
         db_session.commit()
         acfc_log.log(level=logging.INFO,
                              message=f'Client modifié : ID {client.id} par {session['pseudo']}.',
-                             db_log=True,
-                             zone_log=LOG_CLIENTS_FILE)
+                             db_log=True)
         
         # Redirection vers la page de détails du client avec message de succès
         return redirect(url_for(CLIENT_DETAIL, id_client=client.id, success_message="Client modifié avec succès"))
     except Exception as e:
         acfc_log.log(level=logging.ERROR,
                              message=f'Erreur lors de la modification du client {id_client} par {session['pseudo']} : {str(e)}',
-                             db_log=True,
-                             zone_log=LOG_CLIENTS_FILE)
+                             db_log=True)
         return render_template(CLIENT_FORM['page'],
                                title=TITLE_EDIT_CLIENT,
                                context=CLIENT_FORM['context'],
@@ -671,7 +669,7 @@ def clients_add_phone():
         db_session.add(new_telephone)
         db_session.commit()
 
-        acfc_log.log(logging.INFO, f"Téléphone ajouté avec succès pour le client {id_client}", specific_logger=LOG_CLIENTS_FILE, zone_log=LOG_CLIENTS_FILE, db_log=False)
+        acfc_log.log(logging.INFO, f"Téléphone ajouté avec succès pour le client {id_client}", specific_logger=LOG_CLIENTS_FILE, db_log=False)
         return redirect(url_for(CLIENT_DETAIL, id_client=id_client, success_message="Téléphone ajouté avec succès"))
 
     except Exception as e:
