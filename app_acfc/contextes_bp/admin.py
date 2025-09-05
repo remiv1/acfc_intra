@@ -5,7 +5,7 @@ from app_acfc.habilitations import (
 from pymongo import MongoClient
 from flask import session
 from datetime import datetime, timedelta
-from logs.logger import acfc_log, DB_URI, DB_NAME, COLLECTION_NAME, QueryLogs, DEBUG
+from logs.logger import acfc_log, DB_URI, DB_NAME, COLLECTION_NAME, QueryLogs
 from app_acfc.modeles import Constants, PrepareTemplates, get_db_session, User
 from sqlalchemy.orm import Session as SessionBdDType
 from typing import Any, Dict
@@ -48,8 +48,9 @@ def admin_list():
                              
     except Exception as e:
         message = Constants.messages('error_500', 'default') \
-                    + f" (Détails techniques: {str(e)})"
-        return PrepareTemplates.error_5xx(message=message, log=True)
+                    + '\ncode erreur : 500' \
+                    + f'\ndétail erreur : {str(e)}'
+        return PrepareTemplates.error_5xx(status_code=500, status_message=message, log=True)
 
 @validate_habilitation(ADMINISTRATEUR)
 @admin_bp.route('/logs')
@@ -66,7 +67,8 @@ def logs_dashboard():
         query_logs.get_log_form_filter() \
             .construct_query() \
             .construct_pagination() \
-            .construct_stats()
+            .construct_stats() \
+            .get_filters()
         
         # Pagination simple
         pagination: Dict[str, Any] = {
@@ -78,7 +80,6 @@ def logs_dashboard():
             'next_num': query_logs.page + 1 if query_logs.has_next else None,
             'iter_pages': lambda: range(max(1, query_logs.page - 2), min(query_logs.total_pages + 1, query_logs.page + 3))
         }
-        acfc_log.log(DEBUG, f'{query_logs}', specific_logger=Constants.log_files('security'), db_log=False, user=session.get('pseudo', 'N/A'))
         # Rendu du template avec les logs et les filtres
         return PrepareTemplates.admin(logs=query_logs.logs,
                                       total_logs=query_logs.total_logs,
@@ -90,8 +91,9 @@ def logs_dashboard():
 
     except Exception as e:
         message = Constants.messages('error_500', 'default') \
-                    + f" (Détails techniques: {str(e)})"
-        return PrepareTemplates.error_5xx(message=message, log=True, user=session.get('pseudo', 'N/A'))
+                    + '\ncode erreur : 500' \
+                    + f'\ndétail erreur : {str(e)}'
+        return PrepareTemplates.error_5xx(status_code=500, status_message=message, log=True)
 
 @validate_habilitation(ADMINISTRATEUR)
 @admin_bp.route('/logs/export', methods=['POST'])

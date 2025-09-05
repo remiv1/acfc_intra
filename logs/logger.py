@@ -246,6 +246,8 @@ class QueryLogs:
         self.client: MongoClient[Any] = MongoClient(DB_URI)
         self.db = self.client[DB_NAME]
         self.collection = self.db[COLLECTION_NAME]
+        self.available_zones: List[Any] = []
+        self.available_users: List[Any] = []
 
     def get_log_form_filter(self):
         """

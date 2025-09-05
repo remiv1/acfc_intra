@@ -57,15 +57,10 @@ def validate_habilitation(required_habilitation: str) -> Callable[[Callable[...,
                     validate_habilitation = True
                     break
             if not validate_habilitation:
-                message = f"Accès refusé. Habilitation requise : {required_habilitation}." \
-                            + f" Votre habilitation actuelle : {session.get('habilitations', 'inconnu')}." \
-                            + f' Utilisateur : {session.get("username", "Anonyme")}.'
-                acfc_log.log(level=WARNING,
-                                     message=message,
-                                     specific_logger=Constants.log_files('security'),
-                                     db_log=True
-                                     )
-                return PrepareTemplates.error_4xx(message=message, log=True, username=session.get('pseudo', 'Anonyme'))
+                message = f'Accès refusé. Habilitation requise : {required_habilitation}.' \
+                            + f'\nVotre habilitation actuelle : {session.get('habilitations', 'inconnu')}.' \
+                            + f'\nUtilisateur : {session.get("pseudo", "Anonyme")}.'
+                return PrepareTemplates.error_4xx(status_code=403, status_message=message, log=True)
             return function(*args, **kwargs)
         return wrapper
     return decorator

@@ -31,52 +31,14 @@ Version : 1.0
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, Request, session
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy import or_, func
-from app_acfc.modeles import get_db_session, Client, Part, Pro, Telephone, Mail, Commande, Facture, Adresse, PrepareTemplates
+from app_acfc.modeles import (
+    get_db_session, Client, Part, Pro, Telephone, Mail, Commande,
+    Facture, Adresse, PrepareTemplates, Constants)
 from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE
-from logs.logger import acfc_log, ERROR, DEBUG
+from logs.logger import acfc_log, ERROR
 from datetime import datetime
-from typing import List, Dict
+from typing import List
 import logging
-
-# ================================================================
-# CONSTANTES
-# ================================================================
-
-# Messages d'erreur constants
-ERROR_CLIENT_NOT_FOUND = "Client not found"
-ERROR_ACCESS_DENIED = "Accès refusé"
-ERROR_CLIENT_ID_MISSING = "ID client manquant"
-ERROR_PHONE_MISSING = "Numéro de téléphone manquant"
-ERROR_EMAIL_MISSING = "Email manquant"
-ERROR_EMAIL_INVALID = "Format d'email invalide"
-ERROR_ADDRESS_MISSING = "Adresse manquante"
-ERROR_POSTAL_CODE_MISSING = "Code postal manquant"
-ERROR_CITY_MISSING = "Ville manquante"
-
-# Messages constants pour les titres
-TITLE_NEW_CLIENT = "ACFC - Nouveau client"
-TITLE_EDIT_CLIENT = "ACFC - Modifier client"
-BASE = 'base.html'
-
-# Fichiers logs
-LOG_CLIENTS_FILE = 'clients.log'
-
-# Pages de redirection
-CLIENT_DETAIL = 'clients.get_client'
-
-# Configuration page de création/modification de client
-CLIENT_FORM: Dict[str, str] = {
-    'title': TITLE_NEW_CLIENT,
-    'context': 'clients',
-    'page': BASE
-}
-
-# Configuration page de gestion des clients
-CLIENT_PARAM_PAGE: Dict[str, str] = {
-    'title': 'ACFC - Gestion Clients',
-    'context': 'clients',
-    'page': BASE
-}
 
 # ================================================================
 # CONFIGURATION DU BLUEPRINT CRM CLIENTS
@@ -90,85 +52,98 @@ clients_bp = Blueprint(
 )
 
 # ================================================================
-# FONCTIONS HORS ROUTES
+# FONCTIONS ET CLASSES HORS ROUTES
 # ================================================================
 
-def get_reduces(request: Request) -> float:
+class ClientMethods:
     """
-    Récupère le taux de réduction depuis la requête.
+    Classe utilitaire pour les méthodes liées aux clients.
 
-    Args:
-        request (Request): Objet de requête Flask
-
-    Returns:
-        float: Taux de réduction (0.10 par défaut si non spécifié)
+    Methodes statiques pour :
+        - Récupération du taux de réduction
+        - Création/modification de clients particuliers ou professionnels
     """
-    reduces_str = request.form.get('reduces', '0.10')
-    try:
-        return float(reduces_str) / 100  # Conversion pourcentage vers décimal
-    except (ValueError, TypeError):
-        return 10.0  # Valeur par défaut : 10%
+    
+    @staticmethod
+    def get_reduces(request: Request) -> float:
+        """
+        Récupère le taux de réduction depuis la requête.
 
-def test_part_pro(request: Request, type_client: int, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
-    '''
-    Teste la création d'un client particulier ou professionnel.
-    Création du client suivant le type.
-    '''
-    if type_client == 1:  # Particulier
-        create_or_modify_part(request, client, db_session, type_test)
+        Args:
+            request (Request): Objet de requête Flask
 
-    elif type_client == 2:  # Professionnel
-        create_or_modify_pro(request, client, db_session, type_test)
+        Returns:
+            float: Taux de réduction (0.10 par défaut si non spécifié)
+        """
+        reduces_str = request.form.get('reduces', '0.10')
+        try:
+            return float(reduces_str) / 100  # Conversion pourcentage vers décimal
+        except (ValueError, TypeError):
+            return 10.0  # Valeur par défaut : 10%
 
-def create_or_modify_part(request: Request, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
-    """
-    Crée ou modifie un client particulier.
+    @staticmethod
+    def test_part_pro(request: Request, type_client: int, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
+        '''
+        Teste la création d'un client particulier ou professionnel.
+        Création du client suivant le type.
+        '''
+        if type_client == 1:  # Particulier
+            ClientMethods.create_or_modify_part(request, client, db_session, type_test)
 
-    Args:
-        request (Request): Objet de requête Flask
-        client (Client): Objet client à modifier ou à créer
-        db_session (SessionBdDType): Session de base de données
-        type_test (str): Type de test ('create' ou 'update')
-    """
-    # Récupération des données spécifiques au particulier depuis le formulaire
-    prenom = request.form.get('prenom', '')
-    nom = request.form.get('nom', '')
-    date_naissance_str = request.form.get('date_naissance', None)
-    lieu_naissance = request.form.get('lieu_naissance', '')
+        elif type_client == 2:  # Professionnel
+            ClientMethods.create_or_modify_pro(request, client, db_session, type_test)
 
-    # Création ou récupération du client particulier
-    part = Part(id_client=client.id) if type_test == 'create' else client.part
-    part.prenom = prenom
-    part.nom = nom
-    part.date_naissance = datetime.strptime(date_naissance_str, '%Y-%m-%d').date() if date_naissance_str else None
-    part.lieu_naissance = lieu_naissance if lieu_naissance else None
+    @staticmethod
+    def create_or_modify_part(request: Request, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
+        """
+        Crée ou modifie un client particulier.
 
-    db_session.add(part) if type_test == 'create' else db_session.merge(part)
+        Args:
+            request (Request): Objet de requête Flask
+            client (Client): Objet client à modifier ou à créer
+            db_session (SessionBdDType): Session de base de données
+            type_test (str): Type de test ('create' ou 'update')
+        """
+        # Récupération des données spécifiques au particulier depuis le formulaire
+        prenom = request.form.get('prenom', '')
+        nom = request.form.get('nom', '')
+        date_naissance_str = request.form.get('date_naissance', None)
+        lieu_naissance = request.form.get('lieu_naissance', '')
 
-def create_or_modify_pro(request: Request, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
-    """
-    Crée ou modifie un client professionnel.
+        # Création ou récupération du client particulier
+        part = Part(id_client=client.id) if type_test == 'create' else client.part
+        part.prenom = prenom
+        part.nom = nom
+        part.date_naissance = datetime.strptime(date_naissance_str, '%Y-%m-%d').date() if date_naissance_str else None
+        part.lieu_naissance = lieu_naissance if lieu_naissance else None
 
-    Args:
-        request (Request): Objet de requête Flask
-        client (Client): Objet client à modifier ou à créer
-        db_session (SessionBdDType): Session de base de données
-        type_test (str): Type de test ('create' ou 'update')
-    """
-    # Récupération des données spécifiques au professionnel depuis le formulaire
-    raison_sociale = request.form.get('raison_sociale', '')
-    type_pro_str = request.form.get('type_pro', '')
-    siren = request.form.get('siren', '')
-    rna = request.form.get('rna', '')
+        db_session.add(part) if type_test == 'create' else db_session.merge(part)
 
-    # Création ou récupération du client professionnel
-    pro = Pro(id_client=client.id) if type_test == 'create' else client.pro
-    pro.raison_sociale = raison_sociale
-    pro.type_pro = int(type_pro_str)
-    pro.siren = siren if siren else None
-    pro.rna = rna if rna else None
+    @staticmethod
+    def create_or_modify_pro(request: Request, client: Client, db_session: SessionBdDType, type_test: str = 'create') -> None:
+        """
+        Crée ou modifie un client professionnel.
 
-    db_session.add(pro) if type_test == 'create' else db_session.merge(pro)
+        Args:
+            request (Request): Objet de requête Flask
+            client (Client): Objet client à modifier ou à créer
+            db_session (SessionBdDType): Session de base de données
+            type_test (str): Type de test ('create' ou 'update')
+        """
+        # Récupération des données spécifiques au professionnel depuis le formulaire
+        raison_sociale = request.form.get('raison_sociale', '')
+        type_pro_str = request.form.get('type_pro', '')
+        siren = request.form.get('siren', '')
+        rna = request.form.get('rna', '')
+
+        # Création ou récupération du client professionnel
+        pro = Pro(id_client=client.id) if type_test == 'create' else client.pro
+        pro.raison_sociale = raison_sociale
+        pro.type_pro = int(type_pro_str)
+        pro.siren = siren if siren else None
+        pro.rna = rna if rna else None
+
+        db_session.add(pro) if type_test == 'create' else db_session.merge(pro)
 
 
 # ================================================================
@@ -315,70 +290,6 @@ def recherche_avancee():
     finally:
         db_session.close()
 
-@validate_habilitation(GESTIONNAIRE)
-@validate_habilitation(CLIENTS)
-@clients_bp.route('/all_clients', methods=['GET'])
-def get_clients():
-    """
-    API REST : Récupération de la liste des clients.
-    
-    Endpoint JSON pour alimenter les interfaces dynamiques (DataTables, AutoComplete, etc.).
-    Supporte les paramètres de pagination, tri et filtrage via query string.
-    
-    Query Parameters:
-        - page (int): Numéro de page (défaut: 1)
-        - limit (int): Nombre d'éléments par page (défaut: 50)
-        - search (str): Terme de recherche libre
-        - type (int): Filtrage par type client (1=Particulier, 2=Professionnel)
-        - status (bool): Filtrage par statut actif/inactif
-        
-    Returns:
-        JSON: Liste des clients avec métadonnées de pagination
-        
-    Format de réponse:
-        {
-            "clients": [...],
-            "total": 150,
-            "page": 1,
-            "pages": 3,
-            "per_page": 50
-        }
-        
-    Note: 
-        Actuellement retourne des données de test. À connecter avec la base
-        de données via les modèles SQLAlchemy (Client, Part, Pro).
-    """
-    # Ouverture d'une session vers la base de données
-    db_session: SessionBdDType = get_db_session()
-
-    # Recherche de la liste de clients
-    clients: List[Client] = (
-        db_session.query(Client)
-        .filter(Client.is_active == True)
-        .all()
-    )
-
-    # Conversion en dictionnaire pour le retour
-    clients_dict = [c.to_dict() for c in clients]
-
-    # Retour de la route
-    return jsonify(clients_dict)
-
-@validate_habilitation(GESTIONNAIRE)
-@validate_habilitation(CLIENTS)
-@clients_bp.route('/list')
-def client_list():
-    """
-    Page de liste des clients - redirection vers la page principale.
-    """
-    return jsonify({
-        "clients": "clients",
-        "total": len("clients"),
-        "page": 1,
-        "pages": 1,
-        "per_page": 50
-    })
-
 # ================================================================
 # DONNÉES CLIENTS INDIVIDUELLES
 # ================================================================
@@ -407,7 +318,6 @@ def get_client(id_client: int):
         joinedload(Client.commandes),
         joinedload(Client.factures)
     ).get(id_client)
-    acfc_log.log(DEBUG, f'{client}')
 
     # Récupération du contexte du client et retour
     if client:
@@ -419,12 +329,12 @@ def get_client(id_client: int):
         orders: List[Commande] = sorted(client.commandes, key=lambda x: x.id, reverse=True)
         bills: List[Facture] = client.factures
         nom_affichage = client.nom_affichage
-        return render_template(CLIENT_PARAM_PAGE['page'],
-                               title=CLIENT_PARAM_PAGE['title'],
-                               context=CLIENT_PARAM_PAGE['context'],
-                               objects=[client, part, pro, addresses, phones, mails, orders, bills, nom_affichage])
+        return PrepareTemplates.clients(sub_context='detail', client=client, part=part, pro=pro, phones=phones,
+                                        mails=mails, addresses=addresses, orders=orders, bills=bills,
+                                        id_client=client.id, nom_affichage=nom_affichage, log=True)
     else:
-        return jsonify({"error": ERROR_CLIENT_NOT_FOUND}), 404
+        return PrepareTemplates.error_4xx(status_code=404, log=True,
+                                          status_message=Constants.messages('client', 'not_found'))
 
 @clients_bp.route('/<id_client>/commandes/en-cours')
 @validate_habilitation(CLIENTS)
@@ -551,7 +461,7 @@ def edit_client_form(id_client: int):
                                id_client=id_client,
                                nom_affichage=nom_affichage)
     except Exception as e:
-        PrepareTemplates.error_5xx(message=str(e), log=True, user=session.get('pseudo', 'unknown'), error_message=str(e))
+        PrepareTemplates.error_5xx(status_code=500, status_message=str(e), log=True)
 
 @validate_habilitation(CLIENTS)
 @clients_bp.route('/<int:id_client>/update', methods=['POST'])

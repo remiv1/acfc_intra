@@ -23,7 +23,7 @@ from flask import Flask, Response, request, Blueprint, session, url_for, redirec
 from flask_session import Session
 from waitress import serve
 from typing import Any, Dict, Tuple, List, Optional
-from werkzeug.exceptions import HTTPException, Unauthorized
+from werkzeug.exceptions import HTTPException
 from datetime import datetime, date
 from sqlalchemy import text, and_, or_
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
@@ -333,7 +333,7 @@ def login() -> Any:
         message = Constants.messages('error_400', 'wrong_road') \
                   + f'\nMéthode {request.method} non autorisée.' \
                   + f'\nUtilisateur : {session.get("user_id", "inconnu")}'
-        return PrepareTemplates.error_4xx(message=message, log=True)
+        return PrepareTemplates.error_4xx(status_code=400, status_message=message, log=True)
     # === TRAITEMENT POST : Validation des identifiants ===
     else:
         user_to_authenticate = AuthenticationService(request)
@@ -355,8 +355,7 @@ def login() -> Any:
             message = Constants.messages('error_500', 'default') + 'context : auth' \
                       + f' Utilisateur : {user_to_authenticate.user_pseudo if user_to_authenticate else "inconnu"}' + \
                         f' Détail : {str(e)}'
-            return PrepareTemplates.error_5xx(message=str(e), log=True,
-                                              user=user_to_authenticate.user_pseudo if user_to_authenticate else 'N/A')
+            raise 
 
 @acfc.route('/logout')
 def logout() -> Any:
@@ -460,10 +459,12 @@ def my_account(pseudo: str) -> Any:
             if ('user' not in locals()) or (not user):
                 user = User()
                 user.pseudo = pseudo  # Au moins le pseudo pour le template
-            return PrepareTemplates.error_5xx(message=str(e), log=True, user=session.get('pseudo', 'N/A'))
-    
+            return PrepareTemplates.error_5xx(status_code=500, status_message=str(e), log=True)
+
     #=== Gestion de toutes les autres méthodes ===
-    else: raise Unauthorized("Méthode non autorisée.")
+    else: return PrepareTemplates.error_4xx(status_code=405,
+                                            status_message=Constants.messages('error 400', 'wrong_road'),
+                                            log=True)
 
 @acfc.route('/user/<pseudo>/parameters', methods=['GET', 'POST'])
 def user_parameters(pseudo: str) -> Any:
@@ -478,15 +479,12 @@ def user_parameters(pseudo: str) -> Any:
     if request.method == 'GET':
         db_session = get_db_session()
         user = db_session.query(User).filter_by(pseudo=pseudo).first()
-        if not user: return PrepareTemplates.error_4xx(message=f"Utilisateur '{pseudo}' introuvable.", log=True)
+        if not user: return PrepareTemplates.error_4xx(status_code=404, status_message="Utilisateur introuvable", log=True)
         return PrepareTemplates.users(subcontext='parameters', objects=[user])
     elif request.method == 'POST':
         return redirect(url_for('my_account', pseudo=pseudo))
     else:
-        message = Constants.messages('error_400', 'wrong_road') \
-                  + f'\nMéthode {request.method} non autorisée.' \
-                  + f'\nUtilisateur : {session.get("user_id", "inconnu")}'
-        return PrepareTemplates.error_4xx(message=message, log=True, username=session.get('pseudo', 'N/A'))
+        return PrepareTemplates.error_4xx(status_code=405, status_message="Méthode non autorisée", log=True)
 
 @acfc.route('/chg_pwd', methods=['POST'])
 def chg_pwd() -> Any:
@@ -519,7 +517,8 @@ def chg_pwd() -> Any:
         else:
             return redirect(url_for('login'))
     # === Gestion de toutes les autres méthodes ===
-    return PrepareTemplates.error_4xx(message=Constants.messages('error_400', 'wrong_road'))
+    return PrepareTemplates.error_4xx(status_code=405, log=True,
+                                      status_message=Constants.messages('error_400', 'wrong_road'))
 
 # ====================================================================
 # GESTIONNAIRES D'ERREURS HTTP
@@ -545,19 +544,8 @@ def handle_4xx_errors(error: HTTPException) -> str:
     Returns:
         str: Template d'erreur personnalisé avec code et message
     """
-    match error.code:
-        case 400:
-            message_error = f'Votre requête est mal formée.\n{error.name}'
-        case 401:
-            message_error = f'Authentification requise.\n{error.name}'
-        case 403:
-            message_error = f'Accès interdit.\n{error.name}'
-        case 404:
-            message_error = f'Ressource non trouvée.\n{error.name}'
-        case _:
-            message_error = f'Erreur inconnue, {error.name}'
-
-    return PrepareTemplates.error_4xx(message=message_error, status_code=error.code)
+    return PrepareTemplates.error_4xx(status_code=error.code or 400, log=True,
+                                      status_message=error.description or Constants.messages('error_400', 'default'))
 
 @acfc.errorhandler(500)
 @acfc.errorhandler(502)
@@ -579,19 +567,8 @@ def handle_5xx_errors(error: HTTPException) -> str:
     Returns:
         str: Template d'erreur personnalisé avec code et message
     """
-    match error.code:
-        case 500:
-            message_error = f'Erreur interne du serveur.\n{error.name}'
-        case 502:
-            message_error = f'Erreur de passerelle.\n{error.name}'
-        case 503:
-            message_error = f'Service indisponible.\n{error.name}'
-        case 504:
-            message_error = f'Timeout de passerelle.\n{error.name}'
-        case _:
-            message_error = f'Erreur inconnue, {error.name}'
-
-    return PrepareTemplates.error_5xx(message=message_error, status_code=error.code)
+    return PrepareTemplates.error_5xx(status_code=error.code or 500, log=True,
+                                      status_message=error.description or Constants.messages('error_500', 'default'))
 
 # ====================================================================
 # ENREGISTREMENT DES MODULES MÉTIERS
@@ -627,5 +604,4 @@ def start_server():
     serve(acfc, host=host, port=port)
 
 
-if __name__ == '__main__':
-    start_server()
+if __name__ == '__main__': start_server()

@@ -20,9 +20,8 @@ from datetime import datetime, date
 from sqlalchemy.orm import Session as SessionBdDType
 from werkzeug.exceptions import NotFound
 from app_acfc.modeles import (Commande, DevisesFactures, Catalogue, Client,
-                              Expeditions, Facture, Operations, Ventilations, PCG, get_db_session)
+                              Facture, Operations, Ventilations, get_db_session)
 from app_acfc.habilitations import validate_habilitation, CLIENTS
-from logs.logger import acfc_log, ERROR, DEBUG
 from typing import List, Dict, Optional, Any
 import qrcode
 from io import BytesIO
