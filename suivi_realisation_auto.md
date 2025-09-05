@@ -2,79 +2,21 @@
 
 **Date du rapport :** 05 September 2025  
 **Période analysée :** 29 August 2025 - 05 September 2025 (7 jours)  
-**Nombre de commits :** 41  
+**Nombre de commits :** 38  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 41 commits sur 7 jours  
-**Volume de code :** 13419 lignes ajoutées, 16774 lignes supprimées  
-**Fichiers impactés :** 423 fichiers modifiés  
-**Productivité moyenne :** 1917 lignes/jour
+**Activité de développement :** 38 commits sur 7 jours  
+**Volume de code :** 12792 lignes ajoutées, 13778 lignes supprimées  
+**Fichiers impactés :** 392 fichiers modifiés  
+**Productivité moyenne :** 1827 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 29 August 2025
-
-#### 19:38 - 8f00c7d - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
-
-**Catégorie :** Développement général  
-**Impact :** +0 -0 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Merge: 3050336 00ced50`
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 19:38:30 2025 +0200`
-- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
-
-#### 19:38 - 3050336 - fix: Remove obsolete unit tests and improve test structure
-
-**Catégorie :** Correction de bugs  
-**Impact :** +467 -1765 lignes, 17 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 19:38:27 2025 +0200`
-- `    fix: Remove obsolete unit tests and improve test structure`
-- ... et 15 autres fichiers
-
-#### 17:32 - 00ced50 - 📊 Mise à jour automatique du rapport de suivi (29/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +51 -18 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Aug 29 17:32:56 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (29/08/2025)`
-- ... et 1 autres fichiers
-
-#### 19:32 - 1b681ba - Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders
-
-**Catégorie :** Développement général  
-**Impact :** +37 -40 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Merge: 85293ad 3ccf58d`
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 19:32:44 2025 +0200`
-- `    Merge branch 'sprint_orders' of https://github.com/remiv1/acfc_intra into sprint_orders`
-
-#### 19:32 - 85293ad - fix: Remove obsolete unit tests and improve test structure
-
-**Catégorie :** Correction de bugs  
-**Impact :** +390 -1683 lignes, 15 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Aug 29 19:32:41 2025 +0200`
-- `    fix: Remove obsolete unit tests and improve test structure`
-- ... et 13 autres fichiers
 
 
 ### 30 August 2025
@@ -417,6 +359,29 @@
 
 ### 05 September 2025
 
+#### 22:02 - 222fd73 - Refactor: - Routes et méthodes dans les fichiers `catalogue.py`, `clients.py` et `modeles.py` pour améliorer la lisibilité et la cohérence. Renommage des fonctions en ajoutant des types de retour. - Mise à jour des liens dans le template `default.html` pour refléter les changements de routes.
+
+**Catégorie :** Refactoring  
+**Impact :** +198 -120 lignes, 9 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Fri Sep 5 22:02:04 2025 +0200`
+- `    Refactor:`
+- `    - Routes et méthodes dans les fichiers `catalogue.py`, `clients.py` et `modeles.py` pour améliorer la lisibilité et la cohérence. Renommage des fonctions en ajoutant des types de retour.`
+- ... et 6 autres fichiers
+
+#### 17:24 - 8b04cc4 - 📊 Mise à jour automatique du rapport de suivi (05/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +120 -390 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Sep 5 17:24:34 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (05/09/2025)`
+- ... et 1 autres fichiers
+
 #### 19:24 - cc67d57 - refactor: - Ajout d'un filtre Jinja pour générer le titre de la page et centraliser les modifications - Amélioration des messages d'erreur avec des journaux spécifiques, et création d'une nouvelle route pour la création de clients. - Mise à jour des liens dans les templates pour utiliser le nouveau filtre Jinja.
 
 **Catégorie :** Refactoring  
@@ -502,39 +467,39 @@
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 14 commits (34.1%)
-- **Refactoring** : 9 commits (22.0%)
-- **Correction de bugs** : 8 commits (19.5%)
-- **Développement de fonctionnalités** : 5 commits (12.2%)
-- **Développement général** : 4 commits (9.8%)
-- **Tests** : 1 commits (2.4%)
+- **Interface utilisateur** : 14 commits (36.8%)
+- **Refactoring** : 10 commits (26.3%)
+- **Correction de bugs** : 6 commits (15.8%)
+- **Développement de fonctionnalités** : 5 commits (13.2%)
+- **Développement général** : 2 commits (5.3%)
+- **Tests** : 1 commits (2.6%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 115 fichiers modifiés
-- **HTML** : 48 fichiers modifiés
-- **Documentation** : 21 fichiers modifiés
+- **Python** : 96 fichiers modifiés
+- **HTML** : 49 fichiers modifiés
+- **Documentation** : 20 fichiers modifiés
 - **JavaScript** : 7 fichiers modifiés
 - **CSS** : 6 fichiers modifiés
-- **YAML/Config** : 5 fichiers modifiés
+- **YAML/Config** : 4 fichiers modifiés
 - **Docker** : 2 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 5.9 commits/jour
-- **Volume de code :** 30193 modifications totales
-- **Ratio ajouts/suppressions :** 0.80
-- **Moyenne lignes par commit :** 736
+- **Fréquence de commit :** 5.4 commits/jour
+- **Volume de code :** 26570 modifications totales
+- **Ratio ajouts/suppressions :** 0.93
+- **Moyenne lignes par commit :** 699
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 13419 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 12792 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
 *Rapport généré automatiquement le 05 September 2025*
