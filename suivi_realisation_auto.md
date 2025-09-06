@@ -1,47 +1,22 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 05 September 2025  
-**Période analysée :** 29 August 2025 - 05 September 2025 (7 jours)  
-**Nombre de commits :** 38  
+**Date du rapport :** 06 September 2025  
+**Période analysée :** 30 August 2025 - 06 September 2025 (7 jours)  
+**Nombre de commits :** 39  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 38 commits sur 7 jours  
-**Volume de code :** 12792 lignes ajoutées, 13778 lignes supprimées  
-**Fichiers impactés :** 392 fichiers modifiés  
-**Productivité moyenne :** 1827 lignes/jour
+**Activité de développement :** 39 commits sur 7 jours  
+**Volume de code :** 11261 lignes ajoutées, 13385 lignes supprimées  
+**Fichiers impactés :** 390 fichiers modifiés  
+**Productivité moyenne :** 1608 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 30 August 2025
-
-#### 07:19 - d60ca7f - 📊 Mise à jour automatique du rapport de suivi (30/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +68 -21 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Sat Aug 30 07:19:50 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (30/08/2025)`
-- ... et 1 autres fichiers
-
-#### 09:19 - 3761abf - Refactor: Récréation complète des tests pour être plus adaptable aux changements futurs.
-
-**Catégorie :** Refactoring  
-**Impact :** +1712 -459 lignes, 16 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Sat Aug 30 09:19:32 2025 +0200`
-- `    Refactor: Récréation complète des tests pour être plus adaptable aux changements futurs.`
-- ... et 15 autres fichiers
 
 
 ### 31 August 2025
@@ -359,6 +334,17 @@
 
 ### 05 September 2025
 
+#### 20:02 - c8296b1 - 📊 Mise à jour automatique du rapport de suivi (05/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +43 -78 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Sep 5 20:02:32 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (05/09/2025)`
+- ... et 1 autres fichiers
+
 #### 22:02 - 222fd73 - Refactor: - Routes et méthodes dans les fichiers `catalogue.py`, `clients.py` et `modeles.py` pour améliorer la lisibilité et la cohérence. Renommage des fonctions en ajoutant des types de retour. - Mise à jour des liens dans le template `default.html` pour refléter les changements de routes.
 
 **Catégorie :** Refactoring  
@@ -463,22 +449,48 @@
 - ... et 1 autres fichiers
 
 
+### 06 September 2025
+
+#### 09:37 - c800d6d - feat: - Ajout de nouvelles fonctionnalités d'administration et de gestion des clients, y compris la suppression logique des clients et la modification des emails. - listage des réalisations à effectuer (routes, templates, protection CSRF, gestion des habilitations...)
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +205 -9 lignes, 10 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Sat Sep 6 09:37:14 2025 +0200`
+- `    feat:`
+- `    - Ajout de nouvelles fonctionnalités d'administration et de gestion des clients, y compris la suppression logique des clients et la modification des emails.`
+- ... et 7 autres fichiers
+
+#### 08:42 - 83b3f39 - fix: Ajout des variables d'environnement pour l'utilisateur et le mot de passe de l'application MongoDB dans le fichier de configuration pour le CI-CD.
+
+**Catégorie :** Correction de bugs  
+**Impact :** +1 -0 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Sat Sep 6 08:42:56 2025 +0200`
+- `    fix: Ajout des variables d'environnement pour l'utilisateur et le mot de passe de l'application MongoDB dans le fichier de configuration pour le CI-CD.`
+- ... et 1 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 14 commits (36.8%)
-- **Refactoring** : 10 commits (26.3%)
-- **Correction de bugs** : 6 commits (15.8%)
-- **Développement de fonctionnalités** : 5 commits (13.2%)
-- **Développement général** : 2 commits (5.3%)
+- **Interface utilisateur** : 14 commits (35.9%)
+- **Refactoring** : 9 commits (23.1%)
+- **Correction de bugs** : 7 commits (17.9%)
+- **Développement de fonctionnalités** : 6 commits (15.4%)
+- **Développement général** : 2 commits (5.1%)
 - **Tests** : 1 commits (2.6%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 96 fichiers modifiés
+- **Python** : 98 fichiers modifiés
 - **HTML** : 49 fichiers modifiés
 - **Documentation** : 20 fichiers modifiés
 - **JavaScript** : 7 fichiers modifiés
@@ -490,16 +502,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 5.4 commits/jour
-- **Volume de code :** 26570 modifications totales
-- **Ratio ajouts/suppressions :** 0.93
-- **Moyenne lignes par commit :** 699
+- **Fréquence de commit :** 5.6 commits/jour
+- **Volume de code :** 24646 modifications totales
+- **Ratio ajouts/suppressions :** 0.84
+- **Moyenne lignes par commit :** 632
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 12792 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 11261 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 05 September 2025*
+*Rapport généré automatiquement le 06 September 2025*
