@@ -19,7 +19,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from datetime import datetime, date
 from sqlalchemy.orm import Session as SessionBdDType
 from werkzeug.exceptions import NotFound
-from app_acfc.modeles import (Commande, DevisesFactures, Catalogue, Client,
+from app_acfc.modeles import (Commande, Constants, DevisesFactures, Catalogue, Client,
                               Facture, Operations, Ventilations, get_db_session)
 from app_acfc.habilitations import validate_habilitation, CLIENTS
 from typing import List, Dict, Optional, Any
@@ -32,10 +32,6 @@ commandes_bp = Blueprint(name='commandes',
                          import_name=__name__,
                          url_prefix='/commandes')
 
-# Création des constantes
-DETAIL_CLIENT = 'clients.get_client'
-LOG_FILE_COMMANDES = 'commandes.log'
-
 @commandes_bp.route('/client/<int:id_client>/commandes/nouvelle', methods=['GET', 'POST'])
 @validate_habilitation(CLIENTS)
 def nouvelle_commande(id_client: int):
@@ -45,7 +41,7 @@ def nouvelle_commande(id_client: int):
         # Récupérer le client
         client = session_db.query(Client).filter(Client.id == id_client).first()
         if not client:
-            return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
+            return redirect(url_for(Constants.return_pages('clients', 'detail'), id_client=id_client))
         
         if request.method == 'POST':
             action = request.form.get('action', 'save')

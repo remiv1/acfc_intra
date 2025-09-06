@@ -1412,7 +1412,7 @@ class Constants:
         Retourne le nom du template de la page en fonction du domaine et du sous-domaine.
 
         Args:
-            domain (str):
+            domain (str): Domaine principal. Valeurs possibles :
                 - 'admin'
                 - 'clients'
                 - 'commandes'
@@ -1421,12 +1421,13 @@ class Constants:
                 - 'factures'
                 - 'stock'
                 - 'users'
-            sub_domain (str):
-                - admin :
+                - 'catalogue'
+            sub_domain (str): Sous-domaine dépendant du domaine choisi :
+                Si domain == 'admin' :
                     - 'accueil'
                     - 'logs-dashboard'
                     - 'logs-export'
-                - clients :
+                Si domain == 'clients' :
                     - 'recherche'
                     - 'recherche-api'
                     - 'creation'
@@ -1435,23 +1436,21 @@ class Constants:
                     - 'modifier-post'
                     - 'phone-add'
                     - 'mail-add'
-                - commandes :
+                Si domain == 'commandes' :
                     - 'commande-detail'
                     - 'commande-form'
                     - 'commande-print'
                     - 'factures'
                     - 'commercial-clt-target'
-                - commercial :
+                Si domain == 'commercial' :
                     - 'accueil'
                     - 'filtrage'
                     - 'filtrage-api'
-                - comptabilite :
+                Si domain == 'comptabilite' :
                     - 'accueil'
-                - factures : {}
-                - stocks :
-                    - 'accueil'
-                - users : {}
-                - catalogue :
+                Si domain == 'factures', 'users' :
+                    Aucun sous-domaine
+                Si domain == 'stock', 'catalogue' :
                     - 'accueil'
         Returns:
             str: Nom du template de la page
@@ -1481,9 +1480,9 @@ class Constants:
                 'address-mod': 'clients.mod_address',
             },
             'commandes': {
-                'commande-detail': 'commandes.commande_detail',
-                'commande-form': 'commandes.commande_form',
-                'commande-print': 'commandes.commande_print',
+                'detail': 'commandes.commande_detail',
+                'form': 'commandes.commande_form',
+                'print': 'commandes.commande_print',
                 'factures': 'commandes.factures',
             },
             'commercial': {
