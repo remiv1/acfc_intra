@@ -1,3 +1,34 @@
+'''
+Blueprint d'administration pour l'application ACFC.
+Ce module définit les routes et la logique associée à l'administration, incluant :
+- La page d'accueil de l'administration avec statistiques générales.
+- Le dashboard des logs avec filtrage et pagination côté serveur.
+- L'export des logs filtrés au format CSV.
+Fonctionnalités principales :
+- Statistiques sur les utilisateurs et les logs (MongoDB).
+- Filtrage avancé et pagination des logs.
+- Export des logs filtrés.
+- Sécurisation des routes par habilitation (ADMINISTRATEUR).
+Routes :
+- `/admin/` : Page d'accueil de l'administration.
+- `/admin/logs` : Dashboard des logs avec filtres.
+- `/admin/logs/export` : Export des logs filtrés en CSV.
+: TODO :
+- *A développer* :
+  - *Réactivation client*
+  - *Gestion des utilisateurs*
+  - *Suppression de masses à double validation (1 administrateur et 1 gestionnaire)*
+Dépendances :
+- Flask (Blueprint, request, session, make_response)
+- MongoDB (pymongo)
+- SQLAlchemy (gestion des utilisateurs)
+- Modules internes : habilitations, modèles, templates, logs
+Sécurité :
+Toutes les routes sont protégées par le décorateur `validate_habilitation(ADMINISTRATEUR)`.
+
+'''
+# TODO : Réalisations des routes dans *A développer*
+
 from flask import Blueprint, request, make_response
 from app_acfc.habilitations import (
     validate_habilitation, ADMINISTRATEUR

@@ -24,8 +24,7 @@ Version : 1.0
 from functools import wraps
 from typing import Callable, Any
 from flask import session
-from logs.logger import acfc_log, WARNING
-from app_acfc.modeles import PrepareTemplates, Constants
+from app_acfc.modeles import PrepareTemplates
 
 # Définition des niveaux d'habilitation
 ADMINISTRATEUR = '1'
@@ -35,6 +34,8 @@ COMPTABILITE = '4'
 RESSOURCES_HUMAINES = '5'
 DEVELOPPEMENT_IT = '6'
 FORCE_DE_VENTE = '7'
+
+# TODO: Ajouter la possibilité d'insérer une liste dans required_habilitation pour vérifier plusieurs habilitations et un symbole logique (AND/OR)
 
 def validate_habilitation(required_habilitation: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """

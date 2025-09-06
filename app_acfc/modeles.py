@@ -1173,7 +1173,7 @@ class Constants:
             second_type_message (str):
                 - 'error_400': 'wrong_road' + 'not_found' + 'default'
                 - 'error_500': 'default'
-                - 'client': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                - 'client': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search', 'delete_forbidden'
                 - 'phone': 'missing', 'invalid', 'exists', 'valid', 'default'
                 - 'email': 'missing', 'invalid', 'exists', 'valid', 'default'
                 - 'address': 'missing', 'invalid', 'exists', 'valid', 'default'
@@ -1208,7 +1208,8 @@ class Constants:
                 'list': "Liste des clients chargée avec succès.",
                 'detail': "Détails du client affichés avec succès.",
                 'form': "Formulaire de client prêt à être rempli.",
-                'search': "Résultats de la recherche de clients affichés."
+                'search': "Résultats de la recherche de clients affichés.",
+                'delete_forbidden': "Suppression interdite : Le client a des commandes ou des factures associées de moins de 5 ans."
             },
             'phone': {
                 'missing': "Le numéro de téléphone est obligatoire.",
@@ -1468,9 +1469,16 @@ class Constants:
                 'detail': 'clients.get_client',
                 'modifier-get': 'clients.edit_client',
                 'modifier-post': 'clients.update_client',
+                'supprimer': 'clients.delete_client',
                 'phone-add': 'clients.add_phone',
                 'mail-add': 'clients.add_email',
                 'address-add': 'clients.add_address',
+                'phone-del': 'clients.del_phone',
+                'mail-del': 'clients.del_email',
+                'address-del': 'clients.del_address',
+                'phone-mod': 'clients.mod_phone',
+                'mail-mod': 'clients.mod_email',
+                'address-mod': 'clients.mod_address',
             },
             'commandes': {
                 'commande-detail': 'commandes.commande_detail',

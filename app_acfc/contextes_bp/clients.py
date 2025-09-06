@@ -197,6 +197,8 @@ def recherche_avancee() -> ResponseWerkzeug | str:
     # Récupération des paramètres
     search_term = request.args.get('q', '').strip()
     search_type = request.args.get('type', 'part').strip()
+    # TODO: Ajouter la possibilité de chercher un client inactif via un paramètre supplémentaire
+    # Dans le formulaire, cette possibilité ne sera proposée qu'aux gestionnaires et administrateurs
     
     # Validation longueur minimum
     if len(search_term) < 3:
@@ -292,7 +294,7 @@ def recherche_avancee() -> ResponseWerkzeug | str:
 # DONNÉES CLIENTS INDIVIDUELLES
 # ================================================================
 
-@clients_bp.route('/nouveau', methods=['GET', 'POST'])
+@clients_bp.route('/new', methods=['GET', 'POST'])
 @validate_habilitation(CLIENTS)
 def create_client() -> str | ResponseWerkzeug:
     """
@@ -381,7 +383,7 @@ def get_client(id_client: int) -> str:
         return PrepareTemplates.error_4xx(status_code=404, log=True,
                                           status_message=Constants.messages('client', 'not_found'))
 
-@clients_bp.route('/<int:id_client>/modifier', methods=['GET'])
+@clients_bp.route('/<int:id_client>/modify', methods=['GET'])
 @validate_habilitation(CLIENTS)
 def edit_client(id_client: int) -> str:
     """
@@ -467,7 +469,7 @@ def update_client(id_client: int) -> ResponseWerkzeug | str:
                                         nom_affichage=nom_affichage if nom_affichage else f"Client {id_client}",
                                         error_message=Constants.messages('error_500', 'default') + f" : {e}")
 
-@clients_bp.route('<int:id_client>/add_phone/', methods=['POST'])
+@clients_bp.route('<int:id_client>/add-phone/', methods=['POST'])
 @validate_habilitation(CLIENTS)
 def add_phone(id_client: int) -> ResponseWerkzeug:
     """
@@ -534,9 +536,64 @@ def add_phone(id_client: int) -> ResponseWerkzeug:
                                  id_client=id_client, log=True,
                                  error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
-# TODO: Faire une méthode modifier/supprimer pour les téléphones, emails et adresses
+@clients_bp.route('/<int:id_client>/delete/', methods=['POST'])
+@validate_habilitation(CLIENTS)
+def delete_client(id_client: int) -> ResponseWerkzeug:
+    """
+    Suppression d'un client.
+    
+    Endpoint REST pour supprimer un client existant.
+    La suppression est logique (is_active = False).
+    
+    Form Data:
+        - id_client (int): ID du client à supprimer
+    
+    Returns:
+        Redirect: Vers la page de recherche clients avec message de succès ou d'erreur
+    """
+    db_session = get_db_session()
+    client = None
 
-@clients_bp.route('/<int:id_client>/add_email/', methods=['POST'])
+    try:
+        # Récupération du client à supprimer
+        client = db_session.query(Client).options(
+            joinedload(Client.commandes),
+            joinedload(Client.factures)
+        ).get(id_client)
+        if not client:
+            return redirect(url_for(Constants.return_pages('clients', 'client-search'),
+                        error_message=Constants.messages('client', 'not_found')))
+
+        # Vérification de commandes ou factures de moins de 5 ans
+        now = datetime.now()
+        five_years_ago = now.replace(year=now.year - 5)
+        recent_commande = any(
+            c.date_commande and c.date_commande >= five_years_ago
+            for c in client.commandes
+        )
+        recent_facture = any(
+            f.date_facture and f.date_facture >= five_years_ago
+            for f in client.factures
+        )
+        if recent_commande or recent_facture:
+            return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+                        id_client=id_client,
+                        error_message=Constants.messages('client', 'delete_forbidden')))
+
+        # Suppression logique
+        client.is_active = False
+        client.modified_by = session.get('pseudo', 'N/A')
+        db_session.commit()
+
+        return redirect(url_for(Constants.return_pages('clients', 'recherche'),
+                                success_message=Constants.messages('client', 'delete')))
+    
+    except Exception as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                id_client=id_client, log=True,
+                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+
+@clients_bp.route('/<int:id_client>/add-email/', methods=['POST'])
 @validate_habilitation(CLIENTS)
 def add_email(id_client: int) -> ResponseWerkzeug:
     """
@@ -601,6 +658,74 @@ def add_email(id_client: int) -> ResponseWerkzeug:
 
         return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
                                 id_client=id_client, success_message="Email ajouté avec succès"))
+
+    except Exception as e:
+        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+                                id_client=id_client, log=True,
+                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+    
+@clients_bp.route('/<int:id_client>/modify-email/<int:id_mail>/', methods=['POST'])
+@validate_habilitation(CLIENTS)
+def mod_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
+    """
+    Modification d'un email existant pour un client.
+    
+    Endpoint REST pour modifier une adresse email existante d'un client.
+    Supporte différents types : professionnel, personnel, facturation, marketing.
+    
+    Form Data:
+        - id_client (int): ID du client
+        - id_mail (int): ID de l'email à modifier
+        - mail (str): Nouvelle adresse email
+        - type_mail (str): Type d'email
+        - detail (str, optional): Précisions sur l'usage
+        - is_principal (bool, optional): Email principal
+    
+    Returns:
+        Page redirection avec message de succès ou d'erreur
+    """
+    db_session = get_db_session()
+    client = None
+
+    try:
+        # TODO: Vérifier la concordance avec le formulaire à créer
+        # Récupération et validation des données
+        client = db_session.query(Client).get(id_client)
+        mail_obj = db_session.query(Mail).filter_by(id=id_mail, id_client=id_client).first()
+        email = request.form.get('mail', '').strip()
+        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+        if not mail_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                         id_client=id_client,
+                                         error_message=Constants.messages('email', 'not_found')))
+        if not email: return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                                  id_client=id_client,
+                                                  error_message=Constants.messages('email', 'missing')))
+
+        # Validation basique du format email
+        if '@' not in email or '.' not in email.split('@')[-1]:
+            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                                  id_client=id_client,
+                                                  error_message=Constants.messages('email', 'invalid')))
+
+        # Récupération des autres données
+        type_mail = request.form.get('type_mail', 'professionnel')
+        detail = request.form.get('detail', '').strip()
+        is_principal = request.form.get('is_principal', 'false').lower() == 'true'
+
+        # Si c'est l'email principal, désactiver les autres
+        if is_principal: db_session.query(Mail).filter_by(
+            id_client=client.id, is_principal=True
+            ).update({'is_principal': False})
+
+        # Mise à jour de l'email
+        mail_obj.mail = email
+        mail_obj.type_mail = type_mail
+        mail_obj.detail = detail if detail else None
+        mail_obj.is_principal = is_principal
+
+        db_session.commit()
+        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+                                id_client=id_client, success_message=Constants.messages('email', 'valid')))
 
     except Exception as e:
         return redirect(url_for(Constants.return_pages('clients', 'client-detail'),

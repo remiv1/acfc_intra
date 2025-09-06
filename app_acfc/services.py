@@ -163,6 +163,37 @@ class SecureSessionService:
         # === CONFIGURATION DE L'EXPIRATION ===
         self.app.config['PERMANENT_SESSION_LIFETIME'] = 1800  # 30 minutes d'inactivité max
 
+        # === AJOUT D'UNE PROTECTION CONTRE LES ATTAQUES CSRF ===
+        # TODO: Implémenter Flask-WTF
+        """
+        pip install flask-wtf
+
+        # Dans l'application ou le service principal
+        from flask import Flask
+        from flask_wtf import CSRFProtect
+
+        app = Flask(__name__)
+        app.secret_key = 'ton_secret_key'  # Obligatoire pour signer les tokens CSRF
+        csrf = CSRFProtect(app)  # Active la protection CSRF
+
+        # Dans les formulaires
+        from flask_wtf import FlaskForm
+        from wtforms import StringField, SubmitField
+        from wtforms.validators import DataRequired
+
+        class MyForm(FlaskForm):
+            name = StringField('Nom', validators=[DataRequired()])
+            submit = SubmitField('Envoyer')
+
+        # Dans les templates Jinja2
+        <form method="POST" action="/submit">
+            {{ form.hidden_tag() }}
+            {{ form.name.label }} {{ form.name(size=32) }}
+            {{ form.submit() }}
+        </form>
+
+        """
+
 class AuthenticationService:
     """
     Service de gestion de l'authentification des utilisateurs.
