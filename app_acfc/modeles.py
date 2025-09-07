@@ -1153,40 +1153,43 @@ class Constants:
         Retourne le message en fonction du type.
 
         Args:
-            type_msg (str):
-                - 'error_400'
-                - 'error_500'
-                - 'client'
-                - 'phone'
-                - 'email'
-                - 'address'
-                - 'user'
-                - 'security'
-                - 'commandes'
-                - 'factures'
-                - 'comptabilite'
-                - 'stock'
-                - 'commercial'
-                - 'warning'
-                - 'debug'
-                - 'info'
-            second_type_message (str):
-                - 'error_400': 'wrong_road' + 'not_found' + 'default'
-                - 'error_500': 'default'
-                - 'client': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search', 'delete_forbidden'
-                - 'phone': 'missing', 'invalid', 'exists', 'valid', 'default'
-                - 'email': 'missing', 'invalid', 'exists', 'valid', 'default'
-                - 'address': 'missing', 'invalid', 'exists', 'valid', 'default'
-                - 'user': 'create', 'update', 'to_update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
-                - 'security': 'default'
-                - 'commandes': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
-                - 'factures': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
-                - 'comptabilite': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
-                - 'stock': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
-                - 'commercial': 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
-                - 'warning': 'default'
-                - 'debug': 'default'
-                - 'info': 'default'
+            type_msg (str): Catégorie du message:
+                'error_400', 'error_500', 'client', 'phone', 'email', 'address',
+                'user', 'security', 'commandes', 'factures', 'comptabilite', 'stock',
+                'commercial', 'warning', 'debug', 'info'
+            second_type_message (str): Sous-catégorie du message:
+                Si type_msg == 'error_400':
+                  - 'wrong_road', 'not_found', 'default'
+                Si type_msg == 'error_500':
+                  - 'default'
+                Si type_msg == 'client':
+                  - 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search', 'delete_forbidden'
+                Si type_msg == 'phone':
+                  - 'missing', 'invalid', 'exists', 'valid', 'default'
+                Si type_msg == 'email':
+                  - 'missing', 'invalid', 'exists', 'valid', 'default'
+                Si type_msg == 'address':
+                  - 'missing', 'invalid', 'exists', 'valid', 'default'
+                Si type_msg == 'user':
+                  - 'create', 'update', 'to_update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                Si type_msg == 'security':
+                  - 'default'
+                Si type_msg == 'commandes':
+                  - 'create', 'created', 'updated', 'deleted', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                Si type_msg == 'factures':
+                  - 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                Si type_msg == 'comptabilite':
+                  - 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                Si type_msg == 'stock':
+                  - 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                Si type_msg == 'commercial':
+                  - 'create', 'update', 'delete', 'not_found', 'exists', 'list', 'detail', 'form', 'search'
+                Si type_msg == 'warning':
+                  - 'default'
+                Si type_msg == 'debug':
+                  - 'default'
+                Si type_msg == 'info':
+                  - 'default'
         Returns:
             str: Message formaté
         '''
@@ -1248,9 +1251,10 @@ class Constants:
                 'default': "Action de sécurité enregistrée."
             },
             'commandes': {
-                'create': "Nouvelle commande créée avec succès.",
-                'update': "Commande mise à jour avec succès.",
-                'delete': "Commande supprimée avec succès.",
+                'create': "Merci de remplir le formulaire de commande.",
+                'created': "Nouvelle commande créée avec succès.",
+                'updated': "Commande mise à jour avec succès.",
+                'deleted': "Commande supprimée avec succès.",
                 'not_found': "Commande non trouvée.",
                 'exists': "La commande existe déjà.",
                 'list': "Liste des commandes chargée avec succès.",
@@ -1480,6 +1484,7 @@ class Constants:
                 'address-mod': 'clients.mod_address',
             },
             'commandes': {
+                'new': 'commandes.new_order',
                 'detail': 'commandes.commande_detail',
                 'form': 'commandes.commande_form',
                 'print': 'commandes.commande_print',
@@ -1562,6 +1567,8 @@ class PrepareTemplates:
         Génère le template de la page clients.
 
         Args:
+            sub_context (Optional[str]): Sous-contexte de la page clients.
+            log (bool): Indique si l'action doit être loggée.
             message (Optional[str]): Message à afficher sur la page clients.
         Returns:
             str: Template de la page clients
@@ -1578,11 +1585,86 @@ class PrepareTemplates:
                                **kwargs)
 
     @staticmethod
+    def orders(subcontext: str, commande: Optional[Commande]=None, log: bool=False,
+               message: Optional[str]=None, success_message: Optional[str]=None, error_message: Optional[str]=None,
+               **kwargs: Any) -> str:
+        '''
+        Génère le template de la page commandes.
+
+        Args:
+            subcontext (str): Sous-contexte de la page commandes :
+                - 'form' : Formulaire de création/modification de commande
+                - 'detail' : Détails d'une commande
+                - 'facture_details' : Détails d'une facture
+            message (Optional[str]): Message à afficher sur la page commandes.
+            success_message (Optional[str]): Message de succès à afficher.
+            error_message (Optional[str]): Message d'erreur à afficher.
+        Returns:
+            str: Template de la page commandes
+        '''
+        # Gestion des logs
+        if log:
+            acfc_log.log(level=INFO, message=message or '',
+                         specific_logger=Constants.log_files('commandes'),
+                         user=session.get('pseudo', 'N/A'), db_log=True)
+        
+        # Gestion des paramètres commandes (absent si création)
+        if not commande: commande = None
+
+        # Récupération du catalogue filtres et autre paramètres
+        session_db: SessionBdDType = get_db_session()
+        current_year: int = datetime.now().year
+        compleet_catalog: List[Catalogue] = session_db.query(Catalogue).order_by(Catalogue.id.desc()).all()
+
+        # Récupération des millésimes distincts pour le filtre
+        millesimes = session_db.query(Catalogue.millesime) \
+                            .distinct() \
+                            .filter(Catalogue.millesime.isnot(None)) \
+                            .order_by(Catalogue.millesime.desc()) \
+                            .all()
+        millesimes = [m[0] for m in millesimes if m[0]]
+
+        # Récupération des types de produits distincts pour le filtre
+        product_types = session_db.query(Catalogue.type_produit) \
+                            .distinct() \
+                            .filter(Catalogue.type_produit.isnot(None)) \
+                            .order_by(Catalogue.type_produit) \
+                            .all()
+        product_types = [p[0] for p in product_types if p[0]]
+
+        # Récupération des zones géographiques distinctes pour le filtre
+        geo_areas = session_db.query(Catalogue.geographie) \
+                            .distinct() \
+                            .filter(Catalogue.geographie.isnot(None)) \
+                            .order_by(Catalogue.geographie) \
+                            .all()
+        geo_areas = [g[0] for g in geo_areas if g[0]]
+
+        # Retour du template
+        return render_template(PrepareTemplates.BASE,
+                               title='ACFC - Gestion des Commandes',
+                               context='commandes',
+                               subcontext=subcontext,
+                               message=message,
+                               success_message=success_message,
+                               error_message=error_message,
+                               commande=commande,
+                               current_year=current_year,
+                               catalog=compleet_catalog,
+                               millesimes=millesimes,
+                               types_produit=product_types,
+                               geographies=geo_areas,
+                               today=datetime.now().strftime('%Y-%m-%d'),
+                               **kwargs)
+
+    @staticmethod
     def users(subcontext: Optional[str]=None, message: Optional[str]=None, log: bool=False, **kwargs: Any) -> str:
         '''
         Génère le template de la page utilisateurs.
 
         Args:
+            subcontext (Optional[str]): Sous-contexte de la page utilisateurs.
+            log (bool): Indique si l'action doit être loggée.
             message (Optional[str]): Message à afficher sur la page utilisateurs.
         Returns:
             str: Template de la page utilisateurs
@@ -1604,6 +1686,7 @@ class PrepareTemplates:
         Génère le template de la page par défaut.
 
         Args:
+            objects (Optional[List[Any]]): Liste d'objets à afficher sur la page par défaut.
             message (Optional[str]): Message à afficher sur la page par défaut.
         Returns:
             str: Template de la page par défaut
@@ -1620,6 +1703,10 @@ class PrepareTemplates:
         Génère le template de la page d'erreur 4xx.
 
         Args:
+            status_code (int): Code d'erreur HTTP (400, 403, 404, 405).
+            status_message (str): Message décrivant l'erreur.
+            log (bool): Indique si l'action doit être loggée.
+            specific_log (Optional[str]): Nom spécifique du fichier de log (par défaut '400.log').
             message (Optional[str]): Message à afficher sur la page d'erreur.
         Returns:
             str: Template de la page d'erreur 4xx
@@ -1630,7 +1717,7 @@ class PrepareTemplates:
                     + f'\ndescription : {status_message}'
         if log:
             acfc_log.log(level=ERROR, message=message,
-                         specific_logger=Constants.log_files(specific_log or '400'),
+                         specific_logger=Constants.log_files(specific_log or '400.log'),
                          db_log=True, user=username or 'N/A')
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Erreur chez vous',
@@ -1644,7 +1731,10 @@ class PrepareTemplates:
         Génère le template de la page d'erreur 5xx.
 
         Args:
-            message (Optional[str]): Message à afficher sur la page d'erreur.
+            status_code (int): Code d'erreur HTTP (500, 501, 502, 503, 504).
+            status_message (str): Message décrivant l'erreur.
+            log (bool): Indique si l'action doit être loggée.
+            specific_log (Optional[str]): Nom spécifique du fichier de log (par défaut '500.log').
         Returns:
             str: Template de la page d'erreur 5xx
         '''

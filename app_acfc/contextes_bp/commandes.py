@@ -18,9 +18,10 @@ Version : 1.0
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 from datetime import datetime, date
 from sqlalchemy.orm import Session as SessionBdDType
+from werkzeug import Response
 from werkzeug.exceptions import NotFound
 from app_acfc.modeles import (Commande, Constants, DevisesFactures, Catalogue, Client,
-                              Facture, Operations, Ventilations, get_db_session)
+                              Facture, Operations, PrepareTemplates, Ventilations, get_db_session)
 from app_acfc.habilitations import validate_habilitation, CLIENTS
 from typing import List, Dict, Optional, Any
 import qrcode
@@ -32,36 +33,331 @@ commandes_bp = Blueprint(name='commandes',
                          import_name=__name__,
                          url_prefix='/commandes')
 
-@commandes_bp.route('/client/<int:id_client>/commandes/nouvelle', methods=['GET', 'POST'])
-@validate_habilitation(CLIENTS)
-def nouvelle_commande(id_client: int):
-    """Créer une nouvelle commande pour un client"""
-    session_db = get_db_session()
-    try:
-        # Récupérer le client
-        client = session_db.query(Client).filter(Client.id == id_client).first()
-        if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'), id_client=id_client))
-        
-        if request.method == 'POST':
-            action = request.form.get('action', 'save')
-            print(f'Action reçue: {action}')
+class OrdersMethods:
+    '''
+    Docstring pour OrdersMethods
+    '''
+    @staticmethod
+    def handle_catalog_filters(client: Client, commande: Optional[Commande], form_data: Any, session_db: SessionBdDType):
+        """Gérer les filtres du catalogue"""
+        try:
+            action = form_data.get('action')
+            current_year = datetime.now().year
+            
+            # Sauvegarder les sélections temporairement pour une nouvelle commande
+            if commande is None:
+                # Sauver les produits sélectionnés et leurs quantités/prix
+                produits_selectionnes = form_data.getlist('produits_selectionnes')
+                session['temp_produits_selectionnes'] = produits_selectionnes
+                
+                # Sauver les quantités et prix personnalisés
+                temp_data = {}
+                for produit_id in produits_selectionnes:
+                    qte_key = f'qte_{produit_id}'
+                    prix_key = f'prix_{produit_id}'
+                    if form_data.get(qte_key):
+                        temp_data[qte_key] = form_data.get(qte_key)
+                    if form_data.get(prix_key):
+                        temp_data[prix_key] = form_data.get(prix_key)
+                session['temp_commande_data'] = temp_data
+            
+            if action == 'clear_filters':
+                # Remettre les filtres par défaut
+                session['commande_filter_millesime'] = str(current_year)
+                session['commande_filter_type_produit'] = 'Courrier'
+                session['commande_filter_geographie'] = 'FRANCE'
+            else:
+                # Sauvegarder les filtres en session
+                session['commande_filter_millesime'] = form_data.get('filter_millesime', str(current_year))
+                session['commande_filter_type_produit'] = form_data.get('filter_type_produit', 'Courrier')
+                session['commande_filter_geographie'] = form_data.get('filter_geographie', 'FRANCE')
+            
+            # Re-rendre le formulaire avec les nouveaux filtres
+            return render_commande_form(client, commande, session_db)
+            
+        except Exception as e:
+            return render_commande_form(client, commande, session_db)
 
-            # Actions spéciales pour facturation et expédition
-            if action in ['facturer', 'expedier']:
-                return handle_special_action(client=client, commande=None, action=action, form_data=request.form, session_db=session_db)
+    @staticmethod
+    def handle_special_action(client: Client, commande: Optional[Commande], action: str, form_data: Any, session_db: SessionBdDType):
+        """Gérer les actions spéciales de facturation et d'expédition"""
+        try:
+            if action == 'facturer':
+                # Pour une nouvelle commande, il faut d'abord la sauvegarder
+                if commande is None:
+                    flash('Vous devez d\'abord créer la commande avant de la facturer', 'warning')
+                    return render_commande_form(client, commande, session_db)
+                
+                # Marquer comme facturée
+                commande.is_facture = True
+                commande.date_facturation = datetime.strptime(form_data.get('date_facturation'), '%Y-%m-%d').date()
+                session_db.commit()
+                
+                flash(f'Commande #{commande.id} facturée avec succès', 'success')
+                
+            elif action == 'expedier':
+                # Pour une nouvelle commande, il faut d'abord la sauvegarder
+                if commande is None:
+                    flash('Vous devez d\'abord créer la commande avant de l\'expédier', 'warning')
+                    return render_commande_form(client, commande, session_db)
+                
+                # Vérifier que la commande est facturée
+                if not commande.is_facture:
+                    flash('La commande doit être facturée avant d\'être expédiée', 'warning')
+                    return render_commande_form(client, commande, session_db)
+                
+                # Marquer comme expédiée
+                commande.is_expedie = True
+                commande.date_expedition = datetime.strptime(form_data.get('date_expedition'), '%Y-%m-%d').date()
+                
+                # Gérer le numéro de suivi selon le mode d'expédition
+                mode_expedition = form_data.get('mode_expedition', 'sans_suivi')
+                if mode_expedition == 'suivi':
+                    commande.id_suivi = form_data.get('id_suivi', '')
+                else:
+                    commande.id_suivi = f'{mode_expedition.replace("_", " ").title()}'
+                
+                session_db.commit()
+                
+                flash(f'Commande #{commande.id} expédiée avec succès', 'success')
+            
+            return redirect(url_for(DETAIL_CLIENT, id_client=client.id))
+            
+        except Exception as e:
+            return render_commande_form(client, commande, session_db)
+
+    @staticmethod
+    def save_commande(client: Client, commande: Optional[Commande], form_data: Any, session_db: SessionBdDType):
+        """Sauvegarder une commande (création ou modification)"""
+        try:
+            is_new = commande is None
+            
+            if is_new:
+                commande = Commande()
+                commande.id_client = client.id
+            
+            # Récupérer les données du formulaire
+            commande.date_commande = datetime.strptime(form_data.get('date_commande'), '%Y-%m-%d').date()
+            commande.descriptif = form_data.get('descriptif', '')
+            commande.id_adresse = int(form_data.get('id_adresse')) if form_data.get('id_adresse') else None
+            
+            # États de la commande
+            commande.is_facture = 'is_facture' in form_data
+            commande.is_expedie = 'is_expedie' in form_data
+            
+            # Dates conditionnelles
+            if commande.is_facture and form_data.get('date_facturation'):
+                commande.date_facturation = datetime.strptime(form_data.get('date_facturation'), '%Y-%m-%d').date()
+            else:
+                commande.date_facturation = None
+                
+            if commande.is_expedie and form_data.get('date_expedition'):
+                commande.date_expedition = datetime.strptime(form_data.get('date_expedition'), '%Y-%m-%d').date()
+            else:
+                commande.date_expedition = None
+                
+            commande.id_suivi = form_data.get('id_suivi', '') if commande.is_expedie else ''
+            
+            # Sauvegarder la commande pour obtenir l'ID
+            if is_new:
+                session_db.add(commande)
+                session_db.flush()  # Pour obtenir l'ID
+
+            # Traiter les produits sélectionnés avec le nouveau format
+            if not is_new:
+                # Pour une modification, on va mettre à jour les lignes existantes
+                # au lieu de les supprimer et recréer
+                lignes_existantes = session_db.query(DevisesFactures).filter(
+                    DevisesFactures.id_commande == commande.id
+                ).all()
+                
+                # Créer un dictionnaire des lignes existantes par ligne_id pour accès rapide
+                lignes_existantes_dict = {}
+                for ligne in lignes_existantes:
+                    # Construire la clé ligne_id à partir des données existantes
+                    # On utilise un identifiant temporaire basé sur l'ordre ou l'ID
+                    lignes_existantes_dict[str(ligne.id)] = ligne
+                
+            
+            # Mettre à jour la remise par défaut du client si modifiée
+            remise_client_form = form_data.get('remise_client')
+            if remise_client_form:
+                client.reduces = float(remise_client_form) / 100.0
+            
+            from decimal import Decimal
+            montant_total = Decimal('0.00')
+            
+            # Parcourir tous les champs du formulaire pour trouver les lignes de produits
+            # Format: prix_[produit_id]_[ligne_id], qte_[produit_id]_[ligne_id], remise_[produit_id]_[ligne_id]
+            lignes_produits = {}
+            
+            for key in form_data.keys():
+                if key.startswith(('prix_', 'qte_', 'remise_')):
+                    parts = key.split('_')
+                    if len(parts) >= 3:
+                        field_type = parts[0]  # prix, qte, ou remise
+                        produit_id = parts[1]
+                        ligne_id = '_'.join(parts[2:])  # Au cas où l'ID de ligne contient des underscores
+                        
+                        # Créer la structure si elle n'existe pas
+                        if ligne_id not in lignes_produits:
+                            lignes_produits[ligne_id] = {}
+                        if produit_id not in lignes_produits[ligne_id]:
+                            lignes_produits[ligne_id][produit_id] = {}
+                        
+                        lignes_produits[ligne_id][produit_id][field_type] = form_data.get(key)
+            
+            
+            # Traiter chaque ligne de produit
+            lignes_a_garder = set()  # Track des IDs de lignes à conserver
+            
+            for ligne_id, produits_ligne in lignes_produits.items():
+                for produit_id_str, donnees in produits_ligne.items():
+                    try:
+                        produit_id = int(produit_id_str)
+                        
+                        # Vérifier que toutes les données nécessaires sont présentes
+                        if 'prix' not in donnees or 'qte' not in donnees:
+                            continue
+                        
+                        # Récupérer les infos du produit depuis le catalogue
+                        produit = session_db.query(Catalogue).filter(Catalogue.id == produit_id).first()
+                        if not produit:
+                            continue
+                        
+                        # Chercher si cette ligne existe déjà dans la base (pour les modifications)
+                        ligne_existante = None
+                        if not is_new:
+                            # Essayer de trouver une ligne existante correspondante
+                            # On cherche par produit_id et ligne_id ou on prend la première correspondance
+                            lignes_candidats = session_db.query(DevisesFactures).filter(
+                                DevisesFactures.id_commande == commande.id,
+                                DevisesFactures.reference == produit.ref_auto
+                            ).all()
+                            
+                            for candidat in lignes_candidats:
+                                if candidat.id not in lignes_a_garder:
+                                    ligne_existante = candidat
+                                    lignes_a_garder.add(candidat.id)
+                                    break
+                        
+                        if ligne_existante and not ligne_existante.is_facture:
+                            # Modifier la ligne existante (seulement si pas facturée)
+                            ligne_existante.qte = int(donnees['qte'])
+                            ligne_existante.prix_unitaire = Decimal(str(donnees['prix']))
+                            ligne_existante.remise = Decimal(str(float(donnees.get('remise', '0')) / 100.0))
+                            
+                            # Calculer le montant 
+                            prix_ligne = Decimal(str(ligne_existante.qte)) * ligne_existante.prix_unitaire * (Decimal('1') - ligne_existante.remise)
+                            montant_total += prix_ligne
+                            
+                            
+                        elif ligne_existante and ligne_existante.is_facture:
+                            # Ligne facturée - on la garde telle quelle et on compte son montant
+                            prix_ligne = ligne_existante.qte * ligne_existante.prix_unitaire * (Decimal('1') - ligne_existante.remise)
+                            montant_total += prix_ligne
+                            
+                            
+                        else:
+                            # Créer une nouvelle ligne
+                            devise = DevisesFactures()
+                            devise.id_commande = commande.id
+                            devise.reference = produit.ref_auto
+                            devise.designation = produit.des_auto
+                            devise.qte = int(donnees['qte'])
+                            devise.prix_unitaire = Decimal(str(donnees['prix']))
+                            devise.remise = Decimal(str(float(donnees.get('remise', '0')) / 100.0))
+                            
+                            # Calculer le montant total côté application
+                            prix_ligne = Decimal(str(devise.qte)) * devise.prix_unitaire * (Decimal('1') - devise.remise)
+                            montant_total += prix_ligne
+                            
+                            session_db.add(devise)
+                        
+                    except (ValueError, TypeError) as ve:
+                        continue
+            
+            # Supprimer les lignes qui ne sont plus dans le formulaire (mais seulement les non facturées)
+            if not is_new and lignes_a_garder:
+                lignes_a_supprimer = session_db.query(DevisesFactures).filter(
+                    DevisesFactures.id_commande == commande.id,
+                    DevisesFactures.is_facture == False,
+                    ~DevisesFactures.id.in_(lignes_a_garder)
+                ).all()
+                
+                for ligne_sup in lignes_a_supprimer:
+                    session_db.delete(ligne_sup)
+            elif not is_new:  # Si aucune ligne à garder, supprimer toutes les non facturées
+                lignes_a_supprimer = session_db.query(DevisesFactures).filter(
+                    DevisesFactures.id_commande == commande.id,
+                    DevisesFactures.is_facture == False
+                ).all()
+                
+                for ligne_sup in lignes_a_supprimer:
+                    session_db.delete(ligne_sup)
+            
+            # Mettre à jour le montant total
+            commande.montant = montant_total
+            
+            # Sauvegarder tout
+            session_db.commit()
+            
+            # Nettoyer les données temporaires après succès
+            if is_new:
+                session.pop('temp_produits_selectionnes', None)
+                session.pop('temp_commande_data', None)
+            # Rediriger vers la fiche client
+            return redirect(url_for('clients.get_client', id_client=client.id))
+            
+        except Exception as e:
+            return render_commande_form(client, commande, session_db)
+
+
+
+@commandes_bp.route('/client-<int:id_client>/nouvelle-commande', methods=['GET', 'POST'])
+@validate_habilitation(CLIENTS)
+def new_order(id_client: int) -> str | Response:
+    """
+    Créer une nouvelle commande pour un client.
+    Affiche un formulaire pour sélectionner des produits et saisir les détails de la commande.
+    1. Récupère le client par son ID.
+    2. Si la méthode est POST, traite le formulaire :
+        - Type d'action
+    """
+
+    # === Gestion de la demande de formulaire ===
+    if request.method == 'GET':
+        # retour du formulaire de création de commande
+        message = Constants.messages('commandes', 'create')
+        return PrepareTemplates.orders(subcontext='form', id_client=id_client, message=message)
+
+    # === Traitement du formulaire soumis ===
+    if request.method == 'POST':
+        try:
+            # Récupérer le client
+            session_db = get_db_session()
+            client = session_db.query(Client).filter(Client.id == id_client).first()
+
+            # Gestion du client inconnu
+            if not client: return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                                id_client=id_client,
+                                                error_message=Constants.messages('clients', 'not_found')))
             
             # Sauvegarde de commande (toutes les autres actions)
-            return save_commande(client=client, commande=None, form_data=request.form, session_db=session_db)
+            return OrdersMethods.save_commande(client=client, commande=None, form_data=request.form, session_db=session_db)
 
-        # GET - Afficher le formulaire
-        return render_commande_form(client=client, commande=None, session_db=session_db)
-        
-    except Exception as e:
-        return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
+        except Exception as e:
+            message = Constants.messages('error_500', 'default') + f' : ({e})'
+            log_file = Constants.log_files('commandes')
+            return PrepareTemplates.error_5xx(status_code=500, status_message=message,
+                                            log=True, specific_log=log_file)
+    # === Autres méthodes non gérées ===
+    return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                            id_client=id_client,
+                            error_message=Constants.messages('error_400', 'wrong_road')))
 
 
-@commandes_bp.route('/client/<int:id_client>/commandes/<int:id_commande>/modifier', methods=['GET', 'POST'])
+@commandes_bp.route('/client-<int:id_client>/commande-<int:id_commande>/modifier', methods=['GET', 'POST'])
 @validate_habilitation(CLIENTS)
 def commande_modify(id_client: int, id_commande: int):
     """Modifier une commande existante"""
@@ -109,11 +405,6 @@ def render_commande_form(client: Client, commande: Optional[Commande], session_d
         
         geographies = session_db.query(Catalogue.geographie).distinct().filter(Catalogue.geographie.isnot(None)).order_by(Catalogue.geographie).all()
         geographies = [g[0] for g in geographies if g[0]]
-        
-        # Si on modifie une commande, récupérer les produits déjà sélectionnés
-        produits_commande: Dict[int, Any] = {}
-        produits_id_commandes: List[int] = []
-        lignes_devis: List[Dict[str, Any]] = []
         
         if commande:
             devises = session_db.query(DevisesFactures).filter(DevisesFactures.id_commande == commande.id).all()
@@ -185,282 +476,6 @@ def render_commande_form(client: Client, commande: Optional[Commande], session_d
     
     except Exception as e:
         raise
-
-
-def handle_filters(client: Client, commande: Optional[Commande], form_data: Any, session_db: SessionBdDType):
-    """Gérer les filtres du catalogue"""
-    try:
-        action = form_data.get('action')
-        current_year = datetime.now().year
-        
-        # Sauvegarder les sélections temporairement pour une nouvelle commande
-        if commande is None:
-            # Sauver les produits sélectionnés et leurs quantités/prix
-            produits_selectionnes = form_data.getlist('produits_selectionnes')
-            session['temp_produits_selectionnes'] = produits_selectionnes
-            
-            # Sauver les quantités et prix personnalisés
-            temp_data = {}
-            for produit_id in produits_selectionnes:
-                qte_key = f'qte_{produit_id}'
-                prix_key = f'prix_{produit_id}'
-                if form_data.get(qte_key):
-                    temp_data[qte_key] = form_data.get(qte_key)
-                if form_data.get(prix_key):
-                    temp_data[prix_key] = form_data.get(prix_key)
-            session['temp_commande_data'] = temp_data
-        
-        if action == 'clear_filters':
-            # Remettre les filtres par défaut
-            session['commande_filter_millesime'] = str(current_year)
-            session['commande_filter_type_produit'] = 'Courrier'
-            session['commande_filter_geographie'] = 'FRANCE'
-        else:
-            # Sauvegarder les filtres en session
-            session['commande_filter_millesime'] = form_data.get('filter_millesime', str(current_year))
-            session['commande_filter_type_produit'] = form_data.get('filter_type_produit', 'Courrier')
-            session['commande_filter_geographie'] = form_data.get('filter_geographie', 'FRANCE')
-        
-        # Re-rendre le formulaire avec les nouveaux filtres
-        return render_commande_form(client, commande, session_db)
-        
-    except Exception as e:
-        return render_commande_form(client, commande, session_db)
-
-
-def handle_special_action(client: Client, commande: Optional[Commande], action: str, form_data: Any, session_db: SessionBdDType):
-    """Gérer les actions spéciales de facturation et d'expédition"""
-    try:
-        if action == 'facturer':
-            # Pour une nouvelle commande, il faut d'abord la sauvegarder
-            if commande is None:
-                flash('Vous devez d\'abord créer la commande avant de la facturer', 'warning')
-                return render_commande_form(client, commande, session_db)
-            
-            # Marquer comme facturée
-            commande.is_facture = True
-            commande.date_facturation = datetime.strptime(form_data.get('date_facturation'), '%Y-%m-%d').date()
-            session_db.commit()
-            
-            flash(f'Commande #{commande.id} facturée avec succès', 'success')
-            
-        elif action == 'expedier':
-            # Pour une nouvelle commande, il faut d'abord la sauvegarder
-            if commande is None:
-                flash('Vous devez d\'abord créer la commande avant de l\'expédier', 'warning')
-                return render_commande_form(client, commande, session_db)
-            
-            # Vérifier que la commande est facturée
-            if not commande.is_facture:
-                flash('La commande doit être facturée avant d\'être expédiée', 'warning')
-                return render_commande_form(client, commande, session_db)
-            
-            # Marquer comme expédiée
-            commande.is_expedie = True
-            commande.date_expedition = datetime.strptime(form_data.get('date_expedition'), '%Y-%m-%d').date()
-            
-            # Gérer le numéro de suivi selon le mode d'expédition
-            mode_expedition = form_data.get('mode_expedition', 'sans_suivi')
-            if mode_expedition == 'suivi':
-                commande.id_suivi = form_data.get('id_suivi', '')
-            else:
-                commande.id_suivi = f'{mode_expedition.replace("_", " ").title()}'
-            
-            session_db.commit()
-            
-            flash(f'Commande #{commande.id} expédiée avec succès', 'success')
-        
-        return redirect(url_for(DETAIL_CLIENT, id_client=client.id))
-        
-    except Exception as e:
-        return render_commande_form(client, commande, session_db)
-
-
-def save_commande(client: Client, commande: Optional[Commande], form_data: Any, session_db: SessionBdDType):
-    """Sauvegarder une commande (création ou modification)"""
-    try:
-        is_new = commande is None
-        
-        if is_new:
-            commande = Commande()
-            commande.id_client = client.id
-        
-        # Récupérer les données du formulaire
-        commande.date_commande = datetime.strptime(form_data.get('date_commande'), '%Y-%m-%d').date()
-        commande.descriptif = form_data.get('descriptif', '')
-        commande.id_adresse = int(form_data.get('id_adresse')) if form_data.get('id_adresse') else None
-        
-        # États de la commande
-        commande.is_facture = 'is_facture' in form_data
-        commande.is_expedie = 'is_expedie' in form_data
-        
-        # Dates conditionnelles
-        if commande.is_facture and form_data.get('date_facturation'):
-            commande.date_facturation = datetime.strptime(form_data.get('date_facturation'), '%Y-%m-%d').date()
-        else:
-            commande.date_facturation = None
-            
-        if commande.is_expedie and form_data.get('date_expedition'):
-            commande.date_expedition = datetime.strptime(form_data.get('date_expedition'), '%Y-%m-%d').date()
-        else:
-            commande.date_expedition = None
-            
-        commande.id_suivi = form_data.get('id_suivi', '') if commande.is_expedie else ''
-        
-        # Sauvegarder la commande pour obtenir l'ID
-        if is_new:
-            session_db.add(commande)
-            session_db.flush()  # Pour obtenir l'ID
-
-        # Traiter les produits sélectionnés avec le nouveau format
-        if not is_new:
-            # Pour une modification, on va mettre à jour les lignes existantes
-            # au lieu de les supprimer et recréer
-            lignes_existantes = session_db.query(DevisesFactures).filter(
-                DevisesFactures.id_commande == commande.id
-            ).all()
-            
-            # Créer un dictionnaire des lignes existantes par ligne_id pour accès rapide
-            lignes_existantes_dict = {}
-            for ligne in lignes_existantes:
-                # Construire la clé ligne_id à partir des données existantes
-                # On utilise un identifiant temporaire basé sur l'ordre ou l'ID
-                lignes_existantes_dict[str(ligne.id)] = ligne
-            
-        
-        # Mettre à jour la remise par défaut du client si modifiée
-        remise_client_form = form_data.get('remise_client')
-        if remise_client_form:
-            client.reduces = float(remise_client_form) / 100.0
-        
-        from decimal import Decimal
-        montant_total = Decimal('0.00')
-        
-        # Parcourir tous les champs du formulaire pour trouver les lignes de produits
-        # Format: prix_[produit_id]_[ligne_id], qte_[produit_id]_[ligne_id], remise_[produit_id]_[ligne_id]
-        lignes_produits = {}
-        
-        for key in form_data.keys():
-            if key.startswith(('prix_', 'qte_', 'remise_')):
-                parts = key.split('_')
-                if len(parts) >= 3:
-                    field_type = parts[0]  # prix, qte, ou remise
-                    produit_id = parts[1]
-                    ligne_id = '_'.join(parts[2:])  # Au cas où l'ID de ligne contient des underscores
-                    
-                    # Créer la structure si elle n'existe pas
-                    if ligne_id not in lignes_produits:
-                        lignes_produits[ligne_id] = {}
-                    if produit_id not in lignes_produits[ligne_id]:
-                        lignes_produits[ligne_id][produit_id] = {}
-                    
-                    lignes_produits[ligne_id][produit_id][field_type] = form_data.get(key)
-        
-        
-        # Traiter chaque ligne de produit
-        lignes_a_garder = set()  # Track des IDs de lignes à conserver
-        
-        for ligne_id, produits_ligne in lignes_produits.items():
-            for produit_id_str, donnees in produits_ligne.items():
-                try:
-                    produit_id = int(produit_id_str)
-                    
-                    # Vérifier que toutes les données nécessaires sont présentes
-                    if 'prix' not in donnees or 'qte' not in donnees:
-                        continue
-                    
-                    # Récupérer les infos du produit depuis le catalogue
-                    produit = session_db.query(Catalogue).filter(Catalogue.id == produit_id).first()
-                    if not produit:
-                        continue
-                    
-                    # Chercher si cette ligne existe déjà dans la base (pour les modifications)
-                    ligne_existante = None
-                    if not is_new:
-                        # Essayer de trouver une ligne existante correspondante
-                        # On cherche par produit_id et ligne_id ou on prend la première correspondance
-                        lignes_candidats = session_db.query(DevisesFactures).filter(
-                            DevisesFactures.id_commande == commande.id,
-                            DevisesFactures.reference == produit.ref_auto
-                        ).all()
-                        
-                        for candidat in lignes_candidats:
-                            if candidat.id not in lignes_a_garder:
-                                ligne_existante = candidat
-                                lignes_a_garder.add(candidat.id)
-                                break
-                    
-                    if ligne_existante and not ligne_existante.is_facture:
-                        # Modifier la ligne existante (seulement si pas facturée)
-                        ligne_existante.qte = int(donnees['qte'])
-                        ligne_existante.prix_unitaire = Decimal(str(donnees['prix']))
-                        ligne_existante.remise = Decimal(str(float(donnees.get('remise', '0')) / 100.0))
-                        
-                        # Calculer le montant 
-                        prix_ligne = Decimal(str(ligne_existante.qte)) * ligne_existante.prix_unitaire * (Decimal('1') - ligne_existante.remise)
-                        montant_total += prix_ligne
-                        
-                        
-                    elif ligne_existante and ligne_existante.is_facture:
-                        # Ligne facturée - on la garde telle quelle et on compte son montant
-                        prix_ligne = ligne_existante.qte * ligne_existante.prix_unitaire * (Decimal('1') - ligne_existante.remise)
-                        montant_total += prix_ligne
-                        
-                        
-                    else:
-                        # Créer une nouvelle ligne
-                        devise = DevisesFactures()
-                        devise.id_commande = commande.id
-                        devise.reference = produit.ref_auto
-                        devise.designation = produit.des_auto
-                        devise.qte = int(donnees['qte'])
-                        devise.prix_unitaire = Decimal(str(donnees['prix']))
-                        devise.remise = Decimal(str(float(donnees.get('remise', '0')) / 100.0))
-                        
-                        # Calculer le montant total côté application
-                        prix_ligne = Decimal(str(devise.qte)) * devise.prix_unitaire * (Decimal('1') - devise.remise)
-                        montant_total += prix_ligne
-                        
-                        session_db.add(devise)
-                    
-                except (ValueError, TypeError) as ve:
-                    continue
-        
-        # Supprimer les lignes qui ne sont plus dans le formulaire (mais seulement les non facturées)
-        if not is_new and lignes_a_garder:
-            lignes_a_supprimer = session_db.query(DevisesFactures).filter(
-                DevisesFactures.id_commande == commande.id,
-                DevisesFactures.is_facture == False,
-                ~DevisesFactures.id.in_(lignes_a_garder)
-            ).all()
-            
-            for ligne_sup in lignes_a_supprimer:
-                session_db.delete(ligne_sup)
-        elif not is_new:  # Si aucune ligne à garder, supprimer toutes les non facturées
-            lignes_a_supprimer = session_db.query(DevisesFactures).filter(
-                DevisesFactures.id_commande == commande.id,
-                DevisesFactures.is_facture == False
-            ).all()
-            
-            for ligne_sup in lignes_a_supprimer:
-                session_db.delete(ligne_sup)
-        
-        # Mettre à jour le montant total
-        commande.montant = montant_total
-        
-        # Sauvegarder tout
-        session_db.commit()
-        
-        # Nettoyer les données temporaires après succès
-        if is_new:
-            session.pop('temp_produits_selectionnes', None)
-            session.pop('temp_commande_data', None)
-        # Rediriger vers la fiche client
-        return redirect(url_for('clients.get_client', id_client=client.id))
-        
-    except Exception as e:
-        return render_commande_form(client, commande, session_db)
-
 
 @commandes_bp.route('/client/<int:id_client>/commandes/<int:id_commande>/annuler', methods=['POST'])
 @validate_habilitation(CLIENTS)

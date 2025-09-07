@@ -62,7 +62,19 @@
         </div>
     </div>
 
-    <!-- Messages d'erreur et de succès -->
+    <!-- Messages normaux, d'erreur et de succès -->
+    {% if message %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     {% if error_message %}
     <div class="row mb-3">
         <div class="col-12">

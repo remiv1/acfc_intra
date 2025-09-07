@@ -9,6 +9,7 @@
      Variables Jinja attendues :
      - client : Objet Client SQLAlchemy avec toutes les relations
      - success_message (optionnel) : Message de succès à afficher
+     - error_message (optionnel) : Message d'erreur à afficher
      - message (optionnel) : Message d'erreur à afficher
      
      Features :
@@ -132,6 +133,18 @@
     </div>
     {% endif %}
     
+    {% if error_message %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {{ error_message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     {% if message %}
     <div class="row mb-4">
         <div class="col-12">
