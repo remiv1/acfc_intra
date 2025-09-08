@@ -9,7 +9,9 @@ CREATE TABLE IF NOT EXISTS 21_catalogue (
     geographie VARCHAR(10) GENERATED ALWAYS AS (UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(stype_produit, ' ', 4), ' ', -1))) STORED,
     poids VARCHAR(5) GENERATED ALWAYS AS (SUBSTRING_INDEX(SUBSTRING_INDEX(stype_produit, ' ', 3), ' ', -1)) STORED,
     created_at DATE DEFAULT (CURRENT_DATE) NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL
+    created_by VARCHAR(100) DEFAULT 'system' NOT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+    updated_by VARCHAR(100) DEFAULT 'system' NOT NULL
 );
 INSERT INTO 21_catalogue (type_produit, stype_produit, millesime, prix_unitaire_ht) VALUES ('Courrier', 'Affranchissement Courrier 20g France', 2024, 1.29);
 INSERT INTO 21_catalogue (type_produit, stype_produit, millesime, prix_unitaire_ht) VALUES ('Courrier', 'Affranchissement Courrier 100g France', 2024, 2.58);

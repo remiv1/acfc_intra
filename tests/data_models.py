@@ -466,7 +466,7 @@ class AdresseFixtures:
         adresse.ville = "PARIS"
         adresse.is_principal = True
         adresse.created_at = date(2024, 1, 15)
-        adresse.is_active = True
+        adresse.is_inactive = False
         return adresse
     
     @staticmethod
@@ -481,7 +481,7 @@ class AdresseFixtures:
         adresse.ville = "LYON"
         adresse.is_principal = True
         adresse.created_at = date(2024, 2, 1)
-        adresse.is_active = True
+        adresse.is_inactive = False
         return adresse
 
 

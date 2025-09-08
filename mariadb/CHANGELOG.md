@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.2.1] - 2025-09-10
+
+- Correction de mariadb/init_db.sql pour que les colonnes `created_by` et `updated_by` aient une valeur par défaut de 'system'.
+
 ## [1.2.0] - 2025-09-05
 
 - Ajout des métadonnées :

@@ -360,7 +360,7 @@ class Client(Base):
         # Récupération de l'adresse principale (première active trouvée)
         adresse_principale = None
         for adresse in self.adresses:
-            if adresse.is_active:
+            if not adresse.is_inactive:
                 adresse_principale = adresse
                 break
         
@@ -487,6 +487,24 @@ class Mail(Base):
     def __repr__(self) -> str:
         principal = " (Principal)" if self.is_principal else ""
         return f"<Mail(id={self.id}, client_id={self.id_client}, email='{self.mail}'{principal})>"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Retourne un dictionnaire représentant l'email
+        """
+        return {
+            'id': self.id,
+            'id_client': self.id_client,
+            'type_mail': self.type_mail,
+            'detail': self.detail,
+            'mail': self.mail,
+            'is_principal': self.is_principal,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'created_by': self.created_by,
+            'modified_at': self.modified_at.isoformat() if self.modified_at else None,
+            'modified_by': self.modified_by,
+            'is_inactive': self.is_inactive
+        }
 
 class Telephone(Base):
     """
@@ -535,6 +553,25 @@ class Telephone(Base):
     def __repr__(self) -> str:
         numero_complet = f"{self.indicatif}{self.telephone}" if self.indicatif else self.telephone
         return f"<Telephone(id={self.id}, client_id={self.id_client}, numero='{numero_complet}', type='{self.type_telephone}')>"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Retourne un dictionnaire représentant le téléphone
+        """
+        return {
+            'id': self.id,
+            'id_client': self.id_client,
+            'type_telephone': self.type_telephone,
+            'detail': self.detail,
+            'indicatif': self.indicatif,
+            'telephone': self.telephone,
+            'is_principal': self.is_principal,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'created_by': self.created_by,
+            'modified_at': self.modified_at.isoformat() if self.modified_at else None,
+            'modified_by': self.modified_by,
+            'is_inactive': self.is_inactive
+        }
 
 class Adresse(Base):
     '''Représente une adresse associée à un client.'''
@@ -561,6 +598,30 @@ class Adresse(Base):
     modified_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False)
     modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié l'adresse")
     is_inactive = mapped_column(Boolean, default=False, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<Adresse(id={self.id}, client_id={self.id_client}, cp/ville={self.code_postal} " + \
+            f"'{self.ville.capitalize()}', {'Principale' if self.is_principal else 'Secondaire'})>"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Retourne un dictionnaire représentant l'adresse
+        """
+        return {
+            'id': self.id,
+            'id_client': self.id_client,
+            'adresse_l1': self.adresse_l1,
+            'adresse_l2': self.adresse_l2,
+            'code_postal': self.code_postal,
+            'ville': self.ville,
+            'pays': self.pays,
+            'is_principal': self.is_principal,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'created_by': self.created_by,
+            'modified_at': self.modified_at.isoformat() if self.modified_at else None,
+            'modified_by': self.modified_by,
+            'is_inactive': self.is_inactive
+        }
 
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE GESTION DES COMMANDES ET FACTURATION
@@ -771,7 +832,7 @@ class Catalogue(Base):
 
     # === MÉTADONNÉES ===
     created_at = mapped_column(Date, server_default=func.current_date(), nullable=False)
-    created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé le produit")
+    created_by = mapped_column(String(100), default='system', nullable=False, comment="Utilisateur ayant créé le produit")
     modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié le produit")
 
@@ -1484,10 +1545,12 @@ class Constants:
                 'address-mod': 'clients.mod_address',
             },
             'commandes': {
-                'new': 'commandes.new_order',
-                'detail': 'commandes.commande_detail',
-                'form': 'commandes.commande_form',
-                'print': 'commandes.commande_print',
+                'nouvelle': 'commandes.new_order',
+                'detail': 'commandes.commande_details',
+                'modifier': 'commandes.edit_order',
+                'annuler': 'commandes.cancel_order',
+                'formulaire': 'commandes.commande_form',
+                'imprimer': 'commandes.commande_bon_impression',
                 'factures': 'commandes.factures',
             },
             'commercial': {
@@ -1580,8 +1643,8 @@ class PrepareTemplates:
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Gestion Clients',
                                context='clients',
+                               sub_context=sub_context,
                                message=message,
-                               subcontext=sub_context,
                                **kwargs)
 
     @staticmethod
