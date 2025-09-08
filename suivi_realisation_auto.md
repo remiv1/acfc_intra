@@ -1,91 +1,22 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 07 September 2025  
-**Période analysée :** 31 August 2025 - 07 September 2025 (7 jours)  
-**Nombre de commits :** 44  
+**Date du rapport :** 08 September 2025  
+**Période analysée :** 01 September 2025 - 08 September 2025 (7 jours)  
+**Nombre de commits :** 41  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 44 commits sur 7 jours  
-**Volume de code :** 11851 lignes ajoutées, 13816 lignes supprimées  
-**Fichiers impactés :** 420 fichiers modifiés  
-**Productivité moyenne :** 1693 lignes/jour
+**Activité de développement :** 41 commits sur 7 jours  
+**Volume de code :** 10177 lignes ajoutées, 6550 lignes supprimées  
+**Fichiers impactés :** 350 fichiers modifiés  
+**Productivité moyenne :** 1453 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 31 August 2025
-
-#### 18:04 - 2035c5d - 📊 Mise à jour automatique du rapport de suivi (31/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +38 -16 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Sun Aug 31 18:04:10 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (31/08/2025)`
-- ... et 1 autres fichiers
-
-#### 20:03 - 741460d - fix: Mise à jour du rapport de suivi avec les dernières dates et détails de développement, suppression du rapport automatique obsolète
-
-**Catégorie :** Correction de bugs  
-**Impact :** +108 -313 lignes, 6 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Sun Aug 31 20:03:57 2025 +0200`
-- `    fix: Mise à jour du rapport de suivi avec les dernières dates et détails de développement, suppression du rapport automatique obsolète`
-- ... et 3 autres fichiers
-
-#### 17:49 - 2f443a1 - 📊 Mise à jour automatique du rapport de suivi (31/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +31 -31 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Sun Aug 31 17:49:12 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (31/08/2025)`
-- ... et 1 autres fichiers
-
-#### 19:48 - 0b44f67 - fix: Correction de la logique de changement de mot de passe et mise à jour des messages d'erreur
-
-**Catégorie :** Correction de bugs  
-**Impact :** +110 -55 lignes, 8 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Sun Aug 31 19:48:58 2025 +0200`
-- `    fix: Correction de la logique de changement de mot de passe et mise à jour des messages d'erreur`
-- ... et 7 autres fichiers
-
-#### 15:02 - 06595c6 - 📊 Mise à jour automatique du rapport de suivi (31/08/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +50 -72 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Sun Aug 31 15:02:10 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (31/08/2025)`
-- ... et 1 autres fichiers
-
-#### 17:01 - 0fd5c90 - feat: Ajout d'un service d'authentification et d'une méthode to_dict pour l'utilisateur, amélioration des tests de logging
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +474 -105 lignes, 10 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Sun Aug 31 17:01:00 2025 +0200`
-- `    feat: Ajout d'un service d'authentification et d'une méthode to_dict pour l'utilisateur, amélioration des tests de logging`
-- ... et 8 autres fichiers
 
 
 ### 01 September 2025
@@ -123,28 +54,6 @@
 - `    Refactor:`
 - `    - commercial module: Enhance client filtering API and UI`
 - ... et 16 autres fichiers
-
-#### 15:12 - bf888a3 - 📊 Mise à jour automatique du rapport de suivi (01/09/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +50 -116 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Mon Sep 1 15:12:38 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (01/09/2025)`
-- ... et 1 autres fichiers
-
-#### 17:12 - 1020966 - Add unit tests for authentication scenarios and user fixtures
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +1711 -6725 lignes, 69 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Mon Sep 1 17:12:17 2025 +0200`
-- `    Add unit tests for authentication scenarios and user fixtures`
-- ... et 69 autres fichiers
 
 
 ### 02 September 2025
@@ -510,6 +419,28 @@
 
 ### 07 September 2025
 
+#### 17:46 - d07a236 - feat: Mise à jour du rapport de suivi avec les statistiques de volume de code et les réalisations récentes (au 7 septembre 2025)
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +170 -54 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Sun Sep 7 17:46:44 2025 +0200`
+- `    feat: Mise à jour du rapport de suivi avec les statistiques de volume de code et les réalisations récentes (au 7 septembre 2025)`
+- ... et 1 autres fichiers
+
+#### 14:58 - a71239a - 📊 Mise à jour automatique du rapport de suivi (07/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +58 -22 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Sun Sep 7 14:58:24 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (07/09/2025)`
+- ... et 1 autres fichiers
+
 #### 16:57 - fd194ca - feat: Ajout de la référence au module contextes_bp.commandes dans le document CONTRIBUTING_STEP.md
 
 **Catégorie :** Développement de fonctionnalités  
@@ -533,43 +464,80 @@
 - ... et 14 autres fichiers
 
 
+### 08 September 2025
+
+#### 19:21 - 028d45b - Refactor order management and client details
+
+**Catégorie :** Refactoring  
+**Impact :** +587 -80 lignes, 18 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Mon Sep 8 19:21:47 2025 +0200`
+- `    Refactor order management and client details`
+- ... et 21 autres fichiers
+
+#### 19:19 - 088d729 - fix: - Mise à jour des modèles et des fixtures pour utiliser is_inactive au lieu de is_active, ajout de méthodes to_dict pour les classes Mail, Telephone et Adresse, et ajout de métadonnées dans les tables de la base de données
+
+**Catégorie :** Correction de bugs  
+**Impact :** +82 -11 lignes, 9 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Mon Sep 8 19:19:11 2025 +0200`
+- `    fix:`
+- `    - Mise à jour des modèles et des fixtures pour utiliser is_inactive au lieu de is_active, ajout de méthodes to_dict pour les classes Mail, Telephone et Adresse, et ajout de métadonnées dans les tables de la base de données`
+- ... et 6 autres fichiers
+
+#### 09:57 - 5b6f139 - feat: Ajout des variables MONGO_APP_USER et MONGO_APP_PASSWORD dans le fichier .env.exemple
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +1 -0 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Mon Sep 8 09:57:31 2025 +0200`
+- `    feat: Ajout des variables MONGO_APP_USER et MONGO_APP_PASSWORD dans le fichier .env.exemple`
+- ... et 1 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 16 commits (36.4%)
-- **Refactoring** : 9 commits (20.5%)
-- **Développement de fonctionnalités** : 8 commits (18.2%)
-- **Correction de bugs** : 8 commits (18.2%)
-- **Développement général** : 2 commits (4.5%)
-- **Tests** : 1 commits (2.3%)
+- **Interface utilisateur** : 13 commits (31.7%)
+- **Refactoring** : 10 commits (24.4%)
+- **Développement de fonctionnalités** : 8 commits (19.5%)
+- **Correction de bugs** : 7 commits (17.1%)
+- **Développement général** : 2 commits (4.9%)
+- **Tests** : 1 commits (2.4%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 102 fichiers modifiés
-- **HTML** : 52 fichiers modifiés
-- **Documentation** : 25 fichiers modifiés
+- **Python** : 68 fichiers modifiés
+- **HTML** : 49 fichiers modifiés
+- **Documentation** : 19 fichiers modifiés
 - **JavaScript** : 7 fichiers modifiés
-- **CSS** : 6 fichiers modifiés
-- **YAML/Config** : 4 fichiers modifiés
-- **Docker** : 2 fichiers modifiés
+- **CSS** : 5 fichiers modifiés
+- **YAML/Config** : 2 fichiers modifiés
+- **Docker** : 1 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 6.3 commits/jour
-- **Volume de code :** 25667 modifications totales
-- **Ratio ajouts/suppressions :** 0.86
-- **Moyenne lignes par commit :** 583
+- **Fréquence de commit :** 5.9 commits/jour
+- **Volume de code :** 16727 modifications totales
+- **Ratio ajouts/suppressions :** 1.55
+- **Moyenne lignes par commit :** 408
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 11851 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 10177 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 07 September 2025*
+*Rapport généré automatiquement le 08 September 2025*
