@@ -27,7 +27,8 @@ Sécurité :
 Auteur : Rémi Verschuur - Module CRM
 Version : 1.0
 """
-from flask import Blueprint, jsonify, request, redirect, url_for, Request, session
+from flask import (Blueprint, jsonify, request, redirect, url_for, Request,
+                   session)
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy import or_, func
 from werkzeug import Response as ResponseWerkzeug
@@ -270,7 +271,7 @@ def recherche_avancee() -> ResponseWerkzeug | str:
                 .join(Client.adresses)
                 .filter(
                     Client.is_active == True,
-                    Adresse.is_active == True,
+                    Adresse.is_inactive == False,
                     or_(
                         Adresse.adresse_l1.ilike(f'%{search_term}%'),
                         Adresse.adresse_l2.ilike(f'%{search_term}%'),
@@ -317,23 +318,23 @@ def create_client() -> str | ResponseWerkzeug:
         reduces = ClientMethods.get_reduces(request)
         
         # Création du client de base
-        nouveau_client = Client(
+        new_client = Client(
             type_client=type_client,
             notes=notes,
             reduces=reduces,
             created_by=session.get('pseudo', 'N/A')
         )
-        db_session.add(nouveau_client)
+        db_session.add(new_client)
         db_session.flush()  # Pour obtenir l'ID
         
         # Création du client particulier ou professionnel suivant type
-        ClientMethods.create_or_modify_client(request, type_client, nouveau_client, db_session)
+        ClientMethods.create_or_modify_client(request, type_client, new_client, db_session)
 
         # Envoi du client en base de données
         db_session.commit()        
         
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=nouveau_client.id,
+                                id_client=new_client.id,
                                 success_message=Constants.messages('client', 'create')))
     except Exception as e:
         return PrepareTemplates.error_5xx(status_code=500, status_message=str(e),
@@ -378,7 +379,7 @@ def get_client(id_client: int) -> str:
         nom_affichage = client.nom_affichage
         return PrepareTemplates.clients(sub_context='detail', client=client, part=part, pro=pro, phones=phones,
                                         mails=mails, addresses=addresses, orders=orders, bills=bills,
-                                        id_client=client.id, nom_affichage=nom_affichage, log=True)
+                                        nom_affichage=nom_affichage, log=True)
     else:
         return PrepareTemplates.error_4xx(status_code=404, log=True,
                                           status_message=Constants.messages('client', 'not_found'))
@@ -495,11 +496,11 @@ def add_phone(id_client: int) -> ResponseWerkzeug:
     try:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
-        if not client: return redirect(url_for(Constants.return_pages('clients', 'client-search')))
+        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
 
         # Validation du numéro de téléphone
         telephone = request.form.get('telephone', '').strip()
-        if not telephone: return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+        if not telephone: return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                                   id_client=id_client,
                                                   error_message=Constants.messages('phone', 'missing')))
 
@@ -528,11 +529,11 @@ def add_phone(id_client: int) -> ResponseWerkzeug:
         db_session.add(new_telephone)
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                 id_client=id_client, success_message=Constants.messages('phone', 'valid')))
 
     except Exception as e:
-        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                  id_client=id_client, log=True,
                                  error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
@@ -561,7 +562,7 @@ def delete_client(id_client: int) -> ResponseWerkzeug:
             joinedload(Client.factures)
         ).get(id_client)
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'client-search'),
+            return redirect(url_for(Constants.return_pages('clients', 'recherche'),
                         error_message=Constants.messages('client', 'not_found')))
 
         # Vérification de commandes ou factures de moins de 5 ans
@@ -576,7 +577,7 @@ def delete_client(id_client: int) -> ResponseWerkzeug:
             for f in client.factures
         )
         if recent_commande or recent_facture:
-            return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+            return redirect(url_for(Constants.return_pages('clients', 'detail'),
                         id_client=id_client,
                         error_message=Constants.messages('client', 'delete_forbidden')))
 
@@ -618,17 +619,17 @@ def add_email(id_client: int) -> ResponseWerkzeug:
     try:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
-        if not client: return redirect(url_for(Constants.return_pages('clients', 'client-search')))
+        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
 
         # Validation de l'email
         email = request.form.get('mail', '').strip()
-        if not email: return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+        if not email: return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                                   id_client=id_client,
                                                   error_message=Constants.messages('email', 'missing')))
 
         # Validation basique du format email
         if '@' not in email or '.' not in email.split('@')[-1]:
-            return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+            return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                                   id_client=id_client,
                                                   error_message=Constants.messages('email', 'invalid')))
 
@@ -656,11 +657,11 @@ def add_email(id_client: int) -> ResponseWerkzeug:
         db_session.add(new_mail)
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                 id_client=id_client, success_message="Email ajouté avec succès"))
 
     except Exception as e:
-        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                 id_client=id_client, log=True,
                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
     
@@ -688,7 +689,6 @@ def mod_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
     client = None
 
     try:
-        # TODO: Vérifier la concordance avec le formulaire à créer
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
         mail_obj = db_session.query(Mail).filter_by(id=id_mail, id_client=id_client).first()
@@ -724,11 +724,11 @@ def mod_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         mail_obj.is_principal = is_principal
 
         db_session.commit()
-        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                 id_client=id_client, success_message=Constants.messages('email', 'valid')))
 
     except Exception as e:
-        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                 id_client=id_client, log=True,
                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
@@ -759,7 +759,7 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+            return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                     id_client=id_client, error_message=Constants.messages('client', 'not_found')))
 
         # Validation des données d'adresse
@@ -769,7 +769,7 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         adresse_l2 = request.form.get('adresse_l2', '').strip()
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
         if not adresse_l1 or not code_postal or not ville: return redirect(
-            url_for(Constants.return_pages('clients', 'client-detail'),
+            url_for(Constants.return_pages('clients', 'detail'),
                     id_client=id_client, error_message=Constants.messages('address', 'missing')
                     )
             )
@@ -794,9 +794,75 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         db_session.add(new_adresse)
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'client-detail'),
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                 id_client=id_client, success_message=Constants.messages('address', 'valid')))
 
     except Exception as e:
-        return redirect(url_for(Constants.return_pages('clients', 'client-detail'), id_client=id_client,
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), id_client=id_client,
                                 error_message=Constants.messages('error_500', 'default') + f" : {e}", log=True))
+
+@clients_bp.route('/<int:id_client>/modify_address/<int:id_address>/', methods=['POST'])
+@validate_habilitation(CLIENTS)
+def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
+    """
+    Modification d'une adresse existante pour un client.
+    
+    Endpoint REST pour modifier une adresse existante d'un client.
+    Gère les adresses complètes avec code postal et ville.
+    
+    Form Data:
+        - id_client (int): ID du client
+        - id_address (int): ID de l'adresse à modifier
+        - adresse_l1 (str): Première ligne d'adresse
+        - adresse_l2 (str, optional): Deuxième ligne d'adresse
+        - code_postal (str): Code postal
+        - ville (str): Ville
+        - is_principal (bool, optional): Si c'est l'adresse principale
+    
+    Returns:
+        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
+    """
+    db_session = get_db_session()
+    client = None
+
+    try:
+        # Récupération et validation des données
+        client = db_session.query(Client).get(id_client)
+        address_obj = db_session.query(Adresse).filter_by(id=id_address, id_client=id_client).first()
+        if not client:
+            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                    id_client=id_client, error_message=Constants.messages('client', 'not_found')))
+        if not address_obj:
+            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                    id_client=id_client, error_message=Constants.messages('address', 'not_found')))
+
+        # Validation des données d'adresse
+        adresse_l1 = request.form.get('adresse_l1', '').strip()
+        code_postal = request.form.get('code_postal', '').strip()
+        ville = request.form.get('ville', '').strip()
+        adresse_l2 = request.form.get('adresse_l2', '').strip()
+        is_principal = request.form.get('is_principal', 'false').lower() == 'true'
+        if not adresse_l1 or not code_postal or not ville: return redirect(
+            url_for(Constants.return_pages('clients', 'detail'),
+                    id_client=id_client, error_message=Constants.messages('address', 'missing')
+                    )
+            )
+
+        # Si c'est l'adresse principale, désactiver les autres
+        if is_principal: db_session.query(Adresse).filter_by(
+            id_client=client.id, is_principal=True
+            ).update({'is_principal': False})
+        # Mise à jour de l'adresse
+        address_obj.adresse_l1 = adresse_l1
+        address_obj.adresse_l2 = adresse_l2 if adresse_l2 else None
+        address_obj.code_postal = code_postal
+        address_obj.ville = ville
+        address_obj.is_principal = is_principal
+        db_session.commit()
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                id_client=id_client, success_message=Constants.messages('address', 'valid')))
+    except Exception as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                id_client=id_client, log=True,
+                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+    

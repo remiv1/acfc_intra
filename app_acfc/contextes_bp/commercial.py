@@ -99,7 +99,7 @@ class ClientsAPI:
         if self.departement:
             self.query = self.query.join(Adresse).filter(
                 Adresse.id_client == Client.id,
-                Adresse.is_active == True,
+                Adresse.is_inactive == False,
                 Adresse.code_postal.ilike(f"%{self.departement}%")
             )
         return self
@@ -109,7 +109,7 @@ class ClientsAPI:
         if self.ville:
             self.query = self.query.join(Adresse).filter(
                 Adresse.id_client == Client.id,
-                Adresse.is_active == True,
+                Adresse.is_inactive == False,
                 Adresse.ville.ilike(f"%{self.ville}%")
             )
         return self
@@ -241,7 +241,7 @@ def clients_api_search():
             # Ajout du département
             if client.adresses:
                 for adresse in client.adresses:
-                    if adresse.is_active and len(adresse.code_postal) >= 2:
+                    if not adresse.is_inactive and len(adresse.code_postal) >= 2:
                         client_dict['departement'] = adresse.code_postal[:2]
                         break
             

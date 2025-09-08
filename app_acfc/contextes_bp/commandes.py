@@ -312,8 +312,6 @@ class OrdersMethods:
         except Exception as e:
             return render_commande_form(client, commande, session_db)
 
-
-
 @commandes_bp.route('/client-<int:id_client>/nouvelle-commande', methods=['GET', 'POST'])
 @validate_habilitation(CLIENTS)
 def new_order(id_client: int) -> str | Response:
@@ -359,7 +357,7 @@ def new_order(id_client: int) -> str | Response:
 
 @commandes_bp.route('/client-<int:id_client>/commande-<int:id_commande>/modifier', methods=['GET', 'POST'])
 @validate_habilitation(CLIENTS)
-def commande_modify(id_client: int, id_commande: int):
+def edit_order(id_client: int, id_commande: int):
     """Modifier une commande existante"""
     session_db = get_db_session()
     try:
@@ -375,10 +373,10 @@ def commande_modify(id_client: int, id_commande: int):
             
             # Actions spéciales pour facturation et expédition
             if action in ['facturer', 'expedier']:
-                return handle_special_action(client=client, commande=commande, action=action, form_data=request.form, session_db=session_db)
+                return OrdersMethods.handle_special_action(client=client, commande=commande, action=action, form_data=request.form, session_db=session_db)
             
             # Sinon, c'est une sauvegarde de commande
-            return save_commande(client, commande, request.form, session_db)
+            return OrdersMethods.save_commande(client, commande, request.form, session_db)
         
         # GET - Afficher le formulaire
         return render_commande_form(client, commande, session_db)
@@ -479,7 +477,7 @@ def render_commande_form(client: Client, commande: Optional[Commande], session_d
 
 @commandes_bp.route('/client/<int:id_client>/commandes/<int:id_commande>/annuler', methods=['POST'])
 @validate_habilitation(CLIENTS)
-def annuler_commande(id_commande: int, id_client: int):
+def cancel_order(id_commande: int, id_client: int):
     """Annuler une commande (soft delete)"""
     session_db = get_db_session()
     try:

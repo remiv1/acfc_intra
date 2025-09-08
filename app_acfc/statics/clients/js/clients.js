@@ -42,6 +42,69 @@ function initClientDetailsPage() {
         });
     });
 
+    // Gestionnaire spécifique pour le modal d'email - réinitialisation en mode création
+    const emailModal = document.getElementById('addEmailModal');
+    if (emailModal) {
+        emailModal.addEventListener('show.bs.modal', function(event) {
+            console.log('Modal email ouvert');
+            console.log('Element déclencheur:', event.relatedTarget);
+            
+            // Ne faire la réinitialisation que si c'est explicitement un bouton d'ajout
+            const isAddButton = event.relatedTarget && 
+                               (event.relatedTarget.textContent.includes('Ajouter') ||
+                                event.relatedTarget.classList.contains('btn-success'));
+            
+            console.log('Bouton d\'ajout détecté:', isAddButton);
+            
+            if (isAddButton) {
+                console.log('Réinitialisation en mode création');
+                fillEmailModal({}, 'create');
+            }
+        });
+    }
+
+    // Gestionnaire spécifique pour le modal de téléphone - réinitialisation en mode création
+    const phoneModal = document.getElementById('addPhoneModal');
+    if (phoneModal) {
+        phoneModal.addEventListener('show.bs.modal', function(event) {
+            console.log('Modal téléphone ouvert');
+            console.log('Element déclencheur:', event.relatedTarget);
+            
+            // Ne faire la réinitialisation que si c'est explicitement un bouton d'ajout
+            const isAddButton = event.relatedTarget && 
+                               (event.relatedTarget.textContent.includes('Ajouter') ||
+                                event.relatedTarget.classList.contains('btn-success'));
+            
+            console.log('Bouton d\'ajout téléphone détecté:', isAddButton);
+            
+            if (isAddButton) {
+                console.log('Réinitialisation téléphone en mode création');
+                fillPhoneModal({}, 'create');
+            }
+        });
+    }
+
+    // Gestionnaire spécifique pour le modal d'adresse - réinitialisation en mode création
+    const addressModal = document.getElementById('addAddressModal');
+    if (addressModal) {
+        addressModal.addEventListener('show.bs.modal', function(event) {
+            console.log('Modal adresse ouvert');
+            console.log('Element déclencheur:', event.relatedTarget);
+            
+            // Ne faire la réinitialisation que si c'est explicitement un bouton d'ajout
+            const isAddButton = event.relatedTarget && 
+                               (event.relatedTarget.textContent.includes('Ajouter') ||
+                                event.relatedTarget.classList.contains('btn-success'));
+            
+            console.log('Bouton d\'ajout adresse détecté:', isAddButton);
+            
+            if (isAddButton) {
+                console.log('Réinitialisation adresse en mode création');
+                fillAddressModal({}, 'create');
+            }
+        });
+    }
+
     // Format automatique du téléphone
     const phoneInput = document.getElementById('telephone');
     if (phoneInput) {
@@ -79,11 +142,108 @@ function initClientDetailsPage() {
 /**
  * Actions pour l'édition/suppression des téléphones
  */
-function editPhone(phoneId) {
-    console.log('Edit phone:', phoneId);
-    // TODO: Implémenter l'édition du téléphone
-    // Peut ouvrir un modal d'édition ou rediriger vers une page
-    alert('Fonctionnalité d\'édition à implémenter côté serveur');
+function editPhone(phoneId, buttonElement) {
+    console.log('=== DÉBUT ÉDITION TÉLÉPHONE ===');
+    console.log('Phone ID:', phoneId);
+    console.log('Button Element:', buttonElement);
+    
+    // Récupérer les données depuis les attributs data-* du bouton
+    if (!buttonElement || !buttonElement.dataset) {
+        console.error('Bouton non fourni ou sans données');
+        alert('Erreur : impossible de récupérer les données du téléphone');
+        return;
+    }
+    
+    // Méthode principale avec dataset (camelCase)
+    let data = {
+        id: phoneId,
+        telephone: buttonElement.dataset.phoneTelephone,
+        type_telephone: buttonElement.dataset.phoneType,
+        indicatif: buttonElement.dataset.phoneIndicatif,
+        detail: buttonElement.dataset.phoneDetail,
+        is_principal: buttonElement.dataset.phonePrincipal === 'true'
+    };
+    
+    // Si les données sont vides, essayer avec getAttribute (méthode de fallback)
+    if (!data.telephone) {
+        console.log('Fallback vers getAttribute pour téléphone');
+        data = {
+            id: phoneId,
+            telephone: buttonElement.getAttribute('data-phone-telephone'),
+            type_telephone: buttonElement.getAttribute('data-phone-type'),
+            indicatif: buttonElement.getAttribute('data-phone-indicatif'),
+            detail: buttonElement.getAttribute('data-phone-detail'),
+            is_principal: buttonElement.getAttribute('data-phone-principal') === 'true'
+        };
+    }
+    
+    console.log('Données extraites du DOM:', data);
+    
+    // Remplir le modal avec les données existantes
+    fillPhoneModal(data, 'edit');
+    
+    // Ouvrir le modal
+    const modal = new bootstrap.Modal(document.getElementById('addPhoneModal'));
+    modal.show();
+    
+    console.log('=== FIN ÉDITION TÉLÉPHONE ===');
+}
+
+/**
+ * Fonction pour remplir le modal de téléphone avec les données
+ */
+function fillPhoneModal(data, mode = 'create') {
+    console.log('=== DÉBUT fillPhoneModal ===');
+    console.log('Mode:', mode);
+    console.log('Données reçues:', data);
+    
+    const form = document.getElementById('addPhoneForm');
+    const modalTitle = document.querySelector('#addPhoneModal .modal-title');
+    const submitButton = document.querySelector('#addPhoneForm button[type="submit"]');
+    
+    if (mode === 'edit') {
+        console.log('Mode édition téléphone - modification du modal');
+        
+        // Mode édition
+        modalTitle.innerHTML = '<i class="bi bi-telephone me-2"></i>Modifier le numéro de téléphone';
+        submitButton.innerHTML = '<i class="bi bi-check me-1"></i>Modifier';
+        submitButton.className = 'btn btn-warning';
+        
+        // Modifier l'action du formulaire pour pointer vers la route de modification
+        const clientId = document.getElementById('client-id').value;
+        form.action = `/clients/${clientId}/modify-phone/${data.id}/`;
+        
+        // Remplir les champs avec les données existantes
+        const telephoneInput = document.getElementById('telephone');
+        const typeSelect = document.getElementById('type_telephone');
+        const indicatifInput = document.getElementById('indicatif');
+        const detailInput = document.getElementById('detail_phone');
+        const principalCheckbox = document.getElementById('is_principal_phone');
+        
+        if (telephoneInput) telephoneInput.value = data.telephone || '';
+        if (typeSelect) typeSelect.value = data.type_telephone || 'mobile_pro';
+        if (indicatifInput) indicatifInput.value = data.indicatif || '+33';
+        if (detailInput) detailInput.value = data.detail || '';
+        if (principalCheckbox) principalCheckbox.checked = data.is_principal || false;
+        
+        console.log('Téléphone - Valeurs assignées:', data);
+        
+    } else {
+        // Mode création
+        modalTitle.innerHTML = '<i class="bi bi-telephone me-2"></i>Ajouter un numéro de téléphone';
+        submitButton.innerHTML = '<i class="bi bi-plus me-1"></i>Ajouter';
+        submitButton.className = 'btn btn-success';
+        
+        // Remettre l'action du formulaire pour la création
+        const clientId = document.getElementById('client-id').value;
+        form.action = `/clients/${clientId}/add-phone/`;
+        
+        // Vider les champs
+        form.reset();
+        form.classList.remove('was-validated');
+    }
+    
+    console.log('=== FIN fillPhoneModal ===');
 }
 
 function deletePhone(phoneId) {
@@ -121,10 +281,144 @@ function deletePhone(phoneId) {
 /**
  * Actions pour l'édition/suppression des emails
  */
-function editEmail(emailId) {
-    console.log('Edit email:', emailId);
-    // TODO: Implémenter l'édition de l'email
-    alert('Fonctionnalité d\'édition à implémenter côté serveur');
+function editEmail(emailId, buttonElement) {
+    console.log('=== DÉBUT ÉDITION EMAIL ===');
+    console.log('Email ID:', emailId);
+    console.log('Button Element:', buttonElement);
+    console.log('Button Dataset:', buttonElement ? buttonElement.dataset : 'null');
+    
+    // Récupérer les données depuis les attributs data-* du bouton
+    if (!buttonElement || !buttonElement.dataset) {
+        console.error('Bouton non fourni ou sans données');
+        alert('Erreur : impossible de récupérer les données de l\'email');
+        return;
+    }
+    
+    // Méthode principale avec dataset (camelCase)
+    let data = {
+        id: emailId,
+        mail: buttonElement.dataset.emailMail,
+        type_mail: buttonElement.dataset.emailType,
+        detail: buttonElement.dataset.emailDetail,
+        is_principal: buttonElement.dataset.emailPrincipal === 'true'
+    };
+    
+    // Si les données sont vides, essayer avec getAttribute (méthode de fallback)
+    if (!data.mail) {
+        console.log('Fallback vers getAttribute');
+        data = {
+            id: emailId,
+            mail: buttonElement.getAttribute('data-email-mail'),
+            type_mail: buttonElement.getAttribute('data-email-type'),
+            detail: buttonElement.getAttribute('data-email-detail'),
+            is_principal: buttonElement.getAttribute('data-email-principal') === 'true'
+        };
+        console.log('Données via getAttribute:', data);
+    }
+    
+    console.log('Données extraites du DOM:', data);
+    console.log('Dataset complet:', buttonElement.dataset);
+    
+    // Vérification individuelle des données avec tous les formats possibles
+    console.log('Vérifications détaillées:');
+    console.log('- emailMail (camelCase):', buttonElement.dataset.emailMail);
+    console.log('- email-mail (getAttribute):', buttonElement.getAttribute('data-email-mail'));
+    console.log('- emailType (camelCase):', buttonElement.dataset.emailType);
+    console.log('- email-type (getAttribute):', buttonElement.getAttribute('data-email-type'));
+    console.log('- emailDetail (camelCase):', buttonElement.dataset.emailDetail);
+    console.log('- email-detail (getAttribute):', buttonElement.getAttribute('data-email-detail'));
+    console.log('- emailPrincipal (camelCase):', buttonElement.dataset.emailPrincipal);
+    console.log('- email-principal (getAttribute):', buttonElement.getAttribute('data-email-principal'));
+    
+    // Remplir le modal avec les données existantes
+    fillEmailModal(data, 'edit');
+    
+    // Ouvrir le modal
+    const modal = new bootstrap.Modal(document.getElementById('addEmailModal'));
+    modal.show();
+    
+    console.log('=== FIN ÉDITION EMAIL ===');
+}
+
+/**
+ * Fonction pour remplir le modal d'email avec les données
+ */
+function fillEmailModal(data, mode = 'create') {
+    console.log('=== DÉBUT fillEmailModal ===');
+    console.log('Mode:', mode);
+    console.log('Données reçues:', data);
+    
+    const form = document.getElementById('addEmailForm');
+    const modalTitle = document.querySelector('#addEmailModal .modal-title');
+    const submitButton = document.querySelector('#addEmailForm button[type="submit"]');
+    
+    console.log('Éléments du modal trouvés:');
+    console.log('- Form:', !!form);
+    console.log('- Modal title:', !!modalTitle);
+    console.log('- Submit button:', !!submitButton);
+    
+    if (mode === 'edit') {
+        console.log('Mode édition - modification du modal');
+        
+        // Mode édition
+        modalTitle.innerHTML = '<i class="bi bi-envelope me-2"></i>Modifier l\'adresse email';
+        submitButton.innerHTML = '<i class="bi bi-check me-1"></i>Modifier';
+        submitButton.className = 'btn btn-warning';
+        
+        // Modifier l'action du formulaire pour pointer vers la route de modification
+        const clientId = document.getElementById('client-id').value;
+        console.log('Client ID:', clientId);
+        form.action = `/clients/${clientId}/modify-email/${data.id}/`;
+        console.log('Nouvelle action du formulaire:', form.action);
+        
+        // Vérifier que les éléments existent avant de les remplir
+        const mailInput = document.getElementById('mail');
+        const typeMailSelect = document.getElementById('type_mail');
+        const detailInput = document.getElementById('detail_mail');
+        const principalCheckbox = document.getElementById('is_principal_mail');
+        
+        console.log('Éléments du formulaire trouvés:');
+        console.log('- Mail input:', !!mailInput, mailInput);
+        console.log('- Type select:', !!typeMailSelect, typeMailSelect);
+        console.log('- Detail input:', !!detailInput, detailInput);
+        console.log('- Principal checkbox:', !!principalCheckbox, principalCheckbox);
+        
+        // Remplir les champs avec les données existantes
+        if (mailInput) {
+            mailInput.value = data.mail || '';
+            console.log('Mail assigné:', mailInput.value);
+        }
+        if (typeMailSelect) {
+            typeMailSelect.value = data.type_mail || 'professionnel';
+            console.log('Type assigné:', typeMailSelect.value);
+        }
+        if (detailInput) {
+            detailInput.value = data.detail || '';
+            console.log('Detail assigné:', detailInput.value);
+        }
+        if (principalCheckbox) {
+            principalCheckbox.checked = data.is_principal || false;
+            console.log('Principal assigné:', principalCheckbox.checked);
+        }
+        
+    } else {
+        console.log('Mode création - réinitialisation du modal');
+        
+        // Mode création
+        modalTitle.innerHTML = '<i class="bi bi-envelope me-2"></i>Ajouter une adresse email';
+        submitButton.innerHTML = '<i class="bi bi-plus me-1"></i>Ajouter';
+        submitButton.className = 'btn btn-success';
+        
+        // Remettre l'action du formulaire pour la création
+        const clientId = document.getElementById('client-id').value;
+        form.action = `/clients/${clientId}/add-email/`;
+        
+        // Vider les champs
+        form.reset();
+        form.classList.remove('was-validated');
+    }
+    
+    console.log('=== FIN fillEmailModal ===');
 }
 
 function deleteEmail(emailId) {
@@ -138,10 +432,108 @@ function deleteEmail(emailId) {
 /**
  * Actions pour l'édition/suppression des adresses
  */
-function editAddress(addressId) {
-    console.log('Edit address:', addressId);
-    // TODO: Implémenter l'édition de l'adresse
-    alert('Fonctionnalité d\'édition à implémenter côté serveur');
+function editAddress(addressId, buttonElement) {
+    console.log('=== DÉBUT ÉDITION ADRESSE ===');
+    console.log('Address ID:', addressId);
+    console.log('Button Element:', buttonElement);
+    
+    // Récupérer les données depuis les attributs data-* du bouton
+    if (!buttonElement || !buttonElement.dataset) {
+        console.error('Bouton non fourni ou sans données');
+        alert('Erreur : impossible de récupérer les données de l\'adresse');
+        return;
+    }
+    
+    // Méthode principale avec dataset (camelCase)
+    let data = {
+        id: addressId,
+        adresse_l1: buttonElement.dataset.addressL1,
+        adresse_l2: buttonElement.dataset.addressL2,
+        code_postal: buttonElement.dataset.addressPostal,
+        ville: buttonElement.dataset.addressVille,
+        is_principal: buttonElement.dataset.addressPrincipal === 'true'
+    };
+    
+    // Si les données sont vides, essayer avec getAttribute (méthode de fallback)
+    if (!data.adresse_l1) {
+        console.log('Fallback vers getAttribute pour adresse');
+        data = {
+            id: addressId,
+            adresse_l1: buttonElement.getAttribute('data-address-l1'),
+            adresse_l2: buttonElement.getAttribute('data-address-l2'),
+            code_postal: buttonElement.getAttribute('data-address-postal'),
+            ville: buttonElement.getAttribute('data-address-ville'),
+            is_principal: buttonElement.getAttribute('data-address-principal') === 'true'
+        };
+    }
+    
+    console.log('Données extraites du DOM:', data);
+    
+    // Remplir le modal avec les données existantes
+    fillAddressModal(data, 'edit');
+    
+    // Ouvrir le modal
+    const modal = new bootstrap.Modal(document.getElementById('addAddressModal'));
+    modal.show();
+    
+    console.log('=== FIN ÉDITION ADRESSE ===');
+}
+
+/**
+ * Fonction pour remplir le modal d'adresse avec les données
+ */
+function fillAddressModal(data, mode = 'create') {
+    console.log('=== DÉBUT fillAddressModal ===');
+    console.log('Mode:', mode);
+    console.log('Données reçues:', data);
+    
+    const form = document.getElementById('addAddressForm');
+    const modalTitle = document.querySelector('#addAddressModal .modal-title');
+    const submitButton = document.querySelector('#addAddressForm button[type="submit"]');
+    
+    if (mode === 'edit') {
+        console.log('Mode édition adresse - modification du modal');
+        
+        // Mode édition
+        modalTitle.innerHTML = '<i class="bi bi-geo-alt me-2"></i>Modifier l\'adresse';
+        submitButton.innerHTML = '<i class="bi bi-check me-1"></i>Modifier';
+        submitButton.className = 'btn btn-warning';
+        
+        // Modifier l'action du formulaire pour pointer vers la route de modification
+        const clientId = document.getElementById('client-id').value;
+        form.action = `/clients/${clientId}/modify-address/${data.id}/`;
+        
+        // Remplir les champs avec les données existantes
+        const adresseL1Input = document.getElementById('adresse_l1');
+        const adresseL2Input = document.getElementById('adresse_l2');
+        const codePostalInput = document.getElementById('code_postal');
+        const villeInput = document.getElementById('ville');
+        const principalCheckbox = document.getElementById('is_principal_adresse');
+        
+        if (adresseL1Input) adresseL1Input.value = data.adresse_l1 || '';
+        if (adresseL2Input) adresseL2Input.value = data.adresse_l2 || '';
+        if (codePostalInput) codePostalInput.value = data.code_postal || '';
+        if (villeInput) villeInput.value = data.ville || '';
+        if (principalCheckbox) principalCheckbox.checked = data.is_principal || false;
+        
+        console.log('Adresse - Valeurs assignées:', data);
+        
+    } else {
+        // Mode création
+        modalTitle.innerHTML = '<i class="bi bi-geo-alt me-2"></i>Ajouter une adresse';
+        submitButton.innerHTML = '<i class="bi bi-plus me-1"></i>Ajouter';
+        submitButton.className = 'btn btn-success';
+        
+        // Remettre l'action du formulaire pour la création
+        const clientId = document.getElementById('client-id').value;
+        form.action = `/clients/${clientId}/add_address/`;
+        
+        // Vider les champs
+        form.reset();
+        form.classList.remove('was-validated');
+    }
+    
+    console.log('=== FIN fillAddressModal ===');
 }
 
 function deleteAddress(addressId) {
@@ -300,3 +692,30 @@ function initClientSearchPage() {
         });
     });
 }
+
+// Exposer uniquement les fonctions utiles pour debug
+window.editEmail = editEmail;
+window.fillEmailModal = fillEmailModal;
+window.editPhone = editPhone;
+window.fillPhoneModal = fillPhoneModal;
+window.editAddress = editAddress;
+window.fillAddressModal = fillAddressModal;
+
+// Fonction de test pour vérifier les données dans les boutons
+window.testEmailButtons = function() {
+    console.log('=== TEST DES BOUTONS EMAIL ===');
+    const buttons = document.querySelectorAll('[data-email-id]');
+    console.log('Nombre de boutons trouvés:', buttons.length);
+    
+    buttons.forEach((btn, index) => {
+        console.log(`Bouton ${index + 1}:`);
+        console.log('- Element:', btn);
+        console.log('- ID:', btn.getAttribute('data-email-id'));
+        console.log('- Mail:', btn.getAttribute('data-email-mail'));
+        console.log('- Type:', btn.getAttribute('data-email-type'));
+        console.log('- Detail:', btn.getAttribute('data-email-detail'));
+        console.log('- Principal:', btn.getAttribute('data-email-principal'));
+        console.log('- Dataset:', btn.dataset);
+        console.log('---');
+    });
+};

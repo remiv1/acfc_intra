@@ -8,6 +8,13 @@
      
      Variables Jinja attendues :
      - client : Objet Client SQLAlchemy avec toutes les relations
+        - part : Objet Particulier (si client est un particulier)
+        - pro : Objet Professionnel (si client est un professionnel)
+        - addresses : Liste des objets Adresse liés au client
+        - phones : Liste des objets Telephone liés au client
+        - mails : Liste des objets Mail liés au client
+        - orders : Liste des objets Commande liés au client
+        - bills : Liste des objets Facture liés au client
      - success_message (optionnel) : Message de succès à afficher
      - error_message (optionnel) : Message d'erreur à afficher
      - message (optionnel) : Message d'erreur à afficher
@@ -27,15 +34,6 @@
 {% if not request.endpoint.startswith('static') %}
 <link rel="stylesheet" href="{{ url_for('static', filename='clients/css/clients.css') }}">
 {% endif %}
-{% set client = objects[0] %}
-{% set part = objects[1] %}
-{% set pro = objects[2] %}
-{% set addresses = objects[3] %}
-{% set phones = objects[4] %}
-{% set mails = objects[5] %}
-{% set orders = objects[6] %}
-{% set bills = objects[7] %}
-{% set nom_affichage = objects[8] %}
 <!-- Champs cachés pour les identifiants -->
 <input type="hidden" id="client-id" value="{{ client.id }}">
 <input type="hidden" id="client-type" value="{{ client.type_client }}">
@@ -104,13 +102,13 @@
                         <!-- Actions rapides -->
                         <div class="text-end">
                             <nav aria-label="Actions du client">
-                                <a href="{{ url_for('clients.edit_client', id_client=client.id) }}" 
+                                <a href="{{ url_for(('clients', 'modifier-get') | jinja_page_title, id_client=client.id) }}" 
                                    class="btn btn-outline-secondary btn-sm me-2">
                                     <i class="bi bi-pencil me-1"></i>Modifier
                                 </a>
-                                <a href="{{ url_for('clients.client_list') }}" 
+                                <a href="{{ url_for(('clients', 'recherche') | jinja_page_title) }}" 
                                    class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-arrow-left me-1"></i>Retour à la liste
+                                    <i class="bi bi-arrow-left me-1"></i>Retour à la recherche
                                 </a>
                             </nav>
                         </div>
@@ -390,7 +388,14 @@
                                                     <i class="bi bi-three-dots-vertical"></i>
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li><button type="button" class="dropdown-item" data-phone-id="{{ telephone.id }}" onclick="editPhone(this.dataset.phoneId)">
+                                                    <li><button type="button" class="dropdown-item" 
+                                                        data-phone-id="{{ telephone.id }}"
+                                                        data-phone-telephone="{{ telephone.telephone }}"
+                                                        data-phone-type="{{ telephone.type_telephone }}"
+                                                        data-phone-indicatif="{{ telephone.indicatif or '' }}"
+                                                        data-phone-detail="{{ telephone.detail or '' }}"
+                                                        data-phone-principal="{{ telephone.is_principal|lower }}"
+                                                        onclick="editPhone(this.dataset.phoneId, this)">
                                                         <i class="bi bi-pencil me-2"></i>Modifier
                                                     </button></li>
                                                     <li><button type="button" class="dropdown-item text-danger" data-phone-id="{{ telephone.id }}" onclick="deletePhone(this.dataset.phoneId)">
@@ -455,7 +460,13 @@
                                                     <i class="bi bi-three-dots-vertical"></i>
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li><button class="dropdown-item" type="button" data-email-id="{{ email.id }}" onclick="editEmail(this.dataset.emailId)">
+                                                    <li><button class="dropdown-item" type="button" 
+                                                        data-email-id="{{ email.id }}" 
+                                                        data-email-mail="{{ email.mail }}"
+                                                        data-email-type="{{ email.type_mail }}"
+                                                        data-email-detail="{{ email.detail or '' }}"
+                                                        data-email-principal="{{ email.is_principal|lower }}"
+                                                        onclick="editEmail(this.dataset.emailId, this)">
                                                         <i class="bi bi-pencil me-2"></i>Modifier
                                                     </button></li>
                                                     <li><button class="dropdown-item text-danger" type="button" data-email-id="{{ email.id }}" onclick="deleteEmail(this.dataset.emailId)">
@@ -522,7 +533,14 @@
                                                     <i class="bi bi-three-dots-vertical"></i>
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li><button class="dropdown-item" type="button" data-address-id="{{ adresse.id }}" onclick="editAddress(this.dataset.addressId)">
+                                                    <li><button class="dropdown-item" type="button" 
+                                                        data-address-id="{{ adresse.id }}"
+                                                        data-address-l1="{{ adresse.adresse_l1 }}"
+                                                        data-address-l2="{{ adresse.adresse_l2 or '' }}"
+                                                        data-address-postal="{{ adresse.code_postal }}"
+                                                        data-address-ville="{{ adresse.ville }}"
+                                                        data-address-principal="{{ adresse.is_principal|lower }}"
+                                                        onclick="editAddress(this.dataset.addressId, this)">
                                                         <i class="bi bi-pencil me-2"></i>Modifier
                                                     </button></li>
                                                     <li><button class="dropdown-item text-danger" type="button" data-address-id="{{ adresse.id }}" onclick="deleteAddress(this.dataset.addressId)">
@@ -556,7 +574,7 @@
                     <h5 class="card-title mb-0">
                         <i class="bi bi-cart me-2 text-primary"></i>Commandes
                     </h5>
-                    <a href="{{ url_for('commandes.nouvelle_commande', id_client=client.id) }}" class="btn btn-success btn-sm">
+                    <a href="{{ url_for(('commandes','nouvelle') | jinja_page_title, id_client=client.id) }}" class="btn btn-success btn-sm">
                         <i class="bi bi-plus me-1"></i>Nouvelle commande
                     </a>
                 </div>
@@ -592,17 +610,17 @@
                                         </td>
                                         <td>
                                             <fieldset class="btn-group gap-1" role="group" aria-label="Actions commande">
-                                                <a href="{{ url_for('commandes.commande_details', id_client=commande.id_client, id_commande=commande.id) }}" 
+                                                <a href="{{ url_for(('commandes', 'detail') | jinja_page_title, id_client=commande.id_client, id_commande=commande.id) }}" 
                                                    class="btn btn-sm btn-outline-primary" title="Voir les détails">
                                                     <i class="bi bi-eye me-1"></i>Voir
                                                 </a>
                                                 {% if not commande.is_annulee and not commande.is_facture %}
-                                                <a href="{{ url_for('commandes.commande_modify', id_client=commande.id_client, id_commande=commande.id) }}" 
+                                                <a href="{{ url_for(('commandes', 'modifier') | jinja_page_title, id_client=commande.id_client, id_commande=commande.id) }}" 
                                                    class="btn btn-sm btn-outline-secondary ms-1" title="Modifier la commande">
                                                     <i class="bi bi-pencil me-1"></i>Modifier
                                                 </a>
                                                 {% elif not commande.is_expedie and not commande.is_facture and not commande.is_annulee %}
-                                                <form class="inline-display" method="POST" action="{{ url_for('commandes.annuler_commande', id_client=commande.id_client, id_commande=commande.id) }}" 
+                                                <form class="inline-display" method="POST" action="{{ url_for(('commandes', 'annuler') | jinja_page_title, id_client=commande.id_client, id_commande=commande.id) }}" 
                                                       onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
                                                     <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Annuler la commande">
                                                         <i class="bi bi-x-circle me-1"></i>Annuler
@@ -633,7 +651,7 @@
                         <div class="text-center py-5">
                             <i class="bi bi-cart fs-3 text-muted mb-3"></i>
                             <p class="text-muted mb-3">Aucune commande enregistrée</p>
-                            <a href="{{ url_for('commandes.nouvelle_commande', id_client=client.id) }}" class="btn btn-primary">
+                            <a href="{{ url_for(('commandes', 'nouvelle') | jinja_page_title, id_client=client.id) }}" class="btn btn-primary">
                                 <i class="bi bi-plus me-1"></i>Créer la première commande
                             </a>
                         </div>
@@ -679,7 +697,7 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <a href="{{ url_for('commandes.facture_details', id_facture=facture.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <a href="{{ url_for(('commandes', 'detail') | jinja_page_title, id_facture=facture.id) }}" class="btn btn-sm btn-outline-primary">
                                                 <i class="bi bi-eye me-1"></i>Voir
                                             </a>
                                         </td>
@@ -710,7 +728,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ url_for('clients.clients_add_phone') }}" method="post" id="addPhoneForm">
+            <form action="{{ url_for(('clients', 'phone-add') | jinja_page_title, id_client=client.id) }}" method="post" id="addPhoneForm">
                 <div class="modal-body">
                     <input type="hidden" name="id_client" value="{{ client.id }}">
                     
@@ -778,7 +796,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ url_for('clients.clients_add_email') }}" method="post" id="addEmailForm">
+            <form action="{{ url_for(('clients', 'mail-add') | jinja_page_title, id_client=client.id) }}" method="post" id="addEmailForm">
                 <div class="modal-body">
                     <input type="hidden" name="id_client" value="{{ client.id }}">
                     
@@ -800,15 +818,15 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="detail_email" class="form-label">Détail (optionnel)</label>
-                        <input type="text" class="form-control" id="detail_email" 
+                        <label for="detail_mail" class="form-label">Détail (optionnel)</label>
+                        <input type="text" class="form-control" id="detail_mail" 
                                name="detail" placeholder="Précisions sur l'usage...">
                     </div>
                     
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="is_principal_email" 
+                        <input class="form-check-input" type="checkbox" id="is_principal_mail" 
                                name="is_principal" value="true">
-                        <label class="form-check-label" for="is_principal_email">
+                        <label class="form-check-label" for="is_principal_mail">
                             Email principal
                         </label>
                     </div>
@@ -834,7 +852,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ url_for('clients.clients_add_address') }}" method="post" id="addAddressForm">
+            <form action="{{ url_for(('clients', 'address-add') | jinja_page_title, id_client=client.id) }}" method="post" id="addAddressForm">
                 <div class="modal-body">
                     <input type="hidden" name="id_client" value="{{ client.id }}">
                     

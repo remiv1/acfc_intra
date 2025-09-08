@@ -45,8 +45,8 @@
                             </p>
                         </div>
                         <div>
-                            <a href="{{ url_for('clients.client_list') }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-1"></i>Retour à la liste
+                            <a href="{{ url_for(('clients', 'recherche') | jinja_page_title) }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Retour à la recherche
                             </a>
                         </div>
                     </div>
@@ -83,7 +83,7 @@
     <!-- Formulaire principal -->
     <div class="row">
         <div class="col-12">
-            <form action="{% if sub_context == 'create' %}{{ url_for('clients.create_client') }}{% else %}{{ url_for('clients.update_client', id_client=id_client) }}{% endif %}" 
+            <form action="{% if sub_context == 'create' %}{{ url_for(('clients', 'creation') | jinja_page_title) }}{% else %}{{ url_for(('clients', 'modifier-post') | jinja_page_title, id_client=id_client) }}{% endif %}" 
                   method="post" class="needs-validation" novalidate id="clientForm">
                 
                 <div class="card border-0 shadow-sm">
@@ -273,7 +273,7 @@
                         <div class="card border-0 shadow-sm">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
-                                    <a href="{{ url_for('clients.client_list') }}" class="btn btn-outline-secondary">
+                                    <a href="{{ url_for(('clients', 'recherche') | jinja_page_title) }}" class="btn btn-outline-secondary">
                                         <i class="bi bi-arrow-left me-1"></i>Annuler
                                     </a>
                                     <button type="submit" class="btn btn-success">
