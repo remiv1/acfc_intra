@@ -57,6 +57,8 @@ jobs:
           MONGO_INITDB_ROOT_PASSWORD=changeme
           MONGO_HOST=acfc-logs
           MONGO_PORT=27017
+          MONGO_APP_USER=app_user_mongo
+          MONGO_APP_PASSWORD=pwd_test_mongo
           SESSION_PASSKEY=change_me_to_a_random_long_secret
           API_SECRET=replace_with_real_secret
           FLASK_HOST=0.0.0.0
