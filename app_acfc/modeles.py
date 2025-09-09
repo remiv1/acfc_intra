@@ -1028,7 +1028,7 @@ class IndicatifsTel(Base):
     """Classe représentant les indicatifs téléphoniques."""
     __tablename__ = '92_indicatifs_tel'
 
-    tri = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, primary_key=True)
     indicatif = mapped_column(String(4), nullable=False)
     pays = mapped_column(String(100), nullable=False)
 
@@ -1838,7 +1838,7 @@ class GeoMethods:
     """
 
     @staticmethod
-    def get_indicatifs_tel(pays: str) -> List[IndicatifsTel]:
+    def get_indicatifs_tel() -> List[IndicatifsTel]:
         """
         Récupère la liste des indicatifs téléphoniques depuis l'objet SQLAlchemy.
         Args:
@@ -1847,9 +1847,9 @@ class GeoMethods:
             List[Dict]: Liste des indicatifs téléphoniques
         """
         db_session: SessionBdDType = get_db_session()
-        return db_session.query(IndicatifsTel).filter(
-            IndicatifsTel.pays.ilike(f'%{pays}%'
-            )).limit(25).all()
+        return db_session.query(IndicatifsTel) \
+                            .order_by(IndicatifsTel.id.asc()) \
+                            .all()
     
     @staticmethod
     def get_codes_postaux_villes(code_postal: str) -> List[Villes]:

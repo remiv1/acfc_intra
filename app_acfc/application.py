@@ -581,8 +581,8 @@ def handle_5xx_errors(error: HTTPException) -> str:
 # Routes utilitaires diverses
 # ====================================================================
 
-@acfc.route('/api/indic-tel/<ilike_pays>', methods=['GET'])
-def get_indic_tel(ilike_pays: str='') -> Any:
+@acfc.route('/api/indic-tel', methods=['GET'])
+def get_indic_tel() -> Any:
     """
     API REST pour récupérer les indicatifs téléphoniques par pays.
     
@@ -597,11 +597,11 @@ def get_indic_tel(ilike_pays: str='') -> Any:
                                           status_message=Constants.messages('error_400', 'wrong_road'),
                                           log=True)
     try:
-        indicatifs = GeoMethods.get_indicatifs_tel(ilike_pays)
+        indicatifs = GeoMethods.get_indicatifs_tel()
         indicatifs_list: List[Dict[str, str]] = [
             {
                 'label': f'{ind.pays} ({ind.indicatif})',
-                'value': ind.indicatif
+                'value': f'+{ind.indicatif}'
             } for ind in indicatifs
         ]
         return jsonify(indicatifs_list), 200

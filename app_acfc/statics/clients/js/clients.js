@@ -28,6 +28,13 @@ function fillPhoneModal(data, mode = 'create') {
     const form = document.getElementById('addPhoneForm');
     const modalTitle = document.querySelector('#addPhoneModal .modal-title');
     const submitButton = document.querySelector('#addPhoneForm button[type="submit"]');
+    const indicatifInput = document.getElementById('indicatif');
+    if (mode === 'edit' || mode === 'create') {
+        // Vider le menu déroulant des indicatifs avant de le remplir
+        if (indicatifInput) {
+            indicatifInput.options.length = 0;
+        }
+    }
     
     if (mode === 'edit') {
         // Mode édition
@@ -44,11 +51,19 @@ function fillPhoneModal(data, mode = 'create') {
         const typeSelect = document.getElementById('type_telephone');
         const indicatifInput = document.getElementById('indicatif');
         const detailInput = document.getElementById('detail_phone');
-        const principalCheckbox = document.getElementById('is_principal');
+        const principalCheckbox = document.getElementById('is_principal_phone');
         
         if (telephoneInput) telephoneInput.value = data.telephone || '';
         if (typeSelect) typeSelect.value = data.type_telephone || 'mobile_pro';
-        if (indicatifInput) indicatifInput.value = data.indicatif || '+33';
+        if (indicatifInput) {
+            // Ajoute une option avec la valeur actuelle si elle n'existe pas déjà
+            const option = document.createElement('option');
+            option.value = data.indicatif || '+33';
+            option.textContent = data.indicatif || '+33';
+            option.selected = true;
+            indicatifInput.appendChild(option);
+            indicatifInput.value = data.indicatif || '+33';
+        }
         if (detailInput) detailInput.value = data.detail || '';
         if (principalCheckbox) principalCheckbox.checked = data.is_principal || false;
         
@@ -112,18 +127,10 @@ function deletePhoneWithConfirm(button) {
 }
 
 // Modifie la liste en fonction de ce qui est inscrit dans l'outil de recherche
-function updateIndic(indicatifInput) {
-    // Récupérer la valeur de l'input
-    const indicatifInput = document.getElementById('paysIndicatif');
-
-    // Vider la liste avant de la remplir
-    const datalist = document.getElementById('indicatif-list');
-    if (datalist) {
-        datalist.innerHTML = '';
-    }
-    
+function updateIndic() {
+    const selectList = document.getElementById('indicatif');
     // Envoie la requête au serveur pour obtenir les indicatifs
-    fetch(`/api/indic-tel/${indicatifInput.value}`, {
+    fetch(`/api/indic-tel`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -135,14 +142,14 @@ function updateIndic(indicatifInput) {
             const option = document.createElement('option');
             option.value = indicatif.value;
             option.textContent = indicatif.label;
-            datalist.appendChild(option);
+            selectList.appendChild(option);
         });
     })
     .catch(error => {
         const option = document.createElement('option');
         option.value = '';
         option.textContent = `Erreur lors de la récupération des indicatifs : ${error}`;
-        datalist.appendChild(option);
+        selectList.appendChild(option);
     });
 }
 
@@ -157,7 +164,7 @@ function initClientDetailsPage() {
     const emailForm = document.getElementById('addEmailForm');
     const addressForm = document.getElementById('addAddressForm');
 
-    // Validation des formulaires
+    // Listener de validation des formulaires modaux
     [phoneForm, emailForm, addressForm].forEach(form => {
         if (form) {
             form.addEventListener('submit', function(e) {
@@ -185,20 +192,15 @@ function initClientDetailsPage() {
     const emailModal = document.getElementById('addEmailModal');
     if (emailModal) {
         emailModal.addEventListener('show.bs.modal', function(event) {
-            console.log('Modal email ouvert');
-            console.log('Element déclencheur:', event.relatedTarget);
             
             // Ne faire la réinitialisation que si c'est explicitement un bouton d'ajout
             const isAddButton = event.relatedTarget && 
                                (event.relatedTarget.textContent.includes('Ajouter') ||
                                 event.relatedTarget.classList.contains('btn-success'));
-            
-            console.log('Bouton d\'ajout détecté:', isAddButton);
-            
+
             if (isAddButton) {
-                console.log('Réinitialisation en mode création');
                 fillEmailModal({}, 'create');
-            }
+            } 
         });
     }
 
@@ -283,14 +285,9 @@ function initClientDetailsPage() {
  * Actions pour l'édition/suppression des emails
  */
 function editEmail(emailId, buttonElement) {
-    console.log('=== DÉBUT ÉDITION EMAIL ===');
-    console.log('Email ID:', emailId);
-    console.log('Button Element:', buttonElement);
-    console.log('Button Dataset:', buttonElement ? buttonElement.dataset : 'null');
     
     // Récupérer les données depuis les attributs data-* du bouton
     if (!buttonElement || !buttonElement.dataset) {
-        console.error('Bouton non fourni ou sans données');
         alert('Erreur : impossible de récupérer les données de l\'email');
         return;
     }
@@ -314,22 +311,7 @@ function editEmail(emailId, buttonElement) {
             detail: buttonElement.getAttribute('data-email-detail'),
             is_principal: buttonElement.getAttribute('data-email-principal') === 'true'
         };
-        console.log('Données via getAttribute:', data);
     }
-    
-    console.log('Données extraites du DOM:', data);
-    console.log('Dataset complet:', buttonElement.dataset);
-    
-    // Vérification individuelle des données avec tous les formats possibles
-    console.log('Vérifications détaillées:');
-    console.log('- emailMail (camelCase):', buttonElement.dataset.emailMail);
-    console.log('- email-mail (getAttribute):', buttonElement.getAttribute('data-email-mail'));
-    console.log('- emailType (camelCase):', buttonElement.dataset.emailType);
-    console.log('- email-type (getAttribute):', buttonElement.getAttribute('data-email-type'));
-    console.log('- emailDetail (camelCase):', buttonElement.dataset.emailDetail);
-    console.log('- email-detail (getAttribute):', buttonElement.getAttribute('data-email-detail'));
-    console.log('- emailPrincipal (camelCase):', buttonElement.dataset.emailPrincipal);
-    console.log('- email-principal (getAttribute):', buttonElement.getAttribute('data-email-principal'));
     
     // Remplir le modal avec les données existantes
     fillEmailModal(data, 'edit');
@@ -346,21 +328,11 @@ function editEmail(emailId, buttonElement) {
  * Fonction pour remplir le modal d'email avec les données
  */
 function fillEmailModal(data, mode = 'create') {
-    console.log('=== DÉBUT fillEmailModal ===');
-    console.log('Mode:', mode);
-    console.log('Données reçues:', data);
-    
     const form = document.getElementById('addEmailForm');
     const modalTitle = document.querySelector('#addEmailModal .modal-title');
     const submitButton = document.querySelector('#addEmailForm button[type="submit"]');
     
-    console.log('Éléments du modal trouvés:');
-    console.log('- Form:', !!form);
-    console.log('- Modal title:', !!modalTitle);
-    console.log('- Submit button:', !!submitButton);
-    
     if (mode === 'edit') {
-        console.log('Mode édition - modification du modal');
         
         // Mode édition
         modalTitle.innerHTML = '<i class="bi bi-envelope me-2"></i>Modifier l\'adresse email';
@@ -369,9 +341,7 @@ function fillEmailModal(data, mode = 'create') {
         
         // Modifier l'action du formulaire pour pointer vers la route de modification
         const clientId = document.getElementById('client-id').value;
-        console.log('Client ID:', clientId);
         form.action = `/clients/${clientId}/modify-email/${data.id}/`;
-        console.log('Nouvelle action du formulaire:', form.action);
         
         // Vérifier que les éléments existent avant de les remplir
         const mailInput = document.getElementById('mail');
@@ -379,33 +349,21 @@ function fillEmailModal(data, mode = 'create') {
         const detailInput = document.getElementById('detail_mail');
         const principalCheckbox = document.getElementById('is_principal_mail');
         
-        console.log('Éléments du formulaire trouvés:');
-        console.log('- Mail input:', !!mailInput, mailInput);
-        console.log('- Type select:', !!typeMailSelect, typeMailSelect);
-        console.log('- Detail input:', !!detailInput, detailInput);
-        console.log('- Principal checkbox:', !!principalCheckbox, principalCheckbox);
-        
         // Remplir les champs avec les données existantes
         if (mailInput) {
             mailInput.value = data.mail || '';
-            console.log('Mail assigné:', mailInput.value);
         }
         if (typeMailSelect) {
             typeMailSelect.value = data.type_mail || 'professionnel';
-            console.log('Type assigné:', typeMailSelect.value);
         }
         if (detailInput) {
             detailInput.value = data.detail || '';
-            console.log('Detail assigné:', detailInput.value);
         }
         if (principalCheckbox) {
             principalCheckbox.checked = data.is_principal || false;
-            console.log('Principal assigné:', principalCheckbox.checked);
         }
         
     } else {
-        console.log('Mode création - réinitialisation du modal');
-        
         // Mode création
         modalTitle.innerHTML = '<i class="bi bi-envelope me-2"></i>Ajouter une adresse email';
         submitButton.innerHTML = '<i class="bi bi-plus me-1"></i>Ajouter';
@@ -419,8 +377,6 @@ function fillEmailModal(data, mode = 'create') {
         form.reset();
         form.classList.remove('was-validated');
     }
-    
-    console.log('=== FIN fillEmailModal ===');
 }
 
 //NOK

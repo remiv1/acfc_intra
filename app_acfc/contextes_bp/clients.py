@@ -375,9 +375,18 @@ def get_client(id_client: int) -> str:
     if client:
         part = client.part
         pro = client.pro
-        phones: List[Telephone] = client.tels
-        mails: List[Mail] = client.mails
-        addresses: List[Adresse] = client.adresses
+        phones: List[Telephone] = sorted(
+            client.tels,
+            key=lambda p: (p.is_inactive, p.id)
+        )
+        mails: List[Mail] = sorted(
+            client.mails,
+            key=lambda m: (m.is_inactive, m.id)
+        )
+        addresses: List[Adresse] = sorted(
+            client.adresses,
+            key=lambda a: (a.is_inactive, a.id)
+        )
         orders: List[Commande] = sorted(client.commandes, key=lambda x: x.id, reverse=True)
         bills: List[Facture] = client.factures
         nom_affichage = client.nom_affichage
@@ -586,7 +595,8 @@ def add_phone(id_client: int) -> ResponseWerkzeug:
             type_telephone=type_telephone,
             indicatif=indicatif if indicatif else None,
             detail=detail if detail else None,
-            is_principal=is_principal
+            is_principal=is_principal,
+            created_by=session.get('pseudo', 'N/A')
         )
         
         # Enregistrement en base de données
@@ -657,6 +667,7 @@ def mod_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         phone_obj.indicatif = indic if indic else None
         phone_obj.detail = detail if detail else None
         phone_obj.is_principal = is_principal
+        phone_obj.modified_by = session.get('pseudo', 'N/A')
         db_session.commit()
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                  id_client=id_client, log=True, tab='phone',
@@ -694,6 +705,8 @@ def del_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
 
         # Suppression logique
         phone_obj.is_inactive = True
+        phone_obj.modified_by = session.get('pseudo', 'N/A')
+        phone_obj.is_principal = False  # Ne peut plus être principal
         db_session.commit()
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                  id_client=id_client, log=True, tab='phone',
