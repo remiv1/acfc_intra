@@ -147,7 +147,6 @@ class ClientMethods:
 
         db_session.add(pro) if type_test == 'create' else db_session.merge(pro)
 
-
 # ================================================================
 # ROUTES - INTERFACE DE RECHERCHE CLIENTS
 # ================================================================
@@ -353,6 +352,11 @@ def get_client(id_client: int) -> str:
         - Factures
     Pour le moment, retour sous forme de dictionnaire, mais par la suite, intégration dans une page.
     """
+    message = request.args.get('message', '')
+    success_message = request.args.get('success_message', '')
+    error_message = request.args.get('error_message', '')
+    tab = request.args.get('tab', None)
+
     # Ouverture d'une session vers la base de données
     db_session: SessionBdDType = get_db_session()
 
@@ -379,7 +383,8 @@ def get_client(id_client: int) -> str:
         nom_affichage = client.nom_affichage
         return PrepareTemplates.clients(sub_context='detail', client=client, part=part, pro=pro, phones=phones,
                                         mails=mails, addresses=addresses, orders=orders, bills=bills,
-                                        nom_affichage=nom_affichage, log=True)
+                                        nom_affichage=nom_affichage, log=True, tab=tab, message=message,
+                                        success_message=success_message, error_message=error_message)
     else:
         return PrepareTemplates.error_4xx(status_code=404, log=True,
                                           status_message=Constants.messages('client', 'not_found'))
@@ -463,79 +468,14 @@ def update_client(id_client: int) -> ResponseWerkzeug | str:
         db_session.commit()
         
         # Redirection vers la page de détails du client avec message de succès
-        return PrepareTemplates.clients(success_message=Constants.messages('client', 'update'), id_client=client.id)
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                success_message=Constants.messages('client', 'update'),
+                                id_client=client.id))
     except Exception as e:
         return PrepareTemplates.clients(sub_context='edit', client=client, log=True,
                                         id_client=client.id if client else id_client,
                                         nom_affichage=nom_affichage if nom_affichage else f"Client {id_client}",
                                         error_message=Constants.messages('error_500', 'default') + f" : {e}")
-
-@clients_bp.route('<int:id_client>/add-phone/', methods=['POST'])
-@validate_habilitation(CLIENTS)
-def add_phone(id_client: int) -> ResponseWerkzeug:
-    """
-    Ajout d'un numéro de téléphone pour un client.
-    
-    Endpoint REST pour ajouter un nouveau numéro de téléphone à un client existant.
-    Supporte différents types : fixe_pro, mobile_pro, fixe_perso, mobile_perso, fax.
-    
-    Form Data:
-        - id_client (int): ID du client
-        - telephone (str): Numéro de téléphone
-        - type_telephone (str): Type de téléphone
-        - indicatif (str, optional): Indicatif pays (ex: +33)
-        - detail (str, optional): Précisions sur l'usage
-        - is_principal (bool, optional): Téléphone principal
-    
-    Returns:
-        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
-    """
-    db_session = get_db_session()
-    client = None
-
-    try:
-        # Récupération et validation des données
-        client = db_session.query(Client).get(id_client)
-        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
-
-        # Validation du numéro de téléphone
-        telephone = request.form.get('telephone', '').strip()
-        if not telephone: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                                  id_client=id_client,
-                                                  error_message=Constants.messages('phone', 'missing')))
-
-        # Récupération des autres données
-        type_telephone = request.form.get('type_telephone', 'mobile_pro')
-        indicatif = request.form.get('indicatif', '').strip()
-        detail = request.form.get('detail', '').strip()
-        is_principal = request.form.get('is_principal', 'false').lower() == 'true'
-
-        # Si c'est le téléphone principal, désactiver les autres
-        if is_principal: db_session.query(Telephone).filter_by(
-            id_client=client.id, is_principal=True
-            ).update({'is_principal': False})
-
-        # Création du nouveau téléphone
-        new_telephone = Telephone(
-            id_client=client.id,
-            telephone=telephone,
-            type_telephone=type_telephone,
-            indicatif=indicatif if indicatif else None,
-            detail=detail if detail else None,
-            is_principal=is_principal
-        )
-        
-        # Enregistrement en base de données
-        db_session.add(new_telephone)
-        db_session.commit()
-
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=id_client, success_message=Constants.messages('phone', 'valid')))
-
-    except Exception as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                 id_client=id_client, log=True,
-                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/delete/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -594,6 +534,176 @@ def delete_client(id_client: int) -> ResponseWerkzeug:
                                 id_client=id_client, log=True,
                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
+@clients_bp.route('/<int:id_client>/add-phone/', methods=['POST'])
+@validate_habilitation(CLIENTS)
+def add_phone(id_client: int) -> ResponseWerkzeug:
+    """
+    Ajout d'un numéro de téléphone pour un client.
+    
+    Endpoint REST pour ajouter un nouveau numéro de téléphone à un client existant.
+    Supporte différents types : fixe_pro, mobile_pro, fixe_perso, mobile_perso, fax.
+    
+    Form Data:
+        - id_client (int): ID du client
+        - telephone (str): Numéro de téléphone
+        - type_telephone (str): Type de téléphone
+        - indicatif (str, optional): Indicatif pays (ex: +33)
+        - detail (str, optional): Précisions sur l'usage
+        - is_principal (bool, optional): Téléphone principal
+    
+    Returns:
+        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
+    """
+    db_session = get_db_session()
+    client = None
+
+    try:
+        # Récupération et validation des données
+        client = db_session.query(Client).get(id_client)
+        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+
+        # Validation du numéro de téléphone
+        telephone = request.form.get('telephone', '').strip()
+        if not telephone: return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                                  id_client=id_client, tab='phone',
+                                                  error_message=Constants.messages('phone', 'missing')))
+
+        # Récupération des autres données
+        type_telephone = request.form.get('type_telephone', 'mobile_pro')
+        indicatif = request.form.get('indicatif', '').strip()
+        detail = request.form.get('detail', '').strip()
+        is_principal = request.form.get('is_principal', 'false').lower() == 'true'
+
+        # Si c'est le téléphone principal, désactiver les autres
+        if is_principal: db_session.query(Telephone).filter_by(
+            id_client=client.id, is_principal=True
+            ).update({'is_principal': False})
+
+        # Création du nouveau téléphone
+        new_telephone = Telephone(
+            id_client=client.id,
+            telephone=telephone,
+            type_telephone=type_telephone,
+            indicatif=indicatif if indicatif else None,
+            detail=detail if detail else None,
+            is_principal=is_principal
+        )
+        
+        # Enregistrement en base de données
+        db_session.add(new_telephone)
+        db_session.commit()
+
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='phone',
+                                id_client=id_client, success_message=Constants.messages('phone', 'valid')))
+
+    except Exception as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                 id_client=id_client, log=True, tab='phone',
+                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+
+@clients_bp.route('/<int:id_client>/modify-phone/<int:id_phone>/', methods=['POST'])
+@validate_habilitation(CLIENTS)
+def mod_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
+    """
+    Modification d'un numéro de téléphone existant pour un client.
+    
+    Endpoint REST pour modifier un numéro de téléphone existant d'un client.
+    Supporte différents types : fixe_pro, mobile_pro, fixe_perso, mobile_perso, fax.
+    
+    Form Data:
+        - id_client (int): ID du client
+        - id_phone (int): ID du téléphone à modifier
+        - telephone (str): Nouveau numéro de téléphone
+        - type_telephone (str): Type de téléphone
+        - indicatif (str, optional): Indicatif pays (ex: +33)
+        - detail (str, optional): Précisions sur l'usage
+        - is_principal (bool, optional): Téléphone principal
+    
+    Returns:
+        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
+    """
+    db_session = get_db_session()
+
+    try:
+        # Récupération et validation des données
+        client = db_session.query(Client).get(id_client)
+        phone = request.form.get('telephone', '').strip()
+        type_phone = request.form.get('type_telephone', 'mobile_pro')
+        indic = request.form.get('indicatif', '').strip()
+        detail = request.form.get('detail', '').strip()
+        is_principal = request.form.get('is_principal', 'false').lower() == 'true'
+        phone_obj = db_session.query(Telephone).filter_by(id=id_phone, id_client=id_client).first()
+
+        # Gestion de l'absence de retours
+        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+        if not phone_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                         id_client=id_client, tab='phone',
+                                         error_message=Constants.messages('phone', 'not_found')))
+        if not phone: return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                                  id_client=id_client, tab='phone',
+                                                  error_message=Constants.messages('phone', 'missing')))
+
+        # Si c'est le téléphone principal, désactiver les autres
+        if is_principal: db_session.query(Telephone).filter(
+            Telephone.id_client == client.id,
+            Telephone.id != id_phone,
+            Telephone.is_principal == True
+        ).update({'is_principal': False})
+        db_session.commit()
+
+        # Mise à jour du téléphone existant
+        phone_obj.telephone = phone
+        phone_obj.type_telephone = type_phone
+        phone_obj.indicatif = indic if indic else None
+        phone_obj.detail = detail if detail else None
+        phone_obj.is_principal = is_principal
+        db_session.commit()
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                 id_client=id_client, log=True, tab='phone',
+                                 success_message=Constants.messages('phone', 'updated')))
+    except Exception as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                 id_client=id_client, log=True, tab='phone',
+                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+
+@clients_bp.route('/<int:id_client>/delete-phone/<int:id_phone>/', methods=['POST'])
+@validate_habilitation(CLIENTS)
+def del_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
+
+    """
+    Suppression d'un numéro de téléphone existant pour un client.
+    Endpoint REST pour supprimer un numéro de téléphone d'un client.
+    La suppression est logique (is_inactive = True).
+    Form Data:
+        - id_client (int): ID du client
+        - id_phone (int): ID du téléphone à supprimer
+    Returns:
+        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
+    """
+    db_session = get_db_session()
+    client = None
+
+    try:
+        # Récupération et validation des données
+        client = db_session.query(Client).get(id_client)
+        phone_obj = db_session.query(Telephone).filter_by(id=id_phone, id_client=id_client).first()
+        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+        if not phone_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                         id_client=id_client, tab='phone',
+                                         error_message=Constants.messages('phone', 'not_found')))
+
+        # Suppression logique
+        phone_obj.is_inactive = True
+        db_session.commit()
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                 id_client=id_client, log=True, tab='phone',
+                                 success_message=Constants.messages('phone', 'deleted')))
+    except Exception as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                 id_client=id_client, log=True, tab='phone',
+                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+
+
 @clients_bp.route('/<int:id_client>/add-email/', methods=['POST'])
 @validate_habilitation(CLIENTS)
 def add_email(id_client: int) -> ResponseWerkzeug:
@@ -624,13 +734,13 @@ def add_email(id_client: int) -> ResponseWerkzeug:
         # Validation de l'email
         email = request.form.get('mail', '').strip()
         if not email: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                                  id_client=id_client,
+                                                  id_client=id_client, tab='mail',
                                                   error_message=Constants.messages('email', 'missing')))
 
         # Validation basique du format email
         if '@' not in email or '.' not in email.split('@')[-1]:
             return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                                  id_client=id_client,
+                                                  id_client=id_client, tab='mail',
                                                   error_message=Constants.messages('email', 'invalid')))
 
         # Récupération des autres données
@@ -657,12 +767,12 @@ def add_email(id_client: int) -> ResponseWerkzeug:
         db_session.add(new_mail)
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
                                 id_client=id_client, success_message="Email ajouté avec succès"))
 
     except Exception as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=id_client, log=True,
+                                id_client=id_client, log=True, tab='mail',
                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
     
 @clients_bp.route('/<int:id_client>/modify-email/<int:id_mail>/', methods=['POST'])
@@ -695,16 +805,16 @@ def mod_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         email = request.form.get('mail', '').strip()
         if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
         if not mail_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                         id_client=id_client,
+                                         id_client=id_client, tab='mail',
                                          error_message=Constants.messages('email', 'not_found')))
         if not email: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                                  id_client=id_client,
+                                                  id_client=id_client, tab='mail',
                                                   error_message=Constants.messages('email', 'missing')))
 
         # Validation basique du format email
         if '@' not in email or '.' not in email.split('@')[-1]:
             return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                                  id_client=id_client,
+                                                  id_client=id_client, tab='mail',
                                                   error_message=Constants.messages('email', 'invalid')))
 
         # Récupération des autres données
@@ -724,15 +834,56 @@ def mod_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         mail_obj.is_principal = is_principal
 
         db_session.commit()
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
                                 id_client=id_client, success_message=Constants.messages('email', 'valid')))
 
     except Exception as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=id_client, log=True,
+                                id_client=id_client, log=True, tab='mail',
                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
-@clients_bp.route('/<int:id_client>/add_address/', methods=['POST'])
+@clients_bp.route('/<int:id_client>/delete-email/<int:id_mail>/', methods=['POST'])
+@validate_habilitation(CLIENTS)
+def del_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
+    """
+    Suppression d'un email existant pour un client.
+    
+    Endpoint REST pour supprimer une adresse email d'un client.
+    La suppression est logique (is_inactive = True).
+    
+    Form Data:
+        - id_client (int): ID du client
+        - id_mail (int): ID de l'email à supprimer
+    
+    Returns:
+        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
+    """
+    db_session = get_db_session()
+    client = None
+
+    try:
+        # Récupération et validation des données
+        client = db_session.query(Client).get(id_client)
+        mail_obj = db_session.query(Mail).filter_by(id=id_mail, id_client=id_client).first()
+        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+        if not mail_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                         id_client=id_client, tab='mail',
+                                         error_message=Constants.messages('email', 'not_found')))
+
+        # Suppression logique
+        mail_obj.is_inactive = True
+        mail_obj.modified_by = session.get('pseudo', 'N/A')
+        db_session.commit()
+
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
+                                id_client=id_client, success_message=Constants.messages('email', 'delete')))
+
+    except Exception as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                id_client=id_client, log=True, tab='mail',
+                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+
+@clients_bp.route('/<int:id_client>/add-address/', methods=['POST'])
 @validate_habilitation(CLIENTS)
 def add_address(id_client: int) -> ResponseWerkzeug:
     """
@@ -759,7 +910,7 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+            return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
                                     id_client=id_client, error_message=Constants.messages('client', 'not_found')))
 
         # Validation des données d'adresse
@@ -769,7 +920,7 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         adresse_l2 = request.form.get('adresse_l2', '').strip()
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
         if not adresse_l1 or not code_postal or not ville: return redirect(
-            url_for(Constants.return_pages('clients', 'detail'),
+            url_for(Constants.return_pages('clients', 'detail'), tab='add',
                     id_client=id_client, error_message=Constants.messages('address', 'missing')
                     )
             )
@@ -794,14 +945,14 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         db_session.add(new_adresse)
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
                                 id_client=id_client, success_message=Constants.messages('address', 'valid')))
 
     except Exception as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), id_client=id_client,
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), id_client=id_client, tab='add',
                                 error_message=Constants.messages('error_500', 'default') + f" : {e}", log=True))
 
-@clients_bp.route('/<int:id_client>/modify_address/<int:id_address>/', methods=['POST'])
+@clients_bp.route('/<int:id_client>/modify-address/<int:id_address>/', methods=['POST'])
 @validate_habilitation(CLIENTS)
 def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
     """
@@ -830,20 +981,20 @@ def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
         client = db_session.query(Client).get(id_client)
         address_obj = db_session.query(Adresse).filter_by(id=id_address, id_client=id_client).first()
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+            return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
                                     id_client=id_client, error_message=Constants.messages('client', 'not_found')))
         if not address_obj:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+            return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
                                     id_client=id_client, error_message=Constants.messages('address', 'not_found')))
 
         # Validation des données d'adresse
         adresse_l1 = request.form.get('adresse_l1', '').strip()
+        adresse_l2 = request.form.get('adresse_l2', '').strip()
         code_postal = request.form.get('code_postal', '').strip()
         ville = request.form.get('ville', '').strip()
-        adresse_l2 = request.form.get('adresse_l2', '').strip()
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
         if not adresse_l1 or not code_postal or not ville: return redirect(
-            url_for(Constants.return_pages('clients', 'detail'),
+            url_for(Constants.return_pages('clients', 'detail'), tab='add',
                     id_client=id_client, error_message=Constants.messages('address', 'missing')
                     )
             )
@@ -859,10 +1010,51 @@ def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
         address_obj.ville = ville
         address_obj.is_principal = is_principal
         db_session.commit()
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
                                 id_client=id_client, success_message=Constants.messages('address', 'valid')))
     except Exception as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=id_client, log=True,
+                                id_client=id_client, log=True, tab='add',
+                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+
+@clients_bp.route('/<int:id_client>/delete-address/<int:id_address>/', methods=['POST'])
+@validate_habilitation(CLIENTS)
+def del_address(id_client: int, id_address: int) -> ResponseWerkzeug:
+    """
+    Suppression d'une adresse existante pour un client.
+    
+    Endpoint REST pour supprimer une adresse d'un client.
+    La suppression est logique (is_inactive = True).
+    
+    Form Data:
+        - id_client (int): ID du client
+        - id_address (int): ID de l'adresse à supprimer
+    
+    Returns:
+        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
+    """
+    db_session = get_db_session()
+    client = None
+
+    try:
+        # Récupération et validation des données
+        client = db_session.query(Client).get(id_client)
+        address_obj = db_session.query(Adresse).filter_by(id=id_address, id_client=id_client).first()
+        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+        if not address_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                         id_client=id_client, tab='add',
+                                         error_message=Constants.messages('address', 'not_found')))
+
+        # Suppression logique
+        address_obj.is_inactive = True
+        address_obj.modified_by = session.get('pseudo', 'N/A')
+        db_session.commit()
+
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
+                                id_client=id_client, success_message=Constants.messages('address', 'delete')))
+
+    except Exception as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                id_client=id_client, log=True, tab='add',
                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
     

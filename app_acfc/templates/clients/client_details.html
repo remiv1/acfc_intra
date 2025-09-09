@@ -160,49 +160,55 @@
         <div class="col-12">
             <div class="nav nav-tabs nav-fill mb-4" id="clientTabs" role="tablist">
                 <div class="nav-item">
-                    <button class="nav-link active" id="infos-tab" data-bs-toggle="tab" 
-                            data-bs-target="#infos" type="button" role="tab"
-                            aria-controls="infos" aria-selected="true">
+                    <button class="nav-link {% if tab == 'infos' or tab is none %}active{% endif %}" id="infos-tab"
+                            data-bs-toggle="tab" data-bs-target="#infos" type="button" role="tab"
+                            aria-controls="infos" {% if tab == 'infos' or tab is none %} aria-selected="true"{% else %} aria-selected="false" {% endif %}>
                         <i class="bi bi-person me-2"></i>Informations
                     </button>
                 </div>
                 <div class="nav-item">
-                    <button class="nav-link" id="phones-tab" data-bs-toggle="tab" 
-                            data-bs-target="#phones" type="button" role="tab"
-                            aria-controls="phones" aria-selected="false">
+                    <button class="nav-link {% if tab == 'phone' %}active{% endif %}" id="phones-tab"
+                            data-bs-toggle="tab" data-bs-target="#phones" type="button" role="tab"
+                            aria-controls="phones" {% if tab == 'phone' %} aria-selected="true"{% else %} aria-selected="false" {% endif %}>
                         <i class="bi bi-telephone me-2"></i>Téléphones
                         {% set principal_phones = phones|selectattr('is_principal')|list %}
                         {% if principal_phones %}
-                            <i class="bi bi-star-fill text-warning ms-1">+</i>
+                            <i class="bi bi-check-circle-fill text-success ms-1"></i>
+                        {% else %}
+                            <i class="bi bi-exclamation-triangle-fill text-danger ms-1"></i>
                         {% endif %}
                     </button>
                 </div>
                 <div class="nav-item">
-                    <button class="nav-link" id="emails-tab" data-bs-toggle="tab" 
-                            data-bs-target="#emails" type="button" role="tab"
-                            aria-controls="emails" aria-selected="false">
+                    <button class="nav-link {% if tab == 'mail' %}active{% endif %}" id="emails-tab" data-bs-toggle="tab" 
+                            data-bs-target="#emails" type="button" role="tab" aria-controls="emails"
+                            {% if tab == 'mail' %} aria-selected="true"{% else %} aria-selected="false" {% endif %}>
                         <i class="bi bi-envelope me-2"></i>Emails
                         {% set principal_emails = mails|selectattr('is_principal')|list %}
                         {% if principal_emails %}
-                            <i class="bi bi-star-fill text-warning ms-1">+</i>
+                            <i class="bi bi-check-circle-fill text-success ms-1"></i>
+                        {% else %}
+                            <i class="bi bi-exclamation-triangle-fill text-danger ms-1"></i>
                         {% endif %}
                     </button>
                 </div>
                 <div class="nav-item">
-                    <button class="nav-link" id="addresses-tab" data-bs-toggle="tab" 
-                            data-bs-target="#addresses" type="button" role="tab"
-                            aria-controls="addresses" aria-selected="false">
+                    <button class="nav-link {% if tab == 'add' %}active{% endif %}" id="addresses-tab" data-bs-toggle="tab" 
+                            data-bs-target="#addresses" type="button" role="tab" aria-controls="addresses"
+                            {% if tab == 'add' %} aria-selected="true"{% else %} aria-selected="false" {% endif %}>
                         <i class="bi bi-geo-alt me-2"></i>Adresses
                         {% set principal_addresses = addresses|selectattr('is_principal')|list %}
                         {% if principal_addresses %}
-                            <i class="bi bi-star-fill text-warning ms-1">+</i>
+                            <i class="bi bi-check-circle-fill text-success ms-1"></i>
+                        {% else %}
+                            <i class="bi bi-exclamation-triangle-fill text-danger ms-1"></i>
                         {% endif %}
                     </button>
                 </div>
                 <div class="nav-item">
-                    <button class="nav-link" id="orders-tab" data-bs-toggle="tab" 
-                            data-bs-target="#orders" type="button" role="tab"
-                            aria-controls="orders" aria-selected="false">
+                    <button class="nav-link {% if tab == 'order' %}active{% endif %}" id="orders-tab" data-bs-toggle="tab" 
+                            data-bs-target="#orders" type="button" role="tab" aria-controls="orders"
+                            {% if tab == 'order' %} aria-selected="true"{% else %} aria-selected="false" {% endif %}>
                         <i class="bi bi-cart me-2"></i>Commandes
                         {% set commandes_en_cours = orders|selectattr('is_expedie', 'equalto', false)|selectattr('is_annulee', 'equalto', false)|list %}
                         {% set nb_en_cours = commandes_en_cours|length %}
@@ -212,9 +218,9 @@
                     </button>
                 </div>
                 <div class="nav-item">
-                    <button class="nav-link" id="invoices-tab" data-bs-toggle="tab" 
-                            data-bs-target="#invoices" type="button" role="tab"
-                            aria-controls="invoices" aria-selected="false">
+                    <button class="nav-link {% if tab == 'bill' %}active{% endif %}" id="invoices-tab" data-bs-toggle="tab" 
+                            data-bs-target="#invoices" type="button" role="tab" aria-controls="invoices"
+                            {% if tab == 'bill' %} aria-selected="true"{% else %} aria-selected="false" {% endif %}>
                         <i class="bi bi-receipt me-2"></i>Factures
                         <span id="invoices-count" class="badge bg-secondary ms-1">{{ bills|length }}</span>
                     </button>
@@ -227,7 +233,7 @@
     <div class="tab-content" id="clientTabsContent">
         
         <!-- Onglet Informations -->
-        <div class="tab-pane fade show active" id="infos" role="tabpanel">
+        <div class="tab-pane fade{% if tab == 'info' or tab is none %} show active{% endif %}" id="infos" role="tabpanel">
             <div class="row">
                 <div class="col-lg-8">
                     <div class="card border-0 shadow-sm">
@@ -349,7 +355,7 @@
         </div>
 
         <!-- Onglet Téléphones -->
-        <div class="tab-pane fade" id="phones" role="tabpanel">
+        <div class="tab-pane fade{% if tab == 'phone' %}show active{% endif %}" id="phones" role="tabpanel">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
@@ -398,7 +404,10 @@
                                                         onclick="editPhone(this.dataset.phoneId, this)">
                                                         <i class="bi bi-pencil me-2"></i>Modifier
                                                     </button></li>
-                                                    <li><button type="button" class="dropdown-item text-danger" data-phone-id="{{ telephone.id }}" onclick="deletePhone(this.dataset.phoneId)">
+                                                    <li><button type="button" class="dropdown-item text-danger"
+                                                                data-client-id="{{ client.id }}"
+                                                                data-phone-id="{{ telephone.id }}"
+                                                                onclick="deletePhoneWithConfirm(this)">
                                                         <i class="bi bi-trash me-2"></i>Supprimer
                                                     </button></li>
                                                 </ul>
@@ -423,7 +432,7 @@
         </div>
 
         <!-- Onglet Emails -->
-        <div class="tab-pane fade" id="emails" role="tabpanel">
+        <div class="tab-pane fade{% if tab == 'mail' %} show active{% endif %}" id="emails" role="tabpanel">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
@@ -494,7 +503,7 @@
         </div>
 
         <!-- Onglet Adresses -->
-        <div class="tab-pane fade" id="addresses" role="tabpanel">
+        <div class="tab-pane fade{% if tab == 'add' %} show active{% endif %}" id="addresses" role="tabpanel">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
@@ -568,7 +577,7 @@
         </div>
 
         <!-- Onglet Commandes -->
-        <div class="tab-pane fade" id="orders" role="tabpanel">
+        <div class="tab-pane fade{% if tab == 'order' %} show active{% endif %}" id="orders" role="tabpanel">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
@@ -661,7 +670,7 @@
         </div>
 
         <!-- Onglet Factures -->
-        <div class="tab-pane fade" id="invoices" role="tabpanel">
+        <div class="tab-pane fade{% if tab == 'bill' %} show active{% endif %}" id="invoices" role="tabpanel">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom">
                     <h5 class="card-title mb-0">
@@ -718,7 +727,7 @@
     </div>
 </div>
 
-<!-- Modal Ajout Téléphone -->
+<!-- Modal Ajout/Modification Téléphone -->
 <div class="modal fade" id="addPhoneModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -748,8 +757,12 @@
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="indicatif" class="form-label">Indicatif</label>
-                                <input type="text" class="form-control" id="indicatif" 
-                                       name="indicatif" placeholder="+33" value="+33">
+                                <input type="text" class="form-control" id="paysIndicatif" 
+                                       name="paysIndicatif" onchange="updateIndic(this.value)"
+                                       list="indic-list" required>
+                                <datalist class="form-control" id="indic-list">
+                                    <option value="+33" selected> France (+33)</option>
+                                </datalist>
                             </div>
                         </div>
                         <div class="col-md-8">
@@ -786,7 +799,7 @@
     </div>
 </div>
 
-<!-- Modal Ajout Email -->
+<!-- Modal Ajout/Modification Email -->
 <div class="modal fade" id="addEmailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -842,7 +855,7 @@
     </div>
 </div>
 
-<!-- Modal Ajout Adresse -->
+<!-- Modal Ajout/Modification Adresse -->
 <div class="modal fade" id="addAddressModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">

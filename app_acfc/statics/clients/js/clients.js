@@ -3,12 +3,151 @@
    ====================================================================
    
    JavaScript pour la gestion des détails client :
-   - Gestion des modals d'ajout de contacts
-   - Validation des formulaires
-   - Actions d'édition/suppression
-   - Formatage automatique des données
+   - Gestion des scripts au chargement de la page
+   - fillPhoneModal : Remplissage du modal téléphone avec données si édition, vide sinon.
+   - editPhone : Actions pour l'édition des numéros de téléphones.
+   - deletePhoneWithConfirm : Suppression avec confirmation d'un numéro de téléphone. (suppression logique)
+   - updateIndic : Met à jour la liste des indicatifs en fonction du pays saisi.
 ==================================================================== */
 
+// Initialiser les fonctionnalités spécifiques aux détails client si on est sur cette page
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('clientTabs')) {
+        initClientDetailsPage();
+    }
+    
+    // Initialiser la recherche de clients si on est sur cette page
+    if (document.getElementById('client-search-form')) {
+        initClientSearchPage();
+    }
+});
+
+// Remplissage du modal téléphone avec données si édition, vide sinon.
+function fillPhoneModal(data, mode = 'create') {
+    // Création des constantes pour les éléments du modal
+    const form = document.getElementById('addPhoneForm');
+    const modalTitle = document.querySelector('#addPhoneModal .modal-title');
+    const submitButton = document.querySelector('#addPhoneForm button[type="submit"]');
+    
+    if (mode === 'edit') {
+        // Mode édition
+        modalTitle.innerHTML = '<i class="bi bi-telephone me-2"></i>Modifier le numéro de téléphone';
+        submitButton.innerHTML = '<i class="bi bi-check me-1"></i>Modifier';
+        submitButton.className = 'btn btn-warning';
+        
+        // Modifier l'action du formulaire pour pointer vers la route de modification
+        const clientId = document.getElementById('client-id').value;
+        form.action = `/clients/${clientId}/modify-phone/${data.id}/`;
+        
+        // Remplir les champs avec les données existantes
+        const telephoneInput = document.getElementById('telephone');
+        const typeSelect = document.getElementById('type_telephone');
+        const indicatifInput = document.getElementById('indicatif');
+        const detailInput = document.getElementById('detail_phone');
+        const principalCheckbox = document.getElementById('is_principal');
+        
+        if (telephoneInput) telephoneInput.value = data.telephone || '';
+        if (typeSelect) typeSelect.value = data.type_telephone || 'mobile_pro';
+        if (indicatifInput) indicatifInput.value = data.indicatif || '+33';
+        if (detailInput) detailInput.value = data.detail || '';
+        if (principalCheckbox) principalCheckbox.checked = data.is_principal || false;
+        
+    } else {
+        // Mode création
+        modalTitle.innerHTML = '<i class="bi bi-telephone me-2"></i>Ajouter un numéro de téléphone';
+        submitButton.innerHTML = '<i class="bi bi-plus me-1"></i>Ajouter';
+        submitButton.className = 'btn btn-success';
+        
+        // Remettre l'action du formulaire pour la création
+        const clientId = document.getElementById('client-id').value;
+        form.action = `/clients/${clientId}/add-phone/`;
+        
+        // Vider les champs
+        form.reset();
+        form.classList.remove('was-validated');
+    }
+}
+
+// Actions pour l'édition des téléphones
+function editPhone(phoneId, buttonElement) {
+
+    // Récupérer les données depuis les attributs data-* du bouton
+    if (!buttonElement?.dataset) {
+        alert('Erreur : impossible de récupérer les données du téléphone');
+        return;
+    }
+    
+    // Méthode principale avec dataset
+    let phonesData = {
+        id: phoneId,
+        telephone: buttonElement.dataset.phoneTelephone,
+        type_telephone: buttonElement.dataset.phoneType,
+        indicatif: buttonElement.dataset.phoneIndicatif,
+        detail: buttonElement.dataset.phoneDetail,
+        is_principal: buttonElement.dataset.phonePrincipal === 'true'
+    };
+    
+    // Remplir le modal avec les données existantes
+    fillPhoneModal(phonesData, 'edit');
+
+    // Ouvrir le modal
+    const modal = new bootstrap.Modal(document.getElementById('addPhoneModal'));
+    modal.show();
+}
+
+// Supprimer un téléphone avec confirmation
+function deletePhoneWithConfirm(button) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce numéro de téléphone ?')) {
+        const idClient = button.getAttribute('data-client-id');
+        const idPhone = button.getAttribute('data-phone-id');
+
+        // Effectuer la requête de suppression
+        fetch(`/clients/${idClient}/delete-phone/${idPhone}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    }
+}
+
+// Modifie la liste en fonction de ce qui est inscrit dans l'outil de recherche
+function updateIndic(indicatifInput) {
+    // Récupérer la valeur de l'input
+    const indicatifInput = document.getElementById('paysIndicatif');
+
+    // Vider la liste avant de la remplir
+    const datalist = document.getElementById('indicatif-list');
+    if (datalist) {
+        datalist.innerHTML = '';
+    }
+    
+    // Envoie la requête au serveur pour obtenir les indicatifs
+    fetch(`/api/indic-tel/${indicatifInput.value}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(indicatifs => {
+        indicatifs.forEach(indicatif => {
+            const option = document.createElement('option');
+            option.value = indicatif.value;
+            option.textContent = indicatif.label;
+            datalist.appendChild(option);
+        });
+    })
+    .catch(error => {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = `Erreur lors de la récupération des indicatifs : ${error}`;
+        datalist.appendChild(option);
+    });
+}
+
+/* TODO: Gérer les fonctions non vérifiées (//NOK) */
+//NOK
 /**
  * Initialisation des fonctionnalités de la page détails client
  */
@@ -139,145 +278,7 @@ function initClientDetailsPage() {
     }
 }
 
-/**
- * Actions pour l'édition/suppression des téléphones
- */
-function editPhone(phoneId, buttonElement) {
-    console.log('=== DÉBUT ÉDITION TÉLÉPHONE ===');
-    console.log('Phone ID:', phoneId);
-    console.log('Button Element:', buttonElement);
-    
-    // Récupérer les données depuis les attributs data-* du bouton
-    if (!buttonElement || !buttonElement.dataset) {
-        console.error('Bouton non fourni ou sans données');
-        alert('Erreur : impossible de récupérer les données du téléphone');
-        return;
-    }
-    
-    // Méthode principale avec dataset (camelCase)
-    let data = {
-        id: phoneId,
-        telephone: buttonElement.dataset.phoneTelephone,
-        type_telephone: buttonElement.dataset.phoneType,
-        indicatif: buttonElement.dataset.phoneIndicatif,
-        detail: buttonElement.dataset.phoneDetail,
-        is_principal: buttonElement.dataset.phonePrincipal === 'true'
-    };
-    
-    // Si les données sont vides, essayer avec getAttribute (méthode de fallback)
-    if (!data.telephone) {
-        console.log('Fallback vers getAttribute pour téléphone');
-        data = {
-            id: phoneId,
-            telephone: buttonElement.getAttribute('data-phone-telephone'),
-            type_telephone: buttonElement.getAttribute('data-phone-type'),
-            indicatif: buttonElement.getAttribute('data-phone-indicatif'),
-            detail: buttonElement.getAttribute('data-phone-detail'),
-            is_principal: buttonElement.getAttribute('data-phone-principal') === 'true'
-        };
-    }
-    
-    console.log('Données extraites du DOM:', data);
-    
-    // Remplir le modal avec les données existantes
-    fillPhoneModal(data, 'edit');
-    
-    // Ouvrir le modal
-    const modal = new bootstrap.Modal(document.getElementById('addPhoneModal'));
-    modal.show();
-    
-    console.log('=== FIN ÉDITION TÉLÉPHONE ===');
-}
-
-/**
- * Fonction pour remplir le modal de téléphone avec les données
- */
-function fillPhoneModal(data, mode = 'create') {
-    console.log('=== DÉBUT fillPhoneModal ===');
-    console.log('Mode:', mode);
-    console.log('Données reçues:', data);
-    
-    const form = document.getElementById('addPhoneForm');
-    const modalTitle = document.querySelector('#addPhoneModal .modal-title');
-    const submitButton = document.querySelector('#addPhoneForm button[type="submit"]');
-    
-    if (mode === 'edit') {
-        console.log('Mode édition téléphone - modification du modal');
-        
-        // Mode édition
-        modalTitle.innerHTML = '<i class="bi bi-telephone me-2"></i>Modifier le numéro de téléphone';
-        submitButton.innerHTML = '<i class="bi bi-check me-1"></i>Modifier';
-        submitButton.className = 'btn btn-warning';
-        
-        // Modifier l'action du formulaire pour pointer vers la route de modification
-        const clientId = document.getElementById('client-id').value;
-        form.action = `/clients/${clientId}/modify-phone/${data.id}/`;
-        
-        // Remplir les champs avec les données existantes
-        const telephoneInput = document.getElementById('telephone');
-        const typeSelect = document.getElementById('type_telephone');
-        const indicatifInput = document.getElementById('indicatif');
-        const detailInput = document.getElementById('detail_phone');
-        const principalCheckbox = document.getElementById('is_principal_phone');
-        
-        if (telephoneInput) telephoneInput.value = data.telephone || '';
-        if (typeSelect) typeSelect.value = data.type_telephone || 'mobile_pro';
-        if (indicatifInput) indicatifInput.value = data.indicatif || '+33';
-        if (detailInput) detailInput.value = data.detail || '';
-        if (principalCheckbox) principalCheckbox.checked = data.is_principal || false;
-        
-        console.log('Téléphone - Valeurs assignées:', data);
-        
-    } else {
-        // Mode création
-        modalTitle.innerHTML = '<i class="bi bi-telephone me-2"></i>Ajouter un numéro de téléphone';
-        submitButton.innerHTML = '<i class="bi bi-plus me-1"></i>Ajouter';
-        submitButton.className = 'btn btn-success';
-        
-        // Remettre l'action du formulaire pour la création
-        const clientId = document.getElementById('client-id').value;
-        form.action = `/clients/${clientId}/add-phone/`;
-        
-        // Vider les champs
-        form.reset();
-        form.classList.remove('was-validated');
-    }
-    
-    console.log('=== FIN fillPhoneModal ===');
-}
-
-function deletePhone(phoneId) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce numéro de téléphone ?')) {
-        // TODO: Envoyer une requête DELETE vers le serveur
-        console.log('Delete phone:', phoneId);
-        
-        // Exemple d'implémentation avec fetch
-        /*
-        fetch(`/clients/phones/${phoneId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken() // Si vous utilisez CSRF
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                // Recharger la page ou supprimer l'élément du DOM
-                location.reload();
-            } else {
-                alert('Erreur lors de la suppression');
-            }
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert('Erreur lors de la suppression');
-        });
-        */
-        
-        alert('Fonctionnalité de suppression à implémenter côté serveur');
-    }
-}
-
+//NOK
 /**
  * Actions pour l'édition/suppression des emails
  */
@@ -294,7 +295,7 @@ function editEmail(emailId, buttonElement) {
         return;
     }
     
-    // Méthode principale avec dataset (camelCase)
+    // Méthode principale avec dataset
     let data = {
         id: emailId,
         mail: buttonElement.dataset.emailMail,
@@ -340,6 +341,7 @@ function editEmail(emailId, buttonElement) {
     console.log('=== FIN ÉDITION EMAIL ===');
 }
 
+//NOK
 /**
  * Fonction pour remplir le modal d'email avec les données
  */
@@ -421,6 +423,7 @@ function fillEmailModal(data, mode = 'create') {
     console.log('=== FIN fillEmailModal ===');
 }
 
+//NOK
 function deleteEmail(emailId) {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse email ?')) {
         // TODO: Envoyer une requête DELETE vers le serveur
@@ -429,6 +432,7 @@ function deleteEmail(emailId) {
     }
 }
 
+//NOK
 /**
  * Actions pour l'édition/suppression des adresses
  */
@@ -479,6 +483,7 @@ function editAddress(addressId, buttonElement) {
     console.log('=== FIN ÉDITION ADRESSE ===');
 }
 
+//NOK
 /**
  * Fonction pour remplir le modal d'adresse avec les données
  */
@@ -536,6 +541,7 @@ function fillAddressModal(data, mode = 'create') {
     console.log('=== FIN fillAddressModal ===');
 }
 
+//NOK
 function deleteAddress(addressId) {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
         // TODO: Envoyer une requête DELETE vers le serveur
@@ -544,6 +550,7 @@ function deleteAddress(addressId) {
     }
 }
 
+//NOK
 /**
  * Utilitaire pour obtenir le token CSRF (si utilisé)
  */
@@ -552,6 +559,7 @@ function getCSRFToken() {
     return token ? token.getAttribute('content') : '';
 }
 
+//NOK
 /**
  * Affichage de notifications toast (optionnel)
  */
@@ -580,18 +588,7 @@ function showToast(message, type = 'success') {
     }
 }
 
-// Initialiser les fonctionnalités spécifiques aux détails client si on est sur cette page
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('clientTabs')) {
-        initClientDetailsPage();
-    }
-    
-    // Initialiser la recherche de clients si on est sur cette page
-    if (document.getElementById('client-search-form')) {
-        initClientSearchPage();
-    }
-});
-
+//NOK
 /**
  * Initialisation de la page de recherche de clients
  */
@@ -692,30 +689,3 @@ function initClientSearchPage() {
         });
     });
 }
-
-// Exposer uniquement les fonctions utiles pour debug
-window.editEmail = editEmail;
-window.fillEmailModal = fillEmailModal;
-window.editPhone = editPhone;
-window.fillPhoneModal = fillPhoneModal;
-window.editAddress = editAddress;
-window.fillAddressModal = fillAddressModal;
-
-// Fonction de test pour vérifier les données dans les boutons
-window.testEmailButtons = function() {
-    console.log('=== TEST DES BOUTONS EMAIL ===');
-    const buttons = document.querySelectorAll('[data-email-id]');
-    console.log('Nombre de boutons trouvés:', buttons.length);
-    
-    buttons.forEach((btn, index) => {
-        console.log(`Bouton ${index + 1}:`);
-        console.log('- Element:', btn);
-        console.log('- ID:', btn.getAttribute('data-email-id'));
-        console.log('- Mail:', btn.getAttribute('data-email-mail'));
-        console.log('- Type:', btn.getAttribute('data-email-type'));
-        console.log('- Detail:', btn.getAttribute('data-email-detail'));
-        console.log('- Principal:', btn.getAttribute('data-email-principal'));
-        console.log('- Dataset:', btn.dataset);
-        console.log('---');
-    });
-};

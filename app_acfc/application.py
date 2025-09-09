@@ -30,7 +30,10 @@ from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy.sql.functions import func
 from logs.logger import acfc_log, ERROR
 from app_acfc.services import SecureSessionService, AuthenticationService
-from app_acfc.modeles import MyAccount, PrepareTemplates, Constants, User, Commande, Client, init_database, get_db_session
+from app_acfc.modeles import (
+    MyAccount, PrepareTemplates, Constants, User, Commande, Client, init_database, get_db_session,
+    GeoMethods
+    )
 from app_acfc.contextes_bp.clients import clients_bp         # Module CRM - Gestion clients
 from app_acfc.contextes_bp.catalogue import catalogue_bp     # Module Catalogue produits
 from app_acfc.contextes_bp.commercial import commercial_bp   # Module Commercial - Devis, commandes
@@ -220,7 +223,6 @@ def get_current_orders(id_client: int = 0) -> List[Commande]:
         )
 
     return commandes
-
 
 def get_commercial_indicators() -> Dict[str, Any] | None:
     """
@@ -574,6 +576,39 @@ def handle_5xx_errors(error: HTTPException) -> str:
     """
     return PrepareTemplates.error_5xx(status_code=error.code or 500, log=True, specific_log=Constants.log_files('500'),
                                       status_message=error.description or Constants.messages('error_500', 'default'))
+
+# ====================================================================
+# Routes utilitaires diverses
+# ====================================================================
+
+@acfc.route('/api/indic-tel/<ilike_pays>', methods=['GET'])
+def get_indic_tel(ilike_pays: str='') -> Any:
+    """
+    API REST pour récupérer les indicatifs téléphoniques par pays.
+    
+    Args:
+        ilike_pays (str): Nom du pays (partiel, insensible à la casse)
+        
+    Returns:
+        JSON: Liste des indicatifs téléphoniques
+    """
+    if request.method != 'GET':
+        return PrepareTemplates.error_4xx(status_code=405,
+                                          status_message=Constants.messages('error_400', 'wrong_road'),
+                                          log=True)
+    try:
+        indicatifs = GeoMethods.get_indicatifs_tel(ilike_pays)
+        indicatifs_list: List[Dict[str, str]] = [
+            {
+                'label': f'{ind.pays} ({ind.indicatif})',
+                'value': ind.indicatif
+            } for ind in indicatifs
+        ]
+        return jsonify(indicatifs_list), 200
+    except Exception as e:
+        return PrepareTemplates.error_5xx(status_code=500,
+                                          status_message=f"Erreur lors de la récupération des indicatifs : {str(e)}",
+                                          log=True, specific_log=Constants.log_files('500'))
 
 # ====================================================================
 # ENREGISTREMENT DES MODULES MÉTIERS

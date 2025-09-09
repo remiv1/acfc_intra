@@ -1290,7 +1290,7 @@ class Constants:
                 'default': "Vérification de l'adresse email effectuée."
             },
             'address': {
-                'missing': "L'adresse est obligatoire.",
+                'missing': "L'adresse complète est obligatoire.",
                 'invalid': "Le format de l'adresse est invalide.",
                 'exists': "L'adresse existe déjà.",
                 'valid': "L'adresse est valide.",
@@ -1535,14 +1535,14 @@ class Constants:
                 'modifier-post': 'clients.update_client',
                 'supprimer': 'clients.delete_client',
                 'phone-add': 'clients.add_phone',
-                'mail-add': 'clients.add_email',
-                'address-add': 'clients.add_address',
-                'phone-del': 'clients.del_phone',
-                'mail-del': 'clients.del_email',
-                'address-del': 'clients.del_address',
                 'phone-mod': 'clients.mod_phone',
+                'phone-del': 'clients.del_phone',
+                'mail-add': 'clients.add_email',
                 'mail-mod': 'clients.mod_email',
+                'mail-del': 'clients.del_email',
+                'address-add': 'clients.add_address',
                 'address-mod': 'clients.mod_address',
+                'address-del': 'clients.del_address',
             },
             'commandes': {
                 'nouvelle': 'commandes.new_order',
@@ -1625,14 +1625,29 @@ class PrepareTemplates:
                                **kwargs)
 
     @staticmethod
-    def clients(sub_context: Optional[str]=None, message: Optional[str]=None, log: bool=False, **kwargs: Any) -> str:
+    def clients(sub_context: Optional[str]=None, tab: Optional[str]=None, message: Optional[str]=None,
+                success_message: Optional[str]=None, error_message: Optional[str]=None,
+                log: bool=False, **kwargs: Any) -> str:
         '''
         Génère le template de la page clients.
 
         Args:
-            sub_context (Optional[str]): Sous-contexte de la page clients.
+            sub_context (Optional[str]): Sous-contexte de la page clients :
+                - 'research' : Recherche de clients
+                - 'create' : Création d'un nouveau client
+                - 'edit' : Modification d'un client
+                - 'detail' : Détails d'un client
+            tab (Optional[str]): Onglet actif de la page détail du clients :
+                - 'info' : Informations générales
+                - 'phone' : Téléphones
+                - 'mail' : Emails
+                - 'add' : Adresses
+                - 'order' : Commandes
+                - 'bill' : Factures
             log (bool): Indique si l'action doit être loggée.
             message (Optional[str]): Message à afficher sur la page clients.
+            success_message (Optional[str]): Message de succès à afficher.
+            error_message (Optional[str]): Message d'erreur à afficher.
         Returns:
             str: Template de la page clients
         '''
@@ -1641,10 +1656,8 @@ class PrepareTemplates:
                          specific_logger=Constants.log_files('client'),
                          user=session.get('pseudo', 'N/A'), db_log=True)
         return render_template(PrepareTemplates.BASE,
-                               title='ACFC - Gestion Clients',
-                               context='clients',
-                               sub_context=sub_context,
-                               message=message,
+                               title='ACFC - Gestion Clients', context='clients', sub_context=sub_context,
+                               tab=tab, message=message, success_message=success_message, error_message=error_message,
                                **kwargs)
 
     @staticmethod
@@ -1814,3 +1827,40 @@ class PrepareTemplates:
                                context='500', message=message,
                                status_code=status_code,
                                status_message=status_message)
+
+
+class GeoMethods:
+    """
+    Classe utilitaire pour les méthodes liées aux données géographiques :
+        - Codes postaux et villes
+        - Indicatifs téléphoniques
+        - Autres éventuelles API géographiques
+    """
+
+    @staticmethod
+    def get_indicatifs_tel(pays: str) -> List[IndicatifsTel]:
+        """
+        Récupère la liste des indicatifs téléphoniques depuis l'objet SQLAlchemy.
+        Args:
+            pays (str): données textuelles du pays (ex: 'franc')
+        Returns:
+            List[Dict]: Liste des indicatifs téléphoniques
+        """
+        db_session: SessionBdDType = get_db_session()
+        return db_session.query(IndicatifsTel).filter(
+            IndicatifsTel.pays.ilike(f'%{pays}%'
+            )).limit(25).all()
+    
+    @staticmethod
+    def get_codes_postaux_villes(code_postal: str) -> List[Villes]:
+        """
+        Récupère la liste des villes et codes postaux depuis l'objet SQLAlchemy.
+        Args:
+            code_postal (str): données textuelles du code postal (ex: '39270')
+        Returns:
+            List[Villes]: Liste des villes et codes postaux
+        """
+        db_session: SessionBdDType = get_db_session()
+        return db_session.query(Villes).filter(
+            Villes.code_postal.ilike(f'{code_postal}'
+            )).all()
