@@ -1,7 +1,7 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 09 September 2025  
-**Période analysée :** 02 September 2025 - 09 September 2025 (7 jours)  
+**Date du rapport :** 10 September 2025  
+**Période analysée :** 03 September 2025 - 10 September 2025 (7 jours)  
 **Nombre de commits :** 34  
 **Générateur :** Script automatique v1.0
 
@@ -10,60 +10,13 @@
 ## Résumé exécutif
 
 **Activité de développement :** 34 commits sur 7 jours  
-**Volume de code :** 7913 lignes ajoutées, 4392 lignes supprimées  
-**Fichiers impactés :** 299 fichiers modifiés  
-**Productivité moyenne :** 1130 lignes/jour
+**Volume de code :** 8345 lignes ajoutées, 4508 lignes supprimées  
+**Fichiers impactés :** 336 fichiers modifiés  
+**Productivité moyenne :** 1192 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 02 September 2025
-
-#### 18:59 - 311e7dc - 📊 Mise à jour automatique du rapport de suivi (02/09/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +39 -17 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Tue Sep 2 18:59:11 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (02/09/2025)`
-- ... et 1 autres fichiers
-
-#### 20:58 - 4553a46 - fix: Correction des références aux identifiants SIREN et RNA pour les clients professionnels dans l'impression des factures
-
-**Catégorie :** Correction de bugs  
-**Impact :** +3 -3 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Tue Sep 2 20:58:35 2025 +0200`
-- `    fix: Correction des références aux identifiants SIREN et RNA pour les clients professionnels dans l'impression des factures`
-- ... et 1 autres fichiers
-
-#### 17:24 - 55b9a9c - 📊 Mise à jour automatique du rapport de suivi (02/09/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +43 -54 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Tue Sep 2 17:24:57 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (02/09/2025)`
-- ... et 1 autres fichiers
-
-#### 19:24 - 3a4a2bb - style: Ajustement des styles CSS pour la facture et mise à jour de la mise en page dans le modèle d'impression
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +37 -17 lignes, 5 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Tue Sep 2 19:24:43 2025 +0200`
-- `    style: Ajustement des styles CSS pour la facture et mise à jour de la mise en page dans le modèle d'impression`
-- ... et 2 autres fichiers
 
 
 ### 03 September 2025
@@ -400,6 +353,28 @@
 
 ### 09 September 2025
 
+#### 20:06 - ef264cc - fix: Ajout des variables d'environnement pour l'utilisateur et le mot de passe de MongoDB
+
+**Catégorie :** Correction de bugs  
+**Impact :** +1 -0 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Tue Sep 9 20:06:43 2025 +0200`
+- `    fix: Ajout des variables d'environnement pour l'utilisateur et le mot de passe de MongoDB`
+- ... et 1 autres fichiers
+
+#### 17:18 - 99d48cd - 📊 Mise à jour automatique du rapport de suivi (09/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +59 -138 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Tue Sep 9 17:18:49 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (09/09/2025)`
+- ... et 1 autres fichiers
+
 #### 19:18 - e5dc288 - feat: Amélioration de la gestion des indicatifs téléphoniques et tri des informations client
 
 **Catégorie :** Développement de fonctionnalités  
@@ -423,42 +398,68 @@
 - ... et 15 autres fichiers
 
 
+### 10 September 2025
+
+#### 11:20 - 8b2ba12 - feat: - Ajout de la protection CSRF avec Flask-WTF et mise à jour des templates pour inclure le token CSRF
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +481 -55 lignes, 37 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Sep 10 11:20:18 2025 +0200`
+- `    feat:`
+- `    - Ajout de la protection CSRF avec Flask-WTF et mise à jour des templates pour inclure le token CSRF`
+- ... et 36 autres fichiers
+
+#### 08:59 - 9dd0d59 - fix: Correction des chemins de fichiers SQL dans le Dockerfile et le script d'initialisation de la base de données
+
+**Catégorie :** Correction de bugs  
+**Impact :** +13 -14 lignes, 9 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Sep 10 08:59:16 2025 +0200`
+- `    fix: Correction des chemins de fichiers SQL dans le Dockerfile et le script d'initialisation de la base de données`
+- ... et 6 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 12 commits (35.3%)
+- **Interface utilisateur** : 10 commits (29.4%)
 - **Refactoring** : 9 commits (26.5%)
-- **Développement de fonctionnalités** : 6 commits (17.6%)
-- **Correction de bugs** : 6 commits (17.6%)
+- **Développement de fonctionnalités** : 7 commits (20.6%)
+- **Correction de bugs** : 7 commits (20.6%)
 - **Développement général** : 1 commits (2.9%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 62 fichiers modifiés
-- **HTML** : 39 fichiers modifiés
-- **Documentation** : 17 fichiers modifiés
-- **JavaScript** : 7 fichiers modifiés
-- **CSS** : 2 fichiers modifiés
-- **YAML/Config** : 1 fichiers modifiés
-- **Docker** : 1 fichiers modifiés
+- **Python** : 64 fichiers modifiés
+- **HTML** : 55 fichiers modifiés
+- **Documentation** : 16 fichiers modifiés
+- **JavaScript** : 9 fichiers modifiés
+- **Docker** : 3 fichiers modifiés
+- **YAML/Config** : 2 fichiers modifiés
+- **CSS** : 1 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
 - **Fréquence de commit :** 4.9 commits/jour
-- **Volume de code :** 12305 modifications totales
-- **Ratio ajouts/suppressions :** 1.80
-- **Moyenne lignes par commit :** 362
+- **Volume de code :** 12853 modifications totales
+- **Ratio ajouts/suppressions :** 1.85
+- **Moyenne lignes par commit :** 378
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 7913 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 8345 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 09 September 2025*
+*Rapport généré automatiquement le 10 September 2025*
