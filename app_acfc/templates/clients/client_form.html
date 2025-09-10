@@ -83,9 +83,10 @@
     <!-- Formulaire principal -->
     <div class="row">
         <div class="col-12">
+            {% from '_macros.html' import csrf_field %}
             <form action="{% if sub_context == 'create' %}{{ url_for(('clients', 'creation') | jinja_page_title) }}{% else %}{{ url_for(('clients', 'modifier-post') | jinja_page_title, id_client=id_client) }}{% endif %}" 
-                  method="POST" class="needs-validation" novalidate id="clientForm">
-                
+                method="POST" class="needs-validation" novalidate id="clientForm">
+                {{ csrf_field() }}
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-bottom">
                         <h5 class="card-title mb-0">

@@ -3,7 +3,9 @@
         <h2>Liste des utilisateurs</h2>
         <a href="{{ url_for('admin.add_user') }}" class="btn btn-primary">Ajouter un utilisateur</a>
     </div>
+    {% from '_macros.html' import csrf_field %}
     <form method="post" action="{{ url_for('admin.users_action') }}"></form>
+        {{ csrf_field() }}
         <table class="table table-striped">
             <thead>
                 <tr>

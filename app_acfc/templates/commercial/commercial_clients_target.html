@@ -8,7 +8,9 @@ window.COMMERCIAL_SUBCONTEXT = 'filter_list';
     <!-- Formulaire de filtres -->
     <div class="card mb-4">
         <div class="card-body">
+            {% from '_macros.html' import csrf_field %}            
             <form id="filtersForm" class="row g-3">
+                {{ csrf_field() }}
                 <div class="col-md-3">
                     <label for="type_client">Type de client</label>
                     <select id="type_client" name="type_client" class="form-select">

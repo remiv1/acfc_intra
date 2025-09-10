@@ -21,7 +21,9 @@
             </h5>
         </div>
         <div class="card-body">
+            {% from '_macros.html' import csrf_field %}
             <form id="client-search-form" class="row g-3">
+                {{ csrf_field() }}
                 <!-- Champ de recherche principal -->
                 <div class="col-md-8">
                     <label for="search-term" class="form-label">Terme de recherche</label>

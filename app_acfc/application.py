@@ -21,6 +21,7 @@ Version : 1.0
 
 from flask import Flask, Response, request, Blueprint, session, url_for, redirect, jsonify, g
 from flask_session import Session
+from flask_wtf.csrf import generate_csrf, validate_csrf # type: ignore
 from waitress import serve
 from typing import Any, Dict, Tuple, List, Optional
 from werkzeug.exceptions import HTTPException
@@ -138,6 +139,16 @@ def teardown_appcontext(exception: Optional[BaseException]=None) -> None:
     
     if exception:
         acfc_log.log(level=ERROR, message=str(exception), specific_logger=Constants.log_files('warning'))
+
+@acfc.context_processor
+def inject_csrf_token():
+    try:
+        token_to_return: Dict[str, str] = {'csrf_token': generate_csrf()}
+    except Exception:
+        # En cas de problème (ex: pas de session active), renvoyer une valeur vide
+        token_to_return = {'csrf_token': ''}
+    return token_to_return
+
 
 # ====================================================================
 # FILTRES JINJA2 PERSONNALISÉS

@@ -156,7 +156,9 @@
                         <div class="card-body">
                             {% if subcontext == 'parameters' %}
                                 <!-- Mode édition - Formulaire -->
+                                {% from '_macros.html' import csrf_field %}
                                 <form action="{{ url_for('my_account', pseudo=user.pseudo) }}" method="post" class="needs-validation" novalidate>
+                                    {{ csrf_field() }}
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <label for="prenom" class="form-label">Prénom</label>
@@ -501,7 +503,9 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+            {% from '_macros.html' import csrf_field %}
             <form action="{{ url_for('chg_pwd') }}" method="post" id="changePasswordForm">
+                {{ csrf_field() }}
                 <div class="modal-body">
                     <input type="hidden" name="username" value="{{ user.pseudo }}">
                     

@@ -22,6 +22,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Récupération du Token CSRF depuis la meta injectée par le serveur
+function getCSRFToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+
 // Remplissage du modal téléphone avec données si édition, vide sinon.
 function fillPhoneModal(data, mode = 'create') {
     // Création des constantes pour les éléments du modal
@@ -88,7 +94,6 @@ function editPhone(phoneId, buttonElement) {
 
     // Récupérer les données depuis les attributs data-* du bouton
     if (!buttonElement?.dataset) {
-        alert('Erreur : impossible de récupérer les données du téléphone');
         return;
     }
     
@@ -117,11 +122,24 @@ function deletePhoneWithConfirm(button) {
         const idPhone = button.getAttribute('data-phone-id');
 
         // Effectuer la requête de suppression
-        fetch(`/clients/${idClient}/delete-phone/${idPhone}`, {
+        const url = `/clients/${idClient}/delete-phone/${idPhone}`;
+        fetch(url, {
             method: 'POST',
+            credentials: 'same-origin',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+                'X-CSRF-Token': getCSRFToken()
             }
+        }).then(resp => {
+            if (resp.ok) {
+                // Rafraîchir la page ou retirer l'élément du DOM
+                location.reload();
+            } else {
+                resp.text().then(t => console.error('Erreur suppression : ' + t));
+            }
+        }).catch(err => {
+            showToast('Erreur réseau lors de la suppression : ' + err, 'error');
         });
     }
 }
@@ -287,8 +305,7 @@ function initClientDetailsPage() {
 function editEmail(emailId, buttonElement) {
     
     // Récupérer les données depuis les attributs data-* du bouton
-    if (!buttonElement || !buttonElement.dataset) {
-        alert('Erreur : impossible de récupérer les données de l\'email');
+    if (!buttonElement?.dataset) {
         return;
     }
     
@@ -382,9 +399,21 @@ function fillEmailModal(data, mode = 'create') {
 //NOK
 function deleteEmail(emailId) {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse email ?')) {
-        // TODO: Envoyer une requête DELETE vers le serveur
-        console.log('Delete email:', emailId);
-        alert('Fonctionnalité de suppression à implémenter côté serveur');
+        const clientId = document.getElementById('client-id').value;
+        const url = `/clients/${clientId}/delete-email/${emailId}`;
+        fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+                'X-CSRF-Token': getCSRFToken()
+            }
+        })
+        .catch(err => {
+            console.error('Erreur réseau lors de la suppression :', err);
+            showToast('Erreur réseau lors de la suppression : ' + err, 'error');
+        });
     }
 }
 
@@ -398,9 +427,8 @@ function editAddress(addressId, buttonElement) {
     console.log('Button Element:', buttonElement);
     
     // Récupérer les données depuis les attributs data-* du bouton
-    if (!buttonElement || !buttonElement.dataset) {
+    if (!buttonElement?.dataset) {
         console.error('Bouton non fourni ou sans données');
-        alert('Erreur : impossible de récupérer les données de l\'adresse');
         return;
     }
     
@@ -500,19 +528,24 @@ function fillAddressModal(data, mode = 'create') {
 //NOK
 function deleteAddress(addressId) {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
-        // TODO: Envoyer une requête DELETE vers le serveur
-        console.log('Delete address:', addressId);
-        alert('Fonctionnalité de suppression à implémenter côté serveur');
+        const clientId = document.getElementById('client-id').value;
+        const url = `/clients/${clientId}/delete-address/${addressId}`;
+        fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+                'X-CSRF-Token': getCSRFToken()
+            }
+        }).then(resp => {
+            if (resp.ok) {
+                location.reload();
+            }
+        }).catch(err => {
+            showToast('Erreur réseau lors de la suppression : ' + err, 'error');
+        });
     }
-}
-
-//NOK
-/**
- * Utilitaire pour obtenir le token CSRF (si utilisé)
- */
-function getCSRFToken() {
-    const token = document.querySelector('meta[name="csrf-token"]');
-    return token ? token.getAttribute('content') : '';
 }
 
 //NOK

@@ -98,7 +98,9 @@
     {% endif %}
 
     <!-- Formulaire principal -->
+    {% from '_macros.html' import csrf_field %}    
     <form method="POST" id="commandeForm" action="{% if form_sub_context == 'create' %}{{ url_for('commandes.nouvelle_commande', id_client=client.id) }}{% else %}{{ url_for('commandes.commande_modify', id_client=client.id, id_commande=commande.id) }}{% endif %}">
+        {{ csrf_field() }}
         <div class="row">
             <!-- Informations de la commande -->
             <div class="col-lg-6 mb-4">

@@ -655,8 +655,10 @@
                                                     <i class="bi bi-pencil me-1"></i>Modifier
                                                 </a>
                                                 {% elif not commande.is_expedie and not commande.is_facture and not commande.is_annulee %}
+                                                {% from '_macros.html' import csrf_field %}
                                                 <form class="inline-display" method="POST" action="{{ url_for(('commandes', 'annuler') | jinja_page_title, id_client=commande.id_client, id_commande=commande.id) }}" 
-                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
+                                                    onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
+                                                    {{ csrf_field() }}
                                                     <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Annuler la commande">
                                                         <i class="bi bi-x-circle me-1"></i>Annuler
                                                     </button>
@@ -763,7 +765,9 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+            {% from '_macros.html' import csrf_field %}
             <form action="{{ url_for(('clients', 'phone-add') | jinja_page_title, id_client=client.id) }}" method="post" id="addPhoneForm">
+                {{ csrf_field() }}
                 <div class="modal-body">
                     <input type="hidden" name="id_client" value="{{ client.id }}">
                     
@@ -832,7 +836,9 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+            {% from '_macros.html' import csrf_field %}
             <form action="{{ url_for(('clients', 'mail-add') | jinja_page_title, id_client=client.id) }}" method="post" id="addEmailForm">
+                {{ csrf_field() }}
                 <div class="modal-body">
                     <input type="hidden" name="id_client" value="{{ client.id }}">
                     
@@ -888,7 +894,9 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+            {% from '_macros.html' import csrf_field %}
             <form action="{{ url_for(('clients', 'address-add') | jinja_page_title, id_client=client.id) }}" method="post" id="addAddressForm">
+                {{ csrf_field() }}
                 <div class="modal-body">
                     <input type="hidden" name="id_client" value="{{ client.id }}">
                     

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
 
+    <!-- Token CSRF accessible au JS -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
     <!-- Favicon pour les navigateurs -->
     <link rel="shortcut icon" href="{{ url_for('static', filename='common/img/favicon.svg') }}" type="image/svg+xml">
     <link rel="shortcut icon" href="{{ url_for('static', filename='common/img/favicon.png') }}" type="image/x-icon">
@@ -14,7 +17,7 @@
     
     <!-- Font Awesome pour les icônes -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <!-- CSS propriétaire (charge après Bootstrap pour surcharger si besoin) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='common/css/base.css') }}">
@@ -61,6 +64,9 @@
 {% elif not context or context == 'default' %}
 <script src="{{ url_for('static', filename='common/js/home.js') }}"></script>
 {% endif %}
+
+<!-- Conteneur pour toasts (utilisé par showToast) -->
+<div class="toast-container position-fixed top-0 end-0 p-3" aria-live="polite" aria-atomic="true"></div>
 
 </body>
 </html>

@@ -383,7 +383,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body">
+                {% from '_macros.html' import csrf_field %}
                 <form id="facturationForm" method="post" action="{{ url_for('commandes.facturer_commande') }}">
+                    {{ csrf_field() }}
                     <input type="hidden" name="id_commande" value="{{ commande.id }}">
                     
                     <!-- Informations sur la facturation -->
@@ -507,7 +509,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body">
+                {% from '_macros.html' import csrf_field %}
                 <form id="expeditionForm" method="post" action="{{ url_for('commandes.traiter_expedition', id_commande=commande.id) }}">
+                    {{ csrf_field() }}
                     <input type="hidden" name="id_commande" value="{{ commande.id }}">
                     
                     <!-- Lignes à expédier -->

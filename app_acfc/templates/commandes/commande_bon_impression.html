@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>Bon de Commande #{{ commande.id }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='commandes/css/commandes.css') }}">
 </head>
