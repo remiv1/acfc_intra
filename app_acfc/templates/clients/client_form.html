@@ -84,7 +84,7 @@
     <div class="row">
         <div class="col-12">
             <form action="{% if sub_context == 'create' %}{{ url_for(('clients', 'creation') | jinja_page_title) }}{% else %}{{ url_for(('clients', 'modifier-post') | jinja_page_title, id_client=id_client) }}{% endif %}" 
-                  method="post" class="needs-validation" novalidate id="clientForm">
+                  method="POST" class="needs-validation" novalidate id="clientForm">
                 
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-bottom">

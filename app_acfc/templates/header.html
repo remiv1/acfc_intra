@@ -30,7 +30,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="clientsDropdown">
                         <li><a class="dropdown-item" href="{{ url_for(('clients', 'recherche') | jinja_page_title) }}">Rechercher</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for(('clients', 'creation') | jinja_page_title) }}">Nouveau prospect</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for(('clients', 'creation') | jinja_page_title, sub_context='create') }}">Nouveau prospect</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/clients">Traiter une commande</a></li>
                         <li><a class="dropdown-item" href="/clients">Commandes en cours</a></li>

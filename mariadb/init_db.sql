@@ -98,17 +98,13 @@ DELIMITER ;
 -- ========================================
 
 -- Insertion du Plan Comptable Général (PCG)
--- Note: Ce fichier contient plus de 580 comptes comptables
-SOURCE docker-entrypoint-initdb.d/prepare_base_datas/pcg/pcg.sql;
+SOURCE docker-entrypoint-initdb.d/pcg.sql;
 
 -- Insertion des indicatifs téléphoniques internationaux
--- Note: Ce fichier contient les indicatifs de tous les pays
-SOURCE docker-entrypoint-initdb.d/prepare_base_datas/indic_tel/92_indicatifs_tel.sql;
+SOURCE docker-entrypoint-initdb.d/92_indicatifs_tel.sql;
 
 -- Insertion des villes françaises avec codes postaux
--- Note: Ce fichier contient plus de 33000 villes françaises
-SOURCE docker-entrypoint-initdb.d/prepare_base_datas/cp_villes/91_villes.sql;
+SOURCE docker-entrypoint-initdb.d/91_villes.sql;
 
 -- Insertion du catalogue de produits préformaté
--- Note: Ce fichier contient les données du catalogue
-SOURCE docker-entrypoint-initdb.d/prepare_base_datas/catalogue/21_catalogue.sql;
+SOURCE docker-entrypoint-initdb.d/21_catalogue.sql;

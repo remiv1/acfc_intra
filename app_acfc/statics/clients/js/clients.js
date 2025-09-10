@@ -487,7 +487,7 @@ function fillAddressModal(data, mode = 'create') {
         
         // Remettre l'action du formulaire pour la création
         const clientId = document.getElementById('client-id').value;
-        form.action = `/clients/${clientId}/add_address/`;
+        form.action = `/clients/${clientId}/add-address/`;
         
         // Vider les champs
         form.reset();
