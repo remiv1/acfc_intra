@@ -197,97 +197,134 @@ def recherche_avancee() -> ResponseWerkzeug | str:
     # Récupération des paramètres
     search_term = request.args.get('q', '').strip()
     search_type = request.args.get('type', 'part').strip()
-    # TODO: Ajouter la possibilité de chercher un client inactif via un paramètre supplémentaire
-    # Dans le formulaire, cette possibilité ne sera proposée qu'aux gestionnaires et administrateurs
+    # TODO: Dans le formulaire, cette possibilité ne sera proposée qu'aux gestionnaires et administrateurs
+    search_is_inactive = request.args.get('search-inactive', 'false').strip().lower() == 'true'
     
-    # Validation longueur minimum
-    if len(search_term) < 3:
-        return jsonify([])
-    
+    # Récupération de la session de base de données
     db_session: SessionBdDType = get_db_session()
     
     try:
         clients = []
         
-        if search_type == 'part':
-            # Recherche dans les particuliers (prénom + nom)
-            clients = (
-                db_session.query(Client)
-                .join(Client.part)
-                .filter(
-                    Client.is_active == True,
-                    or_(
-                        Part.prenom.ilike(f'%{search_term}%'),
-                        Part.nom.ilike(f'%{search_term}%'),
-                        func.concat(Part.prenom, ' ', Part.nom).ilike(f'%{search_term}%')
+        match search_type:
+            case 'part':
+                # Recherche dans les particuliers (prénom + nom)
+                clients = (
+                    db_session.query(Client)
+                    .join(Client.part)
+                    .filter(
+                        Client.is_active == (
+                            (True or False) if (
+                                search_is_inactive \
+                                and (
+                                    '1' in session['habilitations'] or \
+                                    '2' in session['habilitations']
+                                )
+                            ) else True
+                        ),
+                        or_(
+                            Part.prenom.ilike(f'%{search_term}%'),
+                            Part.nom.ilike(f'%{search_term}%'),
+                            func.concat(Part.prenom, ' ', Part.nom).ilike(f'%{search_term}%')
+                        )
                     )
+                    .all()
                 )
-                .all()
-            )
-            
-        elif search_type == 'pro':
-            # Recherche dans les professionnels (raison sociale)
-            clients = (
-                db_session.query(Client)
-                .join(Client.pro)
-                .filter(
-                    Client.is_active == True,
-                    Pro.raison_sociale.ilike(f'%{search_term}%')
-                )
-                .all()
-            )
-            
-        elif search_type == 'mail':
-            # Recherche par email
-            clients = (
-                db_session.query(Client)
-                .join(Client.mails)
-                .filter(
-                    Client.is_active == True,
-                    Mail.mail.ilike(f'%{search_term}%')
-                )
-                .distinct()
-                .all()
-            )
-            
-        elif search_type == 'telephone':
-            # Recherche par téléphone
-            clients = (
-                db_session.query(Client)
-                .join(Client.tels)
-                .filter(
-                    Client.is_active == True,
-                    Telephone.telephone.ilike(f'%{search_term}%')
-                )
-                .distinct()
-                .all()
-            )
-            
-        elif search_type == 'adresse':
-            # Recherche par adresse (adresse, code postal ou ville)
-            clients = (
-                db_session.query(Client)
-                .join(Client.adresses)
-                .filter(
-                    Client.is_active == True,
-                    Adresse.is_inactive == False,
-                    or_(
-                        Adresse.adresse_l1.ilike(f'%{search_term}%'),
-                        Adresse.adresse_l2.ilike(f'%{search_term}%'),
-                        Adresse.code_postal.ilike(f'%{search_term}%'),
-                        Adresse.ville.ilike(f'%{search_term}%')
+            case 'pro':
+                # Recherche dans les professionnels (raison sociale)
+                clients = (
+                    db_session.query(Client)
+                    .join(Client.pro)
+                    .filter(
+                        Client.is_active == (
+                            (True or False) if (
+                                search_is_inactive \
+                                and (
+                                    '1' in session['habilitations'] or \
+                                    '2' in session['habilitations']
+                                )
+                            ) else True
+                        ),
+                        Pro.raison_sociale.ilike(f'%{search_term}%')
                     )
+                    .all()
                 )
-                .distinct()
-                .all()
-            )
+            case 'mail':
+                # Recherche par email
+                clients = (
+                    db_session.query(Client)
+                    .join(Client.mails)
+                    .filter(
+                        Client.is_active == (
+                            (True or False) if (
+                                search_is_inactive \
+                                and (
+                                    '1' in session['habilitations'] or \
+                                    '2' in session['habilitations']
+                                )
+                            ) else True
+                        ),
+                        Mail.mail.ilike(f'%{search_term}%'),
+                        Mail.is_inactive == ((True or False) if search_is_inactive else False)
+                    )
+                    .distinct()
+                    .all()
+                )
+            case 'telephone':
+                # Recherche par téléphone
+                clients = (
+                    db_session.query(Client)
+                    .join(Client.tels)
+                        .filter(
+                            Client.is_active == (
+                            (True or False) if (
+                                search_is_inactive \
+                                and (
+                                    '1' in session['habilitations'] or \
+                                    '2' in session['habilitations']
+                                )
+                            ) else True
+                        ),
+                        Telephone.telephone.ilike(f'%{search_term}%'),
+                        Telephone.is_inactive == ((True or False) if search_is_inactive else False)
+                    )
+                    .distinct()
+                    .all()
+                )
+            case _:
+                # Recherche par adresse (adresse, code postal ou ville)
+                clients = (
+                    db_session.query(Client)
+                    .join(Client.adresses)
+                    .filter(
+                        Client.is_active == (
+                            (True or False) if (
+                                search_is_inactive \
+                                and (
+                                    '1' in session['habilitations'] or \
+                                    '2' in session['habilitations']
+                                )
+                            ) else True
+                        ),
+                        Adresse.is_inactive == ((True or False) if search_is_inactive else True),
+                        or_(
+                            Adresse.adresse_l1.ilike(f'%{search_term}%'),
+                            Adresse.adresse_l2.ilike(f'%{search_term}%'),
+                            Adresse.code_postal.ilike(f'%{search_term}%'),
+                            Adresse.ville.ilike(f'%{search_term}%'),
+                            Adresse.is_inactive == ((True or False) if search_is_inactive else False)
+                        )
+                    )
+                    .distinct()
+                    .all()
+                )
         
         # Conversion en dictionnaire et retour
         return jsonify([client.to_dict() for client in clients[:20]])  # Limite à 20 résultats
         
     except Exception as e:
         return PrepareTemplates.error_5xx(status_code=500, status_message=str(e),
-                                          log=True, specific_log=Constants.log_files('client'))
+                                          log=True, specific_log=Constants.log_files('client') + str(e))
 
 
 # ================================================================
@@ -577,7 +614,7 @@ def add_phone(id_client: int) -> ResponseWerkzeug:
                                                   id_client=id_client, tab='phone',
                                                   error_message=Constants.messages('phone', 'missing')))
 
-        # Récupération des autres données
+        # Récupération des autres données (type de téléphone, indicatif, détail, si principal)
         type_telephone = request.form.get('type_telephone', 'mobile_pro')
         indicatif = request.form.get('indicatif', '').strip()
         detail = request.form.get('detail', '').strip()
@@ -635,40 +672,48 @@ def mod_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
     db_session = get_db_session()
 
     try:
-        # Récupération et validation des données
+        # Récupération et validation des données (client, téléphone, type, indicatif, détail, si principal)
         client = db_session.query(Client).get(id_client)
         phone = request.form.get('telephone', '').strip()
         type_phone = request.form.get('type_telephone', 'mobile_pro')
         indic = request.form.get('indicatif', '').strip()
         detail = request.form.get('detail', '').strip()
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
-        phone_obj = db_session.query(Telephone).filter_by(id=id_phone, id_client=id_client).first()
 
-        # Gestion de l'absence de retours
+        # Récupération du téléphone à modifier
+        phone_obj = db_session.query(Telephone).filter_by(id=id_phone, id_client=id_client, is_inactive=False).first()
+
+        # Gestion de l'absence de retours (absence client, absence téléphone, absence numéro)
+        # L'absence de client est peu probable, mais on la gère quand même
         if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+        # L'absence de téléphone est peu probable aussi (mauvais ID ou téléphone déjà supprimé)
         if not phone_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                          id_client=id_client, tab='phone',
                                          error_message=Constants.messages('phone', 'not_found')))
+        # Le numéro de téléphone est obligatoire : retour avec message d'erreur
         if not phone: return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                                   id_client=id_client, tab='phone',
                                                   error_message=Constants.messages('phone', 'missing')))
 
         # Si c'est le téléphone principal, désactiver les autres
-        if is_principal: db_session.query(Telephone).filter(
-            Telephone.id_client == client.id,
-            Telephone.id != id_phone,
-            Telephone.is_principal == True
-        ).update({'is_principal': False})
-        db_session.commit()
+        if is_principal:
+            db_session.query(Telephone).filter(
+                Telephone.id_client == client.id,
+                Telephone.id != id_phone,
+                Telephone.is_principal == True
+            ).update({'is_principal': False})
+            db_session.commit()
 
         # Mise à jour du téléphone existant
         phone_obj.telephone = phone
         phone_obj.type_telephone = type_phone
-        phone_obj.indicatif = indic if indic else None
+        phone_obj.indicatif = indic if indic else '+33'
         phone_obj.detail = detail if detail else None
         phone_obj.is_principal = is_principal
         phone_obj.modified_by = session.get('pseudo', 'N/A')
         db_session.commit()
+
+        # Redirection vers la page de détails du client sur l'onglet téléphone avec message de succès
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                  id_client=id_client, log=True, tab='phone',
                                  success_message=Constants.messages('phone', 'updated')))

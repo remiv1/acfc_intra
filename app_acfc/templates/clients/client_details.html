@@ -53,7 +53,7 @@
                     <div class="d-flex align-items-center">
                         <!-- Avatar placeholder -->
                         <div class="me-4">
-                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white fw-bold client-avatar">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold client-avatar">
                                 {% if client.type_client == 1 and part %}
                                     {{ part.prenom[0].upper() }}{{ part.nom[0].upper() }}
                                 {% elif client.type_client == 2 and pro %}
@@ -68,9 +68,9 @@
                         <div class="flex-grow-1">
                             <h2 class="mb-1 text-dark">{{ nom_affichage }}</h2>
                             <p class="text-muted mb-2">
-                                <i class="bi bi-hash me-1"></i>Client #{{ client.id }}
+                                <i class="bi bi-hash me-1"></i>Client n°{{ client.id }}
                                 {% if client.type_client == 1 %}
-                                    <span class="badge bg-info ms-2">Particulier</span>
+                                    <span class="badge bg-primary ms-2">Particulier</span>
                                 {% else %}
                                     <span class="badge bg-primary ms-2">Professionnel</span>
                                 {% endif %}
@@ -78,7 +78,7 @@
                             <div class="d-flex flex-wrap gap-2">
                                 <!-- Badge statut client -->
                                 {% if client.is_active %}
-                                    <span class="badge bg-success">
+                                    <span class="badge bg-primary">
                                         <i class="bi bi-check-circle me-1"></i>Actif
                                     </span>
                                 {% else %}
@@ -88,7 +88,7 @@
                                 {% endif %}
                                 
                                 <!-- Badge création -->
-                                <span class="badge bg-secondary">
+                                <span class="badge bg-primary">
                                     <i class="bi bi-calendar me-1"></i>Créé le {{ client.created_at.strftime('%d/%m/%Y') }}
                                 </span>
                                 
@@ -222,7 +222,7 @@
                             data-bs-target="#invoices" type="button" role="tab" aria-controls="invoices"
                             {% if tab == 'bill' %} aria-selected="true"{% else %} aria-selected="false" {% endif %}>
                         <i class="bi bi-receipt me-2"></i>Factures
-                        <span id="invoices-count" class="badge bg-secondary ms-1">{{ bills|length }}</span>
+                        <span id="invoices-count" class="badge bg-primary ms-1">{{ bills|length }}</span>
                     </button>
                 </div>
             </div>
@@ -240,7 +240,7 @@
                         <div class="card-header bg-white border-bottom">
                             <h5 class="card-title mb-0">
                                 {% if client.type_client == 1 %}
-                                    <i class="bi bi-person-lines-fill me-2 text-success"></i>Informations particulier
+                                    <i class="bi bi-person-lines-fill me-2 text-primary"></i>Informations particulier
                                 {% else %}
                                     <i class="bi bi-building me-2 text-primary"></i>Informations professionnel
                                 {% endif %}
@@ -325,34 +325,34 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="text-muted">Téléphones</span>
-                                <span class="badge bg-primary-subtle text-primary">
+                                <span class="badge text-primary">
                                     {{ phones|selectattr('is_inactive', 'equalto', False)|list|length }}
                                 </span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="text-muted">Emails</span>
-                                <span class="badge bg-primary-subtle text-primary">
+                                <span class="badge text-primary">
                                     {{ mails|selectattr('is_inactive', 'equalto', False)|list|length }}
                                 </span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="text-muted">Adresses</span>
-                                <span class="badge bg-primary-subtle text-primary">
+                                <span class="badge text-primary">
                                     {{ addresses|selectattr('is_inactive', 'equalto', False)|list|length }}
                                 </span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="text-muted">Commandes</span>
-                                <span class="badge bg-success-subtle text-success">{{ orders|length }}</span>
+                                <span class="badge {{ 'text-success' if orders|length > 0 else 'text-warning' }}">{{ orders|length }}</span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="text-muted">Factures</span>
-                                <span class="badge bg-warning-subtle text-warning">{{ bills|length }}</span>
+                                <span class="badge {{ 'text-success' if bills|length > 0 else 'text-warning' }}">{{ bills|length }}</span>
                             </div>
                             <hr class="my-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="text-muted">Réduction appliquée</span>
-                                <span class="badge bg-info-subtle text-info">{{ "%.1f"|format(client.reduces * 100) }}%</span>
+                                <span class="badge text-info">{{ "%.1f"|format(client.reduces * 100) }}%</span>
                             </div>
                         </div>
                     </div>
@@ -471,23 +471,36 @@
                                 | sort(attribute='id', reverse=False)
                                 | sort(attribute='is_inactive', reverse=False) %}
                             <div class="col-md-6">
-                                <div class="card border{% if email.is_principal %} principal-contact{% endif %}">
+                                <div class="card border{% if email.is_principal %} principal-contact{% endif %} {% if email.is_inactive %} bg-light text-muted opacity-50{% endif %}">
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div>
                                                 <h6 class="card-title mb-1">
+                                                    <i class="bi bi-envelope me-1"></i>{{ email.type_mail|title }}
                                                     {% if email.is_principal %}
                                                         <span class="badge badge-principal me-2">
                                                             <i class="bi bi-star-fill me-1"></i>Principal
                                                         </span>
                                                     {% endif %}
-                                                    <i class="bi bi-envelope me-1"></i>{{ email.type_mail|title }}
                                                 </h6>
                                                 <p class="card-text fw-bold mb-1">{{ email.mail }}</p>
                                                 {% if email.detail %}
                                                 <p class="card-text small text-muted mb-0">{{ email.detail }}</p>
                                                 {% endif %}
+                                                <p class="card-text small text-muted mb-0">
+                                                    {% if email.is_inactive %}
+                                                        <i class="bi bi-x-circle-fill me-1"></i>Inactif
+                                                    {% else %}
+                                                        <i class="bi bi-check-circle-fill me-1"></i>Actif
+                                                    {% endif %}
+                                                    {% if email.modified_by %}
+                                                        <i class="bi bi-pencil me-1"></i>Modifié par {{ email.modified_by }} le {{ email.modified_at | date_input }}    
+                                                    {% else %}
+                                                        <i class="bi bi-person-fill me-1"></i>Créé par {{ email.created_by }} le {{ email.created_at | date_input }}
+                                                    {% endif %}
+                                                </p>
                                             </div>
+                                            {% if not email.is_inactive %}
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-label="Actions pour l'email">
                                                     <i class="bi bi-three-dots-vertical"></i>
@@ -507,6 +520,7 @@
                                                     </button></li>
                                                 </ul>
                                             </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -544,25 +558,41 @@
                                 | sort(attribute='id', reverse=False)
                                 | sort(attribute='is_inactive', reverse=False) %}
                             <div class="col-md-6">
-                                <div class="card border{% if adresse.is_principal %} principal-contact{% endif %}">
+                                <div class="card border{% if adresse.is_principal %} principal-contact{% endif %}{% if adresse.is_inactive %} bg-light text-muted opacity-50{% endif %}">
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div>
                                                 <h6 class="card-title mb-2">
+                                                    <i class="bi bi-house me-1"></i>Adresse {{ loop.index }}
                                                     {% if adresse.is_principal %}
                                                         <span class="badge badge-principal me-2">
                                                             <i class="bi bi-star-fill me-1"></i>Principal
                                                         </span>
                                                     {% endif %}
-                                                    <i class="bi bi-house me-1"></i>Adresse {{ loop.index }}
                                                 </h6>
                                                 <p class="card-text mb-1">{{ adresse.adresse_l1 }}</p>
                                                 {% if adresse.adresse_l2 %}
                                                 <p class="card-text mb-1">{{ adresse.adresse_l2 }}</p>
                                                 {% endif %}
                                                 <p class="card-text mb-0"><strong>{{ adresse.code_postal }} {{ adresse.ville }}</strong></p>
-                                                <small class="text-muted">Créée le {{ adresse.created_at.strftime('%d/%m/%Y') }}</small>
+                                                <p class="card-text small text-muted mb-0">
+                                                    {% if adresse.is_inactive %}
+                                                    <p class="card-text small text-muted mb-0">
+                                                        <i class="bi bi-x-circle-fill me-1"></i>Inactif
+                                                    </p>
+                                                    {% endif %}
+                                                    {% if adresse.modified_by %}
+                                                    <p class="card-text small text-muted mb-0">
+                                                        <i class="bi bi-pencil me-1"></i>Modifiée par {{ adresse.modified_by }} le {{ adresse.modified_at | date_input }}    
+                                                    </p>
+                                                    {% else %}
+                                                    <p class="card-text small text-muted mb-0">
+                                                        <i class="bi bi-person-fill me-1"></i>Créée par {{ adresse.created_by }} le {{ adresse.created_at | date_input }}
+                                                    </p>
+                                                    {% endif %}
+                                                </p>
                                             </div>
+                                            {% if not adresse.is_inactive %}
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-label="Actions pour l'adresse">
                                                     <i class="bi bi-three-dots-vertical"></i>
@@ -583,6 +613,7 @@
                                                     </button></li>
                                                 </ul>
                                             </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>

@@ -1279,22 +1279,25 @@ class Constants:
                 'missing': "Le numéro de téléphone est obligatoire.",
                 'invalid': "Le format du numéro de téléphone est invalide.",
                 'exists': "Le numéro de téléphone existe déjà.",
-                'valid': "Le numéro de téléphone est valide.",
-                'default': "Vérification du numéro de téléphone effectuée."
+                'valid': "Le numéro de téléphone a bien été ajouté.",
+                'default': "Vérification du numéro de téléphone effectuée.",
+                'not_found': "Numéro de téléphone non trouvé ou déjà désactivé.",
             },
             'email': {
                 'missing': "L'adresse email est obligatoire.",
                 'invalid': "Le format de l'adresse email est invalide.",
                 'exists': "L'adresse email existe déjà.",
-                'valid': "L'adresse email est valide.",
-                'default': "Vérification de l'adresse email effectuée."
+                'valid': "L'adresse email a bien été ajoutée.",
+                'default': "Vérification de l'adresse email effectuée.",
+                'not_found': "Adresse email non trouvée ou déjà désactivée."
             },
             'address': {
                 'missing': "L'adresse complète est obligatoire.",
                 'invalid': "Le format de l'adresse est invalide.",
                 'exists': "L'adresse existe déjà.",
-                'valid': "L'adresse est valide.",
-                'default': "Vérification de l'adresse effectuée."
+                'valid': "L'adresse a bien été ajoutée.",
+                'default': "Vérification de l'adresse effectuée.",
+                'not_found': "Adresse non trouvée ou déjà désactivée."
             },
             'user': {
                 'create': "Nouvel utilisateur créé avec succès.",
@@ -1774,7 +1777,7 @@ class PrepareTemplates:
                                objects=objects)
 
     @staticmethod
-    def error_4xx(status_code: int, status_message: str, log: bool=False, specific_log: Optional[str]=None) -> str:
+    def error_4xx(status_code: int, status_message: str, request: Request | None=None, log: bool=False, specific_log: Optional[str]=None) -> str:
         '''
         Génère le template de la page d'erreur 4xx.
 
@@ -1788,9 +1791,14 @@ class PrepareTemplates:
             str: Template de la page d'erreur 4xx
         '''
         username = session.get('pseudo', 'N/A')
+        if status_code == 404 and request:
+            adresse = request.url or 'N/A'
+        else:
+            adresse = 'N/A'
         message = Constants.messages('error_400', 'default') \
                     + f'\ncode erreur : {status_code}' \
-                    + f'\ndescription : {status_message}'
+                    + f'\ndescription : {status_message}' \
+                    + f'\nadresse : {adresse}'
         if log:
             acfc_log.log(level=ERROR, message=message,
                          specific_logger=Constants.log_files(specific_log or '400.log'),

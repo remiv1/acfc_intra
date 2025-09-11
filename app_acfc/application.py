@@ -103,7 +103,6 @@ def before_request() -> Any:
     # Si l'utilisateur n'est pas connecté, rediriger vers la page de login
     return redirect(url_for('login'))
 
-
 @acfc.after_request
 def after_request(response: Response) -> Response:
     """
@@ -119,7 +118,6 @@ def after_request(response: Response) -> Response:
         Response: Réponse modifiée si nécessaire
     """
     return response
-
 
 @acfc.teardown_appcontext
 def teardown_appcontext(exception: Optional[BaseException]=None) -> None:
@@ -562,7 +560,7 @@ def handle_4xx_errors(error: HTTPException) -> str:
     Returns:
         str: Template d'erreur personnalisé avec code et message
     """
-    return PrepareTemplates.error_4xx(status_code=error.code or 400, log=True,
+    return PrepareTemplates.error_4xx(status_code=error.code or 400, log=True, request=request,
                                       status_message=error.description or Constants.messages('error_400', 'default'))
 
 @acfc.errorhandler(500)

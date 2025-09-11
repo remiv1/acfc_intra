@@ -589,6 +589,7 @@ function initClientSearchPage() {
     const resultsCount = document.getElementById('results-count');
     const loadingDiv = document.getElementById('search-loading');
     const noResultsDiv = document.getElementById('no-results');
+    const inactiveCheckbox = document.getElementById('search-inactive');
     
     let searchTimeout;
     
@@ -596,6 +597,7 @@ function initClientSearchPage() {
     function performSearch() {
         const searchTerm = searchInput.value.trim();
         const searchType = document.querySelector('input[name="search_type"]:checked').value;
+        const searchInactive = inactiveCheckbox ? inactiveCheckbox.checked : false;
         
         // Masquer tous les éléments
         resultsContainer.classList.add('d-none');
@@ -611,7 +613,7 @@ function initClientSearchPage() {
         loadingDiv.classList.remove('d-none');
         
         // Effectuer la recherche
-        fetch(`/clients/recherche_avancee?q=${encodeURIComponent(searchTerm)}&type=${searchType}`)
+        fetch(`/clients/recherche_avancee?q=${encodeURIComponent(searchTerm)}&type=${searchType}&search-inactive=${searchInactive}`)
             .then(response => response.json())
             .then(data => {
                 loadingDiv.classList.add('d-none');
@@ -623,7 +625,6 @@ function initClientSearchPage() {
                 }
             })
             .catch(error => {
-                console.error('Erreur lors de la recherche:', error);
                 loadingDiv.classList.add('d-none');
                 noResultsDiv.classList.remove('d-none');
             });
@@ -667,7 +668,15 @@ function initClientSearchPage() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(performSearch, 300); // Debounce de 300ms
     });
-    
+
+    // Événement pour la case à cocher "inactifs"
+    inactiveCheckbox.addEventListener('change', function() {
+        if (searchInput.value.trim().length >= 3) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(performSearch, 100);
+        }
+    });
+
     // Événement de changement de type de recherche
     searchTypeInputs.forEach(input => {
         input.addEventListener('change', function() {
