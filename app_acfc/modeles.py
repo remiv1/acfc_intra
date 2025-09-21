@@ -1667,7 +1667,7 @@ class PrepareTemplates:
     @staticmethod
     def orders(subcontext: str, commande: Optional[Commande]=None, log: bool=False,
                message: Optional[str]=None, success_message: Optional[str]=None, error_message: Optional[str]=None,
-               **kwargs: Any) -> str:
+               id_client: Optional[int]=None, **kwargs: Any) -> str:
         '''
         Génère le template de la page commandes.
 
@@ -1687,14 +1687,12 @@ class PrepareTemplates:
             acfc_log.log(level=INFO, message=message or '',
                          specific_logger=Constants.log_files('commandes'),
                          user=session.get('pseudo', 'N/A'), db_log=True)
-        
-        # Gestion des paramètres commandes (absent si création)
-        if not commande: commande = None
 
         # Récupération du catalogue filtres et autre paramètres
         session_db: SessionBdDType = get_db_session()
         current_year: int = datetime.now().year
         compleet_catalog: List[Catalogue] = session_db.query(Catalogue).order_by(Catalogue.id.desc()).all()
+        client = session_db.query(Client).filter(Client.id == id_client).first() if id_client else None
 
         # Récupération des millésimes distincts pour le filtre
         millesimes = session_db.query(Catalogue.millesime) \
@@ -1724,10 +1722,11 @@ class PrepareTemplates:
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Gestion des Commandes',
                                context='commandes',
-                               subcontext=subcontext,
+                               sub_context=subcontext,
                                message=message,
                                success_message=success_message,
                                error_message=error_message,
+                               client=client if id_client else None,
                                commande=commande,
                                current_year=current_year,
                                catalog=compleet_catalog,

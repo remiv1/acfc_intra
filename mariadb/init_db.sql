@@ -77,8 +77,8 @@ CREATE TABLE IF NOT EXISTS 21_catalogue (
     poids VARCHAR(5) GENERATED ALWAYS AS (SUBSTRING_INDEX(SUBSTRING_INDEX(stype_produit, ' ', 3), ' ', -1)) STORED,
     created_at DATE DEFAULT (CURRENT_DATE) NOT NULL,
     created_by VARCHAR(100) DEFAULT 'system' NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
-    updated_by VARCHAR(100) DEFAULT 'system' NOT NULL
+    modified_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+    modified_by VARCHAR(100) DEFAULT 'system' NOT NULL
 );
 
 DELIMITER $$
@@ -98,13 +98,19 @@ DELIMITER ;
 -- ========================================
 
 -- Insertion du Plan Comptable Général (PCG)
-SOURCE docker-entrypoint-initdb.d/pcg.sql;
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/pcg/pcg.sql;
 
 -- Insertion des indicatifs téléphoniques internationaux
-SOURCE docker-entrypoint-initdb.d/92_indicatifs_tel.sql;
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/indic_tel/92_indicatifs_tel.sql;
 
 -- Insertion des villes françaises avec codes postaux
-SOURCE docker-entrypoint-initdb.d/91_villes.sql;
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/cp_villes/91_villes.sql;
 
 -- Insertion du catalogue de produits préformaté
-SOURCE docker-entrypoint-initdb.d/21_catalogue.sql;
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/catalogue/21_catalogue.sql;
+
+-- Insertion des clients depuis l'ancienne base de données
+-- SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/clients/clients.sql;
+
+-- Insertion des adresses depuis l'ancienne base de données
+-- SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/adresses/adresses.sql;

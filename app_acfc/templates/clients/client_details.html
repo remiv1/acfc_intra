@@ -160,6 +160,7 @@
         <div class="col-12">
             <div class="nav nav-tabs nav-fill mb-4" id="clientTabs" role="tablist">
                 <div class="nav-item">
+                    <!-- Erreur sur le Aria-selected du fait du jinja -->
                     <button class="nav-link {% if tab == 'infos' or tab is none %}active{% endif %}" id="infos-tab"
                             data-bs-toggle="tab" data-bs-target="#infos" type="button" role="tab"
                             aria-controls="infos" {% if tab == 'infos' or tab is none %} aria-selected="true"{% else %} aria-selected="false" {% endif %}>
@@ -575,7 +576,9 @@
                                                 <p class="card-text mb-1">{{ adresse.adresse_l2 }}</p>
                                                 {% endif %}
                                                 <p class="card-text mb-0"><strong>{{ adresse.code_postal }} {{ adresse.ville }}</strong></p>
+                                                {% if adresse.detail %}
                                                 <p class="card-text small text-muted mb-0">{{ adresse.detail }}</p>
+                                                {% endif %}
                                                 <p class="card-text small text-muted mb-0">
                                                     {% if adresse.is_inactive %}
                                                     <p class="card-text small text-muted mb-0">
