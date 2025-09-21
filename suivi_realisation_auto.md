@@ -1,47 +1,22 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 10 September 2025  
-**Période analysée :** 03 September 2025 - 10 September 2025 (7 jours)  
-**Nombre de commits :** 34  
+**Date du rapport :** 11 September 2025  
+**Période analysée :** 04 September 2025 - 11 September 2025 (7 jours)  
+**Nombre de commits :** 33  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 34 commits sur 7 jours  
-**Volume de code :** 8345 lignes ajoutées, 4508 lignes supprimées  
-**Fichiers impactés :** 336 fichiers modifiés  
-**Productivité moyenne :** 1192 lignes/jour
+**Activité de développement :** 33 commits sur 7 jours  
+**Volume de code :** 6423 lignes ajoutées, 3280 lignes supprimées  
+**Fichiers impactés :** 310 fichiers modifiés  
+**Productivité moyenne :** 917 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 03 September 2025
-
-#### 18:22 - 2158f5a - 📊 Mise à jour automatique du rapport de suivi (03/09/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +50 -143 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Wed Sep 3 18:22:35 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (03/09/2025)`
-- ... et 1 autres fichiers
-
-#### 20:22 - 9463709 - Refactor command form templates and unify JavaScript files
-
-**Catégorie :** Refactoring  
-**Impact :** +1581 -954 lignes, 20 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Wed Sep 3 20:22:20 2025 +0200`
-- `    Refactor command form templates and unify JavaScript files`
-- ... et 18 autres fichiers
 
 
 ### 04 September 2025
@@ -67,17 +42,6 @@
 - `Date:   Thu Sep 4 19:43:49 2025 +0200`
 - `    Refactor logging methods and enhance admin dashboard`
 - ... et 26 autres fichiers
-
-#### 12:29 - a678da3 - Refactor database session management and improve error handling
-
-**Catégorie :** Refactoring  
-**Impact :** +572 -314 lignes, 19 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Thu Sep 4 12:29:26 2025 +0200`
-- `    Refactor database session management and improve error handling`
-- ... et 17 autres fichiers
 
 
 ### 05 September 2025
@@ -400,6 +364,17 @@
 
 ### 10 September 2025
 
+#### 09:53 - caff6c1 - 📊 Mise à jour automatique du rapport de suivi (10/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +68 -67 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Wed Sep 10 09:53:42 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (10/09/2025)`
+- ... et 1 autres fichiers
+
 #### 11:20 - 8b2ba12 - feat: - Ajout de la protection CSRF avec Flask-WTF et mise à jour des templates pour inclure le token CSRF
 
 **Catégorie :** Développement de fonctionnalités  
@@ -424,24 +399,39 @@
 - ... et 6 autres fichiers
 
 
+### 11 September 2025
+
+#### 13:14 - e31428c - feat: Ajout de la recherche avancée avec option pour inclure les clients, adresse, mail et téléphones inactifs fix: Correction de bugs mineurs et améliorations de la gestion des erreurs 404 en montrant l'URL demandée et non trouvée fix: correction des conflits CSS (couleurs) refactor: meilleure visibilité et amélioration des couleurs dans les templates HTML et CSS (UX)
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +213 -116 lignes, 13 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Thu Sep 11 13:14:49 2025 +0200`
+- `    feat: Ajout de la recherche avancée avec option pour inclure les clients, adresse, mail et téléphones inactifs`
+- `    fix: Correction de bugs mineurs et améliorations de la gestion des erreurs 404 en montrant l'URL demandée et non trouvée`
+- ... et 10 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 10 commits (29.4%)
-- **Refactoring** : 9 commits (26.5%)
-- **Développement de fonctionnalités** : 7 commits (20.6%)
-- **Correction de bugs** : 7 commits (20.6%)
-- **Développement général** : 1 commits (2.9%)
+- **Interface utilisateur** : 10 commits (30.3%)
+- **Développement de fonctionnalités** : 8 commits (24.2%)
+- **Correction de bugs** : 7 commits (21.2%)
+- **Refactoring** : 7 commits (21.2%)
+- **Développement général** : 1 commits (3.0%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 64 fichiers modifiés
-- **HTML** : 55 fichiers modifiés
+- **Python** : 60 fichiers modifiés
+- **HTML** : 46 fichiers modifiés
 - **Documentation** : 16 fichiers modifiés
-- **JavaScript** : 9 fichiers modifiés
+- **JavaScript** : 8 fichiers modifiés
 - **Docker** : 3 fichiers modifiés
 - **YAML/Config** : 2 fichiers modifiés
 - **CSS** : 1 fichiers modifiés
@@ -450,16 +440,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 4.9 commits/jour
-- **Volume de code :** 12853 modifications totales
-- **Ratio ajouts/suppressions :** 1.85
-- **Moyenne lignes par commit :** 378
+- **Fréquence de commit :** 4.7 commits/jour
+- **Volume de code :** 9703 modifications totales
+- **Ratio ajouts/suppressions :** 1.96
+- **Moyenne lignes par commit :** 294
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 8345 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 6423 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 10 September 2025*
+*Rapport généré automatiquement le 11 September 2025*
