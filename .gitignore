@@ -4,3 +4,5 @@
 *.pyc
 *.pem
 .env
+**/_confidential/*
+flask_session
