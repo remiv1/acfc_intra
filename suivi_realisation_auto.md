@@ -2,17 +2,17 @@
 
 **Date du rapport :** 21 September 2025  
 **Période analysée :** 14 September 2025 - 21 September 2025 (7 jours)  
-**Nombre de commits :** 2  
+**Nombre de commits :** 4  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 2 commits sur 7 jours  
-**Volume de code :** 66 lignes ajoutées, 60 lignes supprimées  
-**Fichiers impactés :** 11 fichiers modifiés  
-**Productivité moyenne :** 9 lignes/jour
+**Activité de développement :** 4 commits sur 7 jours  
+**Volume de code :** 114 lignes ajoutées, 500 lignes supprimées  
+**Fichiers impactés :** 30 fichiers modifiés  
+**Productivité moyenne :** 16 lignes/jour
 
 ---
 
@@ -20,6 +20,29 @@
 
 
 ### 21 September 2025
+
+#### 19:18 - 77b2fbc - feat: Ajout d'un paramètre id_client pour la génération de templates de commandes et amélioration de l'affichage des détails des adresses fix: - Correction de l'attribut aria-selected dans les onglets des détails du client - Correction de init_db.sql pour l'accès aux fichiers montés et 21_catalogue.sql pour ajouter les colonnes modified_at et modified_by - Correction du dockerfile mariadb pour copier init_db.sql dans le bon répertoire et supprimer les copies inutiles - Correction de l'affichage des détails du client pour éviter les erreurs Jinja refactor: Renommage de variables pour une meilleure clarté dans la gestion des commandes style: Amélioration de la lisibilité du code dans les modèles de l'application
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +21 -35 lignes, 15 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Sun Sep 21 19:18:02 2025 +0200`
+- `    feat: Ajout d'un paramètre id_client pour la génération de templates de commandes et amélioration de l'affichage des détails des adresses`
+- `    fix:`
+- ... et 12 autres fichiers
+
+#### 13:17 - 982ddcb - 📊 Mise à jour automatique du rapport de suivi (21/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +27 -405 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Sun Sep 21 13:17:12 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (21/09/2025)`
+- ... et 1 autres fichiers
 
 #### 15:17 - a7e762b - Merge branch 'sprint_billing_order' of https://github.com/remiv1/acfc_intra into sprint_billing_order
 
@@ -48,30 +71,33 @@
 
 ## Analyse par type d'activité
 
-- **Développement général** : 1 commits (50.0%)
-- **Développement de fonctionnalités** : 1 commits (50.0%)
+- **Développement de fonctionnalités** : 2 commits (50.0%)
+- **Interface utilisateur** : 1 commits (25.0%)
+- **Développement général** : 1 commits (25.0%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 2 fichiers modifiés
-- **HTML** : 1 fichiers modifiés
+- **Python** : 3 fichiers modifiés
+- **Docker** : 2 fichiers modifiés
+- **HTML** : 2 fichiers modifiés
+- **Documentation** : 1 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 0.3 commits/jour
-- **Volume de code :** 126 modifications totales
-- **Ratio ajouts/suppressions :** 1.10
-- **Moyenne lignes par commit :** 63
+- **Fréquence de commit :** 0.6 commits/jour
+- **Volume de code :** 614 modifications totales
+- **Ratio ajouts/suppressions :** 0.23
+- **Moyenne lignes par commit :** 154
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **modérée** avec un focus principal sur **développement général**. Le volume de 66 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 114 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
 *Rapport généré automatiquement le 21 September 2025*
