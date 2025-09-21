@@ -575,6 +575,7 @@
                                                 <p class="card-text mb-1">{{ adresse.adresse_l2 }}</p>
                                                 {% endif %}
                                                 <p class="card-text mb-0"><strong>{{ adresse.code_postal }} {{ adresse.ville }}</strong></p>
+                                                <p class="card-text small text-muted mb-0">{{ adresse.detail }}</p>
                                                 <p class="card-text small text-muted mb-0">
                                                     {% if adresse.is_inactive %}
                                                     <p class="card-text small text-muted mb-0">
@@ -659,7 +660,7 @@
                                 </thead>
                                 <tbody>
                                     {% for commande in orders %}
-                                    <tr{% if commande.is_annulee %} class="table-danger"{% endif %}>
+                                    <tr {% if commande.is_annulee %}class="table-danger"{% endif %}>
                                         <td><strong>#{{ commande.id }}</strong></td>
                                         <td>{{ commande.date_commande.strftime('%d/%m/%Y') }}</td>
                                         <td><strong>{{ "%.2f"|format(commande.montant) }} €</strong></td>
@@ -956,6 +957,15 @@
                                 <label for="ville" class="form-label">Ville</label>
                                 <input type="text" class="form-control" id="ville" 
                                        name="ville" placeholder="Paris" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="detail_address" class="form-label">Détail (optionnel)</label>
+                                <input type="text" class="form-control" id="detail_address" 
+                                name="detail" placeholder="Précisions sur l'adresse...">
                             </div>
                         </div>
                     </div>

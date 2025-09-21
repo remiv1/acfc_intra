@@ -589,6 +589,7 @@ class Adresse(Base):
     code_postal = mapped_column(String(10), nullable=False)
     ville = mapped_column(String(100), nullable=False)
     pays = mapped_column(String(100), nullable=False, default='France')
+    detail = mapped_column(String(255), nullable=True, comment="Précision libre sur l'adresse")
 
     # === MÉTADONNÉES ===
     is_principal = mapped_column(Boolean, default=False, nullable=False, 
@@ -1835,7 +1836,6 @@ class PrepareTemplates:
                                context='500', message=message,
                                status_code=status_code,
                                status_message=status_message)
-
 
 class GeoMethods:
     """

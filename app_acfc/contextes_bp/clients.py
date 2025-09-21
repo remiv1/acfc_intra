@@ -957,6 +957,7 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         - code_postal (str): Code postal
         - ville (str): Ville
         - is_principal (bool, optional): Si c'est l'adresse principale
+        - detail (str, optional): Précisions sur l'adresse
     
     Returns:
         Redirect: Vers la page de détails du client avec message de succès ou d'erreur
@@ -977,6 +978,7 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         ville = request.form.get('ville', '').strip()
         adresse_l2 = request.form.get('adresse_l2', '').strip()
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
+        detail = request.form.get('detail', '').strip()
         if not adresse_l1 or not code_postal or not ville: return redirect(
             url_for(Constants.return_pages('clients', 'detail'), tab='add',
                     id_client=id_client, error_message=Constants.messages('address', 'missing')
@@ -995,6 +997,7 @@ def add_address(id_client: int) -> ResponseWerkzeug:
             adresse_l2=adresse_l2 if adresse_l2 else None,
             code_postal=code_postal,
             ville=ville,
+            detail=detail if detail else None,
             is_principal=is_principal,
             created_by=session.get('pseudo', 'N/A')
         )
@@ -1051,6 +1054,7 @@ def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
         code_postal = request.form.get('code_postal', '').strip()
         ville = request.form.get('ville', '').strip()
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
+        detail = request.form.get('detail', '').strip()
         if not adresse_l1 or not code_postal or not ville: return redirect(
             url_for(Constants.return_pages('clients', 'detail'), tab='add',
                     id_client=id_client, error_message=Constants.messages('address', 'missing')
@@ -1067,6 +1071,8 @@ def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
         address_obj.code_postal = code_postal
         address_obj.ville = ville
         address_obj.is_principal = is_principal
+        address_obj.detail = detail if detail else None
+        address_obj.modified_by = session.get('pseudo', 'N/A')
         db_session.commit()
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
                                 id_client=id_client, success_message=Constants.messages('address', 'valid')))
