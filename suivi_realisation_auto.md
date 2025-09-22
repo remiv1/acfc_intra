@@ -2,17 +2,17 @@
 
 **Date du rapport :** 22 September 2025  
 **Période analysée :** 15 September 2025 - 22 September 2025 (7 jours)  
-**Nombre de commits :** 6  
+**Nombre de commits :** 8  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 6 commits sur 7 jours  
-**Volume de code :** 234 lignes ajoutées, 944 lignes supprimées  
-**Fichiers impactés :** 38 fichiers modifiés  
-**Productivité moyenne :** 33 lignes/jour
+**Activité de développement :** 8 commits sur 7 jours  
+**Volume de code :** 279 lignes ajoutées, 965 lignes supprimées  
+**Fichiers impactés :** 49 fichiers modifiés  
+**Productivité moyenne :** 39 lignes/jour
 
 ---
 
@@ -80,6 +80,28 @@
 
 ### 22 September 2025
 
+#### 11:57 - f7d8b48 - fix: Ajout d'un commentaire pour ignorer les types lors de la lecture des fichiers CSV dans les scripts de conversions de données transférées
+
+**Catégorie :** Correction de bugs  
+**Impact :** +3 -4 lignes, 7 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Mon Sep 22 11:57:51 2025 +0200`
+- `    fix: Ajout d'un commentaire pour ignorer les types lors de la lecture des fichiers CSV dans les scripts de conversions de données transférées`
+- ... et 4 autres fichiers
+
+#### 07:35 - 8591b8d - 📊 Mise à jour automatique du rapport de suivi (22/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +42 -17 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Mon Sep 22 07:35:31 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (22/09/2025)`
+- ... et 1 autres fichiers
+
 #### 09:35 - c201f42 - Merge branch 'sprint_billing_order' of https://github.com/remiv1/acfc_intra into sprint_billing_order
 
 **Catégorie :** Développement général  
@@ -96,16 +118,17 @@
 
 ## Analyse par type d'activité
 
-- **Développement général** : 2 commits (33.3%)
-- **Interface utilisateur** : 2 commits (33.3%)
-- **Développement de fonctionnalités** : 2 commits (33.3%)
+- **Interface utilisateur** : 3 commits (37.5%)
+- **Développement général** : 2 commits (25.0%)
+- **Développement de fonctionnalités** : 2 commits (25.0%)
+- **Correction de bugs** : 1 commits (12.5%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 3 fichiers modifiés
-- **Documentation** : 2 fichiers modifiés
+- **Python** : 7 fichiers modifiés
+- **Documentation** : 3 fichiers modifiés
 - **Docker** : 2 fichiers modifiés
 - **HTML** : 2 fichiers modifiés
 
@@ -113,16 +136,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 0.9 commits/jour
-- **Volume de code :** 1178 modifications totales
-- **Ratio ajouts/suppressions :** 0.25
-- **Moyenne lignes par commit :** 196
+- **Fréquence de commit :** 1.1 commits/jour
+- **Volume de code :** 1244 modifications totales
+- **Ratio ajouts/suppressions :** 0.29
+- **Moyenne lignes par commit :** 156
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement général**. Le volume de 234 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 279 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
 *Rapport généré automatiquement le 22 September 2025*
