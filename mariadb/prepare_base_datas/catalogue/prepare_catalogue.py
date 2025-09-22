@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv('catalogue.csv', sep=';', header=0)
+df = pd.read_csv('catalogue.csv', sep=';', header=0)    # type: ignore
 df = df.sort_values(by='N°', ascending=True).reset_index(drop=True)
 df = df[['Type', 'Sous-Type', 'PU HT', 'Année']]
 

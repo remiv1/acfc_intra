@@ -5,7 +5,6 @@ import email
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import List, Dict, Any, Optional
-from datetime import datetime
 
 def send_mail_task(to: str, subject: str, body: str) -> bool:
     """Fonction pour envoyer un email (existante)"""

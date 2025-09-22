@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv('indic_tel.csv', sep=';', header=0)
+df = pd.read_csv('indic_tel.csv', sep=';', header=0)    # type: ignore
 
 print(df.head())
 

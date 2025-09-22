@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv('cp_villes.csv', sep=';', header=0)
+df = pd.read_csv('cp_villes.csv', sep=';', header=0)    # type: ignore
 df = df.sort_values(by='Nom_commune', ascending=True).reset_index(drop=True)
 
 print(df.head())
