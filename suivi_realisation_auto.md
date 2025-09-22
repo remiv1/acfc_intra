@@ -1,455 +1,103 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 11 September 2025  
-**Période analysée :** 04 September 2025 - 11 September 2025 (7 jours)  
-**Nombre de commits :** 33  
+**Date du rapport :** 21 September 2025  
+**Période analysée :** 14 September 2025 - 21 September 2025 (7 jours)  
+**Nombre de commits :** 4  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 33 commits sur 7 jours  
-**Volume de code :** 6423 lignes ajoutées, 3280 lignes supprimées  
-**Fichiers impactés :** 310 fichiers modifiés  
-**Productivité moyenne :** 917 lignes/jour
+**Activité de développement :** 4 commits sur 7 jours  
+**Volume de code :** 114 lignes ajoutées, 500 lignes supprimées  
+**Fichiers impactés :** 30 fichiers modifiés  
+**Productivité moyenne :** 16 lignes/jour
 
 ---
 
 ## Analyse des commits par période
 
 
-### 04 September 2025
+### 21 September 2025
 
-#### 17:44 - d11d234 - 📊 Mise à jour automatique du rapport de suivi (04/09/2025)
+#### 19:18 - 77b2fbc - feat: Ajout d'un paramètre id_client pour la génération de templates de commandes et amélioration de l'affichage des détails des adresses fix: - Correction de l'attribut aria-selected dans les onglets des détails du client - Correction de init_db.sql pour l'accès aux fichiers montés et 21_catalogue.sql pour ajouter les colonnes modified_at et modified_by - Correction du dockerfile mariadb pour copier init_db.sql dans le bon répertoire et supprimer les copies inutiles - Correction de l'affichage des détails du client pour éviter les erreurs Jinja refactor: Renommage de variables pour une meilleure clarté dans la gestion des commandes style: Amélioration de la lisibilité du code dans les modèles de l'application
 
-**Catégorie :** Interface utilisateur  
-**Impact :** +60 -46 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Thu Sep 4 17:44:08 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (04/09/2025)`
-- ... et 1 autres fichiers
-
-#### 19:43 - 6425504 - Refactor logging methods and enhance admin dashboard
-
-**Catégorie :** Refactoring  
-**Impact :** +1216 -219 lignes, 28 fichiers
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +21 -35 lignes, 15 fichiers
 
 **Fichiers modifiés :**
 - `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Thu Sep 4 19:43:49 2025 +0200`
-- `    Refactor logging methods and enhance admin dashboard`
-- ... et 26 autres fichiers
-
-
-### 05 September 2025
-
-#### 20:02 - c8296b1 - 📊 Mise à jour automatique du rapport de suivi (05/09/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +43 -78 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Sep 5 20:02:32 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (05/09/2025)`
-- ... et 1 autres fichiers
-
-#### 22:02 - 222fd73 - Refactor: - Routes et méthodes dans les fichiers `catalogue.py`, `clients.py` et `modeles.py` pour améliorer la lisibilité et la cohérence. Renommage des fonctions en ajoutant des types de retour. - Mise à jour des liens dans le template `default.html` pour refléter les changements de routes.
-
-**Catégorie :** Refactoring  
-**Impact :** +198 -120 lignes, 9 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Fri Sep 5 22:02:04 2025 +0200`
-- `    Refactor:`
-- `    - Routes et méthodes dans les fichiers `catalogue.py`, `clients.py` et `modeles.py` pour améliorer la lisibilité et la cohérence. Renommage des fonctions en ajoutant des types de retour.`
-- ... et 6 autres fichiers
-
-#### 17:24 - 8b04cc4 - 📊 Mise à jour automatique du rapport de suivi (05/09/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +120 -390 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Sep 5 17:24:34 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (05/09/2025)`
-- ... et 1 autres fichiers
-
-#### 19:24 - cc67d57 - refactor: - Ajout d'un filtre Jinja pour générer le titre de la page et centraliser les modifications - Amélioration des messages d'erreur avec des journaux spécifiques, et création d'une nouvelle route pour la création de clients. - Mise à jour des liens dans les templates pour utiliser le nouveau filtre Jinja.
-
-**Catégorie :** Refactoring  
-**Impact :** +90 -117 lignes, 15 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Sep 5 19:24:19 2025 +0200`
-- `    refactor:`
-- `    - Ajout d'un filtre Jinja pour générer le titre de la page et centraliser les modifications`
+- `Date:   Sun Sep 21 19:18:02 2025 +0200`
+- `    feat: Ajout d'un paramètre id_client pour la génération de templates de commandes et amélioration de l'affichage des détails des adresses`
+- `    fix:`
 - ... et 12 autres fichiers
 
-#### 17:18 - 8bd0405 - Refactor des méthodes de gestion des clients pour améliorer la lisibilité et la modularité, en remplaçant les appels de rendu par des templates préparés et en renommant des fonctions pour mieux refléter leur fonctionnalité.
+#### 13:17 - 982ddcb - 📊 Mise à jour automatique du rapport de suivi (21/09/2025)
 
-**Catégorie :** Refactoring  
-**Impact :** +27 -50 lignes, 4 fichiers
+**Catégorie :** Interface utilisateur  
+**Impact :** +27 -405 lignes, 4 fichiers
 
 **Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Sep 5 17:18:28 2025 +0200`
-- `    Refactor des méthodes de gestion des clients pour améliorer la lisibilité et la modularité, en remplaçant les appels de rendu par des templates préparés et en renommant des fonctions pour mieux refléter leur fonctionnalité.`
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Sun Sep 21 13:17:12 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (21/09/2025)`
 - ... et 1 autres fichiers
 
-#### 17:18 - c8944b4 - Ajout des métadonnées `created_by`, `modified_at`, `modified_by` et `is_inactive` dans plusieurs tables, mise à jour des colonnes `created_at` et `modified_at` pour utiliser `func.now()`, et modification du modèle Python et SQLAlchemy pour refléter ces changements.
+#### 15:17 - a7e762b - Merge branch 'sprint_billing_order' of https://github.com/remiv1/acfc_intra into sprint_billing_order
 
 **Catégorie :** Développement général  
-**Impact :** +197 -25 lignes, 5 fichiers
+**Impact :** +47 -57 lignes, 4 fichiers
 
 **Fichiers modifiés :**
+- `Merge: 776471b e58b3ef`
 - `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Sep 5 17:18:13 2025 +0200`
-- `    Ajout des métadonnées `created_by`, `modified_at`, `modified_by` et `is_inactive` dans plusieurs tables, mise à jour des colonnes `created_at` et `modified_at` pour utiliser `func.now()`, et modification du modèle Python et SQLAlchemy pour refléter ces changements.`
-- ... et 2 autres fichiers
+- `Date:   Sun Sep 21 15:17:02 2025 +0200`
+- `    Merge branch 'sprint_billing_order' of https://github.com/remiv1/acfc_intra into sprint_billing_order`
 
-#### 15:54 - b4a7a34 - Refactor logs dashboard and templates
-
-**Catégorie :** Refactoring  
-**Impact :** +1074 -560 lignes, 21 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Sep 5 15:54:24 2025 +0200`
-- `    Refactor logs dashboard and templates`
-- ... et 19 autres fichiers
-
-#### 11:46 - 118e849 - fix: - Correction des niveaux de journalisation, amélioration de la gestion des exceptions et mise à jour des modèles de données dans plusieurs fichiers.
-
-**Catégorie :** Correction de bugs  
-**Impact :** +65 -140 lignes, 14 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Sep 5 11:46:03 2025 +0200`
-- `    fix:`
-- `    - Correction des niveaux de journalisation, amélioration de la gestion des exceptions et mise à jour des modèles de données dans plusieurs fichiers.`
-- ... et 11 autres fichiers
-
-#### 11:40 - 9c7bf4e - fix: - Ajout de la configuration MongoDB pour le logging et mise à jour des scripts d'initialisation - Suppression des logs de débogage superflus dans les routes - Correction de la gestion des exceptions pour afficher les erreurs dans la console - Rationnalisation des logs dans l'application.
-
-**Catégorie :** Correction de bugs  
-**Impact :** +61 -19 lignes, 15 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Sep 5 11:40:59 2025 +0200`
-- `    fix:`
-- `    - Ajout de la configuration MongoDB pour le logging et mise à jour des scripts d'initialisation`
-- ... et 12 autres fichiers
-
-#### 07:42 - 62ea850 - Mise à jour des statistiques de volume de code par langage dans le rapport de suivi
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +6 -3 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Fri Sep 5 07:42:56 2025 +0200`
-- `    Mise à jour des statistiques de volume de code par langage dans le rapport de suivi`
-- ... et 1 autres fichiers
-
-
-### 06 September 2025
-
-#### 09:58 - 5553ffc - 📊 Mise à jour automatique du rapport de suivi (06/09/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +39 -17 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Sat Sep 6 09:58:25 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (06/09/2025)`
-- ... et 1 autres fichiers
-
-#### 11:58 - 51b948f - fix: Mise à jour des importations et des redirections dans le module Commandes pour une meilleure gestion des constantes
-
-**Catégorie :** Correction de bugs  
-**Impact :** +16 -21 lignes, 5 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Sat Sep 6 11:58:00 2025 +0200`
-- `    fix: Mise à jour des importations et des redirections dans le module Commandes pour une meilleure gestion des constantes`
-- ... et 2 autres fichiers
-
-#### 07:37 - d2a01ce - 📊 Mise à jour automatique du rapport de suivi (06/09/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +56 -44 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Sat Sep 6 07:37:29 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (06/09/2025)`
-- ... et 1 autres fichiers
-
-#### 09:37 - c800d6d - feat: - Ajout de nouvelles fonctionnalités d'administration et de gestion des clients, y compris la suppression logique des clients et la modification des emails. - listage des réalisations à effectuer (routes, templates, protection CSRF, gestion des habilitations...)
+#### 15:16 - 776471b - feat: Ajout d'un champ de détail pour les adresses et mise à jour des formulaires associés
 
 **Catégorie :** Développement de fonctionnalités  
-**Impact :** +205 -9 lignes, 10 fichiers
+**Impact :** +19 -3 lignes, 7 fichiers
 
 **Fichiers modifiés :**
 - `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Sat Sep 6 09:37:14 2025 +0200`
-- `    feat:`
-- `    - Ajout de nouvelles fonctionnalités d'administration et de gestion des clients, y compris la suppression logique des clients et la modification des emails.`
-- ... et 7 autres fichiers
-
-#### 08:42 - 83b3f39 - fix: Ajout des variables d'environnement pour l'utilisateur et le mot de passe de l'application MongoDB dans le fichier de configuration pour le CI-CD.
-
-**Catégorie :** Correction de bugs  
-**Impact :** +1 -0 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Sat Sep 6 08:42:56 2025 +0200`
-- `    fix: Ajout des variables d'environnement pour l'utilisateur et le mot de passe de l'application MongoDB dans le fichier de configuration pour le CI-CD.`
-- ... et 1 autres fichiers
-
-
-### 07 September 2025
-
-#### 17:46 - d07a236 - feat: Mise à jour du rapport de suivi avec les statistiques de volume de code et les réalisations récentes (au 7 septembre 2025)
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +170 -54 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Sun Sep 7 17:46:44 2025 +0200`
-- `    feat: Mise à jour du rapport de suivi avec les statistiques de volume de code et les réalisations récentes (au 7 septembre 2025)`
-- ... et 1 autres fichiers
-
-#### 14:58 - a71239a - 📊 Mise à jour automatique du rapport de suivi (07/09/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +58 -22 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Sun Sep 7 14:58:24 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (07/09/2025)`
-- ... et 1 autres fichiers
-
-#### 16:57 - fd194ca - feat: Ajout de la référence au module contextes_bp.commandes dans le document CONTRIBUTING_STEP.md
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +2 -1 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Sun Sep 7 16:57:52 2025 +0200`
-- `    feat: Ajout de la référence au module contextes_bp.commandes dans le document CONTRIBUTING_STEP.md`
-- ... et 1 autres fichiers
-
-#### 16:57 - f0c4110 - feat: Refactor command handling by introducing OrdersMethods class for better organization and maintainability
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +477 -348 lignes, 13 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Sun Sep 7 16:57:27 2025 +0200`
-- `    feat: Refactor command handling by introducing OrdersMethods class for better organization and maintainability`
-- ... et 14 autres fichiers
-
-
-### 08 September 2025
-
-#### 17:22 - 5a3a53b - 📊 Mise à jour automatique du rapport de suivi (08/09/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +84 -116 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Mon Sep 8 17:22:05 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (08/09/2025)`
-- ... et 1 autres fichiers
-
-#### 19:21 - 028d45b - Refactor order management and client details
-
-**Catégorie :** Refactoring  
-**Impact :** +587 -80 lignes, 18 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Mon Sep 8 19:21:47 2025 +0200`
-- `    Refactor order management and client details`
-- ... et 21 autres fichiers
-
-#### 19:19 - 088d729 - fix: - Mise à jour des modèles et des fixtures pour utiliser is_inactive au lieu de is_active, ajout de méthodes to_dict pour les classes Mail, Telephone et Adresse, et ajout de métadonnées dans les tables de la base de données
-
-**Catégorie :** Correction de bugs  
-**Impact :** +82 -11 lignes, 9 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Mon Sep 8 19:19:11 2025 +0200`
-- `    fix:`
-- `    - Mise à jour des modèles et des fixtures pour utiliser is_inactive au lieu de is_active, ajout de méthodes to_dict pour les classes Mail, Telephone et Adresse, et ajout de métadonnées dans les tables de la base de données`
-- ... et 6 autres fichiers
-
-#### 09:57 - 5b6f139 - feat: Ajout des variables MONGO_APP_USER et MONGO_APP_PASSWORD dans le fichier .env.exemple
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +1 -0 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Mon Sep 8 09:57:31 2025 +0200`
-- `    feat: Ajout des variables MONGO_APP_USER et MONGO_APP_PASSWORD dans le fichier .env.exemple`
-- ... et 1 autres fichiers
-
-
-### 09 September 2025
-
-#### 20:06 - ef264cc - fix: Ajout des variables d'environnement pour l'utilisateur et le mot de passe de MongoDB
-
-**Catégorie :** Correction de bugs  
-**Impact :** +1 -0 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
-- `Date:   Tue Sep 9 20:06:43 2025 +0200`
-- `    fix: Ajout des variables d'environnement pour l'utilisateur et le mot de passe de MongoDB`
-- ... et 1 autres fichiers
-
-#### 17:18 - 99d48cd - 📊 Mise à jour automatique du rapport de suivi (09/09/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +59 -138 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Tue Sep 9 17:18:49 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (09/09/2025)`
-- ... et 1 autres fichiers
-
-#### 19:18 - e5dc288 - feat: Amélioration de la gestion des indicatifs téléphoniques et tri des informations client
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +94 -102 lignes, 8 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Tue Sep 9 19:18:28 2025 +0200`
-- `    feat: Amélioration de la gestion des indicatifs téléphoniques et tri des informations client`
+- `Date:   Sun Sep 21 15:16:50 2025 +0200`
+- `    feat: Ajout d'un champ de détail pour les adresses et mise à jour des formulaires associés`
 - ... et 5 autres fichiers
-
-#### 13:29 - ae0ce0c - Refactor client management templates and scripts
-
-**Catégorie :** Refactoring  
-**Impact :** +559 -298 lignes, 17 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Tue Sep 9 13:29:00 2025 +0200`
-- `    Refactor client management templates and scripts`
-- ... et 15 autres fichiers
-
-
-### 10 September 2025
-
-#### 09:53 - caff6c1 - 📊 Mise à jour automatique du rapport de suivi (10/09/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +68 -67 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Wed Sep 10 09:53:42 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (10/09/2025)`
-- ... et 1 autres fichiers
-
-#### 11:20 - 8b2ba12 - feat: - Ajout de la protection CSRF avec Flask-WTF et mise à jour des templates pour inclure le token CSRF
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +481 -55 lignes, 37 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Wed Sep 10 11:20:18 2025 +0200`
-- `    feat:`
-- `    - Ajout de la protection CSRF avec Flask-WTF et mise à jour des templates pour inclure le token CSRF`
-- ... et 36 autres fichiers
-
-#### 08:59 - 9dd0d59 - fix: Correction des chemins de fichiers SQL dans le Dockerfile et le script d'initialisation de la base de données
-
-**Catégorie :** Correction de bugs  
-**Impact :** +13 -14 lignes, 9 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Wed Sep 10 08:59:16 2025 +0200`
-- `    fix: Correction des chemins de fichiers SQL dans le Dockerfile et le script d'initialisation de la base de données`
-- ... et 6 autres fichiers
-
-
-### 11 September 2025
-
-#### 13:14 - e31428c - feat: Ajout de la recherche avancée avec option pour inclure les clients, adresse, mail et téléphones inactifs fix: Correction de bugs mineurs et améliorations de la gestion des erreurs 404 en montrant l'URL demandée et non trouvée fix: correction des conflits CSS (couleurs) refactor: meilleure visibilité et amélioration des couleurs dans les templates HTML et CSS (UX)
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +213 -116 lignes, 13 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Thu Sep 11 13:14:49 2025 +0200`
-- `    feat: Ajout de la recherche avancée avec option pour inclure les clients, adresse, mail et téléphones inactifs`
-- `    fix: Correction de bugs mineurs et améliorations de la gestion des erreurs 404 en montrant l'URL demandée et non trouvée`
-- ... et 10 autres fichiers
 
 
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 10 commits (30.3%)
-- **Développement de fonctionnalités** : 8 commits (24.2%)
-- **Correction de bugs** : 7 commits (21.2%)
-- **Refactoring** : 7 commits (21.2%)
-- **Développement général** : 1 commits (3.0%)
+- **Développement de fonctionnalités** : 2 commits (50.0%)
+- **Interface utilisateur** : 1 commits (25.0%)
+- **Développement général** : 1 commits (25.0%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 60 fichiers modifiés
-- **HTML** : 46 fichiers modifiés
-- **Documentation** : 16 fichiers modifiés
-- **JavaScript** : 8 fichiers modifiés
-- **Docker** : 3 fichiers modifiés
-- **YAML/Config** : 2 fichiers modifiés
-- **CSS** : 1 fichiers modifiés
+- **Python** : 3 fichiers modifiés
+- **Docker** : 2 fichiers modifiés
+- **HTML** : 2 fichiers modifiés
+- **Documentation** : 1 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 4.7 commits/jour
-- **Volume de code :** 9703 modifications totales
-- **Ratio ajouts/suppressions :** 1.96
-- **Moyenne lignes par commit :** 294
+- **Fréquence de commit :** 0.6 commits/jour
+- **Volume de code :** 614 modifications totales
+- **Ratio ajouts/suppressions :** 0.23
+- **Moyenne lignes par commit :** 154
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 6423 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 114 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 11 September 2025*
+*Rapport généré automatiquement le 21 September 2025*

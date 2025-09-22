@@ -29,28 +29,6 @@ LABEL maintainer="Rémi Verschuur"
 LABEL description="Base de données MariaDB pour application ACFC"
 LABEL version="1.0"
 
-# === CONFIGURATION DES VARIABLES D'ENVIRONNEMENT ===
-# Variables injectées depuis docker-compose.yml et fichier .env
-# Cette approche sécurise les mots de passe sans les exposer dans l'image
-
-# === INITIALISATION DU SCHÉMA DE BASE DE DONNÉES ===
-# Copie du script d'initialisation principal dans le répertoire spécial de MariaDB
-# Ce script sera exécuté automatiquement au premier démarrage du conteneur
-# Contient : création des tables, index, données de référence, utilisateurs
-COPY mariadb/init_db.sql /docker-entrypoint-initdb.d/
-
-# Copie des fichiers de données de référence nécessaires pour l'initialisation
-# Ces fichiers sont référencés par des commandes SOURCE dans init_db.sql
-COPY mariadb/prepare_base_datas/pcg/pcg.sql /docker-entrypoint-initdb.d/prepare_base_datas/pcg.sql
-COPY mariadb/prepare_base_datas/cp_villes/91_villes.sql /docker-entrypoint-initdb.d/91_villes.sql
-COPY mariadb/prepare_base_datas/indic_tel/92_indicatifs_tel.sql /docker-entrypoint-initdb.d/92_indicatifs_tel.sql
-COPY mariadb/prepare_base_datas/catalogue/21_catalogue.sql /docker-entrypoint-initdb.d/21_catalogue.sql
-
-# === CONFIGURATION RÉSEAU ===
-# Exposition du port standard MariaDB/MySQL (3306)
-# Mappé et sécurisé via docker-compose (accessible uniquement depuis le réseau interne)
-EXPOSE 3306
-
 # === OPTIMISATIONS DE PERFORMANCE ===
 # Configuration additionnelle via variables d'environnement
 # Note: Pour des optimisations avancées, utiliser un fichier my.cnf personnalisé
