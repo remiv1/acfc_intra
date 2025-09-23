@@ -638,9 +638,11 @@ class Commande(Base):
     client = relationship("Client", back_populates="commandes")
 
     # === DONNÉES DE LA COMMANDE ===
+    id_adresse_facturation = mapped_column(Integer, ForeignKey(PK_ADRESSE), nullable=True)
+    adresse_facturation = relationship("Adresse", back_populates="commandes")
     is_ad_livraison = mapped_column(Boolean, default=False, nullable=False)
-    id_adresse = mapped_column(Integer, ForeignKey(PK_ADRESSE), nullable=True)
-    adresse = relationship("Adresse", back_populates="commandes")
+    id_adresse_livraison = mapped_column(Integer, ForeignKey(PK_ADRESSE), nullable=True)
+    adresse_livraison = relationship("Adresse", foreign_keys=[id_adresse_livraison])
     descriptif = mapped_column(String(255), nullable=True)
     date_commande = mapped_column(Date, default=func.now(), nullable=False)
     montant = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
@@ -659,8 +661,6 @@ class Commande(Base):
                                     comment="Date de première facturation (compatibilité)")
     date_expedition = mapped_column(Date, nullable=True,
                                    comment="Date de première expédition (compatibilité)")
-    id_suivi = mapped_column(String(100), nullable=True,
-                            comment="Premier numéro de suivi (compatibilité)")
 
     # === MÉTADONNÉES ===
     created_at = mapped_column(DateTime, default=func.now(), nullable=False)
@@ -725,8 +725,6 @@ class Facture(Base):
     commande = relationship("Commande", back_populates="facture")
 
     # === DONNÉES DE FACTURATION ===
-    is_adresse_facturation = mapped_column(Boolean, default=False, nullable=False)
-    id_adresse = mapped_column(Integer, ForeignKey(PK_ADRESSE), nullable=False)
     date_facturation = mapped_column(Date, nullable=False, default=func.now())
     montant_facture = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
 
