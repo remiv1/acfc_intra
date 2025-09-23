@@ -1,18 +1,18 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 22 September 2025  
-**Période analysée :** 15 September 2025 - 22 September 2025 (7 jours)  
-**Nombre de commits :** 8  
+**Date du rapport :** 23 September 2025  
+**Période analysée :** 16 September 2025 - 23 September 2025 (7 jours)  
+**Nombre de commits :** 10  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 8 commits sur 7 jours  
-**Volume de code :** 279 lignes ajoutées, 965 lignes supprimées  
-**Fichiers impactés :** 49 fichiers modifiés  
-**Productivité moyenne :** 39 lignes/jour
+**Activité de développement :** 10 commits sur 7 jours  
+**Volume de code :** 321 lignes ajoutées, 982 lignes supprimées  
+**Fichiers impactés :** 57 fichiers modifiés  
+**Productivité moyenne :** 45 lignes/jour
 
 ---
 
@@ -80,6 +80,17 @@
 
 ### 22 September 2025
 
+#### 09:58 - 99ddb06 - 📊 Mise à jour automatique du rapport de suivi (22/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +38 -15 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Mon Sep 22 09:58:07 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (22/09/2025)`
+- ... et 1 autres fichiers
+
 #### 11:57 - f7d8b48 - fix: Ajout d'un commentaire pour ignorer les types lors de la lecture des fichiers CSV dans les scripts de conversions de données transférées
 
 **Catégorie :** Correction de bugs  
@@ -114,21 +125,35 @@
 - `    Merge branch 'sprint_billing_order' of https://github.com/remiv1/acfc_intra into sprint_billing_order`
 
 
+### 23 September 2025
+
+#### 11:44 - 56d3b40 - fix: mise à jour de la colonne id_expedition pour utiliser un entier et ajout d'un champ de contrôle qualité dans la classe Expeditions
+
+**Catégorie :** Correction de bugs  
+**Impact :** +4 -2 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Sep 23 11:44:22 2025 +0200`
+- `    fix: mise à jour de la colonne id_expedition pour utiliser un entier et ajout d'un champ de contrôle qualité dans la classe Expeditions`
+- ... et 1 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 3 commits (37.5%)
-- **Développement général** : 2 commits (25.0%)
-- **Développement de fonctionnalités** : 2 commits (25.0%)
-- **Correction de bugs** : 1 commits (12.5%)
+- **Interface utilisateur** : 4 commits (40.0%)
+- **Correction de bugs** : 2 commits (20.0%)
+- **Développement général** : 2 commits (20.0%)
+- **Développement de fonctionnalités** : 2 commits (20.0%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 7 fichiers modifiés
-- **Documentation** : 3 fichiers modifiés
+- **Python** : 8 fichiers modifiés
+- **Documentation** : 4 fichiers modifiés
 - **Docker** : 2 fichiers modifiés
 - **HTML** : 2 fichiers modifiés
 
@@ -136,16 +161,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 1.1 commits/jour
-- **Volume de code :** 1244 modifications totales
-- **Ratio ajouts/suppressions :** 0.29
-- **Moyenne lignes par commit :** 156
+- **Fréquence de commit :** 1.4 commits/jour
+- **Volume de code :** 1303 modifications totales
+- **Ratio ajouts/suppressions :** 0.33
+- **Moyenne lignes par commit :** 130
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 279 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 321 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 22 September 2025*
+*Rapport généré automatiquement le 23 September 2025*
