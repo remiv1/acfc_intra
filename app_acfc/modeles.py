@@ -697,8 +697,6 @@ class DevisesFactures(Base):
     
     is_expedie = mapped_column(Boolean, default=False, nullable=False,
                               comment="Indique si cette ligne a été expédiée")
-    id_expedition = mapped_column(String(50), nullable=True,
-                                     comment="Numéro d'expédition de cette ligne")
     id_expedition = mapped_column(Integer, ForeignKey('14_expeditions.id'), nullable=True)
     expedition = relationship("Expeditions", back_populates="devises")
     expedie_by = mapped_column(String(100), nullable=True,
@@ -792,6 +790,10 @@ class Expeditions(Base):
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_commande = mapped_column(Integer, ForeignKey('11_commandes.id'), nullable=False)
     devises = relationship("DevisesFactures", back_populates="expedition")
+    
+    # === DONNÉES DE CONTRÔLE QUALITE ===
+    #TODO: Ajouter les champs de formulaire sur l'expédition
+    c_qualite = mapped_column(Text, nullable=True, comment="Détail de la préparation de commande")
 
     # === DONNÉES DE L'EXPÉDITION ===
     is_main_propre = mapped_column(Boolean, default=False, nullable=False)
