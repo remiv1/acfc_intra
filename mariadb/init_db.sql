@@ -122,3 +122,6 @@ SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/mails/mails.s
 
 -- Insertion des téléphones depuis l'ancienne base de données
 SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/telephones/telephones.sql;
+
+-- Insertion des commandes depuis l'ancienne base de données
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/devis_factures/commandes/commandes.sql;
