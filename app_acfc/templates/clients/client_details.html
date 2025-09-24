@@ -670,9 +670,9 @@
                                         <td>
                                             {% if commande.is_annulee %}
                                                 <span class="badge bg-danger">Annulée</span>
-                                            {% elif commande.is_expedie %}
+                                            {% elif commande.is_expediee %}
                                                 <span class="badge bg-success">Expédiée</span>
-                                            {% elif commande.is_facture %}
+                                            {% elif commande.is_facturee %}
                                                 <span class="badge bg-info">Facturée</span>
                                             {% else %}
                                                 <span class="badge bg-warning">En cours</span>
@@ -684,12 +684,12 @@
                                                    class="btn btn-sm btn-outline-primary" title="Voir les détails">
                                                     <i class="bi bi-eye me-1"></i>Voir
                                                 </a>
-                                                {% if not commande.is_annulee and not commande.is_facture %}
+                                                {% if not commande.is_annulee and not commande.is_facturee %}
                                                 <a href="{{ url_for(('commandes', 'modifier') | jinja_page_title, id_client=commande.id_client, id_commande=commande.id) }}" 
                                                    class="btn btn-sm btn-outline-secondary ms-1" title="Modifier la commande">
                                                     <i class="bi bi-pencil me-1"></i>Modifier
                                                 </a>
-                                                {% elif not commande.is_expedie and not commande.is_facture and not commande.is_annulee %}
+                                                {% elif not commande.is_expediee and not commande.is_facturee and not commande.is_annulee %}
                                                 {% from '_macros.html' import csrf_field %}
                                                 <form class="inline-display" method="POST" action="{{ url_for(('commandes', 'annuler') | jinja_page_title, id_client=commande.id_client, id_commande=commande.id) }}" 
                                                     onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
@@ -699,15 +699,15 @@
                                                     </button>
                                                 </form>
                                                 {% endif %}
-                                                {% if commande.is_annulée %}
+                                                {% if commande.is_annulee %}
                                                     <span class="text-muted">
                                                         <i class="bi bi-x-circle me-1"></i>Commande annulée
                                                     </span>
-                                                {% elif commande.is_facture %}
+                                                {% elif commande.is_facturee %}
                                                     <span class="text-muted">
                                                         <i class="bi bi-check-circle me-1"></i>Commande facturée
                                                     </span>
-                                                {% elif commande.is_expedie %}
+                                                {% elif commande.is_expediee %}
                                                     <span class="text-muted">
                                                         <i class="bi bi-truck me-1"></i>Commande expédiée
                                                     </span>

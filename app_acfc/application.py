@@ -207,8 +207,8 @@ def get_current_orders(id_client: int = 0) -> List[Commande]:
                 joinedload(Commande.client).joinedload(Client.pro)    # Eager loading du client professionnel
             )
             .filter(or_(
-                Commande.is_facture.is_(False),
-                Commande.is_expedie.is_(False)
+                Commande.is_facturee.is_(False),
+                Commande.is_expediee.is_(False)
             ))
             .all()
         )
@@ -224,8 +224,8 @@ def get_current_orders(id_client: int = 0) -> List[Commande]:
             .filter(and_(
                 Commande.id_client == id_client,
                 or_(
-                    Commande.is_facture.is_(False),
-                    Commande.is_expedie.is_(False)
+                    Commande.is_facturee.is_(False),
+                    Commande.is_expediee.is_(False)
                 )
             ))
             .all()
@@ -260,7 +260,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
             "ca_current_month": [
                 round(db_session.query(func.sum(Commande.montant))
                 .filter(
-                    Commande.is_facture.is_(True),
+                    Commande.is_facturee.is_(True),
                     Commande.date_commande >= first_day_of_month
                 ).scalar() or 0.0, 2),
                 'CA Mensuel'
@@ -270,7 +270,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
             "ca_current_year": [
                 round(db_session.query(func.sum(Commande.montant))
                 .filter(
-                    Commande.is_facture.is_(True),
+                    Commande.is_facturee.is_(True),
                     Commande.date_commande >= first_day_of_year
                 ).scalar() or 0.0, 2),
                 'CA Annuel'
@@ -280,7 +280,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
             "average_basket": [
                 round(db_session.query(func.avg(Commande.montant))
                 .filter(
-                    Commande.is_facture.is_(True),
+                    Commande.is_facturee.is_(True),
                     Commande.date_commande >= first_day_of_year
                 ).scalar() or 0.0, 2),
                 'Panier Moyen'
@@ -290,7 +290,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
             "active_clients": [
                 db_session.query(func.count(func.distinct(Commande.id_client)))
                 .filter(
-                    Commande.is_facture.is_(True),
+                    Commande.is_facturee.is_(True),
                     Commande.date_commande >= first_day_of_year
                 ).scalar() or 0,
                 'Clients Actifs'
@@ -300,7 +300,7 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
             "orders_per_year": [
                 db_session.query(func.count(Commande.id))
                 .filter(
-                    Commande.is_facture.is_(True),
+                    Commande.is_facturee.is_(True),
                     Commande.date_commande >= first_day_of_year
                 ).scalar() or 0,
                 'Commandes Annuelles'

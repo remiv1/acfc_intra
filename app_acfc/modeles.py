@@ -210,8 +210,10 @@ def get_db_session() -> SessionBdDType:
 PK_CLIENTS = '01_clients.id'           # Référence vers la table clients
 PK_ADRESSE = '04_adresse.id'           # Référence vers la table adresses
 PK_COMMANDE = '11_commandes.id'        # Référence vers la table commandes
+PK_FACTURE = '12_factures.id'          # Référence vers la table factures
 PK_OPERATION = '31_operations.id'      # Référence vers la table opérations comptables
 PK_COMPTE = '30_pcg.compte'            # Référence vers le plan comptable général
+PK_EXPEDITION = '14_expeditions.id'     # Référence vers la table expéditions
 
 # ====================================================================
 # AUTRES CONSTANTES
@@ -705,8 +707,9 @@ class DevisesFactures(Base):
     
     is_expedie = mapped_column(Boolean, default=False, nullable=False,
                               comment="Indique si cette ligne a été expédiée")
-    id_expedition = mapped_column(Integer, ForeignKey('14_expeditions.id'), nullable=True)
-    expedition = relationship("Expeditions", back_populates="devises")
+    id_expedition = mapped_column(Integer, ForeignKey(PK_EXPEDITION), nullable=True)
+    expedition = relationship("Expeditions", back_populates="devises_factures",
+                              primaryjoin="foreign(DevisesFactures.id_expedition) == Expeditions.id")
     expedie_by = mapped_column(String(100), nullable=True,
                               comment="Utilisateur qui a expédié cette ligne")
     
@@ -795,7 +798,8 @@ class Expeditions(Base):
     # === IDENTIFIANT ET LIAISON ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_devises_factures = mapped_column(Integer, ForeignKey('12_devises_factures.id'), nullable=False)
-    devises_factures = relationship("DevisesFactures", back_populates="expedition")
+    devises_factures = relationship("DevisesFactures", back_populates="expedition",
+                                     primaryjoin="Expeditions.id == foreign(DevisesFactures.id_expedition)")
     
     # === DONNÉES DE CONTRÔLE QUALITE ===
     #TODO: Ajouter les champs de formulaire sur l'expédition

@@ -231,7 +231,7 @@
                                     <strong>Commande annulée</strong><br>
                                     <small>Cette commande a été annulée et ne peut plus être modifiée.</small>
                                 </div>
-                            {% elif commande.is_expedie %}
+                            {% elif commande.is_expediee %}
                                 <!-- Commande expédiée -->
                                 <div class="alert alert-success">
                                     <i class="fas fa-shipping-fast me-2"></i>
@@ -241,7 +241,7 @@
                                         <br><small>Suivi: {{ commande.id_suivi }}</small>
                                     {% endif %}
                                 </div>
-                            {% elif commande.is_facture %}
+                            {% elif commande.is_facturee %}
                                 <!-- Commande facturée mais pas expédiée -->
                                 <div class="alert alert-warning">
                                     <i class="fas fa-file-invoice me-2"></i>

@@ -504,8 +504,8 @@ class CommandeFixtures:
         commande.date_commande = date(2024, 8, 15)
         commande.montant = Decimal('125.50')
         commande.is_annulee = False
-        commande.is_facture = False
-        commande.is_expedie = False
+        commande.is_facturee = False
+        commande.is_expediee = False
         commande.date_facturation = None
         commande.date_expedition = None
         commande.id_suivi = None
@@ -530,8 +530,8 @@ class CommandeFixtures:
         commande.date_commande = date(2024, 7, 1)
         commande.montant = Decimal('450.00')
         commande.is_annulee = False
-        commande.is_facture = True
-        commande.is_expedie = True
+        commande.is_facturee = True
+        commande.is_expediee = True
         commande.date_facturation = date(2024, 7, 5)
         commande.date_expedition = date(2024, 7, 8)
         commande.id_suivi = "FR123456789"
@@ -920,8 +920,8 @@ class CommandeFactory:
         commande.date_commande = date_commande or date.today()
         commande.montant = Decimal(str(montant))
         commande.is_annulee = kwargs.get('is_annulee', False)
-        commande.is_facture = kwargs.get('is_facture', False)
-        commande.is_expedie = kwargs.get('is_expedie', False)
+        commande.is_facturee = kwargs.get('is_facture', False)
+        commande.is_expediee = kwargs.get('is_expedie', False)
         commande.date_facturation = kwargs.get('date_facturation')
         commande.date_expedition = kwargs.get('date_expedition')
         commande.id_suivi = kwargs.get('id_suivi')

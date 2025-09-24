@@ -215,11 +215,11 @@
                             <span class="badge bg-danger fs-6">
                                 <i class="bi bi-x-circle me-1"></i>Annulée
                             </span>
-                        {% elif commande.is_expedie %}
+                        {% elif commande.is_expediee %}
                             <span class="badge bg-info fs-6">
                                 <i class="bi bi-truck me-1"></i>Expédiée
                             </span>
-                        {% elif commande.is_facture %}
+                        {% elif commande.is_facturee %}
                             <span class="badge bg-success fs-6">
                                 <i class="bi bi-receipt me-1"></i>Facturée
                             </span>
@@ -266,13 +266,13 @@
                                 </button>
                             {% endif %}
                             
-                            {% if commande.is_facture and not commande.is_expedie %}
+                            {% if commande.is_facturee and not commande.is_expediee %}
                                 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#expeditionModal">
                                     <i class="bi bi-truck me-1"></i>Expédier la commande
                                 </button>
                             {% endif %}
                             
-                            {% if commande.is_expedie %}
+                            {% if commande.is_expediee %}
                                 <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#expeditionPartielleModal">
                                     <i class="bi bi-truck me-1"></i>Expédition partielle
                                 </button>
@@ -305,7 +305,7 @@
                         </div>
 
                         <!-- Facturation -->
-                        {% if commande.is_facture %}
+                        {% if commande.is_facturee %}
                         <div class="timeline-item">
                             <div class="timeline-marker bg-success"></div>
                             <div class="timeline-content">
@@ -318,7 +318,7 @@
                         {% endif %}
 
                         <!-- Expédition -->
-                        {% if commande.is_expedie %}
+                        {% if commande.is_expediee %}
                         <div class="timeline-item">
                             <div class="timeline-marker bg-info"></div>
                             <div class="timeline-content">
@@ -348,7 +348,7 @@
             </div>
 
             <!-- Informations complémentaires -->
-            {% if commande.is_expedie and commande.id_suivi %}
+            {% if commande.is_expediee and commande.id_suivi %}
             <div class="card mt-4">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Suivi de l'expédition</h5>

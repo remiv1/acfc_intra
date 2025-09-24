@@ -89,7 +89,7 @@ class OrdersMethods:
                     return render_commande_form(client, commande, session_db)
                 
                 # Marquer comme facturée
-                commande.is_facture = True
+                commande.is_facturee = True
                 commande.date_facturation = datetime.strptime(form_data.get('date_facturation'), '%Y-%m-%d').date()
                 session_db.commit()
                 
@@ -102,12 +102,12 @@ class OrdersMethods:
                     return render_commande_form(client, commande, session_db)
                 
                 # Vérifier que la commande est facturée
-                if not commande.is_facture:
+                if not commande.is_facturee:
                     flash('La commande doit être facturée avant d\'être expédiée', 'warning')
                     return render_commande_form(client, commande, session_db)
                 
                 # Marquer comme expédiée
-                commande.is_expedie = True
+                commande.is_expediee = True
                 commande.date_expedition = datetime.strptime(form_data.get('date_expedition'), '%Y-%m-%d').date()
                 
                 # Gérer le numéro de suivi selon le mode d'expédition
@@ -142,21 +142,21 @@ class OrdersMethods:
             commande.id_adresse = int(form_data.get('id_adresse')) if form_data.get('id_adresse') else None
             
             # États de la commande
-            commande.is_facture = 'is_facture' in form_data
-            commande.is_expedie = 'is_expedie' in form_data
+            commande.is_facturee = 'is_facture' in form_data
+            commande.is_expediee = 'is_expedie' in form_data
             
             # Dates conditionnelles
-            if commande.is_facture and form_data.get('date_facturation'):
+            if commande.is_facturee and form_data.get('date_facturation'):
                 commande.date_facturation = datetime.strptime(form_data.get('date_facturation'), '%Y-%m-%d').date()
             else:
                 commande.date_facturation = None
                 
-            if commande.is_expedie and form_data.get('date_expedition'):
+            if commande.is_expediee and form_data.get('date_expedition'):
                 commande.date_expedition = datetime.strptime(form_data.get('date_expedition'), '%Y-%m-%d').date()
             else:
                 commande.date_expedition = None
                 
-            commande.id_suivi = form_data.get('id_suivi', '') if commande.is_expedie else ''
+            commande.id_suivi = form_data.get('id_suivi', '') if commande.is_expediee else ''
             
             # Sauvegarder la commande pour obtenir l'ID
             if is_new:
@@ -490,7 +490,7 @@ def cancel_order(id_commande: int, id_client: int):
             return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
         
         # Vérifier que la commande n'est pas expédiée (on ne peut pas annuler une commande expédiée)
-        if commande.is_expedie:
+        if commande.is_expediee:
             return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
         
         # Marquer la commande comme annulée
@@ -874,14 +874,14 @@ def _mettre_a_jour_statut_commande(session_db: SessionBdDType, commande: Command
         
         # Mettre à jour le statut selon la situation
         if lignes_facturees == 0:
-            commande.is_facture = False
+            commande.is_facturee = False
         elif lignes_facturees == total_lignes:
-            commande.is_facture = True
+            commande.is_facturee = True
             if not commande.date_facturation:
                 commande.date_facturation = date.today()
         else:
             # Facturation partielle - on garde is_facture = False mais on pourrait ajouter un champ spécifique
-            commande.is_facture = False
+            commande.is_facturee = False
         
         
     except Exception as e:

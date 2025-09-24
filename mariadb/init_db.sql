@@ -5,17 +5,17 @@ CREATE TABLE IF NOT EXISTS `99_users` (
     `nom` VARCHAR(100) NOT NULL,
     `pseudo` VARCHAR(100) NOT NULL,
     `sha_mdp` VARCHAR(255) NOT NULL,
-    `is_chg_mdp` BOOLEAN NOT NULL DEFAULT FALSE,
+    `is_chg_mdp` TINYINT(1) NOT NULL DEFAULT 0,
     `date_chg_mdp` DATE NOT NULL DEFAULT CURRENT_DATE,
     `permission` VARCHAR(10) NOT NULL DEFAULT '0',
     `email` VARCHAR(100) NOT NULL,
     `telephone` VARCHAR(20) NOT NULL,
     `created_at` DATE NOT NULL DEFAULT CURRENT_DATE,
-    `is_active` BOOLEAN NOT NULL DEFAULT TRUE,
+    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
     `debut` DATE NOT NULL DEFAULT CURRENT_DATE,
     `fin` DATE DEFAULT NULL,
     `nb_errors` INT NOT NULL DEFAULT 0,
-    `is_locked` BOOLEAN NOT NULL DEFAULT FALSE
+    `is_locked` TINYINT(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- TODO: Modifier le profil de l'admin (uniquement '1') en production
@@ -118,7 +118,7 @@ SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/clients/profe
 SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/adresses/adresses.sql;
 
 -- Insertion des emails depuis l'ancienne base de données
-SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/mails/mails.sql
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/mails/mails.sql;
 
 -- Insertion des téléphones depuis l'ancienne base de données
 SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/telephones/telephones.sql;
