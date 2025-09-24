@@ -115,4 +115,10 @@ SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/clients/parti
 SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/clients/professionnels.sql;
 
 -- Insertion des adresses depuis l'ancienne base de données
--- SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/adresses/adresses.sql;
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/adresses/adresses.sql;
+
+-- Insertion des emails depuis l'ancienne base de données
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/mails/mails.sql
+
+-- Insertion des téléphones depuis l'ancienne base de données
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/telephones/telephones.sql;
