@@ -1,18 +1,18 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 23 September 2025  
-**Période analysée :** 16 September 2025 - 23 September 2025 (7 jours)  
-**Nombre de commits :** 13  
+**Date du rapport :** 24 September 2025  
+**Période analysée :** 17 September 2025 - 24 September 2025 (7 jours)  
+**Nombre de commits :** 20  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 13 commits sur 7 jours  
-**Volume de code :** 413 lignes ajoutées, 1026 lignes supprimées  
-**Fichiers impactés :** 70 fichiers modifiés  
-**Productivité moyenne :** 59 lignes/jour
+**Activité de développement :** 20 commits sur 7 jours  
+**Volume de code :** 1479 lignes ajoutées, 1434 lignes supprimées  
+**Fichiers impactés :** 115 fichiers modifiés  
+**Productivité moyenne :** 211 lignes/jour
 
 ---
 
@@ -127,6 +127,17 @@
 
 ### 23 September 2025
 
+#### 18:08 - 5cac0b4 - 📊 Mise à jour automatique du rapport de suivi (23/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +50 -16 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Tue Sep 23 18:08:03 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (23/09/2025)`
+- ... et 1 autres fichiers
+
 #### 20:05 - 87a0c06 - Merge branch 'sprint_billing_order' of https://github.com/remiv1/acfc_intra into sprint_billing_order
 
 **Catégorie :** Développement général  
@@ -173,38 +184,109 @@
 - ... et 1 autres fichiers
 
 
+### 24 September 2025
+
+#### 19:07 - 707266f - Merge branch 'sprint_billing_order' of https://github.com/remiv1/acfc_intra into sprint_billing_order
+
+**Catégorie :** Développement général  
+**Impact :** +50 -16 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Merge: ebd8e4f 5cac0b4`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Sep 24 19:07:02 2025 +0200`
+- `    Merge branch 'sprint_billing_order' of https://github.com/remiv1/acfc_intra into sprint_billing_order`
+
+#### 19:06 - ebd8e4f - feat: ajout de l'insertion des commandes depuis l'ancienne base de données
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +1 -0 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Sep 24 19:06:59 2025 +0200`
+- `    feat: ajout de l'insertion des commandes depuis l'ancienne base de données`
+- ... et 1 autres fichiers
+
+#### 17:02 - 7ba209e - refactor: renommer les attributs de facturation et d'expédition pour une meilleure cohérence
+
+**Catégorie :** Refactoring  
+**Impact :** +54 -50 lignes, 11 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Sep 24 17:02:37 2025 +0200`
+- `    refactor: renommer les attributs de facturation et d'expédition pour une meilleure cohérence`
+- ... et 8 autres fichiers
+
+#### 16:01 - 6ccd4d3 - feat: ajout de l'insertion des emails et téléphones depuis l'ancienne base de données
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +7 -1 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Sep 24 16:01:21 2025 +0200`
+- `    feat: ajout de l'insertion des emails et téléphones depuis l'ancienne base de données`
+- ... et 1 autres fichiers
+
+#### 14:25 - 1e48b95 - Update UML diagram in MariaDB project
+
+**Catégorie :** Développement général  
+**Impact :** +294 -294 lignes, 5 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Sep 24 14:25:29 2025 +0200`
+- `    Update UML diagram in MariaDB project`
+- ... et 2 autres fichiers
+
+#### 14:20 - a34a0b3 - feat: fix: Ajout du diagrame UML et adaptation de `init_db.sql` Pour l'insertion des clients
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +610 -31 lignes, 13 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Sep 24 14:20:32 2025 +0200`
+- `    feat:`
+- `    fix:`
+- ... et 11 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 5 commits (38.5%)
-- **Développement général** : 3 commits (23.1%)
-- **Correction de bugs** : 3 commits (23.1%)
-- **Développement de fonctionnalités** : 2 commits (15.4%)
+- **Interface utilisateur** : 6 commits (30.0%)
+- **Développement général** : 5 commits (25.0%)
+- **Développement de fonctionnalités** : 5 commits (25.0%)
+- **Correction de bugs** : 3 commits (15.0%)
+- **Refactoring** : 1 commits (5.0%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 9 fichiers modifiés
-- **Documentation** : 5 fichiers modifiés
+- **Python** : 14 fichiers modifiés
+- **Documentation** : 7 fichiers modifiés
+- **HTML** : 5 fichiers modifiés
 - **Docker** : 2 fichiers modifiés
-- **HTML** : 2 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 1.9 commits/jour
-- **Volume de code :** 1439 modifications totales
-- **Ratio ajouts/suppressions :** 0.40
-- **Moyenne lignes par commit :** 111
+- **Fréquence de commit :** 2.9 commits/jour
+- **Volume de code :** 2913 modifications totales
+- **Ratio ajouts/suppressions :** 1.03
+- **Moyenne lignes par commit :** 146
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 413 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 1479 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 23 September 2025*
+*Rapport généré automatiquement le 24 September 2025*
