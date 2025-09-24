@@ -2,17 +2,17 @@
 
 **Date du rapport :** 23 September 2025  
 **Période analysée :** 16 September 2025 - 23 September 2025 (7 jours)  
-**Nombre de commits :** 10  
+**Nombre de commits :** 13  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 10 commits sur 7 jours  
-**Volume de code :** 321 lignes ajoutées, 982 lignes supprimées  
-**Fichiers impactés :** 57 fichiers modifiés  
-**Productivité moyenne :** 45 lignes/jour
+**Activité de développement :** 13 commits sur 7 jours  
+**Volume de code :** 413 lignes ajoutées, 1026 lignes supprimées  
+**Fichiers impactés :** 70 fichiers modifiés  
+**Productivité moyenne :** 59 lignes/jour
 
 ---
 
@@ -127,6 +127,40 @@
 
 ### 23 September 2025
 
+#### 20:05 - 87a0c06 - Merge branch 'sprint_billing_order' of https://github.com/remiv1/acfc_intra into sprint_billing_order
+
+**Catégorie :** Développement général  
+**Impact :** +44 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Merge: 376a8cf 636783b`
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Sep 23 20:05:48 2025 +0200`
+- `    Merge branch 'sprint_billing_order' of https://github.com/remiv1/acfc_intra into sprint_billing_order`
+
+#### 20:05 - 376a8cf - fix: ajout de la gestion des adresses de facturation et de livraison dans la classe Commande suppression de la gestion des adresses dans la classe Facture
+
+**Catégorie :** Correction de bugs  
+**Impact :** +4 -6 lignes, 5 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Sep 23 20:05:36 2025 +0200`
+- `    fix: ajout de la gestion des adresses de facturation et de livraison dans la classe Commande`
+- `    suppression de la gestion des adresses dans la classe Facture`
+- ... et 2 autres fichiers
+
+#### 09:45 - 636783b - 📊 Mise à jour automatique du rapport de suivi (23/09/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +44 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Tue Sep 23 09:45:46 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (23/09/2025)`
+- ... et 1 autres fichiers
+
 #### 11:44 - 56d3b40 - fix: mise à jour de la colonne id_expedition pour utiliser un entier et ajout d'un champ de contrôle qualité dans la classe Expeditions
 
 **Catégorie :** Correction de bugs  
@@ -143,17 +177,17 @@
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 4 commits (40.0%)
-- **Correction de bugs** : 2 commits (20.0%)
-- **Développement général** : 2 commits (20.0%)
-- **Développement de fonctionnalités** : 2 commits (20.0%)
+- **Interface utilisateur** : 5 commits (38.5%)
+- **Développement général** : 3 commits (23.1%)
+- **Correction de bugs** : 3 commits (23.1%)
+- **Développement de fonctionnalités** : 2 commits (15.4%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 8 fichiers modifiés
-- **Documentation** : 4 fichiers modifiés
+- **Python** : 9 fichiers modifiés
+- **Documentation** : 5 fichiers modifiés
 - **Docker** : 2 fichiers modifiés
 - **HTML** : 2 fichiers modifiés
 
@@ -161,16 +195,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 1.4 commits/jour
-- **Volume de code :** 1303 modifications totales
-- **Ratio ajouts/suppressions :** 0.33
-- **Moyenne lignes par commit :** 130
+- **Fréquence de commit :** 1.9 commits/jour
+- **Volume de code :** 1439 modifications totales
+- **Ratio ajouts/suppressions :** 0.40
+- **Moyenne lignes par commit :** 111
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 321 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 413 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
 *Rapport généré automatiquement le 23 September 2025*
