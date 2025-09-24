@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="80cm" height="65cm" viewBox="19 -661 1599 1298" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="20" y="-200" width="194.8" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="20" y="-200" width="194.8" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="117.4" y="-184.8">&lt;&lt;99_users&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="117.4" y="-164">User</text>
+    <rect style="fill: #ffffff" x="20" y="-156" width="194.8" height="260"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="20" y="-156" width="194.8" height="260"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-142.8">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-126.8">+prenom: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-110.8">+nom: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-94.8">+pseudo: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-78.8">+email: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-62.8">+telephone: VARCHAR(20)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-46.8">+sha_mdp: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-30.8">+is_chg_mdp: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-14.8">+date_chg_mdp: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="1.2">+nb_errors: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="17.2">+is_locked: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="33.2">+permission: VARCHAR(10)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="49.2">+created_at: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="65.2">+is_active: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="81.2">+debut: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="97.2">+fin: DATE</text>
+    <rect style="fill: #ffffff" x="20" y="104" width="194.8" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="20" y="104" width="194.8" height="36"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="117.2">-__repr__()</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="133.2">+to_dict()</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="640" y="40" width="217.9" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="640" y="40" width="217.9" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="748.95" y="55.2">&lt;&lt;01_clients&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="748.95" y="76">Client</text>
+    <rect style="fill: #ffffff" x="640" y="84" width="217.9" height="148"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="640" y="84" width="217.9" height="148"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="97.2">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="113.2">+type_client: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="129.2">+created_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="145.2">+created_by: STRING(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="161.2">+modified_at: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="177.2">+modified_by: STRING(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="193.2">+is_active: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="209.2">+notes: TEXT</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="225.2">+reduces: NUMERIC(4,3)</text>
+    <rect style="fill: #ffffff" x="640" y="232" width="217.9" height="52"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="640" y="232" width="217.9" height="52"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="245.2">-__repr__()</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="261.2">+to_dict()</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="277.2">+nom_affichage(): @property</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="320" y="-160" width="233.3" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="320" y="-160" width="233.3" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="436.65" y="-144.8">&lt;&lt;011_part&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="436.65" y="-124">Part</text>
+    <rect style="fill: #ffffff" x="320" y="-116" width="233.3" height="100"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="320" y="-116" width="233.3" height="100"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-102.8">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-86.8">+id_client: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #30795a" x1="324" y1="-80.4" x2="470.3" y2="-80.4"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-70.8">+prenom: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-54.8">+nom: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-38.8">+date_naissance: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-22.8">+lieu_naissance: VARCHAR(255)</text>
+    <rect style="fill: #ffffff" x="320" y="-16" width="233.3" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="320" y="-16" width="233.3" height="20"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-2.8">-__repr__()</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" points="553.3,-90 573.149,-90 573.149,94 628.028,94 "/>
+    <polygon style="fill: #30795a" points="635.528,94 625.528,99 628.028,94 625.528,89 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" points="635.528,94 625.528,99 628.028,94 625.528,89 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="560.3" y="-97">1</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="633" y="87">1</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="320" y="-380" width="233.3" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="320" y="-380" width="233.3" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="436.65" y="-364.8">&lt;&lt;012_pro&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="436.65" y="-344">Pro</text>
+    <rect style="fill: #ffffff" x="320" y="-336" width="233.3" height="100"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="320" y="-336" width="233.3" height="100"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-322.8">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-306.8">+id_client: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #30795a" x1="324" y1="-300.4" x2="470.3" y2="-300.4"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-290.8">+raison_sociale: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-274.8">+type_pro: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-258.8">+siren: VARCHAR(9)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-242.8">+rna: VARCHAR(10)</text>
+    <rect style="fill: #ffffff" x="320" y="-236" width="233.3" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="320" y="-236" width="233.3" height="20"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-222.8">-__repr__()</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" points="553.3,-310 573.149,-310 573.149,94 628.028,94 "/>
+    <polygon style="fill: #30795a" points="635.528,94 625.528,99 628.028,94 625.528,89 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" points="635.528,94 625.528,99 628.028,94 625.528,89 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="560.3" y="-317">1</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="633" y="87">1</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="320" y="60" width="210.2" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="320" y="60" width="210.2" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="425.1" y="75.2">&lt;&lt;02_mail&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="425.1" y="96">Mail</text>
+    <rect style="fill: #ffffff" x="320" y="104" width="210.2" height="180"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="320" y="104" width="210.2" height="180"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="117.2">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="133.2">+id_client: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #30795a" x1="324" y1="139.6" x2="470.3" y2="139.6"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="149.2">+type_mail: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="165.2">+detail: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="181.2">+mail: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="197.2">+is_principal: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="213.2">+created_at: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="229.2">+created_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="245.2">+modified_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="261.2">+modified_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="277.2">+is_inactive: BOOLEAN</text>
+    <rect style="fill: #ffffff" x="320" y="284" width="210.2" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="320" y="284" width="210.2" height="36"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="297.2">-__repr__()</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="313.2">+to_dict()</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" points="530.2,130 573,130 573,94 628.028,94 "/>
+    <polygon style="fill: #30795a" points="635.528,94 625.528,99 628.028,94 625.528,89 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" points="635.528,94 625.528,99 628.028,94 625.528,89 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="537.2" y="123">n</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="633" y="87">1</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="320" y="360" width="233.3" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="320" y="360" width="233.3" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="436.65" y="375.2">&lt;&lt;03_telephone&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="436.65" y="396">Telephone</text>
+    <rect style="fill: #ffffff" x="320" y="404" width="233.3" height="196"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="320" y="404" width="233.3" height="196"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="417.2">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="433.2">+id_client: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #30795a" x1="324" y1="439.6" x2="470.3" y2="439.6"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="449.2">+type_telephone: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="465.2">+detail: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="481.2">+indicatif: VARCHAR(5)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="497.2">+telephone: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="513.2">+is_principal: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="529.2">+created_at: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="545.2">+created_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="561.2">+modified_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="577.2">+modified_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="593.2">+is_inactive: BOOLEAN</text>
+    <rect style="fill: #ffffff" x="320" y="600" width="233.3" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="320" y="600" width="233.3" height="36"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="613.2">-__repr__()</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="629.2">+to_dict()</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" points="553.3,430 573,430 573,94 628.028,94 "/>
+    <polygon style="fill: #30795a" points="635.528,94 625.528,99 628.028,94 625.528,89 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" points="635.528,94 625.528,99 628.028,94 625.528,89 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="560.3" y="423">n</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="633" y="87">1</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="640" y="320" width="210.2" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="640" y="320" width="210.2" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="745.1" y="335.2">&lt;&lt;04_adresse&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="745.1" y="356">Adresse</text>
+    <rect style="fill: #ffffff" x="640" y="364" width="210.2" height="228"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="640" y="364" width="210.2" height="228"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="377.2">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="393.2">+id_client: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #30795a" x1="644" y1="399.6" x2="790.3" y2="399.6"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="409.2">+adresse_l1: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="425.2">+adresse_l2: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="441.2">+code_postal: VARCHAR(10)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="457.2">+ville: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="473.2">+pays: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="489.2">+detail: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="505.2">+is_principal: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="521.2">+created_at: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="537.2">+created_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="553.2">+modified_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="569.2">+modified_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="585.2">+is_inactive: BOOLEAN</text>
+    <rect style="fill: #ffffff" x="640" y="592" width="210.2" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" x="640" y="592" width="210.2" height="36"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="605.2">-__repr__()</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="644" y="621.2">+to_dict()</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" points="640,390 573,390 573,94 628.028,94 "/>
+    <polygon style="fill: #30795a" points="635.528,94 625.528,99 628.028,94 625.528,89 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #30795a" points="635.528,94 625.528,99 628.028,94 625.528,89 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="633" y="383">n</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="633" y="87">1</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="680" y="-320" width="256.4" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="680" y="-320" width="256.4" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="808.2" y="-304.8">&lt;&lt;11_commandes&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="808.2" y="-284">Commande</text>
+    <rect style="fill: #ffffff" x="680" y="-276" width="256.4" height="276"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="680" y="-276" width="256.4" height="276"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-262.8">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-246.8">+id_client: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff5500" x1="684" y1="-240.4" x2="830.3" y2="-240.4"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-230.8">+is_ad_livraison: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-214.8">+id_adresse_livraison: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff5500" x1="684" y1="-208.4" x2="915" y2="-208.4"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-198.8">+id_adresse_facturation: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff5500" x1="684" y1="-192.4" x2="930.4" y2="-192.4"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-182.8">+descriptif: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-166.8">+date_commande: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-150.8">+montant: NUMERIC(10,2)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-134.8">+is_annulee: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-118.8">+is_facturee: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-102.8">+is_expediee: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-86.8">+date_expedition: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-70.8">+date_facturation: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-54.8">+created_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-38.8">+created_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-22.8">+modified_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-6.8">+modified_by: VARCHAR(100)</text>
+    <rect style="fill: #ffffff" x="680" y="7.10543e-014" width="256.4" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="680" y="7.10543e-014" width="256.4" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" points="936.4,-250 957.262,-250 957.262,94 869.872,94 "/>
+    <polygon style="fill: #ff5500" points="862.372,94 872.372,89 869.872,94 872.372,99 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" points="862.372,94 872.372,89 869.872,94 872.372,99 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="943.4" y="-257">n</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="864.9" y="87">1</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1060" y="-320" width="233.3" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="1060" y="-320" width="233.3" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="1176.65" y="-304.8">&lt;&lt;12_devises_factures&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1176.65" y="-284">DevisesFactures</text>
+    <rect style="fill: #ffffff" x="1060" y="-276" width="233.3" height="308"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="1060" y="-276" width="233.3" height="308"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-262.8">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-246.8">+id_commande: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff5500" x1="1064" y1="-240.4" x2="1225.7" y2="-240.4"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-230.8">+reference: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-214.8">+designation: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-198.8">+qte: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-182.8">+prix_unitaire: NUMERIC(10,4)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-166.8">+remise: NUMERIC(10,4)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-150.8">+prix_total: NUMERIC(10,4)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-134.8">+remise_euro: NUMERIC(10,4)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-118.8">+is_facture: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-102.8">+id_facture: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff5500" x1="1064" y1="-96.4" x2="1218" y2="-96.4"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-86.8">+facture_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-70.8">+is_expedie: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-54.8">+id_expedition: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff5500" x1="1064" y1="-48.4" x2="1241.1" y2="-48.4"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-38.8">+expedie_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-22.8">+created_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-6.8">+created_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="9.2">+modified_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="25.2">+modified_by: VARCHAR(100)</text>
+    <rect style="fill: #ffffff" x="1060" y="32" width="233.3" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="1060" y="32" width="233.3" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" points="1060,-250 978.668,-250 978.668,-266 948.372,-266 "/>
+    <polygon style="fill: #ff5500" points="940.872,-266 950.872,-271 948.372,-266 950.872,-261 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" points="940.872,-266 950.872,-271 948.372,-266 950.872,-261 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="1053" y="-257">n</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="943.4" y="-273">1</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1160" y="60" width="456.6" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="1160" y="60" width="456.6" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="1388.3" y="75.2">&lt;&lt;13_factures&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1388.3" y="96">Facture</text>
+    <rect style="fill: #ffffff" x="1160" y="104" width="456.6" height="180"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="1160" y="104" width="456.6" height="180"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="117.2">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="133.2">+id_fiscal: VARCHAR(20)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="149.2">+id_client: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff5500" x1="1164" y1="155.6" x2="1310.3" y2="155.6"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="165.2">+id_commande: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff5500" x1="1164" y1="171.6" x2="1325.7" y2="171.6"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="181.2">+date_facturation: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="197.2">+montant_facture: NUMERIC(10,2)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="213.2">+is_imprime: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="229.2">+date_impression: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="245.2">+is_prestation_facturee: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="261.2">+created_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="277.2">+created_by: VARCHAR(100)</text>
+    <rect style="fill: #ffffff" x="1160" y="284" width="456.6" height="84"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="1160" y="284" width="456.6" height="84"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="297.2">+generate_fiscal_id()()</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="313.2">+cle_ean13(base_code:str)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="329.2">+set_id_fiscal_after_insert(mapper:Mapper[Any],</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="345.2">                            connection:Connection,</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="361.2">                            target:Facture): @staticmethod</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" points="1160,146 915.64,146 915.64,94 869.872,94 "/>
+    <polygon style="fill: #ff5500" points="862.372,94 872.372,89 869.872,94 872.372,99 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" points="862.372,94 872.372,89 869.872,94 872.372,99 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="1153" y="139">n</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="864.9" y="87">1</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" points="1060,-106 1008.4,-106 1008.4,114 1148.03,114 "/>
+    <polygon style="fill: #ff5500" points="1155.53,114 1145.53,119 1148.03,114 1145.53,109 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" points="1155.53,114 1145.53,119 1148.03,114 1145.53,109 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="1053" y="-113">n</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="1153" y="107">1</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" points="1160,162 978.668,162 978.668,-266 948.372,-266 "/>
+    <polygon style="fill: #ff5500" points="940.872,-266 950.872,-271 948.372,-266 950.872,-261 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" points="940.872,-266 950.872,-271 948.372,-266 950.872,-261 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="1153" y="155">1</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="943.4" y="-273">1</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1360" y="-320" width="248.7" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="1360" y="-320" width="248.7" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="1484.35" y="-304.8">&lt;&lt;14_expeditions&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1484.35" y="-284">Expeditions</text>
+    <rect style="fill: #ffffff" x="1360" y="-276" width="248.7" height="164"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="1360" y="-276" width="248.7" height="164"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-262.8">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-246.8">+id_devises_factures: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff5500" x1="1364" y1="-240.4" x2="1587.3" y2="-240.4"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-230.8">+c_qualite: TEXT</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-214.8">+is_main_propre: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-198.8">+numero_expedition: VARCHAR(50)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-182.8">+date_expedition_remise: DATE</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-166.8">+created_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-150.8">+created_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-134.8">+modified_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-118.8">+madified_by: VARCHAR(100)</text>
+    <rect style="fill: #ffffff" x="1360" y="-112" width="248.7" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="1360" y="-112" width="248.7" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" points="1293.3,-58 1339,-58 1339,-266 1348.03,-266 "/>
+    <polygon style="fill: #ff5500" points="1355.53,-266 1345.53,-261 1348.03,-266 1345.53,-271 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" points="1355.53,-266 1345.53,-261 1348.03,-266 1345.53,-271 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1300.3" y="-65">n</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="1353" y="-273">1</text>
+  </g>
+  <g>
+    <rect style="fill: #e8e8e8" x="1360" y="-660" width="256.4" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff0000" x="1360" y="-660" width="256.4" height="44"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="1488.2" y="-644.8">&lt;&lt;21_catalogue&gt;&gt;</text>
+    <text font-size="16" style="fill: #404040;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1488.2" y="-624">Catalogue</text>
+    <rect style="fill: #e8e8e8" x="1360" y="-616" width="256.4" height="180"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff0000" x="1360" y="-616" width="256.4" height="180"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-602.8">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-586.8">+type_produit: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-570.8">+stype_produit: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-554.8">+millesime: INTEGER</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-538.8">+prix_unitaire_ht: NUMERIC(10,2)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-522.8">+geographie: VARCHAR(10)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-506.8">+poids: VARCHAR(5)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-490.8">+created_at: DATE</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-474.8">+created_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-458.8">+modified_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-442.8">+modified_by: VARCHAR(100)</text>
+    <rect style="fill: #e8e8e8" x="1360" y="-436" width="256.4" height="52"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff0000" x="1360" y="-436" width="256.4" height="52"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-422.8">-__repr__()</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-406.8">+ref_auto(): @property</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1364" y="-390.8">+des_auto(): @property</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="20" y="-360" width="217.9" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="20" y="-360" width="217.9" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="128.95" y="-344.8">&lt;&lt;30_pcg&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="128.95" y="-324">PCG</text>
+    <rect style="fill: #ffffff" x="20" y="-316" width="217.9" height="84"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="20" y="-316" width="217.9" height="84"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-302.8">+classe: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-286.8">+categorie_1: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-270.8">+categorie_2: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-254.8">+**compte**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-238.8">+denomination: VARCHAR(100)</text>
+    <rect style="fill: #ffffff" x="20" y="-232" width="217.9" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="20" y="-232" width="217.9" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #e8e8e8" x="320" y="-660" width="264.1" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" x="320" y="-660" width="264.1" height="44"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="452.05" y="-644.8">&lt;&lt;31_operations&gt;&gt;</text>
+    <text font-size="16" style="fill: #404040;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="452.05" y="-624">Operations</text>
+    <rect style="fill: #e8e8e8" x="320" y="-616" width="264.1" height="164"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" x="320" y="-616" width="264.1" height="164"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-602.8">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-586.8">+date_operation: DATE</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-570.8">+libelle_operation: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-554.8">+montant_operation: NUMERIC(10,2)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-538.8">+annee_comptable: INTEGER</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-522.8">+created_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-506.8">+created_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-490.8">+modified_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-474.8">+modified_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="-458.8">+is_inactive: BOOLEAN</text>
+    <rect style="fill: #e8e8e8" x="320" y="-452" width="264.1" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" x="320" y="-452" width="264.1" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #e8e8e8" x="20" y="-660" width="241" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" x="20" y="-660" width="241" height="44"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="140.5" y="-644.8">&lt;&lt;32_ventilations&gt;&gt;</text>
+    <text font-size="16" style="fill: #404040;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="140.5" y="-624">Ventilations</text>
+    <rect style="fill: #e8e8e8" x="20" y="-616" width="241" height="228"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" x="20" y="-616" width="241" height="228"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-602.8">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-586.8">+id_operation: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #00ff00" x1="24" y1="-580.4" x2="193.4" y2="-580.4"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-570.8">+compte_id: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #00ff00" x1="24" y1="-564.4" x2="170.3" y2="-564.4"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-554.8">+sens: VARCHAR(10)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-538.8">+montant_debit: NUMERIC(10,2)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-522.8">+montant_credit: NUMERIC(10,2)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-506.8">+banque: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-490.8">+id_facture: VARCHAR(13)</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #00ff00" x1="24" y1="-484.4" x2="208.8" y2="-484.4"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-474.8">+id_cheque: VARCHAR(7)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-458.8">+created_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-442.8">+created_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-426.8">+modified_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-410.8">+modified_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="-394.8">+is_inactive: BOOLEAN</text>
+    <rect style="fill: #e8e8e8" x="20" y="-388" width="241" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" x="20" y="-388" width="241" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" points="320,-606 300,-606 300,-590 272.972,-590 "/>
+    <polygon style="fill: #00ff00" points="265.472,-590 275.472,-595 272.972,-590 275.472,-585 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" points="265.472,-590 275.472,-595 272.972,-590 275.472,-585 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="313" y="-613">1</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="268" y="-597">n</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" points="261,-574 300,-574 300,-258 249.872,-258 "/>
+    <polygon style="fill: #00ff00" points="242.372,-258 252.372,-263 249.872,-258 252.372,-253 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" points="242.372,-258 252.372,-263 249.872,-258 252.372,-253 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="268" y="-581">1</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="244.9" y="-265">n</text>
+  </g>
+  <g>
+    <rect style="fill: #e8e8e8" x="680" y="-660" width="256.4" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" x="680" y="-660" width="256.4" height="44"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="808.2" y="-644.8">&lt;&lt;33_documents&gt;&gt;</text>
+    <text font-size="16" style="fill: #404040;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="808.2" y="-624">Documents</text>
+    <rect style="fill: #e8e8e8" x="680" y="-616" width="256.4" height="180"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" x="680" y="-616" width="256.4" height="180"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-602.8">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-586.8">+id_operation: INTEGER</text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #00ff00" x1="684" y1="-580.4" x2="853.4" y2="-580.4"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-570.8">+type_document: VARCHAR(50)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-554.8">+date_document: DATE</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-538.8">+montant_document: NUMERIC(10,2)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-522.8">+document: LARGEBINARY</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-506.8">+created_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-490.8">+created_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-474.8">+modified_at: DATETIME</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-458.8">+modified_by: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-442.8">+is_inactive: BOOLEAN</text>
+    <rect style="fill: #e8e8e8" x="680" y="-436" width="256.4" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" x="680" y="-436" width="256.4" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" points="584.1,-606 620,-606 620,-590 668.028,-590 "/>
+    <polygon style="fill: #00ff00" points="675.528,-590 665.528,-585 668.028,-590 665.528,-595 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" points="675.528,-590 665.528,-585 668.028,-590 665.528,-595 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="591.1" y="-613">1</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="673" y="-597">n</text>
+  </g>
+  <g>
+    <rect style="fill: #e8e8e8" x="1060" y="-660" width="202.5" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff0000" x="1060" y="-660" width="202.5" height="44"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="1161.25" y="-644.8">&lt;&lt;40_stock&gt;&gt;</text>
+    <text font-size="16" style="fill: #404040;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1161.25" y="-624">Stock</text>
+    <rect style="fill: #e8e8e8" x="1060" y="-616" width="202.5" height="180"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff0000" x="1060" y="-616" width="202.5" height="180"/>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-602.8">+type_code: INTEGER</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-586.8">#type_valeur: VARCHAR(3)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-570.8">#val_code: VARCHAR(4)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-554.8">#code_produit: VARCHAR(6)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-538.8">+val_valeur: NUMERIC(5,2)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-522.8">+qte: INTEGER</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-506.8">+tvp_valeur: NUMERIC(5,2)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-490.8">+tvp_poids: VARCHAR(4)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-474.8">#pu_ht: NUMERIC(8,4)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-458.8">#pt_fr: NUMERIC(5,2)</text>
+    <text font-size="12.8" style="fill: #404040;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-442.8">#pt_eu: NUMERIC(5,2)</text>
+    <rect style="fill: #e8e8e8" x="1060" y="-436" width="202.5" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff0000" x="1060" y="-436" width="202.5" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="20" y="160" width="202.5" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="20" y="160" width="202.5" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="121.25" y="175.2">&lt;&lt;91_villes&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="121.25" y="196">Villes</text>
+    <rect style="fill: #ffffff" x="20" y="204" width="202.5" height="52"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="20" y="204" width="202.5" height="52"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="217.2">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="233.2">+nom: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="249.2">+code_postal: VARCHAR(10)</text>
+    <rect style="fill: #ffffff" x="20" y="256" width="202.5" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="20" y="256" width="202.5" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="20" y="280" width="179.4" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="20" y="280" width="179.4" height="44"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="109.7" y="295.2">&lt;&lt;92_indicatifs_tel&gt;&gt;</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="109.7" y="316">IndicatifsTel</text>
+    <rect style="fill: #ffffff" x="20" y="324" width="179.4" height="52"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="20" y="324" width="179.4" height="52"/>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="337.2">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="353.2">+indicatif: VARCHAR(4)</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="24" y="369.2">+pays: VARCHAR(100)</text>
+    <rect style="fill: #ffffff" x="20" y="376" width="179.4" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="20" y="376" width="179.4" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #e8e8e8" x="900" y="320" width="225.6" height="44"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00eeff" x="900" y="320" width="225.6" height="44"/>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="1012.8" y="335.2">&lt;&lt;93_moi&gt;&gt;</text>
+    <text font-size="16" style="fill: #196b24;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1012.8" y="356">Moi</text>
+    <rect style="fill: #e8e8e8" x="900" y="364" width="225.6" height="244"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00eeff" x="900" y="364" width="225.6" height="244"/>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="377.2">+**id**: INTEGER</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="393.2">+nom: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="409.2">+adresse_l1: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="425.2">+adresse_l2: VARCHAR(255)</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="441.2">+code_postal: VARCHAR(10)</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="457.2">+ville: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="473.2">+siret: VARCHAR(14)</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="489.2">+siren: VARCHAR(9)</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="505.2">+is_tva_intra: BOOLEAN</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="521.2">+id_tva_intra: VARCHAR(15)</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="537.2">+logo: LARGEBINARY</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="553.2">+type_activite: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="569.2">+telephone: VARCHAR(15)</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="585.2">+mail: VARCHAR(100)</text>
+    <text font-size="12.8" style="fill: #196b24;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="904" y="601.2">+mois_comptable: INTEGER</text>
+    <rect style="fill: #e8e8e8" x="900" y="608" width="225.6" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00eeff" x="900" y="608" width="225.6" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" points="261,-494 280,-494 280,20 1040,20 1040,114 1148.03,114 "/>
+    <polygon style="fill: #00ff00" points="1155.53,114 1145.53,119 1148.03,114 1145.53,109 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #00ff00" points="1155.53,114 1145.53,119 1148.03,114 1145.53,109 "/>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="268" y="-501">n</text>
+    <text font-size="15.9993" style="fill: #ff0000;text-anchor:end;font-family:monospace;font-style:normal;font-weight:normal" x="1153" y="107">1</text>
+  </g>
+</svg>

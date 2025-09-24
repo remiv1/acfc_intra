@@ -110,7 +110,9 @@ SOURCE docker-entrypoint-initdb.d/prepare_base_datas/cp_villes/91_villes.sql;
 SOURCE docker-entrypoint-initdb.d/prepare_base_datas/catalogue/21_catalogue.sql;
 
 -- Insertion des clients depuis l'ancienne base de données
--- SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/clients/clients.sql;
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/clients/clients.sql;
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/clients/particuliers.sql;
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/clients/professionnels.sql;
 
 -- Insertion des adresses depuis l'ancienne base de données
 -- SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/adresses/adresses.sql;

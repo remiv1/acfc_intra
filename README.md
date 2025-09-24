@@ -4,6 +4,7 @@ author: Rémi Verschuur
 date: 2025-08-28
 tags: ['Flask', 'Docker', 'Microservices', 'API', 'Gestion d\'entreprise', 'Web', 'Python', 'MariaDB', 'Au Collectionneur Franc-Comtois']
 ---
+
 # 🏢 ACFC - Application de Gestion d'Entreprise
 
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
@@ -45,6 +46,8 @@ L'architecture de l'application ACFC repose sur une approche micro-services, cha
 
 ## 🏗️ Architecture
 
+### Stack Technologique
+
 ```text
 Frontend:  HTML5 + CSS3 + JavaScript + Jinja2
 Backend:   Python 3.12 + Flask + SQLAlchemy  
@@ -52,6 +55,15 @@ Database:  MariaDB (données) + MongoDB (logs)
 Server:    Waitress WSGI + Nginx (reverse proxy)
 Deploy:    Docker + Docker Compose
 ```
+
+### Base de données
+
+### Diagramme de la Base de Données
+
+![Diagramme BDD](documentation/UML.svg)
+
+> Le schéma ci-dessus illustre les principales tables et relations du modèle de données ACFC.  
+> Pour plus de détails, consultez le fichier [UML.svg](documentation/UML.svg) dans le dossier documentation.
 
 ## 🚀 Démarrage Rapide
 

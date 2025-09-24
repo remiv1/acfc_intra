@@ -325,7 +325,7 @@ class Client(Base):
     type_client = mapped_column(Integer, nullable=False, comment="Type: 1=Particulier, 2=Professionnel")
     
     # === MÉTADONNÉES ===
-    created_at = mapped_column(Date, default=func.now(), nullable=False, comment="Date de création du client")
+    created_at = mapped_column(DateTime, default=func.now(), nullable=False, comment="Date de création du client")
     created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé le client")
     modified_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False, comment="Date de modification du client")
     modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié le client")
@@ -480,7 +480,7 @@ class Mail(Base):
     # === MÉTADONNÉES ===
     created_at = mapped_column(Date, default=func.now(), nullable=False)
     created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé l'email")
-    modified_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False)
+    modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié l'email")
     is_inactive = mapped_column(Boolean, default=False, nullable=False)
     
@@ -546,7 +546,7 @@ class Telephone(Base):
     # === MÉTADONNÉES ===
     created_at = mapped_column(Date, default=func.now(), nullable=False)
     created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé le téléphone")
-    modified_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False, comment="Date de modification du téléphone")
+    modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False, comment="Date de modification du téléphone")
     modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié le téléphone")
     is_inactive = mapped_column(Boolean, default=False, nullable=False)
     
@@ -581,7 +581,10 @@ class Adresse(Base):
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False)
     client = relationship("Client", back_populates="adresses")
-    commandes = relationship("Commande", back_populates="adresse")
+    commandes_livrees = relationship("Commande", back_populates="adresse_livraison",
+                                     foreign_keys='Commande.id_adresse_livraison')
+    commandes_facturees = relationship("Commande", back_populates="adresse_facturation",
+                                      foreign_keys='Commande.id_adresse_facturation')
 
     # === DONNÉES D'ADRESSE ===
     adresse_l1 = mapped_column(String(255), nullable=False)
@@ -596,7 +599,7 @@ class Adresse(Base):
                                 comment="Adresse principale pour ce client (une seule par client)")
     created_at = mapped_column(Date, default=func.now(), nullable=False)
     created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé l'adresse")
-    modified_at = mapped_column(Date, default=func.now(), onupdate=func.now(), nullable=False)
+    modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     modified_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant modifié l'adresse")
     is_inactive = mapped_column(Boolean, default=False, nullable=False)
 
@@ -629,7 +632,12 @@ class Adresse(Base):
 # ====================================================================
 
 class Commande(Base):
-    '''Représente une commande dans le système.'''
+    '''
+    Représente une commande dans le système.
+    Gère les informations de la commande, son état,
+    les adresses de livraison et facturation, ainsi que les
+    articles commandés.
+    '''
     __tablename__ = '11_commandes'
 
     # === IDENTIFIANT ET LIAISON CLIENT ===
@@ -638,11 +646,11 @@ class Commande(Base):
     client = relationship("Client", back_populates="commandes")
 
     # === DONNÉES DE LA COMMANDE ===
-    id_adresse_facturation = mapped_column(Integer, ForeignKey(PK_ADRESSE), nullable=True)
-    adresse_facturation = relationship("Adresse", back_populates="commandes")
     is_ad_livraison = mapped_column(Boolean, default=False, nullable=False)
     id_adresse_livraison = mapped_column(Integer, ForeignKey(PK_ADRESSE), nullable=True)
-    adresse_livraison = relationship("Adresse", foreign_keys=[id_adresse_livraison])
+    adresse_livraison = relationship("Adresse", foreign_keys=[id_adresse_livraison], back_populates="commandes_livrees")
+    id_adresse_facturation = mapped_column(Integer, ForeignKey(PK_ADRESSE), nullable=True)
+    adresse_facturation = relationship("Adresse", foreign_keys=[id_adresse_facturation], back_populates="commandes_facturees")
     descriptif = mapped_column(String(255), nullable=True)
     date_commande = mapped_column(Date, default=func.now(), nullable=False)
     montant = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
@@ -651,16 +659,16 @@ class Commande(Base):
 
     # === ÉTAT DE LA COMMANDE (GLOBAL) ===
     is_annulee = mapped_column(Boolean, default=False, nullable=False)
-    is_facture = mapped_column(Boolean, default=False, nullable=False,
-                              comment="True quand toute la commande est facturée")
-    is_expedie = mapped_column(Boolean, default=False, nullable=False,
+    is_expediee = mapped_column(Boolean, default=False, nullable=False,
                               comment="True quand toute la commande est expédiée")
+    is_facturee = mapped_column(Boolean, default=False, nullable=False,
+                              comment="True quand toute la commande est facturée")
     
     # === DATES HÉRITÉES (POUR COMPATIBILITÉ) ===
-    date_facturation = mapped_column(Date, nullable=True,
-                                    comment="Date de première facturation (compatibilité)")
     date_expedition = mapped_column(Date, nullable=True,
-                                   comment="Date de première expédition (compatibilité)")
+                                   comment="Date de dernière expédition (compatibilité)")
+    date_facturation = mapped_column(Date, nullable=True,
+                                    comment="Date de dernière facturation (compatibilité)")
 
     # === MÉTADONNÉES ===
     created_at = mapped_column(DateTime, default=func.now(), nullable=False)
@@ -703,14 +711,14 @@ class DevisesFactures(Base):
                               comment="Utilisateur qui a expédié cette ligne")
     
     # === MÉTADONNÉES ===
-    created_by = mapped_column(String(100), nullable=True,
-                              comment="Utilisateur qui a créé cette ligne")
     created_at = mapped_column(DateTime, default=func.now(), nullable=False,
                               comment="Date de création de cette ligne")
-    modified_by = mapped_column(String(100), nullable=True,
-                              comment="Utilisateur qui a modifié cette ligne")
+    created_by = mapped_column(String(100), nullable=True,
+                              comment="Utilisateur qui a créé cette ligne")
     modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False,
                               comment="Date de dernière modification")
+    modified_by = mapped_column(String(100), nullable=True,
+                              comment="Utilisateur qui a modifié cette ligne")
 
 class Facture(Base):
     '''Représente une facture dans le système.'''
@@ -786,8 +794,8 @@ class Expeditions(Base):
     
     # === IDENTIFIANT ET LIAISON ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    id_commande = mapped_column(Integer, ForeignKey('11_commandes.id'), nullable=False)
-    devises = relationship("DevisesFactures", back_populates="expedition")
+    id_devises_factures = mapped_column(Integer, ForeignKey('12_devises_factures.id'), nullable=False)
+    devises_factures = relationship("DevisesFactures", back_populates="expedition")
     
     # === DONNÉES DE CONTRÔLE QUALITE ===
     #TODO: Ajouter les champs de formulaire sur l'expédition
@@ -799,10 +807,10 @@ class Expeditions(Base):
     date_expedition_remise = mapped_column(Date, nullable=False)
 
     # === MÉTADONNÉES ===
-    created_by = mapped_column(String(50), nullable=True)
     created_at = mapped_column(DateTime, default=func.now())
-    modified_by = mapped_column(String(50), nullable=True)
+    created_by = mapped_column(String(100), nullable=True)
     modified_at = mapped_column(DateTime, default=func.now(), onupdate=func.now())
+    modified_by = mapped_column(String(100), nullable=True)
 
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE GESTION DES PRODUITS
@@ -812,11 +820,6 @@ class Catalogue(Base):
     """
     Classe représentant un catalogue de produits.
     La classe Catalogue gère l'ensemble des produits disponibles à la vente.
-    +==================================================+
-    ||        ATTENTION                               ||
-    ||  Vérifier que les changements sont identiques  ||
-    ||  à ceux du fichier d'initialisation init_db.*  ||
-    +==================================================+
     """
     __tablename__ = '21_catalogue'
 
@@ -1023,7 +1026,7 @@ class Villes(Base):
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     nom = mapped_column(String(100), nullable=False)
-    code_postal = mapped_column(Integer, nullable=False)
+    code_postal = mapped_column(String(10), nullable=False)
 
 class IndicatifsTel(Base):
     """Classe représentant les indicatifs téléphoniques."""
@@ -1041,7 +1044,7 @@ class Moi(Base):
     nom = mapped_column(String(100), nullable=False)
     adresse_l1 = mapped_column(String(255), nullable=False)
     adresse_l2 = mapped_column(String(255), nullable=True)
-    code_postal = mapped_column(Integer, nullable=False)
+    code_postal = mapped_column(String(10), nullable=False)
     ville = mapped_column(String(100), nullable=False)
     siret = mapped_column(String(14), nullable=False)
     siren = mapped_column(String(9), Computed(
