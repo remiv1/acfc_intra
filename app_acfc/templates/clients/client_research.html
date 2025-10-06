@@ -30,12 +30,14 @@
                     <input type="text" class="form-control" id="search-term" name="search_term" 
                            placeholder="Tapez au moins 3 caractères..." minlength="3">
                     <div class="form-text">Recherche à partir de 3 caractères</div>
+                    {% if '1' in session['habilitations'] or '2' in session['habilitations'] %}
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="search-inactive" name="search-inactive" value="true">
                         <label class="form-check-label" for="search-inactive">
                             Inclure les clients, mails, téléphones et adresses inactifs
                         </label>
                     </div>
+                    {% endif %}
                 </div>
                 
                 <!-- Type de recherche -->

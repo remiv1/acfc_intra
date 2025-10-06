@@ -132,14 +132,12 @@ function deletePhoneWithConfirm(button) {
                 'X-CSRF-Token': getCSRFToken()
             }
         }).then(resp => {
-            if (resp.ok) {
-                // Rafraîchir la page ou retirer l'élément du DOM
+            // Recharge la page après la réponse du serveur
+            if (resp.redirected) {
+                window.location.href = resp.url;
+            } else if (resp.ok) {
                 location.reload();
-            } else {
-                resp.text().then(t => console.error('Erreur suppression : ' + t));
             }
-        }).catch(err => {
-            showToast('Erreur réseau lors de la suppression : ' + err, 'error');
         });
     }
 }
@@ -171,17 +169,13 @@ function updateIndic() {
     });
 }
 
-/* TODO: Gérer les fonctions non vérifiées (//NOK) */
-//NOK
-/**
- * Initialisation des fonctionnalités de la page détails client
- */
+// Initialisation des fonctionnalités de la page détails client
 function initClientDetailsPage() {
     // Gestion des formulaires dans les modals
     const phoneForm = document.getElementById('addPhoneForm');
     const emailForm = document.getElementById('addEmailForm');
     const addressForm = document.getElementById('addAddressForm');
-
+    
     // Listener de validation des formulaires modaux
     [phoneForm, emailForm, addressForm].forEach(form => {
         if (form) {
@@ -194,8 +188,8 @@ function initClientDetailsPage() {
             });
         }
     });
-
-    // Reset des formulaires quand les modals se ferment
+    
+    // Reset des formulaires quand les modaux se ferment
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('hidden.bs.modal', function() {
             const form = this.querySelector('form');
@@ -205,7 +199,7 @@ function initClientDetailsPage() {
             }
         });
     });
-
+    
     // Gestionnaire spécifique pour le modal d'email - réinitialisation en mode création
     const emailModal = document.getElementById('addEmailModal');
     if (emailModal) {
@@ -213,31 +207,25 @@ function initClientDetailsPage() {
             
             // Ne faire la réinitialisation que si c'est explicitement un bouton d'ajout
             const isAddButton = event.relatedTarget && 
-                               (event.relatedTarget.textContent.includes('Ajouter') ||
-                                event.relatedTarget.classList.contains('btn-success'));
-
+            (event.relatedTarget.textContent.includes('Ajouter') ||
+            event.relatedTarget.classList.contains('btn-success'));
+            
             if (isAddButton) {
                 fillEmailModal({}, 'create');
             } 
         });
     }
-
+    
     // Gestionnaire spécifique pour le modal de téléphone - réinitialisation en mode création
     const phoneModal = document.getElementById('addPhoneModal');
     if (phoneModal) {
         phoneModal.addEventListener('show.bs.modal', function(event) {
-            console.log('Modal téléphone ouvert');
-            console.log('Element déclencheur:', event.relatedTarget);
-            
             // Ne faire la réinitialisation que si c'est explicitement un bouton d'ajout
             const isAddButton = event.relatedTarget && 
-                               (event.relatedTarget.textContent.includes('Ajouter') ||
-                                event.relatedTarget.classList.contains('btn-success'));
-            
-            console.log('Bouton d\'ajout téléphone détecté:', isAddButton);
+            (event.relatedTarget.textContent.includes('Ajouter') ||
+            event.relatedTarget.classList.contains('btn-success'));
             
             if (isAddButton) {
-                console.log('Réinitialisation téléphone en mode création');
                 fillPhoneModal({}, 'create');
             }
         });
@@ -247,23 +235,17 @@ function initClientDetailsPage() {
     const addressModal = document.getElementById('addAddressModal');
     if (addressModal) {
         addressModal.addEventListener('show.bs.modal', function(event) {
-            console.log('Modal adresse ouvert');
-            console.log('Element déclencheur:', event.relatedTarget);
-            
             // Ne faire la réinitialisation que si c'est explicitement un bouton d'ajout
             const isAddButton = event.relatedTarget && 
-                               (event.relatedTarget.textContent.includes('Ajouter') ||
-                                event.relatedTarget.classList.contains('btn-success'));
-            
-            console.log('Bouton d\'ajout adresse détecté:', isAddButton);
+            (event.relatedTarget.textContent.includes('Ajouter') ||
+            event.relatedTarget.classList.contains('btn-success'));
             
             if (isAddButton) {
-                console.log('Réinitialisation adresse en mode création');
                 fillAddressModal({}, 'create');
             }
         });
     }
-
+    
     // Format automatique du téléphone
     const phoneInput = document.getElementById('telephone');
     if (phoneInput) {
@@ -279,7 +261,7 @@ function initClientDetailsPage() {
             this.value = value.trim();
         });
     }
-
+    
     // Validation email en temps réel
     const emailInput = document.getElementById('mail');
     if (emailInput) {
@@ -298,13 +280,10 @@ function initClientDetailsPage() {
     }
 }
 
-//NOK
-/**
- * Actions pour l'édition/suppression des emails
- */
+// Actions pour l'édition/suppression des emails
 function editEmail(emailId, buttonElement) {
     
-    // Récupérer les données depuis les attributs data-* du bouton
+    // Récupérer les données depuis les attributs data-* du bouton et gestion d'erreur
     if (!buttonElement?.dataset) {
         return;
     }
@@ -320,7 +299,7 @@ function editEmail(emailId, buttonElement) {
     
     // Si les données sont vides, essayer avec getAttribute (méthode de fallback)
     if (!data.mail) {
-        console.log('Fallback vers getAttribute');
+        console.log('Fallback vers getAttribute pour email');
         data = {
             id: emailId,
             mail: buttonElement.getAttribute('data-email-mail'),
@@ -336,14 +315,9 @@ function editEmail(emailId, buttonElement) {
     // Ouvrir le modal
     const modal = new bootstrap.Modal(document.getElementById('addEmailModal'));
     modal.show();
-    
-    console.log('=== FIN ÉDITION EMAIL ===');
 }
 
-//NOK
-/**
- * Fonction pour remplir le modal d'email avec les données
- */
+// Fonction pour remplir le modal d'email avec les données
 function fillEmailModal(data, mode = 'create') {
     const form = document.getElementById('addEmailForm');
     const modalTitle = document.querySelector('#addEmailModal .modal-title');
@@ -396,8 +370,8 @@ function fillEmailModal(data, mode = 'create') {
     }
 }
 
-//NOK
-function deleteEmail(emailId) {
+// Fonction de suppression d'un email
+function deleteEmailWithConfirm(emailId) {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse email ?')) {
         const clientId = document.getElementById('client-id').value;
         const url = `/clients/${clientId}/delete-email/${emailId}`;
@@ -409,26 +383,21 @@ function deleteEmail(emailId) {
                 'X-CSRFToken': getCSRFToken(),
                 'X-CSRF-Token': getCSRFToken()
             }
-        })
-        .catch(err => {
-            console.error('Erreur réseau lors de la suppression :', err);
-            showToast('Erreur réseau lors de la suppression : ' + err, 'error');
+        }).then(resp => {
+            // Recharge la page après la réponse du serveur
+            if (resp.redirected) {
+                window.location.href = resp.url;
+            } else if (resp.ok) {
+                location.reload();
+            }
         });
     }
 }
 
-//NOK
-/**
- * Actions pour l'édition/suppression des adresses
- */
+// Actions pour l'édition/suppression des adresses
 function editAddress(addressId, buttonElement) {
-    console.log('=== DÉBUT ÉDITION ADRESSE ===');
-    console.log('Address ID:', addressId);
-    console.log('Button Element:', buttonElement);
-    
     // Récupérer les données depuis les attributs data-* du bouton
     if (!buttonElement?.dataset) {
-        console.error('Bouton non fourni ou sans données');
         return;
     }
     
@@ -455,34 +424,21 @@ function editAddress(addressId, buttonElement) {
         };
     }
     
-    console.log('Données extraites du DOM:', data);
-    
     // Remplir le modal avec les données existantes
     fillAddressModal(data, 'edit');
     
     // Ouvrir le modal
     const modal = new bootstrap.Modal(document.getElementById('addAddressModal'));
     modal.show();
-    
-    console.log('=== FIN ÉDITION ADRESSE ===');
 }
 
-//NOK
-/**
- * Fonction pour remplir le modal d'adresse avec les données
- */
+// Fonction pour remplir le modal d'adresse avec les données
 function fillAddressModal(data, mode = 'create') {
-    console.log('=== DÉBUT fillAddressModal ===');
-    console.log('Mode:', mode);
-    console.log('Données reçues:', data);
-    
     const form = document.getElementById('addAddressForm');
     const modalTitle = document.querySelector('#addAddressModal .modal-title');
     const submitButton = document.querySelector('#addAddressForm button[type="submit"]');
     
-    if (mode === 'edit') {
-        console.log('Mode édition adresse - modification du modal');
-        
+    if (mode === 'edit') {        
         // Mode édition
         modalTitle.innerHTML = '<i class="bi bi-geo-alt me-2"></i>Modifier l\'adresse';
         submitButton.innerHTML = '<i class="bi bi-check me-1"></i>Modifier';
@@ -504,9 +460,6 @@ function fillAddressModal(data, mode = 'create') {
         if (codePostalInput) codePostalInput.value = data.code_postal || '';
         if (villeInput) villeInput.value = data.ville || '';
         if (principalCheckbox) principalCheckbox.checked = data.is_principal || false;
-        
-        console.log('Adresse - Valeurs assignées:', data);
-        
     } else {
         // Mode création
         modalTitle.innerHTML = '<i class="bi bi-geo-alt me-2"></i>Ajouter une adresse';
@@ -521,11 +474,9 @@ function fillAddressModal(data, mode = 'create') {
         form.reset();
         form.classList.remove('was-validated');
     }
-    
-    console.log('=== FIN fillAddressModal ===');
 }
 
-//NOK
+// Fonction pour supprimer une adresse
 function deleteAddress(addressId) {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
         const clientId = document.getElementById('client-id').value;
@@ -539,19 +490,17 @@ function deleteAddress(addressId) {
                 'X-CSRF-Token': getCSRFToken()
             }
         }).then(resp => {
-            if (resp.ok) {
+            // Recharge la page après la réponse du serveur
+            if (resp.redirected) {
+                window.location.href = resp.url;
+            } else if (resp.ok) {
                 location.reload();
             }
-        }).catch(err => {
-            showToast('Erreur réseau lors de la suppression : ' + err, 'error');
         });
     }
 }
 
-//NOK
-/**
- * Affichage de notifications toast (optionnel)
- */
+// Fonction pour afficher des notifications toast
 function showToast(message, type = 'success') {
     // Si vous utilisez Bootstrap 5 toast
     const toastContainer = document.querySelector('.toast-container');
@@ -577,10 +526,7 @@ function showToast(message, type = 'success') {
     }
 }
 
-//NOK
-/**
- * Initialisation de la page de recherche de clients
- */
+ // Fonctionnalités pour la page de recherche avancée de clients
 function initClientSearchPage() {
     const searchInput = document.getElementById('search-term');
     const searchTypeInputs = document.querySelectorAll('input[name="search_type"]');
@@ -686,4 +632,76 @@ function initClientSearchPage() {
             }
         });
     });
+}
+
+// Fonction de réactivation d'une adresse inactive
+function reactivateAddress(addressId) {
+    const clientId = document.getElementById('client-id').value;
+    if (confirm('Êtes-vous sûr de vouloir réactiver cette adresse ?')) {
+        const url = `/clients/${clientId}/activate-address-${addressId}`;
+        fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+                'X-CSRF-Token': getCSRFToken()
+            },
+        }).then(resp => {
+            // Recharge la page après la réponse du serveur
+            if (resp.redirected) {
+                window.location.href = resp.url;
+            } else if (resp.ok) {
+                location.reload();
+            }
+        });
+    }
+}
+
+// Fonction de réactivation d'un téléphone inactif
+function reactivatePhone(phoneId) {
+    const clientId = document.getElementById('client-id').value;
+    if (confirm('Êtes-vous sûr de vouloir réactiver ce téléphone ?')) {
+        const url = `/clients/${clientId}/activate-phone-${phoneId}`;
+        fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+                'X-CSRF-Token': getCSRFToken()
+            },
+        }).then(resp => {
+            // Recharge la page après la réponse du serveur
+            if (resp.redirected) {
+                window.location.href = resp.url;
+            } else if (resp.ok) {
+                location.reload();
+            }
+        });
+    }
+}
+
+// Fonction de réactivation d'un email inactif
+function reactivateMail(emailId) {
+    const clientId = document.getElementById('client-id').value;
+    if (confirm('Êtes-vous sûr de vouloir réactiver cet email ?')) {
+        const url = `/clients/${clientId}/activate-email-${emailId}`;
+        fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+                'X-CSRF-Token': getCSRFToken()
+            },
+        }).then(resp => {
+            // Recharge la page après la réponse du serveur
+            if (resp.redirected) {
+                window.location.href = resp.url;
+            } else if (resp.ok) {
+                location.reload();
+            }
+        });
+    }
 }

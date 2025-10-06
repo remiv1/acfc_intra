@@ -29,13 +29,13 @@ Version : 1.0
 """
 from flask import (Blueprint, jsonify, request, redirect, url_for, Request,
                    session)
-from sqlalchemy.orm import Session as SessionBdDType, joinedload
+from sqlalchemy.orm import Session as SessionBdDType, joinedload, contains_eager
 from sqlalchemy import or_, func
 from werkzeug import Response as ResponseWerkzeug
 from app_acfc.modeles import (
     get_db_session, Client, Part, Pro, Telephone, Mail, Commande,
     Facture, Adresse, PrepareTemplates, Constants)
-from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE
+from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE, ADMINISTRATEUR
 from datetime import datetime
 from typing import List
 
@@ -151,8 +151,7 @@ class ClientMethods:
 # ROUTES - INTERFACE DE RECHERCHE CLIENTS
 # ================================================================
 
-@validate_habilitation(CLIENTS)
-@validate_habilitation(GESTIONNAIRE)
+@validate_habilitation([CLIENTS, GESTIONNAIRE], _and=False)
 @clients_bp.route('/rechercher', methods=['GET'])
 def clients_list() -> str:
     """
@@ -177,8 +176,7 @@ def clients_list() -> str:
 # API REST - DONNÉES CLIENTS GLOBALES
 # ================================================================
 
-@validate_habilitation(GESTIONNAIRE)
-@validate_habilitation(CLIENTS)
+@validate_habilitation([GESTIONNAIRE, CLIENTS], _and=False)
 @clients_bp.route('/recherche_avancee', methods=['GET'])
 def recherche_avancee() -> ResponseWerkzeug | str:
     """
@@ -197,9 +195,25 @@ def recherche_avancee() -> ResponseWerkzeug | str:
     # Récupération des paramètres
     search_term = request.args.get('q', '').strip()
     search_type = request.args.get('type', 'part').strip()
-    # TODO: Dans le formulaire, cette possibilité ne sera proposée qu'aux gestionnaires et administrateurs
     search_is_inactive = request.args.get('search-inactive', 'false').strip().lower() == 'true'
-    
+    search_inactive_phone = or_(Telephone.is_inactive == True, Telephone.is_inactive == False) if (
+        search_is_inactive
+        and ('1' in session['habilitations'] or '2' in session['habilitations'])
+    ) else Telephone.is_inactive == False
+    search_inactive_mail = or_(Mail.is_inactive == True, Mail.is_inactive == False) if (
+        search_is_inactive
+        and ('1' in session['habilitations'] or '2' in session['habilitations'])
+    ) else Mail.is_inactive == False
+    search_inactive_address = or_(Adresse.is_inactive == True, Adresse.is_inactive == False) if (
+        search_is_inactive
+        and ('1' in session['habilitations'] or '2' in session['habilitations'])
+    ) else Adresse.is_inactive == False
+    search_active_clients = or_(Client.is_active == True, Client.is_active == False) if (
+        not search_is_inactive
+        and ('1' in session['habilitations'] or '2' in session['habilitations'])
+    ) else Client.is_active == True
+
+
     # Récupération de la session de base de données
     db_session: SessionBdDType = get_db_session()
     
@@ -213,15 +227,7 @@ def recherche_avancee() -> ResponseWerkzeug | str:
                     db_session.query(Client)
                     .join(Client.part)
                     .filter(
-                        Client.is_active == (
-                            (True or False) if (
-                                search_is_inactive \
-                                and (
-                                    '1' in session['habilitations'] or \
-                                    '2' in session['habilitations']
-                                )
-                            ) else True
-                        ),
+                        search_active_clients,
                         or_(
                             Part.prenom.ilike(f'%{search_term}%'),
                             Part.nom.ilike(f'%{search_term}%'),
@@ -236,15 +242,7 @@ def recherche_avancee() -> ResponseWerkzeug | str:
                     db_session.query(Client)
                     .join(Client.pro)
                     .filter(
-                        Client.is_active == (
-                            (True or False) if (
-                                search_is_inactive \
-                                and (
-                                    '1' in session['habilitations'] or \
-                                    '2' in session['habilitations']
-                                )
-                            ) else True
-                        ),
+                        search_active_clients,
                         Pro.raison_sociale.ilike(f'%{search_term}%')
                     )
                     .all()
@@ -255,17 +253,9 @@ def recherche_avancee() -> ResponseWerkzeug | str:
                     db_session.query(Client)
                     .join(Client.mails)
                     .filter(
-                        Client.is_active == (
-                            (True or False) if (
-                                search_is_inactive \
-                                and (
-                                    '1' in session['habilitations'] or \
-                                    '2' in session['habilitations']
-                                )
-                            ) else True
-                        ),
+                        search_active_clients,
                         Mail.mail.ilike(f'%{search_term}%'),
-                        Mail.is_inactive == ((True or False) if search_is_inactive else False)
+                        search_inactive_mail
                     )
                     .distinct()
                     .all()
@@ -275,18 +265,10 @@ def recherche_avancee() -> ResponseWerkzeug | str:
                 clients = (
                     db_session.query(Client)
                     .join(Client.tels)
-                        .filter(
-                            Client.is_active == (
-                            (True or False) if (
-                                search_is_inactive \
-                                and (
-                                    '1' in session['habilitations'] or \
-                                    '2' in session['habilitations']
-                                )
-                            ) else True
-                        ),
+                    .filter(
+                        search_active_clients,
                         Telephone.telephone.ilike(f'%{search_term}%'),
-                        Telephone.is_inactive == ((True or False) if search_is_inactive else False)
+                        search_inactive_phone
                     )
                     .distinct()
                     .all()
@@ -297,22 +279,13 @@ def recherche_avancee() -> ResponseWerkzeug | str:
                     db_session.query(Client)
                     .join(Client.adresses)
                     .filter(
-                        Client.is_active == (
-                            (True or False) if (
-                                search_is_inactive \
-                                and (
-                                    '1' in session['habilitations'] or \
-                                    '2' in session['habilitations']
-                                )
-                            ) else True
-                        ),
-                        Adresse.is_inactive == ((True or False) if search_is_inactive else True),
+                        search_active_clients,
                         or_(
                             Adresse.adresse_l1.ilike(f'%{search_term}%'),
                             Adresse.adresse_l2.ilike(f'%{search_term}%'),
                             Adresse.code_postal.ilike(f'%{search_term}%'),
                             Adresse.ville.ilike(f'%{search_term}%'),
-                            Adresse.is_inactive == ((True or False) if search_is_inactive else False)
+                            search_inactive_address
                         )
                     )
                     .distinct()
@@ -752,6 +725,7 @@ def del_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         phone_obj.is_inactive = True
         phone_obj.modified_by = session.get('pseudo', 'N/A')
         phone_obj.is_principal = False  # Ne peut plus être principal
+        phone_obj.modified_at = datetime.now()
         db_session.commit()
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                  id_client=id_client, log=True, tab='phone',
@@ -760,7 +734,6 @@ def del_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                  id_client=id_client, log=True, tab='phone',
                                  error_message=Constants.messages('error_500', 'default') + f" : {e}"))
-
 
 @clients_bp.route('/<int:id_client>/add-email/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -931,6 +904,8 @@ def del_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         # Suppression logique
         mail_obj.is_inactive = True
         mail_obj.modified_by = session.get('pseudo', 'N/A')
+        mail_obj.is_principal = False  # Ne peut plus être principal
+        mail_obj.modified_at = datetime.now()
         db_session.commit()
 
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
@@ -1122,3 +1097,143 @@ def del_address(id_client: int, id_address: int) -> ResponseWerkzeug:
                                 id_client=id_client, log=True, tab='add',
                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
     
+@clients_bp.route('/<int:id_client>/activate-address-<int:id_address>/', methods=['POST'])
+@validate_habilitation([CLIENTS, ADMINISTRATEUR], _and=True)
+@validate_habilitation([CLIENTS, GESTIONNAIRE], _and=True)
+def activate_address(id_client: int, id_address: int) -> ResponseWerkzeug:
+    """
+    Réactivation d'une adresse inactive pour un client.
+    
+    Endpoint REST pour réactiver une adresse précédemment supprimée (logiquement) d'un client.
+    
+    Form Data:
+        - id_client (int): ID du client
+        - id_address (int): ID de l'adresse à réactiver
+    
+    Returns:
+        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
+    """
+    db_session = get_db_session()
+
+    try:
+        # Récupération et validation des données
+        client = (db_session
+            .query(Client).join(Client.adresses)
+            .options(
+                contains_eager(Client.adresses)
+            ).filter(
+                Client.id == id_client, Adresse.id == id_address
+            ).first()
+        )
+        address_obj = client.adresses[0] if client and client.adresses else None
+        if not address_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                         id_client=id_client, tab='add',
+                                         error_message=Constants.messages('address', 'not_found')))
+
+        # Réactivation logique
+        address_obj.is_inactive = False
+        address_obj.modified_by = session.get('pseudo', 'N/A')
+        address_obj.modified_at = datetime.now()
+        db_session.commit()
+
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
+                                id_client=id_client, success_message=Constants.messages('address', 'reactivated')))
+
+    except Exception as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                id_client=id_client, log=True, tab='add',
+                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+
+@clients_bp.route('/<int:id_client>/activate-phone-<int:id_phone>/', methods=['POST'])
+@validate_habilitation([CLIENTS, ADMINISTRATEUR], _and=True)
+@validate_habilitation([CLIENTS, GESTIONNAIRE], _and=True)
+def activate_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
+    """
+    Réactivation d'un numéro de téléphone inactif pour un client.
+    
+    Endpoint REST pour réactiver un numéro de téléphone précédemment supprimé (logiquement) d'un client.
+    
+    Form Data:
+        - id_client (int): ID du client
+        - id_phone (int): ID du téléphone à réactiver
+    
+    Returns:
+        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
+    """
+    db_session = get_db_session()
+
+    try:
+        # Récupération et validation des données
+        client = (db_session
+            .query(Client).join(Client.tels)
+            .options(
+                contains_eager(Client.tels)
+            ).filter(
+                Client.id == id_client, Telephone.id == id_phone
+            ).first()
+        )
+        phone_obj = client.tels[0] if client and client.tels else None
+        if not phone_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                         id_client=id_client, tab='phone',
+                                         error_message=Constants.messages('phone', 'not_found')))
+
+        # Réactivation logique
+        phone_obj.is_inactive = False
+        phone_obj.modified_by = session.get('pseudo', 'N/A')
+        phone_obj.modified_at = datetime.now()
+        db_session.commit()
+
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='phone',
+                                id_client=id_client, success_message=Constants.messages('phone', 'reactivated')))
+
+    except Exception as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                id_client=id_client, log=True, tab='phone',
+                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+    
+@clients_bp.route('/<int:id_client>/activate-email-<int:id_mail>/', methods=['POST'])
+@validate_habilitation([CLIENTS, ADMINISTRATEUR], _and=True)
+@validate_habilitation([CLIENTS, GESTIONNAIRE], _and=True)
+def activate_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
+    """
+    Réactivation d'une adresse email inactive pour un client.
+    
+    Endpoint REST pour réactiver une adresse email précédemment supprimée (logiquement) d'un client.
+    
+    Form Data:
+        - id_client (int): ID du client
+        - id_mail (int): ID de l'email à réactiver
+    
+    Returns:
+        Redirect: Vers la page de détails du client avec message de succès ou d'erreur
+    """
+    db_session = get_db_session()
+
+    try:
+        # Récupération et validation des données
+        client = (db_session
+            .query(Client).join(Client.mails)
+            .options(
+                contains_eager(Client.mails)
+            ).filter(
+                Client.id == id_client, Mail.id == id_mail
+            ).first()
+        )
+        mail_obj = client.mails[0] if client and client.mails else None
+        if not mail_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                         id_client=id_client, tab='mail',
+                                         error_message=Constants.messages('email', 'not_found')))
+
+        # Réactivation logique
+        mail_obj.is_inactive = False
+        mail_obj.modified_by = session.get('pseudo', 'N/A')
+        mail_obj.modified_at = datetime.now()
+        db_session.commit()
+
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
+                                id_client=id_client, success_message=Constants.messages('email', 'reactivated')))
+
+    except Exception as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                id_client=id_client, log=True, tab='mail',
+                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))

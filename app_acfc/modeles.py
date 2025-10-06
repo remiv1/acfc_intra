@@ -87,7 +87,6 @@ def verify_env() -> bool:
         )
     return True
 
-
 class Configuration:
     """
     Classe de configuration centralisée de l'application.

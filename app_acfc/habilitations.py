@@ -22,8 +22,8 @@ Auteur : ACFC Development Team
 Version : 1.0
 '''
 from functools import wraps
-from typing import Callable, Any
-from flask import session
+from typing import Callable, Any, List
+from flask import session, g
 from app_acfc.modeles import PrepareTemplates
 
 # Définition des niveaux d'habilitation
@@ -35,14 +35,14 @@ RESSOURCES_HUMAINES = '5'
 DEVELOPPEMENT_IT = '6'
 FORCE_DE_VENTE = '7'
 
-# TODO: Ajouter la possibilité d'insérer une liste dans required_habilitation pour vérifier plusieurs habilitations et un symbole logique (AND/OR)
-
-def validate_habilitation(required_habilitation: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+def validate_habilitation(required_habilitation: List[str] | str, _and: bool = False) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     Décorateur pour valider si l'utilisateur connecté possède une habilitation spécifique.
 
     Args:
-        required_habilitation (str): Habilitation requise (ex: '3').
+        required_habilitation (str): Habilitation requise (ex: '3') : un seul caractère.
+        Utiliser les constantes définies ci-dessus pour plus de clarté.
+        _and (bool): Si True, toutes les habilitations dans la liste doivent être présentes
 
     Returns:
         Callable[[Callable[..., Any]], Callable[..., Any]]: La fonction décorée ou une réponse d'erreur si l'habilitation est manquante.
@@ -50,18 +50,25 @@ def validate_habilitation(required_habilitation: str) -> Callable[[Callable[...,
     def decorator(function: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(function)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            # Si l'habilitation a déjà été validée dans cette requête, on passe directement
+            if getattr(g, 'habilitation_validated', False):
+                return function(*args, **kwargs)
             # Vérifie si l'utilisateur est connecté et possède une habilitation
             habilitations = session.get('habilitations', '')  # Exemple : '123'
             validate_habilitation = False
-            for habilitation in habilitations:
-                if habilitation == required_habilitation:
-                    validate_habilitation = True
-                    break
+            if isinstance(required_habilitation, list):
+                if _and:
+                    validate_habilitation = all(habilitation in habilitations for habilitation in required_habilitation)
+                else:
+                    validate_habilitation = any(habilitation in habilitations for habilitation in required_habilitation)
+            else:
+                validate_habilitation = required_habilitation in habilitations
             if not validate_habilitation:
                 message = f'Accès refusé. Habilitation requise : {required_habilitation}.' \
                             + f'\nVotre habilitation actuelle : {session.get('habilitations', 'inconnu')}.' \
                             + f'\nUtilisateur : {session.get("pseudo", "Anonyme")}.'
                 return PrepareTemplates.error_4xx(status_code=403, status_message=message, log=True)
+            g.habilitation_validated = True  # Marque que l'habilitation a été validée
             return function(*args, **kwargs)
         return wrapper
     return decorator

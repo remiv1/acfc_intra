@@ -44,6 +44,7 @@
 <input type="hidden" id="pro-id" value="{{ pro.id }}">
 {% endif %}
 
+<!-- Conteneur principal du client -->
 <div class="container-fluid">
     <!-- En-tête avec informations principales du client -->
     <div class="row mb-4">
@@ -117,44 +118,32 @@
             </div>
         </div>
     </div>
-
     <!-- Messages de succès et d'erreur -->
-    {% if success_message %}
     <div class="row mb-4">
         <div class="col-12">
+        {% if success_message %}
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="bi bi-check-circle-fill me-2"></i>
                 {{ success_message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        </div>
-    </div>
-    {% endif %}
-    
-    {% if error_message %}
-    <div class="row mb-4">
-        <div class="col-12">
+        {% endif %}
+        {% if error_message %}
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 {{ error_message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if message %}
-    <div class="row mb-4">
-        <div class="col-12">
+        {% endif %}
+        {% if message %}
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+        {% endif %}
         </div>
     </div>
-    {% endif %}
-
     <!-- Navigation par onglets -->
     <div class="row">
         <div class="col-12">
@@ -229,10 +218,8 @@
             </div>
         </div>
     </div>
-
     <!-- Contenu des onglets -->
     <div class="tab-content" id="clientTabsContent">
-        
         <!-- Onglet Informations -->
         <div class="tab-pane fade{% if tab == 'info' or tab is none %} show active{% endif %}" id="infos" role="tabpanel">
             <div class="row">
@@ -434,6 +421,22 @@
                                                     </button></li>
                                                 </ul>
                                             </div>
+                                            {% elif '1' in session['habilitations'] or '2' in session['habilitations'] %}
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-label="Actions pour le téléphone">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <button class="dropdown-item" type="button"
+                                                                data-phone-id="{{ telephone.id }}"
+                                                                data-client-id="{{ client.id }}"
+                                                                onclick="reactivatePhone(this.dataset.phoneId)">
+                                                            <i class="bi bi-arrow-clockwise me-2"></i>Réactiver
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -516,9 +519,25 @@
                                                         onclick="editEmail(this.dataset.emailId, this)">
                                                         <i class="bi bi-pencil me-2"></i>Modifier
                                                     </button></li>
-                                                    <li><button class="dropdown-item text-danger" type="button" data-email-id="{{ email.id }}" onclick="deleteEmail(this.dataset.emailId)">
+                                                    <li><button class="dropdown-item text-danger" type="button" data-email-id="{{ email.id }}" onclick="deleteEmailWithConfirm(this.dataset.emailId)">
                                                         <i class="bi bi-trash me-2"></i>Supprimer
                                                     </button></li>
+                                                </ul>
+                                            </div>
+                                            {% elif '1' in session['habilitations'] or '2' in session['habilitations'] %}
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-label="Actions pour le mail">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <button class="dropdown-item" type="button"
+                                                                data-mail-id="{{ email.id }}"
+                                                                data-client-id="{{ client.id }}"
+                                                                onclick="reactivateMail(this.dataset.mailId)">
+                                                            <i class="bi bi-arrow-clockwise me-2"></i>Réactiver
+                                                        </button>
+                                                    </li>
                                                 </ul>
                                             </div>
                                             {% endif %}
@@ -602,19 +621,39 @@
                                                     <i class="bi bi-three-dots-vertical"></i>
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li><button class="dropdown-item" type="button" 
-                                                        data-address-id="{{ adresse.id }}"
-                                                        data-address-l1="{{ adresse.adresse_l1 }}"
-                                                        data-address-l2="{{ adresse.adresse_l2 or '' }}"
-                                                        data-address-postal="{{ adresse.code_postal }}"
-                                                        data-address-ville="{{ adresse.ville }}"
-                                                        data-address-principal="{{ adresse.is_principal|lower }}"
-                                                        onclick="editAddress(this.dataset.addressId, this)">
-                                                        <i class="bi bi-pencil me-2"></i>Modifier
-                                                    </button></li>
-                                                    <li><button class="dropdown-item text-danger" type="button" data-address-id="{{ adresse.id }}" onclick="deleteAddress(this.dataset.addressId)">
-                                                        <i class="bi bi-trash me-2"></i>Supprimer
-                                                    </button></li>
+                                                    <li>
+                                                        <button class="dropdown-item" type="button" 
+                                                                data-address-id="{{ adresse.id }}"
+                                                                data-address-l1="{{ adresse.adresse_l1 }}"
+                                                                data-address-l2="{{ adresse.adresse_l2 or '' }}"
+                                                                data-address-postal="{{ adresse.code_postal }}"
+                                                                data-address-ville="{{ adresse.ville }}"
+                                                                data-address-principal="{{ adresse.is_principal|lower }}"
+                                                                onclick="editAddress(this.dataset.addressId, this)">
+                                                            <i class="bi bi-pencil me-2"></i>Modifier
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button class="dropdown-item text-danger" type="button" data-address-id="{{ adresse.id }}" onclick="deleteAddress(this.dataset.addressId)">
+                                                            <i class="bi bi-trash me-2"></i>Supprimer
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            {% elif '1' in session['habilitations'] or '2' in session['habilitations'] %}
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-label="Actions pour l'adresse">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <button class="dropdown-item" type="button"
+                                                                data-address-id="{{ adresse.id }}"
+                                                                data-client-id="{{ client.id }}"
+                                                                onclick="reactivateAddress(this.dataset.addressId)">
+                                                            <i class="bi bi-arrow-clockwise me-2"></i>Réactiver
+                                                        </button>
+                                                    </li>
                                                 </ul>
                                             </div>
                                             {% endif %}
