@@ -21,7 +21,8 @@ from sqlalchemy.orm import Session as SessionBdDType
 from werkzeug import Response
 from werkzeug.exceptions import NotFound
 from app_acfc.modeles import (Commande, Constants, DevisesFactures, Catalogue, Client,
-                              Facture, Operations, PrepareTemplates, Ventilations, get_db_session)
+                              Facture, Operations, PrepareTemplates, Ventilations, get_db_session,
+                              OrdersUtilities)
 from app_acfc.habilitations import validate_habilitation, CLIENTS
 from typing import List, Dict, Optional, Any
 import qrcode
@@ -34,9 +35,6 @@ commandes_bp = Blueprint(name='commandes',
                          url_prefix='/commandes')
 
 class OrdersMethods:
-    '''
-    Docstring pour OrdersMethods
-    '''
     @staticmethod
     def handle_catalog_filters(client: Client, commande: Optional[Commande], form_data: Any, session_db: SessionBdDType):
         """Gérer les filtres du catalogue"""
@@ -128,8 +126,7 @@ class OrdersMethods:
 
     @staticmethod
     def save_commande(client: Client, commande: Optional[Commande], form_data: Any, session_db: SessionBdDType):
-        """Sauvegarder une commande (création ou modification)"""
-        try:
+        """Sauvegarder une commande (création ou modification)
             is_new = commande is None
             
             if is_new:
@@ -178,7 +175,8 @@ class OrdersMethods:
                     # On utilise un identifiant temporaire basé sur l'ordre ou l'ID
                     lignes_existantes_dict[str(ligne.id)] = ligne
                 
-            
+            """
+        try:
             # Mettre à jour la remise par défaut du client si modifiée
             remise_client_form = form_data.get('remise_client')
             if remise_client_form:
@@ -312,6 +310,21 @@ class OrdersMethods:
         except Exception as e:
             return render_commande_form(client, commande, session_db)
 
+@commandes_bp.route('/client/<int:id_client>/commandes/<int:id_commande>/details')
+@validate_habilitation(CLIENTS)
+def order_details(id_commande: int, id_client: int):
+    """Afficher les détails d'une commande"""
+    session_db = get_db_session()
+    try:
+        commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
+        if not commande:
+            raise NotFound("Commande non trouvée")
+
+        return PrepareTemplates.orders(subcontext='details', commande=commande, log=True, id_client=id_client)
+        
+    except Exception as e:
+        raise NotFound(Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})')
+
 @commandes_bp.route('/client-<int:id_client>/nouvelle-commande', methods=['GET', 'POST'])
 @validate_habilitation(CLIENTS)
 def new_order(id_client: int) -> str | Response:
@@ -326,33 +339,25 @@ def new_order(id_client: int) -> str | Response:
     # === Gestion de la demande de formulaire ===
     if request.method == 'GET':
         # retour du formulaire de création de commande
-        message = Constants.messages('commandes', 'create')
-        return PrepareTemplates.orders(subcontext='form', id_client=id_client, message=message)
+        order_getting = OrdersUtilities().get_request_new(id_client=id_client)
+        return order_getting.template
 
     # === Traitement du formulaire soumis ===
-    if request.method == 'POST':
-        try:
-            # Récupérer le client
-            session_db = get_db_session()
-            client = session_db.query(Client).filter(Client.id == id_client).first()
+    elif request.method == 'POST':
+        order_posting = OrdersUtilities(request=request) \
+                            .post_request(id_client=id_client)
+        
+        return order_posting.template
+    
+    # === Par défaut, rediriger vers la fiche client ===
+    else:
+        message = Constants.messages(type_msg='error_400', second_type_message='wrong_road')
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                id_client=id_client,
+                                error_message=message))
+    
 
-            # Gestion du client inconnu
-            if not client: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                                id_client=id_client,
-                                                error_message=Constants.messages('clients', 'not_found')))
-            
-            # Sauvegarde de commande (toutes les autres actions)
-            return OrdersMethods.save_commande(client=client, commande=None, form_data=request.form, session_db=session_db)
-
-        except Exception as e:
-            message = Constants.messages('error_500', 'default') + f' : ({e})'
-            log_file = Constants.log_files('commandes')
-            return PrepareTemplates.error_5xx(status_code=500, status_message=message,
-                                            log=True, specific_log=log_file)
-    # === Autres méthodes non gérées ===
-    return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                            id_client=id_client,
-                            error_message=Constants.messages('error_400', 'wrong_road')))
+#TODO: Refactoriser ci-dessous
 
 
 @commandes_bp.route('/client-<int:id_client>/commande-<int:id_commande>/modifier', methods=['GET', 'POST'])
@@ -462,11 +467,11 @@ def render_commande_form(client: Client, commande: Optional[Commande], session_d
                                form_sub_context=form_sub_context,
                                client=client,
                                commande=commande,
+                               current_year=current_year,
                                catalogue_complet=catalogue_complet,
                                millesimes=millesimes,
                                types_produit=types_produit,
                                geographies=geographies,
-                               current_year=current_year,
                                produits_commande=produits_commande,
                                produits_id_commandes=produits_id_commandes,
                                lignes_devis=lignes_devis,
@@ -503,36 +508,9 @@ def cancel_order(id_commande: int, id_client: int):
         return redirect(url_for(DETAIL_CLIENT, id_client=id_client))
 
 
-@commandes_bp.route('/client/<int:id_client>/commandes/<int:id_commande>/details')
-@validate_habilitation(CLIENTS)
-def commande_details(id_commande: int, id_client: int):
-    """Afficher les détails d'une commande"""
-    session_db = get_db_session()
-    try:
-        commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
-        if not commande:
-            raise NotFound("Commande non trouvée")
-
-        # Récupérer les produits de la commande
-        devises_factures = session_db.query(DevisesFactures).filter(DevisesFactures.id_commande == id_commande).all()
-        
-        return render_template('base.html',
-                             context='commandes',
-                             sub_context='details',
-                             id_commande=id_commande,
-                             id_client=id_client,
-                             commande=commande,
-                             devises_factures=devises_factures,
-                             now=datetime.now(),
-                             today=date.today())
-        
-    except Exception as e:
-        raise NotFound("Erreur lors de l'affichage des détails de la commande")
-
-
 @commandes_bp.route('/client/<int:id_client>/commandes/<int:id_commande>/bon-impression')
 @validate_habilitation(CLIENTS)
-def commande_bon_impression(id_commande: int, id_client: int):
+def order_purchase(id_commande: int, id_client: int):
     """Afficher le bon de commande pour impression"""
     session_db = get_db_session()
     try:
@@ -889,9 +867,9 @@ def _mettre_a_jour_statut_commande(session_db: SessionBdDType, commande: Command
         raise
 
 
-@commandes_bp.route('/facture/<int:id_facture>')
+@commandes_bp.route('/client/<int:id_client>/facture/<int:id_facture>')
 @validate_habilitation(CLIENTS)
-def facture_details(id_facture: int):
+def bill_details(id_client: int, id_facture: int):
     """Afficher les détails d'une facture"""
     session_db = get_db_session()
     try:
@@ -918,9 +896,9 @@ def facture_details(id_facture: int):
         return redirect(url_for('clients.liste_clients'))
 
 
-@commandes_bp.route('/facture/<int:id_facture>/impression')
+@commandes_bp.route('/client/<int:id_client>/facture/<int:id_facture>/impression')
 @validate_habilitation(CLIENTS)
-def facture_impression(id_facture: int):
+def bill_print(id_client: int, id_facture: int):
     """Afficher la facture pour impression"""
     session_db = get_db_session()
     try:
