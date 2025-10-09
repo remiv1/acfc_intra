@@ -694,6 +694,7 @@ class DevisesFactures(Base):
     remise = mapped_column(Numeric(10, 4), nullable=False, default=0.10)
     prix_total = mapped_column(Numeric(10, 4), Computed('qte * prix_unitaire * (1 - remise)'))
     remise_euro = mapped_column(Numeric(10, 4), Computed('qte * prix_unitaire * remise'))
+    is_annulee = mapped_column(Boolean, default=False, nullable=False)
     
     # === ÉTAT DE FACTURATION ET EXPÉDITION ===
     is_facture = mapped_column(Boolean, default=False, nullable=False, 
@@ -806,7 +807,7 @@ class Expeditions(Base):
 
     # === DONNÉES DE L'EXPÉDITION ===
     is_main_propre = mapped_column(Boolean, default=False, nullable=False)
-    numero_expedition = mapped_column(String(50), nullable=False)
+    numero_expedition = mapped_column(String(50), nullable=True)
     date_expedition_remise = mapped_column(Date, nullable=False)
 
     # === MÉTADONNÉES ===

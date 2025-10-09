@@ -125,3 +125,12 @@ SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/telephones/te
 
 -- Insertion des commandes depuis l'ancienne base de données
 SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/devis_factures/commandes/commandes.sql;
+
+-- Insertion des factures depuis l'ancienne base de données
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/devis_factures/factures/factures.sql;
+
+-- Insertion des détails des commandes depuis l'ancienne base de données
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/devis_factures/devises_factures/devises_factures.sql;
+
+-- Insertion des expéditions depuis l'ancienne base de données
+SOURCE docker-entrypoint-initdb.d/prepare_base_datas/_confidential/devis_factures/expeditions/expeditions.sql;
