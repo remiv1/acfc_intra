@@ -2,17 +2,17 @@
 
 **Date du rapport :** 11 October 2025  
 **Période analysée :** 04 October 2025 - 11 October 2025 (7 jours)  
-**Nombre de commits :** 11  
+**Nombre de commits :** 14  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 11 commits sur 7 jours  
-**Volume de code :** 1190 lignes ajoutées, 4079 lignes supprimées  
-**Fichiers impactés :** 71 fichiers modifiés  
-**Productivité moyenne :** 170 lignes/jour
+**Activité de développement :** 14 commits sur 7 jours  
+**Volume de code :** 1313 lignes ajoutées, 4497 lignes supprimées  
+**Fichiers impactés :** 90 fichiers modifiés  
+**Productivité moyenne :** 187 lignes/jour
 
 ---
 
@@ -138,6 +138,39 @@
 
 ### 11 October 2025
 
+#### 21:17 - f1bf577 - fix: corriger le chemin de la base de données SQLite et ajouter un volume pour les files d'attente dans docker-compose
+
+**Catégorie :** Correction de bugs  
+**Impact :** +9 -4 lignes, 5 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Sat Oct 11 21:17:25 2025 +0200`
+- `    fix: corriger le chemin de la base de données SQLite et ajouter un volume pour les files d'attente dans docker-compose`
+- ... et 2 autres fichiers
+
+#### 21:07 - b99a615 - feat: ajout d'un modèle QueueItem et configuration de la base de données SQLite, suppression des services de gestion des mails et de Redis qui seront traités dans le conteneur FastAPI avec de système de routes asynchrones.
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +68 -394 lignes, 10 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Sat Oct 11 21:07:04 2025 +0200`
+- `    feat: ajout d'un modèle QueueItem et configuration de la base de données SQLite, suppression des services de gestion des mails et de Redis qui seront traités dans le conteneur FastAPI avec de système de routes asynchrones.`
+- ... et 7 autres fichiers
+
+#### 15:57 - eb55a42 - 📊 Mise à jour automatique du rapport de suivi (11/10/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +46 -20 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Sat Oct 11 15:57:11 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (11/10/2025)`
+- ... et 1 autres fichiers
+
 #### 17:56 - b8f4b8a - Refactor command handling and remove legacy JavaScript
 
 **Catégorie :** Refactoring  
@@ -154,34 +187,37 @@
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 4 commits (36.4%)
-- **Développement de fonctionnalités** : 4 commits (36.4%)
-- **Développement général** : 2 commits (18.2%)
-- **Refactoring** : 1 commits (9.1%)
+- **Développement de fonctionnalités** : 5 commits (35.7%)
+- **Interface utilisateur** : 5 commits (35.7%)
+- **Développement général** : 2 commits (14.3%)
+- **Correction de bugs** : 1 commits (7.1%)
+- **Refactoring** : 1 commits (7.1%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 9 fichiers modifiés
+- **Python** : 13 fichiers modifiés
 - **JavaScript** : 8 fichiers modifiés
+- **Documentation** : 6 fichiers modifiés
 - **HTML** : 6 fichiers modifiés
-- **Documentation** : 5 fichiers modifiés
+- **YAML/Config** : 2 fichiers modifiés
+- **Docker** : 1 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 1.6 commits/jour
-- **Volume de code :** 5269 modifications totales
+- **Fréquence de commit :** 2.0 commits/jour
+- **Volume de code :** 5810 modifications totales
 - **Ratio ajouts/suppressions :** 0.29
-- **Moyenne lignes par commit :** 479
+- **Moyenne lignes par commit :** 415
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 1190 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 1313 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
 *Rapport généré automatiquement le 11 October 2025*
