@@ -1,18 +1,18 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 09 October 2025  
-**Période analysée :** 02 October 2025 - 09 October 2025 (7 jours)  
-**Nombre de commits :** 9  
+**Date du rapport :** 11 October 2025  
+**Période analysée :** 04 October 2025 - 11 October 2025 (7 jours)  
+**Nombre de commits :** 11  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 9 commits sur 7 jours  
-**Volume de code :** 819 lignes ajoutées, 594 lignes supprimées  
-**Fichiers impactés :** 47 fichiers modifiés  
-**Productivité moyenne :** 117 lignes/jour
+**Activité de développement :** 11 commits sur 7 jours  
+**Volume de code :** 1190 lignes ajoutées, 4079 lignes supprimées  
+**Fichiers impactés :** 71 fichiers modifiés  
+**Productivité moyenne :** 170 lignes/jour
 
 ---
 
@@ -46,6 +46,17 @@
 
 
 ### 09 October 2025
+
+#### 16:32 - fded129 - 📊 Mise à jour automatique du rapport de suivi (09/10/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +47 -14 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Thu Oct 9 16:32:07 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (09/10/2025)`
+- ... et 1 autres fichiers
 
 #### 18:31 - 2da5777 - Merge branch 'sprint_billing_order' of https://github.com/remiv1/acfc_intra into sprint_billing_order
 
@@ -125,37 +136,52 @@
 - ... et 2 autres fichiers
 
 
+### 11 October 2025
+
+#### 17:56 - b8f4b8a - Refactor command handling and remove legacy JavaScript
+
+**Catégorie :** Refactoring  
+**Impact :** +324 -3471 lignes, 20 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Sat Oct 11 17:56:39 2025 +0200`
+- `    Refactor command handling and remove legacy JavaScript`
+- ... et 18 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 4 commits (44.4%)
-- **Interface utilisateur** : 3 commits (33.3%)
-- **Développement général** : 2 commits (22.2%)
+- **Interface utilisateur** : 4 commits (36.4%)
+- **Développement de fonctionnalités** : 4 commits (36.4%)
+- **Développement général** : 2 commits (18.2%)
+- **Refactoring** : 1 commits (9.1%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 6 fichiers modifiés
-- **Documentation** : 4 fichiers modifiés
-- **HTML** : 4 fichiers modifiés
-- **JavaScript** : 1 fichiers modifiés
+- **Python** : 9 fichiers modifiés
+- **JavaScript** : 8 fichiers modifiés
+- **HTML** : 6 fichiers modifiés
+- **Documentation** : 5 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 1.3 commits/jour
-- **Volume de code :** 1413 modifications totales
-- **Ratio ajouts/suppressions :** 1.38
-- **Moyenne lignes par commit :** 157
+- **Fréquence de commit :** 1.6 commits/jour
+- **Volume de code :** 5269 modifications totales
+- **Ratio ajouts/suppressions :** 0.29
+- **Moyenne lignes par commit :** 479
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 819 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 1190 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 09 October 2025*
+*Rapport généré automatiquement le 11 October 2025*
