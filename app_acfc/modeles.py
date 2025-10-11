@@ -724,6 +724,70 @@ class DevisesFactures(Base):
                               comment="Date de dernière modification")
     modified_by = mapped_column(String(100), nullable=True,
                               comment="Utilisateur qui a modifié cette ligne")
+    
+    def __repr__(self) -> str:
+        """
+        Représentation sous forme de chaîne de l'objet DevisesFactures
+        lors de l'utilisation de print() ou dans le shell.
+        """
+        return f"<DevisesFactures(id={self.id}, commande_id={self.id_commande}, reference='{self.reference}', qte={self.qte}, prix_total={self.prix_total})>"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Retourne un dictionnaire représentant l'élément de commande/facture
+        """
+        return {
+            'id': self.id,
+            'id_commande': self.id_commande,
+            'reference': self.reference,
+            'designation': self.designation,
+            'qte': self.qte,
+            'prix_unitaire': float(self.prix_unitaire),
+            'remise': float(self.remise),
+            'prix_total': float(self.prix_total) if self.prix_total is not None else None,
+            'remise_euro': float(self.remise_euro) if self.remise_euro is not None else None,
+            'is_annulee': self.is_annulee,
+            'is_facture': self.is_facture,
+            'id_facture': self.id_facture,
+            'facture_by': self.facture_by,
+            'is_expedie': self.is_expedie,
+            'id_expedition': self.id_expedition,
+            'expedie_by': self.expedie_by,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'created_by': self.created_by,
+            'modified_at': self.modified_at.isoformat() if self.modified_at else None,
+            'modified_by': self.modified_by
+        }
+    
+    @classmethod
+    def to_obj(cls, data: Dict[str, Any]) -> 'DevisesFactures':
+        """
+        Crée une instance DevisesFactures à partir d'un dictionnaire.
+        
+        Args:
+            data (Dict[str, Any]): Dictionnaire contenant les données de l'élément
+        
+        Returns:
+            DevisesFactures: Instance créée avec les données fournies
+        """
+        return cls(
+            id=data.get('id', None),
+            id_commande=data.get('id_commande', None),
+            reference=data.get('reference', None),
+            designation=data.get('designation', None),
+            qte=data.get('qte', 1),
+            prix_unitaire=data.get('prix_unitaire', 0.00),
+            remise=data.get('remise', 0.10),
+            is_annulee=data.get('is_annulee', False),
+            is_facture=data.get('is_facture', False),
+            id_facture=data.get('id_facture', None),
+            facture_by=data.get('facture_by', None),
+            is_expedie=data.get('is_expedie', False),
+            id_expedition=data.get('id_expedition', None),
+            expedie_by=data.get('expedie_by', None),
+            created_by=data.get('created_by', None),
+            modified_by=data.get('modified_by', None)
+        )
 
 class Facture(Base):
     '''Représente une facture dans le système.'''
@@ -1887,152 +1951,3 @@ class GeoMethods:
         return db_session.query(Villes).filter(
             Villes.code_postal.ilike(f'{code_postal}'
             )).all()
-
-class OrdersUtilities:
-    """
-    Classe utilitaire pour les méthodes liées aux commandes et factures.
-    """
-    def __init__(self, *, request: Optional[Request]=None) -> None:
-        """
-        Classe d'initialisation des utilitaires de gestion des commandes et factures.
-        """
-        if request:
-            self.request: Request = request
-
-        self.client: Client = Client()
-        self.commande: Commande = Commande()
-        self.session_db: SessionBdDType = get_db_session()
-
-    def get_request_new(self, *, id_client: int) -> 'OrdersUtilities':
-        """
-        Gestion des requêtes HTTP de type GET.
-        Args:
-            id_client (int): Identifiant du client
-        Returns:
-            OrdersUtilities: Instance de la classe OrdersUtilities
-        """
-        message = Constants.messages('commandes', 'create')
-        self.template: str = PrepareTemplates.orders(subcontext='form', id_client=id_client, message=message)
-        return self
-    
-    def post_request(self, *, id_client: int, commande: Optional[Commande]=None) -> 'OrdersUtilities':
-        """
-        Gestion des requêtes HTTP de type POST.
-        Args:
-            request (Request): Objet de la requête HTTP
-            id_client (int): Identifiant du client
-        Returns:
-            OrdersUtilities: Instance de la classe OrdersUtilities
-        """
-        try:
-            # Récupération du client
-            self.client = self.session_db.query(Client).filter(Client.id == id_client).first()
-            if not self.client:
-                error_message = Constants.messages('client', 'not_found')
-                self.template = url_for(Constants.return_pages('clients', 'detail'),
-                                                 id_client=id_client,
-                                                 error_message=error_message)
-                return self
-            self.template = self.save_order(commande=commande).template
-            return self
-        except Exception as e:
-            acfc_log.log(level=ERROR, message=str(e),
-                         specific_logger=Constants.log_files('commandes'),
-                         user=session.get('pseudo', 'N/A'), db_log=True)
-            error_message = Constants.messages('commandes', 'not_found')
-            self.template = url_for(Constants.return_pages('clients', 'detail'),
-                                             id_client=id_client,
-                                             error_message=error_message)
-            return self
-
-    def save_order(self, *, commande: Optional[Commande]=None) -> 'OrdersUtilities':
-        """
-        Sauvegarde une nouvelle commande ou met à jour une commande existante.
-        Args:
-            commande (Optional[Commande]): Instance de la commande à mettre à jour (None pour une nouvelle commande)
-        Returns:
-            OrdersUtilities: Instance de la classe OrdersUtilities
-        """
-        self.commande = commande
-        self._get_order_datas()._get_order_entries_data()
-
-        return self
-
-    def _get_order_datas(self) -> 'OrdersUtilities':
-        """
-        Récupère les données de la commande depuis le formulaire.
-        Returns:
-            OrdersUtilities: Instance de la classe OrdersUtilities
-        """
-        self.is_new_order: bool = self.commande.id is None
-
-        if self.is_new_order:
-            self.commande = Commande()
-            self.commande.id_client = self.client.id
-
-        # Récupération et validation des données du formulaire
-        self.commande.date_commande = datetime.strptime(self.request.form.get('date_commande', ''), '%Y-%m-%d').date()
-        self.commande.descriptif = self.request.form.get('descriptif', '').strip()
-        self.commande.id_adresse_livraison = int(self.request.form.get('id_adresse_livraison', '0'))
-        self.commande.id_adresse_facturation = int(self.request.form.get('id_adresse_facturation', '0'))
-        self.discount: float = float(self.request.form.get('remise_client', '0,10').replace(',', '.'))
-
-        # Etat de la commande
-        self.commande.is_facturee = 'is_facturee' in self.request.form
-        self.commande.is_expediee = 'is_expediee' in self.request.form
-
-        # Dates conditionnelles
-        if self.commande.is_facturee and self.request.form.get('date_facturation'):
-            self.commande.date_facturation = datetime.strptime(self.request.form.get('date_facturation', ''), '%Y-%m-%d').date()
-        else:
-            self.commande.date_facturation = None
-        if self.commande.is_expediee and self.request.form.get('date_expedition'):
-            self.commande.date_expedition = datetime.strptime(self.request.form.get('date_expedition', ''), '%Y-%m-%d').date()
-        else:
-            self.commande.date_expedition = None
-
-        # Flush de la commande pour obtenir un ID si nouvelle
-        if self.is_new_order:
-            self.session_db.add(self.commande)
-            self.session_db.flush()
-
-        return self
-    
-    def _get_order_entries_data(self) -> 'OrdersUtilities':
-        """
-        Récupère les données des entrées de la commande depuis le formulaire.
-        Returns:
-            OrdersUtilities: Instance de la classe OrdersUtilities
-        """
-        if not self.is_new_order:
-            # Mise à jour des entrées existantes
-            self.existing_entries = self.session_db.query(DevisesFactures).filter(
-                DevisesFactures.id_commande == self.commande.id
-            ).all()
-
-        total_amount = Decimal('0.00')
-        self.form_entries: Dict[str, Dict[Any, Any]] = {}
-
-        for key in self.request.form.keys():
-            if key.startswith(('prix_', 'qte_', 'remise_')):
-                parts = key.split('_')
-                if len(parts) >= 3:
-                    field_type = parts[0]
-                    product_id = int(parts[1])
-                    entry_id = '_'.join(parts[2:])
-
-                    if entry_id not in self.form_entries:
-                        self.form_entries[entry_id] = {}
-                    if product_id not in self.form_entries[entry_id]:
-                        self.form_entries[entry_id][product_id] = {}
-
-                    self.form_entries[entry_id][product_id][field_type] = self.request.form.get(key, '').strip()
-
-        self.entries_to_keep = set()
-
-        for entry_id, products in self.form_entries.items():
-
-
-        return self
-    
-    def 

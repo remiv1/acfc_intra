@@ -15,7 +15,7 @@
     - geographies : Liste des géographies (pour filtres)
     - error_message : Message d'erreur éventuel à afficher
     - success_message : Message de succès éventuel à afficher
-    - lignes_devis : Liste des lignes de produits de la commande (pour édition)
+    - entrees : Liste des lignes de produits de la commande (pour édition)
     - current_year : Année courante (pour sélection par défaut)
     - today : Date du jour pour le formulaire
 ==================================================================== -->
@@ -99,7 +99,7 @@
 
     <!-- Formulaire principal -->
     {% from '_macros.html' import csrf_field %}    
-    <form method="POST" id="commandeForm" action="{% if form_sub_context == 'create' %}{{ url_for('commandes.nouvelle_commande', id_client=client.id) }}{% else %}{{ url_for('commandes.commande_modify', id_client=client.id, id_commande=commande.id) }}{% endif %}">
+    <form method="POST" id="commandeForm" action="{% if form_sub_context == 'create' %}{{ url_for(('commandes', 'nouvelle') | jinja_page_title, id_client=client.id) }}{% else %}{{ url_for(('commandes', 'modifier') | jinja_page_title, id_client=client.id, id_commande=commande.id) }}{% endif %}">
         {{ csrf_field() }}
         <div class="row">
             <!-- Informations de la commande -->
@@ -140,8 +140,9 @@
                             {% if client.adresses %}
                                 {% set adresse_principale = client.adresses[0] %}
                                 {% set adresse_livraison = commande.id_adresse_livraison if commande else adresse_principale.id %}
+                                {% set adresses_actives = client.adresses|selectattr('is_inactive', 'equalto', false)|list %}
                                 
-                                {% if client.adresses|length == 1 or (commande and commande.id_adresse_livraison == adresse_principale.id) %}
+                                {% if client.adresses_actives|length == 1 or (commande and commande.id_adresse_livraison == adresse_principale.id) %}
                                     <!-- Une seule adresse ou même adresse pour facturation et livraison -->
                                     <label for="id_adresse_{{ adresse_principale.id }}" class="form-label fw-bold">Adresse de Facturation & Livraison</label>
                                     <input type="hidden" name="id_adresse_{{ adresse_principale.id }}" value="{{ adresse_principale.id }}">
@@ -163,11 +164,11 @@
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            {% if client.adresses|length > 1 %}
                                             <label for="nb_adresses" class="form-label fw-bold">Adresse de Livraison</label>
-                                            <input type="hidden" name="nb_adresses" value="{{ client.adresses|length }}" title="Nombre d'adresses disponibles">
+                                            {% if adresses_actives|length > 1 %}
+                                            <input type="hidden" name="nb_adresses" value="{{ adresses_actives|length }}" title="Nombre d'adresses disponibles">
                                             <input type="hidden" name="id_adresse_facturation" value="{{ adresse_principale.id }}">
-                                                {% for adresse in client.adresses %}
+                                                {% for adresse in adresses_actives %}
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="radio" name="id_adresse_livraison" id="adresse_{{ adresse.id }}" 
                                                             value="{{ adresse.id }}" {% if adresse.id == adresse_livraison %}checked{% endif %}>
@@ -303,7 +304,8 @@
                             <table class="table table-hover" id="tableProduitsSelectionnes">
                                 <thead class="table-light">
                                     <tr>
-                                        <th >Référence</th>
+                                        <th class="d-none">ID</th>
+                                        <th>Référence</th>
                                         <th>Désignation</th>
                                         <th>Prix unitaire HT</th>
                                         <th>Quantité</th>
@@ -313,11 +315,16 @@
                                     </tr>
                                 </thead>
                                 <tbody id="produitsSelectionnesBody">
-                                    {% if commande and lignes_devis %}
-                                        {% for ligne in lignes_devis %}
-                                        <tr data-produit-id="{{ ligne.produit_id }}" data-ligne-id="{{ ligne.ligne_id }}" 
-                                            data-db-id="{{ ligne.devise.id if ligne.devise.id else '' }}"
+                                    {% if commande and entrees %}
+                                        {% for ligne in entrees %}
+                                        <!-- Ligne de produit -->
+                                        <tr data-id="{{ ligne.id }}" data-id-commande="{{ ligne.id_commande }}"
+                                            data-reference="{{ ligne.reference }}" data-designation="{{ ligne.designation }}"
+                                            data-qte="{{ ligne.qte }}" data-prix-unitaire="{{ ligne.prix_unitaire }}"
+                                            data-remise="{{ ligne.remise }}"
                                             {% if ligne.is_facture %}data-ligne-facturee="true"{% endif %}>
+                                            <!-- Colonnes avec le détail des produits -->
+                                            <td class="d-none">{{ ligne.id }}</td>
                                             <td class="reference">{{ ligne.produit.ref_auto }}</td>
                                             <td class="designation">
                                                 {{ ligne.produit.des_auto }}
@@ -387,7 +394,7 @@
                                 </tfoot>
                             </table>
                             
-                            <div id="aucunProduitMessage" class="text-center text-muted py-4" {% if commande and lignes_devis %}style="display: none;"{% endif %}>
+                            <div id="aucunProduitMessage" class="text-center text-muted py-4" {% if commande and entrees %}style="display: none;"{% endif %}>
                                 <i class="fas fa-shopping-cart fa-2x mb-2"></i>
                                 <h5>Aucun produit sélectionné</h5>
                                 <p>Cliquez sur "Ajouter des produits" pour commencer votre commande.</p>
@@ -402,7 +409,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="d-flex justify-content-between">
-                    <a href="{{ url_for('clients.get_client', id_client=client.id) }}" class="btn btn-secondary">
+                    <a href="{{ url_for(('clients', 'detail') | jinja_page_title, id_client=client.id) }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-1"></i>Annuler
                     </a>
                     <button type="submit" name="action" value="save" class="btn btn-primary">
@@ -537,3 +544,4 @@
         </div>
     </div>
 </div>
+<script src="{{ url_for('static', filename='commandes/js/commandes-form-modal.js') }}"></script>

@@ -168,7 +168,6 @@ def format_datetime(value: datetime | date | None, fmt: str='%d/%m/%Y'):
         return value.strftime(fmt)
     return value
 
-
 @acfc.template_filter('date_input')
 def format_date_input(value: datetime | date | None):
     """Filtre spécifique pour les champs input[type=date] qui attendent le format ISO (YYYY-MM-DD)"""
