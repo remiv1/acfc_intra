@@ -9,8 +9,6 @@
 # - acfc-nginx    : Reverse proxy et serveur statique (port 80)
 # - acfc-db       : Base de données MariaDB
 # - acfc-logs     : Base NoSQL MongoDB pour logging des traces
-# - acfc-mails    : Service de gestion des emails
-# - acfc-redis    : Cache et file d'attente Redis
 #
 # Réseau : acfc-network (isolé, communication inter-services)
 # Volumes : Persistance des données (base, logs, documents --factures, commandes, remises de chèques--)
@@ -136,7 +134,7 @@ services:
       start_period: 30s
 
   # ================================================================
-  # SERVICE FAST API (BACK-OFFICE, INTERNE)
+  # SERVICE FAST API (BACK-OFFICE, INTERNE, GESTIONS ASYNCHRONES, MAILS)
   # ================================================================
   acfc-api-back:
     container_name: acfc-api-back
@@ -152,35 +150,6 @@ services:
       - PYTHONDONTWRITEBYTECODE=1
     restart: unless-stopped
     # Aucun port exposé, usage interne uniquement (autres conteneurs ou cron)
-
-  # ================================================================
-  # SERVICE FAST API (BACK-OFFICE, INTERNE)
-  # ================================================================
-  acfc-mails:
-    container_name: acfc-mails
-    build:
-      context: .
-      dockerfile: mails/dockerfile.mails
-    networks:
-      - acfc-network
-    environment:
-      - METTREICILESPARAMETRESIMAPENSECRET=1
-      - REDIS_HOST=acfc-redis
-      - REDIS_PORT=6379
-    depends_on:
-      - acfc-redis
-
-  # ================================================================
-  # SERVICE REDIS
-  # ================================================================
-  acfc-redis:
-    container_name: acfc-redis
-    image: redis:8.2.1
-    networks:
-      - acfc-network
-    volumes:
-      - acfc-redis-data:/data
-    restart: always
 
 # ================================================================
 # VOLUMES PERSISTANTS
