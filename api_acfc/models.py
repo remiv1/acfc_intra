@@ -20,7 +20,7 @@ class QueueItem(Base):
 
 
 # Configuration de la base de données SQLite
-engine = create_engine('sqlite:///queue.db')
+engine = create_engine('sqlite:////data/queue.db')
 Base.metadata.create_all(engine)
 
 # Création d'une session

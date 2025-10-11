@@ -143,6 +143,7 @@ services:
       dockerfile: api_acfc/dockerfile.api
     volumes:
       - ./api_acfc:/app
+      - acfc-queues:/data
     networks:
       - acfc-network
     environment:
@@ -168,9 +169,13 @@ volumes:
   acfc-rch:
     driver: local                            # Stockage pour documents de remises de chèques
     name: acfc_research_storage
-  acfc-redis-data:
-    driver: local                            # Stockage pour données Redis
-    name: acfc_redis_data
+  acfc-queues:
+    driver: local                            # Stockage pour files d'attente (si besoin futur)
+    name: acfc_queues_storage
+    driver_opts:
+      type: none
+      o: bind
+      device: ./queues
 
 # ================================================================
 # RÉSEAUX
