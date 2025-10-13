@@ -1,7 +1,7 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 11 October 2025  
-**Période analysée :** 04 October 2025 - 11 October 2025 (7 jours)  
+**Date du rapport :** 13 October 2025  
+**Période analysée :** 06 October 2025 - 13 October 2025 (7 jours)  
 **Nombre de commits :** 14  
 **Générateur :** Script automatique v1.0
 
@@ -10,39 +10,13 @@
 ## Résumé exécutif
 
 **Activité de développement :** 14 commits sur 7 jours  
-**Volume de code :** 1313 lignes ajoutées, 4497 lignes supprimées  
-**Fichiers impactés :** 90 fichiers modifiés  
-**Productivité moyenne :** 187 lignes/jour
+**Volume de code :** 1987 lignes ajoutées, 4912 lignes supprimées  
+**Fichiers impactés :** 106 fichiers modifiés  
+**Productivité moyenne :** 283 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 06 October 2025
-
-#### 13:07 - acfbe59 - 📊 Mise à jour automatique du rapport de suivi (06/10/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +23 -248 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Mon Oct 6 13:07:55 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (06/10/2025)`
-- ... et 1 autres fichiers
-
-#### 14:36 - d354710 - feat: ajout de la réactivation des adresses, téléphones et emails inactifs pour les clients pour les utilisateurs ADMINISTRATEURS et GESTIONNAIRES fix: correction de la gestion des erreurs réseau lors de la suppression d'adresses, téléphones et emails refactor: simplification des appels de fonction JavaScript pour la réactivation des adresses, téléphones et emails
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +381 -201 lignes, 11 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Mon Oct 6 14:36:13 2025 +0200`
-- `    feat: ajout de la réactivation des adresses, téléphones et emails inactifs pour les clients pour les utilisateurs ADMINISTRATEURS et GESTIONNAIRES`
-- `    fix: correction de la gestion des erreurs réseau lors de la suppression d'adresses, téléphones et emails`
-- ... et 8 autres fichiers
 
 
 ### 09 October 2025
@@ -138,6 +112,17 @@
 
 ### 11 October 2025
 
+#### 19:17 - 102e5a8 - 📊 Mise à jour automatique du rapport de suivi (11/10/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +51 -15 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Sat Oct 11 19:17:56 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (11/10/2025)`
+- ... et 1 autres fichiers
+
 #### 21:17 - f1bf577 - fix: corriger le chemin de la base de données SQLite et ajouter un volume pour les files d'attente dans docker-compose
 
 **Catégorie :** Correction de bugs  
@@ -183,6 +168,20 @@
 - ... et 18 autres fichiers
 
 
+### 13 October 2025
+
+#### 18:36 - b86c37c - feat: Add templates and user management functionality
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +1027 -849 lignes, 27 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Mon Oct 13 18:36:45 2025 +0200`
+- `    feat: Add templates and user management functionality`
+- ... et 25 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
@@ -197,10 +196,10 @@
 
 ## Technologies et langages utilisés
 
-- **Python** : 13 fichiers modifiés
-- **JavaScript** : 8 fichiers modifiés
-- **Documentation** : 6 fichiers modifiés
+- **Python** : 21 fichiers modifiés
+- **JavaScript** : 10 fichiers modifiés
 - **HTML** : 6 fichiers modifiés
+- **Documentation** : 6 fichiers modifiés
 - **YAML/Config** : 2 fichiers modifiés
 - **Docker** : 1 fichiers modifiés
 
@@ -209,15 +208,15 @@
 ## Métriques de productivité
 
 - **Fréquence de commit :** 2.0 commits/jour
-- **Volume de code :** 5810 modifications totales
-- **Ratio ajouts/suppressions :** 0.29
-- **Moyenne lignes par commit :** 415
+- **Volume de code :** 6899 modifications totales
+- **Ratio ajouts/suppressions :** 0.40
+- **Moyenne lignes par commit :** 493
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 1313 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 1987 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 11 October 2025*
+*Rapport généré automatiquement le 13 October 2025*
