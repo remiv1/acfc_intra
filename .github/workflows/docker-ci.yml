@@ -67,6 +67,9 @@ jobs:
           FLASK_HOST=localhost
           FLASK_PORT=5000
 
+      - name: Create required directories
+        run: mkdir -p queues
+
       - name: Build all Docker images
         run: |
           echo "🔨 Building Docker images..."
