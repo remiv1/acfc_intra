@@ -15,18 +15,20 @@ Auteur : Développement ACFC
 Version : 1.0
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
-from datetime import datetime, date
-from sqlalchemy.orm import Session as SessionBdDType
+from flask import Blueprint, request, redirect, url_for
+from datetime import datetime
+from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from werkzeug import Response
 from werkzeug.exceptions import NotFound
-from app_acfc.modeles import (Commande, Constants, DevisesFactures, Catalogue, Client,
-                              Facture, Operations, PrepareTemplates, Ventilations, get_db_session)
+from app_acfc.modeles import (Commande, Catalogue, Client, Adresse, Mail, Telephone,
+                              Facture, Operations, Ventilations, get_db_session)
 from app_acfc.habilitations import validate_habilitation, CLIENTS
-from typing import List, Dict, Optional, Any
+from typing import List
 import qrcode
 from io import BytesIO
 import base64
+from app_acfc.models.templates_models import PrepareTemplates, Constants
+from app_acfc.models.orders_models import OrdersModel
 
 # Création du blueprint
 commandes_bp = Blueprint(name='commandes',
@@ -39,7 +41,17 @@ def order_details(id_commande: int, id_client: int):
     """Afficher les détails d'une commande"""
     session_db = get_db_session()
     try:
-        commande = session_db.query(Commande).filter(Commande.id == id_commande).first()
+        commande = session_db.query(Commande) \
+                        .options(
+                            joinedload(Commande.client)
+                                .joinedload(Client.mails),
+                            joinedload(Commande.client)
+                                .joinedload(Client.tels),
+                            joinedload(Commande.adresse_livraison),
+                            joinedload(Commande.adresse_facturation),
+                            joinedload(Commande.devises)
+                        ).filter(Commande.id == id_commande) \
+                        .first()
         if not commande:
             raise NotFound("Commande non trouvée")
 
@@ -72,6 +84,30 @@ def new_order(id_client: int) -> str | Response:
                                        form_sub_context='create',
                                        catalogue_complet=products)
     
+    # === Gestion de la soumission du formulaire ===
+    elif request.method == 'POST':
+        new_order = OrdersModel(request) \
+                        .post_order_data(id_client=id_client, id_commande=None)
+        session_db: SessionBdDType = get_db_session()
+        try:
+            session_db.add(new_order.order)
+            session_db.flush()  # Pour obtenir l'ID de la commande
+            for entry in new_order.client_entries:
+                entry.id = None
+                entry.id_commande = new_order.order.id
+                session_db.add(entry)
+            session_db.commit()
+            message = Constants.messages(type_msg='commandes', second_type_message='created')
+            return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+                                    id_client=id_client,
+                                    id_commande=new_order.order.id))
+        except Exception as e:
+            error_message = Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})'
+            return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+                                    id_client=id_client,
+                                    id_commande=new_order.order.id,
+                                    error_message=error_message))
+        
     # === Par défaut, rediriger vers la fiche client ===
     else:
         message = Constants.messages(type_msg='error_400', second_type_message='wrong_road')

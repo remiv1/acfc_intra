@@ -25,7 +25,7 @@ from os import getenv
 from flask import Request
 from typing import Any, Dict, Tuple
 from logs.logger import acfc_log, INFO
-from app_acfc.modeles import Constants
+from models.templates_models import Constants
 
 class PasswordService:
     """

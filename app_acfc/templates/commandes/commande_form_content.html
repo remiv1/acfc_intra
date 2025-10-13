@@ -145,7 +145,7 @@
                                 {% if client.adresses_actives|length == 1 or (commande and commande.id_adresse_livraison == adresse_principale.id) %}
                                     <!-- Une seule adresse ou même adresse pour facturation et livraison -->
                                     <label for="id_adresse_{{ adresse_principale.id }}" class="form-label fw-bold">Adresse de Facturation & Livraison</label>
-                                    <input type="hidden" name="id_adresse_{{ adresse_principale.id }}" value="{{ adresse_principale.id }}">
+                                    <input type="hidden" name="id_adresse_facturation" value="{{ adresse_principale.id }}">
                                     <div class="form-control-plaintext border p-2 bg-light">
                                         <strong>Adresse principale</strong><br>
                                         {{ adresse_principale.adresse_l1 }}<br>
@@ -324,7 +324,7 @@
                                             data-remise="{{ ligne.remise }}"
                                             {% if ligne.is_facture %}data-ligne-facturee="true"{% endif %}>
                                             <!-- Colonnes avec le détail des produits -->
-                                            <td class="d-none">{{ ligne.id }}</td>
+                                            <td class="data-product d-none">{{ ligne.id }}</td>
                                             <td class="reference">{{ ligne.produit.ref_auto }}</td>
                                             <td class="designation">
                                                 {{ ligne.produit.des_auto }}

@@ -37,7 +37,8 @@ from pymongo import MongoClient
 from flask import session
 from datetime import datetime, timedelta
 from logs.logger import acfc_log, DB_URI, DB_NAME, COLLECTION_NAME, QueryLogs
-from app_acfc.modeles import Constants, PrepareTemplates, get_db_session, User
+from models.templates_models import PrepareTemplates, Constants
+from app_acfc.modeles import get_db_session, User
 from sqlalchemy.orm import Session as SessionBdDType
 from typing import Any, Dict
 

@@ -1,3 +1,6 @@
+// =====================================================================
+// Variables globales
+// =====================================================================
 let ligneCounter = 1000; // Compteur pour les nouvelles lignes
 
 // =====================================================================
@@ -131,44 +134,75 @@ function ajouterProduitsSelectionnes() {
 // Ajouter une ligne produit dans le tableau de la commande
 // =====================================================================
 function ajouterLigneProduit(produit, quantite, remise) {
+    // Vérifier si le message "Aucun produit" est affiché
+    let isNoneProduct = !!document.getElementById('aucunProduitMessage');
+    // Incrémenter le compteur de lignes
     ligneCounter++;
+    // Référence au tbody du tableau des produits sélectionnés
     const tbody = document.getElementById('produitsSelectionnesBody');
-    
+    // Si le tbody n'existe pas, sortir de la fonction
     if (!tbody) return;
     
+    // Création de la nouvelle ligne
     const row = document.createElement('tr');
-    row.setAttribute('data-produit-id', produit.id);
+
+    // Attributs data pour la ligne
+    row.setAttribute('data-produit-id', produit.id || 'new');
     row.setAttribute('data-ligne-id', ligneCounter);
+    row.setAttribute('data-sum', quantite * produit.prix * (1 - remise / 100));
+    row.setAttribute('data-remise', remise);
+    row.setAttribute('data-quantite', quantite);
+    row.setAttribute('data-prix', produit.prix);
+
+    // Création de l'objet produit pour stockage JSON
+    let produitContent = {
+        id: produit.id || 'new',
+        reference: produit.reference.toUpperCase() || '',
+        designation: produit.designation.toUpperCase() || '',
+        prix: produit.prix || 0,
+        quantite: quantite || 1,
+        remise: (remise/100).toFixed(2) || 0.10
+    }
     
+    // Calcul du total de la ligne
     const totalLigne = quantite * produit.prix * (1 - remise / 100);
     
+    // Contenu HTML de la ligne
     row.innerHTML = `
+        <td class="data-product d-none">
+            <div class="data-product">
+                <input type="hidden" name="lignes_${ligneCounter}" class="data-product" value='${JSON.stringify(produitContent)}'>
+            </div>
+        </td>
         <td class="reference">${produit.reference.toUpperCase()}</td>
         <td class="designation">${produit.designation.toUpperCase()}</td>
         <td>
             <div class="input-group input-group-sm">
                 <input type="number" class="form-control prix-input" 
-                       name="prix_${produit.id}_${ligneCounter}" 
+                       name="prix_${ligneCounter}" 
                        value="${produit.prix.toFixed(2)}" 
                        step="0.01" min="0"
-                       title="Prix unitaire HT">
+                       title="Prix unitaire HT"
+                       onchange=updateSums(${ligneCounter})>
                 <span class="input-group-text">€</span>
             </div>
         </td>
         <td>
             <input type="number" class="form-control form-control-sm qte-input" 
-                   name="qte_${produit.id}_${ligneCounter}" 
+                   name="qte_${ligneCounter}" 
                    value="${quantite}" 
                    min="1"
-                   title="Quantité">
+                   title="Quantité"
+                   onchange=updateSums(${ligneCounter})>
         </td>
         <td>
             <div class="input-group input-group-sm">
                 <input type="number" class="form-control remise-input" 
-                       name="remise_${produit.id}_${ligneCounter}" 
+                       name="remise_${ligneCounter}" 
                        value="${remise.toFixed(1)}" 
                        step="0.1" min="0" max="100"
-                       title="Remise en pourcentage">
+                       title="Remise en pourcentage"
+                       onchange=updateSums(${ligneCounter})>
                 <span class="input-group-text">%</span>
             </div>
         </td>
@@ -184,12 +218,19 @@ function ajouterLigneProduit(produit, quantite, remise) {
             </button>
         </td>
     `;
+
+    // Suppression du message "Aucun produit"
+    if (isNoneProduct) {
+        const noneMessage = document.getElementById('aucunProduitMessage');
+        if (noneMessage) noneMessage.className = 'd-none';
+    }
     
+    // Ajouter les gestionnaires d'événements pour les boutons
     tbody.appendChild(row);
 }
 
 // =====================================================================
-// Calculer le total de la commande
+// Calculer le total de la commande + MàJ des champs de totaux
 // =====================================================================
 function calculerTotalCommande() {
     const totalCells = document.querySelectorAll('#produitsSelectionnesBody .total-ligne');
@@ -216,4 +257,38 @@ function calculerTotalCommande() {
     if (montantInput && totalCells.length > 0) {
         montantInput.value = total.toFixed(2);
     }
+}
+
+function updateSums(rowIndex) {
+    // Récupérer la ligne correspondante
+    const row = document.querySelector(`#produitsSelectionnesBody tr[data-ligne-id="${rowIndex}"]`);
+    const rowData = document.querySelector(`#produitsSelectionnesBody tr`);
+
+    // Si la ligne n'existe pas, sortir de la fonction
+    if (!row) return;
+
+    // Récupérer les éléments de la ligne
+    const prixUnitaire = parseFloat(row.querySelector('.prix-input').value).toFixed(2);
+    const quantite = parseInt(row.querySelector('.qte-input').value);
+    const remise = parseFloat(row.querySelector('.remise-input').value).toFixed(2);
+    const totalValue = (quantite * prixUnitaire * (1 - remise / 100)).toFixed(2);
+    let produitContent = {
+        id: rowData.getAttribute('data-produit-id') || 'new',
+        reference: row.cells[1]?.textContent.toUpperCase() || '',
+        designation: row.cells[2]?.textContent.toUpperCase() || '',
+        prix: parseFloat(prixUnitaire) || 0,
+        quantite: quantite || 1,
+        remise: parseFloat(remise) || 0
+    }
+
+    // Mise à jour du formulaire
+    rowData.querySelector('.data-product').textContent = JSON.stringify(produitContent);
+    rowData.setAttribute('data-prix', prixUnitaire);
+    rowData.setAttribute('data-quantite', quantite);
+    rowData.setAttribute('data-remise', remise);
+    rowData.setAttribute('data-sum', totalValue);
+
+    // Mise à jour des totaux dans la ligne et la commande
+    row.querySelector('.total-ligne').textContent = `${totalValue} €`;
+    calculerTotalCommande();
 }

@@ -7,7 +7,7 @@
     Inclus dans le template principal des commandes via le système de contextes.
 
     Variables Jinja attendues :
-    - commande : Objet Commande SQLAlchemy (commande à afficher)
+    - commande : Objet Commande SQLAlchemy (commande à afficher) et les jonctions associées
     - devises_factures : Liste des lignes/éléments de la commande (devise)
     - now : datetime actuel (pour les formulaires de date)
     - today : date du jour (pour la facturation)
@@ -95,8 +95,8 @@
                         <div class="col-md-6">
                             
                             <h6 class="text-muted mb-2">LIVRAISON</h6>
-                            {% set adresse_principale = commande.client.adresses|selectattr('is_principal', 'equalto', True)|first if commande.client.adresses else none %}
-                            {% if adresse_principale and commande.adresse == adresse_principale %}
+                            {% set one_adresse = commande.id_adresse_livraison == commande.id_adresse_facturation %}
+                            {% if one_adresse %}
                                 <p class="mb-0">
                                     <span class="badge bg-info mb-2">Adresse de facturation</span><br>
                                     Livraison à l'adresse de facturation
@@ -104,8 +104,8 @@
                             {% else %}
                                 <p class="mb-0">
                                     <span class="badge bg-info mb-2">Adresse spécifique</span><br>
-                                    {% if commande.client.adresses %}
-                                        {% set adresse = commande.client.adresses|selectattr('id', 'equalto', commande.id_adresse)|first %}
+                                    {% if commande.adresse_livraison %}
+                                        {% set adresse = commande.adresse_livraison %}
                                         {% if adresse %}
                                             <p class="mb-1">{{ adresse.adresse_l1 }}</p>
                                             {% if adresse.adresse_l2 %}
@@ -143,7 +143,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for devise in devises_factures %}
+                                {% for devise in commande.devises %}
                                 <tr class="
                                     {% if devise.is_expedie %}table-success
                                     {% elif devise.is_facture %}table-warning  

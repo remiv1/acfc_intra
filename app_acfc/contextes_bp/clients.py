@@ -32,9 +32,9 @@ from flask import (Blueprint, jsonify, request, redirect, url_for, Request,
 from sqlalchemy.orm import Session as SessionBdDType, joinedload, contains_eager
 from sqlalchemy import or_, func
 from werkzeug import Response as ResponseWerkzeug
-from app_acfc.modeles import (
-    get_db_session, Client, Part, Pro, Telephone, Mail, Commande,
-    Facture, Adresse, PrepareTemplates, Constants)
+from app_acfc.modeles import (get_db_session, Client, Part, Pro, Telephone, Mail,
+                              Commande, Facture, Adresse)
+from app_acfc.models.templates_models import PrepareTemplates, Constants
 from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE, ADMINISTRATEUR
 from datetime import datetime
 from typing import List

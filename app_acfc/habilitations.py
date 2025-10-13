@@ -24,7 +24,7 @@ Version : 1.0
 from functools import wraps
 from typing import Callable, Any, List
 from flask import session, g
-from app_acfc.modeles import PrepareTemplates
+from models.templates_models import PrepareTemplates
 
 # Définition des niveaux d'habilitation
 ADMINISTRATEUR = '1'

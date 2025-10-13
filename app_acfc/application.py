@@ -32,9 +32,11 @@ from sqlalchemy.sql.functions import func
 from logs.logger import acfc_log, ERROR
 from app_acfc.services import SecureSessionService, AuthenticationService
 from app_acfc.modeles import (
-    MyAccount, PrepareTemplates, Constants, User, Commande, Client, init_database, get_db_session,
+    User, Commande, Client, init_database, get_db_session,
     GeoMethods
     )
+from app_acfc.models.templates_models import PrepareTemplates, Constants
+from app_acfc.models.users_models import MyAccount
 from app_acfc.contextes_bp.clients import clients_bp         # Module CRM - Gestion clients
 from app_acfc.contextes_bp.catalogue import catalogue_bp     # Module Catalogue produits
 from app_acfc.contextes_bp.commercial import commercial_bp   # Module Commercial - Devis, commandes
