@@ -57,13 +57,13 @@ function initializeCommonFeatures() {
 
 function initializeDateFields() {
     // Initialiser la date du jour si nécessaire
-    const dateCommandeInput = document.getElementById('date_commande');
-    if (dateCommandeInput && !dateCommandeInput.value) {
+    const dateOrderInput = document.getElementById('date_commande');
+    if (dateOrderInput && !dateOrderInput.value) {
         const today = new Date();
         const formattedDate = today.getFullYear() + '-' + 
                              (today.getMonth() + 1).toString().padStart(2, '0') + '-' + 
                              today.getDate().toString().padStart(2, '0');
-        dateCommandeInput.value = formattedDate;
+        dateOrderInput.value = formattedDate;
     }
 }
 
@@ -128,7 +128,7 @@ function initializeFormFeatures() {
 
 function initializeTotalCalculation() {
     const montantInput = document.getElementById('montant');
-    const totalElement = document.getElementById('totalCommande');
+    const totalElement = document.getElementById('totalOrder');
     
     if (!montantInput || !totalElement) return;
     
@@ -147,7 +147,7 @@ function initializeTotalCalculation() {
     
     if (isModification && hasLignesExistantes) {
         // En mode modification avec des lignes : recalculer depuis les lignes
-        calculerTotalCommande();
+        calculerTotalOrder();
     } else if (isModification && !hasLignesExistantes) {
         // En mode modification sans lignes : afficher le montant sauvé
         if (totalElement && montantInput.value) {
@@ -155,7 +155,7 @@ function initializeTotalCalculation() {
         }
     } else {
         // En mode création : le total sera calculé quand on ajoutera des produits
-        calculerTotalCommande();
+        calculerTotalOrder();
     }
 }
 
@@ -219,7 +219,7 @@ function initializeFormHandlers() {
     // Validation du formulaire
     const form = document.getElementById('commandeForm');
     if (form) {
-        form.addEventListener('submit', validateCommandeForm);
+        form.addEventListener('submit', validateOrderForm);
     }
 }
 
@@ -394,53 +394,13 @@ function calculerTotalLigne(input) {
     totalCell.textContent = total.toFixed(2) + ' €';
     
     // Recalculer le total de la commande
-    calculerTotalCommande();
-}
-
-function duppliquerLigne(button) {
-    const row = button.closest('tr');
-    const produitId = row.getAttribute('data-produit-id');
-    
-    // Récupérer les valeurs actuelles
-    const prix = parseFloat(row.querySelector('.prix-input').value) || 0;
-    const qte = parseInt(row.querySelector('.qte-input').value) || 1;
-    const remise = parseFloat(row.querySelector('.remise-input').value) || 0;
-    const reference = row.querySelector('.reference').textContent;
-    const designation = row.querySelector('.designation').textContent;
-    
-    const produit = {
-        id: produitId,
-        reference: reference,
-        designation: designation,
-        prix: prix
-    };
-    
-    ajouterLigneProduit(produit, qte, remise);
-    calculerTotalCommande();
-    showAlert('Ligne dupliquée avec succès !', 'success');
-}
-
-function supprimerLigne(button) {
-    const row = button.closest('tr');
-    
-    // Vérifier si la ligne est facturée
-    if (row.hasAttribute('data-ligne-facturee')) {
-        showAlert('Impossible de supprimer une ligne déjà facturée !', 'error');
-        return;
-    }
-    
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette ligne ?')) {
-        row.remove();
-        verifierPresenceProduits();
-        calculerTotalCommande();
-        showAlert('Ligne supprimée avec succès !', 'success');
-    }
+    calculerTotalOrder();
 }
 
 /**
  * Calculer le total de la commande - FONCTION UNIQUE
  */
-function calculerTotalCommande() {
+function calculerTotalOrder() {
     const totalCells = document.querySelectorAll('#produitsSelectionnesBody .total-ligne');
     let total = 0;
     
@@ -462,7 +422,7 @@ function calculerTotalCommande() {
     console.log('Total calculé:', total.toFixed(2), '€');
     
     // Mettre à jour l'affichage du total dans le tableau
-    const totalElement = document.getElementById('totalCommande');
+    const totalElement = document.getElementById('totalOrder');
     if (totalElement) {
         totalElement.textContent = total.toFixed(2) + ' €';
     }
@@ -471,32 +431,6 @@ function calculerTotalCommande() {
     const montantInput = document.getElementById('montant');
     if (montantInput && totalCells.length > 0) {
         montantInput.value = total.toFixed(2);
-    }
-}
-
-function verifierPresenceProduits() {
-    const tbody = document.getElementById('produitsSelectionnesBody');
-    if (!tbody) return;
-    
-    const lignes = tbody.querySelectorAll('tr[data-produit-id]');
-    const messageVide = document.getElementById('aucunProduitMessage'); // Utiliser le message du template
-    
-    if (lignes.length === 0) {
-        // Afficher le message existant dans le template
-        if (messageVide) {
-            messageVide.style.display = 'block';
-        }
-        
-        // Supprimer tout message dans le tbody si il existe
-        const messageInTbody = document.getElementById('messageAucunProduit');
-        if (messageInTbody) {
-            messageInTbody.remove();
-        }
-    } else {
-        // Masquer le message du template
-        if (messageVide) {
-            messageVide.style.display = 'none';
-        }
     }
 }
 
@@ -821,7 +755,7 @@ function initializeFacturationModal() {
     });
 }
 
-function validateCommandeForm(e) {
+function validateOrderForm(e) {
     const form = e.target;
     const clientSelect = document.getElementById('id_client');
     const produitsRows = document.querySelectorAll('#produitsSelectionnesBody tr[data-produit-id]');
@@ -868,10 +802,10 @@ function initializeExpeditionModeHandling() {
     
     function handleModeChange() {
         const selectedMode = document.querySelector('input[name="mode_expedition"]:checked')?.value;
-        const montantCommande = parseFloat(document.querySelector('[data-montant-commande]')?.dataset.montantCommande || 0);
+        const montantOrder = parseFloat(document.querySelector('[data-montant-commande]')?.dataset.montantOrder || 0);
         const submitButton = document.querySelector('#expeditionForm button[type="submit"]');
         
-        console.log(`📋 Mode d'expédition: ${selectedMode}, montant: ${montantCommande}€`);
+        console.log(`📋 Mode d'expédition: ${selectedMode}, montant: ${montantOrder}€`);
         
         // Gérer l'affichage du numéro de suivi
         if (numeroSuiviContainer) {
@@ -886,7 +820,7 @@ function initializeExpeditionModeHandling() {
         }
         
         // Gérer l'alerte pour montant > 80€
-        if (montantCommande > 80 && selectedMode === 'envoi_simple') {
+        if (montantOrder > 80 && selectedMode === 'envoi_simple') {
             if (alertMontant80) alertMontant80.style.display = 'block';
             if (submitButton) submitButton.disabled = true;
         } else {
@@ -1007,7 +941,7 @@ function initializeFacturationCalculations() {
 window.calculerTotalLigne = calculerTotalLigne;
 window.duppliquerLigne = duppliquerLigne;
 window.supprimerLigne = supprimerLigne;
-window.calculerTotalCommande = calculerTotalCommande;
+window.calculerTotalOrder = calculerTotalOrder;
 window.filtrerProduitsCatalogue = filtrerProduitsCatalogue;
 window.reinitialiserRecherche = function() {
     document.getElementById('rechercheProductsInput').value = '';
@@ -1020,6 +954,6 @@ window.ajouterProduitsSelectionnes = ajouterProduitsSelectionnes;
 // window.copierNumeroSuivi est défini dans initializeUtilityFunctions
 
 // Fonction de debug
-// window.debugCommande est défini plus haut
+// window.debugOrder est défini plus haut
 
 console.log('✅ Module commandes unifié chargé avec succès!');

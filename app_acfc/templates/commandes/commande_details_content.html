@@ -7,11 +7,14 @@
     Inclus dans le template principal des commandes via le système de contextes.
 
     Variables Jinja attendues :
-    - commande : Objet Commande SQLAlchemy (commande à afficher) et les jonctions associées
+    - commande : Objet Order SQLAlchemy (commande à afficher) et les jonctions associées
     - devises_factures : Liste des lignes/éléments de la commande (devise)
     - now : datetime actuel (pour les formulaires de date)
     - today : date du jour (pour la facturation)
     ==================================================================== -->
+
+<!-- Gestion des jinja nécessaires -->
+{% set devises_factures = commande.devises %}
 
 <!-- CSS spécifique aux commandes -->
 <link rel="stylesheet" href="{{ url_for('static', filename='commandes/css/commandes.css') }}">
@@ -45,12 +48,47 @@
         </div>
     </div>
 
+    <!-- Messages normaux, d'erreur et de succès -->
+    {% if message %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if error_message %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>{{ error_message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert">X</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if success_message %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>{{ success_message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert">X</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="row">
         <!-- Informations principales -->
         <div class="col-lg-8 mb-4">
             <!-- Informations client et livraison -->
             <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header bg-primary-dark text-white">
                     <h5 class="mb-0"><i class="bi bi-person me-2"></i>Informations Client</h5>
                 </div>
                 <div class="card-body">
@@ -98,12 +136,12 @@
                             {% set one_adresse = commande.id_adresse_livraison == commande.id_adresse_facturation %}
                             {% if one_adresse %}
                                 <p class="mb-0">
-                                    <span class="badge bg-info mb-2">Adresse de facturation</span><br>
+                                    <span class="badge bg-success mb-2">Adresse de facturation</span><br>
                                     Livraison à l'adresse de facturation
                                 </p>
                             {% else %}
                                 <p class="mb-0">
-                                    <span class="badge bg-info mb-2">Adresse spécifique</span><br>
+                                    <span class="badge bg-success mb-2">Adresse spécifique</span><br>
                                     {% if commande.adresse_livraison %}
                                         {% set adresse = commande.adresse_livraison %}
                                         {% if adresse %}
@@ -125,7 +163,7 @@
 
             <!-- Produits de la commande -->
             <div class="card">
-                <div class="card-header bg-info text-white">
+                <div class="card-header bg-primary-dark text-white">
                     <h5 class="mb-0"><i class="bi bi-box me-2"></i>Produits Commandés</h5>
                 </div>
                 <div class="card-body p-0">
@@ -154,7 +192,7 @@
                                     <td>{{ devise.designation }}</td>
                                     <td class="text-center">{{ devise.qte }}</td>
                                     <td class="text-end">{{ "%.4f"|format(devise.prix_unitaire) }} €</td>
-                                    <td class="text-center">{{ "%.1f"|format(devise.remise * 100) }}%</td>
+                                    <td class="text-center">{{ '%.2f' % (devise.remise * 100) }}%</td>
                                     <td class="text-end"><strong>{{ "%.2f"|format(devise.qte * devise.prix_unitaire * (1 - devise.remise)) }} €</strong></td>
                                     <td class="text-center">
                                         {% if devise.is_expedie %}
@@ -204,7 +242,7 @@
         <div class="col-lg-4">
             <!-- Statut et actions -->
             <div class="card mb-4">
-                <div class="card-header bg-success text-white">
+                <div class="card-header bg-primary-dark text-white">
                     <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Statut et Actions</h5>
                 </div>
                 <div class="card-body">
@@ -239,7 +277,7 @@
                             {% if has_non_facture|length > 0 %}
                                 <!-- Dropdown pour les options d'impression -->
                                 <fieldset class="btn-group" role="group">
-                                    <a href="{{ url_for('commandes.commande_bon_impression', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-success" target="_blank">
+                                    <a href="{{ url_for(('commandes', 'imprimer') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" class="btn btn-outline-success" target="_blank">
                                         <i class="bi bi-printer me-1"></i>Bon de commande
                                     </a>
                                     <button type="button" class="btn btn-outline-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
@@ -247,18 +285,18 @@
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <a class="dropdown-item" href="{{ url_for('commandes.commande_bon_impression', id_client=commande.id_client, id_commande=commande.id) }}" target="_blank">
+                                            <a class="dropdown-item" href="{{ url_for(('commandes', 'imprimer') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" target="_blank">
                                                 <i class="bi bi-eye me-2"></i>Aperçu seulement
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{{ url_for('commandes.commande_bon_impression', id_client=commande.id_client, id_commande=commande.id) }}?auto_print=close" target="_blank">
+                                            <a class="dropdown-item" href="{{ url_for(('commandes', 'imprimer') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}?auto_print=close" target="_blank">
                                                 <i class="bi bi-printer me-2"></i>Imprimer et fermer
                                             </a>
                                         </li>
                                     </ul>
                                 </fieldset>
-                                <a href="{{ url_for('commandes.commande_modify', id_client=commande.id_client, id_commande=commande.id) }}" class="btn btn-outline-secondary">
+                                <a href="{{ url_for(('commandes', 'modifier') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-pencil me-1"></i>Modifier la commande
                                 </a>
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#facturationModal">
@@ -290,7 +328,7 @@
 
             <!-- Timeline des événements -->
             <div class="card">
-                <div class="card-header bg-secondary text-white">
+                <div class="card-header bg-primary-dark text-white">
                     <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Historique</h5>
                 </div>
                 <div class="card-body">
@@ -350,7 +388,7 @@
             <!-- Informations complémentaires -->
             {% if commande.is_expediee and commande.id_suivi %}
             <div class="card mt-4">
-                <div class="card-header bg-info text-white">
+                <div class="card-header bg-primary-dark text-white">
                     <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Suivi de l'expédition</h5>
                 </div>
                 <div class="card-body">
@@ -386,7 +424,7 @@
                 {% from '_macros.html' import csrf_field %}
                 <form id="facturationForm" method="post" action="{{ url_for('commandes.facturer_commande') }}">
                     {{ csrf_field() }}
-                    <input type="hidden" name="id_commande" value="{{ commande.id }}">
+                    <input type="hidden" name="id_order" value="{{ commande.id }}">
                     
                     <!-- Informations sur la facturation -->
                     <div class="row mb-3">
@@ -510,9 +548,9 @@
             </div>
             <div class="modal-body">
                 {% from '_macros.html' import csrf_field %}
-                <form id="expeditionForm" method="post" action="{{ url_for('commandes.traiter_expedition', id_commande=commande.id) }}">
+                <form id="expeditionForm" method="post" action="{{ url_for('commandes.traiter_expedition', id_order=commande.id) }}">
                     {{ csrf_field() }}
-                    <input type="hidden" name="id_commande" value="{{ commande.id }}">
+                    <input type="hidden" name="id_order" value="{{ commande.id }}">
                     
                     <!-- Lignes à expédier -->
                     <div class="mb-4">

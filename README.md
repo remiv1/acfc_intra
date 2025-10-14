@@ -178,7 +178,7 @@ docker-compose down -v
 - **Utilisateurs** (`99_users`) - Authentification et autorisation
 - **Clients** (`01_clients`) - CRM principal (particuliers/professionnels)  
 - **Contacts** (`02_mail`, `03_telephone`, `04_adresse`) - Moyens de contact
-- **Commandes** (`11_commandes`, `12_lignes_commande`) - Gestion commerciale
+- **Orders** (`11_commandes`, `12_lignes_commande`) - Gestion commerciale
 - **Comptabilité** (`30_pcg`, `31_operations`) - Plan comptable et écritures
 - **Produits** (`20_produits`, `21_mouvements_stock`) - Catalogue et stocks
 

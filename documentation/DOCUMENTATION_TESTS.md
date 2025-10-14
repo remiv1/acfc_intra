@@ -108,7 +108,7 @@ Classes de tests :
   - `test_print_url_parameters` - Paramètres URL impression
   - `test_delay_parameter_parsing` - Analyse paramètre délai
 
-- **TestBonCommandeIntegration** (1 test)
+- **TestBonOrderIntegration** (1 test)
   - `test_commande_bon_impression_route_structure` - Structure route impression
 
 - **TestTemplateFunctionality** (1 test)
@@ -293,23 +293,23 @@ Classes de tests :
 - `test_recherche_avancee_terme_trop_court` - Terme trop court
 - `test_recherche_avancee_sans_resultat` - Aucun résultat
 
-### **test_commande_qrcode_integration.py** - Intégration QR Code Commande (9 tests)
+### **test_commande_qrcode_integration.py** - Intégration QR Code Order (9 tests)
 
 **Objectif :** Tests d'intégration pour la génération QR code dans les commandes
 
 Classes de tests :
 
-- **TestCommandeBonImpressionIntegration** (4 tests)
+- **TestOrderBonImpressionIntegration** (4 tests)
   - Workflow complet bon impression
   - Génération URL QR code
   - Variables contexte template
   - Gestion paramètres impression
 
-- **TestCommandeFormIntegration** (1 test)
+- **TestOrderFormIntegration** (1 test)
   - Structure bouton détails commande
 
 - **TestErrorHandling** (3 tests)
-  - Commande non trouvée
+  - Order non trouvée
   - Gestion erreur génération QR code
   - Rendu template données manquantes
 
@@ -334,13 +334,13 @@ Classes de tests :
 
 ## 🚀 Tests End-to-End (15 tests)
 
-### **test_bon_commande_e2e.py** - Tests E2E Bon de Commande
+### **test_bon_commande_e2e.py** - Tests E2E Bon de Order
 
 **Objectif :** Tests complets de bout en bout pour le système de bon de commande
 
 Classes de tests :
 
-- **TestBonCommandeE2E** (5 tests)
+- **TestBonOrderE2E** (5 tests)
   - Workflow complet aperçu seulement
   - Workflow complet auto-impression
   - Workflow complet impression et fermeture
@@ -376,7 +376,7 @@ Classes de tests :
 Classes de tests :
 
 - **TestDemoBasicWorkflow** (3 tests)
-  - Commande simple démonstration
+  - Order simple démonstration
   - Modalités impression démonstration
   - Génération QR code démonstration
 
@@ -407,7 +407,7 @@ Classes de tests :
 Fixtures disponibles :
 
 - `sample_client` - Client de test
-- `sample_commande` - Commande de test
+- `sample_commande` - Order de test
 - `sample_articles` - Articles de test
 - `mock_database_session` - Session base mockée
 - `auth_headers` - Headers authentification
@@ -438,7 +438,7 @@ Contenu :
 
 ## 📋 Configuration et Exécution
 
-### **Commandes de Test**
+### **Orders de Test**
 
 ```bash
 # Exécuter tous les tests

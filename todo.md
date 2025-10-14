@@ -23,7 +23,7 @@
     - Récupérer les lignes existantes en base pour la commande :
 
     ```python
-    lignes_db = session_db.query(DevisesFactures).filter_by(id_commande=commande.id).all()
+    lignes_db = session_db.query(DevisesFactures).filter_by(id_order=commande.id).all()
     lignes_db_dict = {ligne.id: ligne for ligne in lignes_db}
     ```
 

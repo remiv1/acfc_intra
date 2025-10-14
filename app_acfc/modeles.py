@@ -337,7 +337,7 @@ class Client(Base):
     tels = relationship("Telephone", back_populates="client")
     mails = relationship("Mail", back_populates="client")
     adresses = relationship("Adresse", back_populates="client")
-    commandes = relationship("Commande", back_populates="client")
+    commandes = relationship("Order", back_populates="client")
     factures = relationship("Facture", back_populates="client")
 
     @property
@@ -579,10 +579,10 @@ class Adresse(Base):
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False)
     client = relationship("Client", back_populates="adresses")
-    commandes_livrees = relationship("Commande", back_populates="adresse_livraison",
-                                     foreign_keys='Commande.id_adresse_livraison')
-    commandes_facturees = relationship("Commande", back_populates="adresse_facturation",
-                                      foreign_keys='Commande.id_adresse_facturation')
+    commandes_livrees = relationship("Order", back_populates="adresse_livraison",
+                                     foreign_keys='Order.id_adresse_livraison')
+    commandes_facturees = relationship("Order", back_populates="adresse_facturation",
+                                      foreign_keys='Order.id_adresse_facturation')
 
     # === DONNÉES D'ADRESSE ===
     adresse_l1 = mapped_column(String(255), nullable=False)
@@ -629,7 +629,7 @@ class Adresse(Base):
 # MODÈLES DE DONNÉES - MODULE GESTION DES COMMANDES ET FACTURATION
 # ====================================================================
 
-class Commande(Base):
+class Order(Base):
     '''
     Représente une commande dans le système.
     Gère les informations de la commande, son état,
@@ -680,8 +680,8 @@ class DevisesFactures(Base):
 
     # === IDENTIFIANT ET LIAISON ===
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    id_commande = mapped_column(Integer, ForeignKey(PK_COMMANDE), nullable=False)
-    commande = relationship("Commande", back_populates="devises")
+    id_order = mapped_column(Integer, ForeignKey(PK_COMMANDE), nullable=False)
+    commande = relationship("Order", back_populates="devises")
 
     # === DONNÉES DE L'ÉLÉMENT ===
     reference = mapped_column(String(100), nullable=False)
@@ -725,7 +725,7 @@ class DevisesFactures(Base):
         Représentation sous forme de chaîne de l'objet DevisesFactures
         lors de l'utilisation de print() ou dans le shell.
         """
-        return f"<DevisesFactures(id={self.id}, commande_id={self.id_commande}, reference='{self.reference}', qte={self.qte}, prix_total={self.prix_total})>"
+        return f"<DevisesFactures(id={self.id}, commande_id={self.id_order}, reference='{self.reference}', qte={self.qte}, prix_total={self.prix_total})>"
     
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -733,7 +733,7 @@ class DevisesFactures(Base):
         """
         return {
             'id': self.id,
-            'id_commande': self.id_commande,
+            'id_order': self.id_order,
             'reference': self.reference,
             'designation': self.designation,
             'qte': self.qte,
@@ -767,7 +767,7 @@ class DevisesFactures(Base):
         """
         return cls(
             id=data.get('id', None),
-            id_commande=data.get('id_commande', None),
+            id_order=data.get('id_order', None),
             reference=data.get('reference', None),
             designation=data.get('designation', None),
             qte=data.get('qte', 1),
@@ -793,8 +793,8 @@ class Facture(Base):
     id_fiscal = mapped_column(String(20), unique=True)  # Augmenté pour supporter le format YYYY-MM-NNNNNN-C
     id_client = mapped_column(Integer, ForeignKey(PK_CLIENTS), nullable=False)
     client = relationship("Client", back_populates="factures")
-    id_commande = mapped_column(Integer, ForeignKey(PK_COMMANDE), nullable=False)
-    commande = relationship("Commande", back_populates="facture")
+    id_order = mapped_column(Integer, ForeignKey(PK_COMMANDE), nullable=False)
+    commande = relationship("Order", back_populates="facture")
 
     # === DONNÉES DE FACTURATION ===
     date_facturation = mapped_column(Date, nullable=False, default=func.now())

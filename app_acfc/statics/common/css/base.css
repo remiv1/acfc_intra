@@ -19,8 +19,16 @@ main {
 :root {
     --bs-primary: #196b24;
     --bs-primary-rgb: 25, 107, 36;
-    --bs-secondary: #54bb8f;
-    --bs-secondary-rgb: 84, 187, 143;
+    --bs-primary-light: #2eb840;
+    --bs-primary-light-rgb: 46, 184, 64;
+    --bs-primary-dark: #0c3111;
+    --bs-primary-dark-rgb: 12, 49, 17;
+    --bs-secondary: #2d5a33;
+    --bs-secondary-rgb: 45, 90, 51;
+    --bs-secondary-light: #56ac62;
+    --bs-secondary-light-rgb: 86, 172, 98;
+    --bs-secondary-dark: rgb(10, 22, 13);
+    --bs-secondary-dark-rgb: 10, 22, 13;
     --bs-success: #47d45a;
     --bs-success-rgb: 71, 212, 90;
     --bs-info: #0c3512;
@@ -37,6 +45,38 @@ main {
     --font-title: 'Playwrite CA', sans-serif;
     --font-size-base: 1rem;
     --line-height-base: 1.5;
+}
+
+/* Complément aux styles Bootstrap */
+.bg-primary-light {
+    background-color: var(--bs-primary-light) !important;
+    color: var(--bs-info) !important;
+}
+.bg-primary-dark {
+    background-color: var(--bs-primary-dark) !important;
+    color: var(--light-color) !important;
+}
+.text-primary-dark {
+    color: var(--bs-primary-dark) !important;
+}
+.btn-primary-dark {
+    background-color: var(--bs-primary-dark) !important;
+    color: var(--light-color) !important;
+}
+.bg-secondary-light {
+    background-color: var(--bs-secondary-light) !important;
+    color: var(--bs-info) !important;
+}
+.bg-secondary-dark {
+    background-color: var(--bs-secondary-dark) !important;
+    color: var(--light-color) !important;
+}
+.text-secondary-dark {
+    color: var(--bs-secondary-dark) !important;
+}
+.btn-secondary-dark {
+    background-color: var(--bs-secondary-dark) !important;
+    color: var(--light-color) !important;
 }
 
 /* Header / Navigation */

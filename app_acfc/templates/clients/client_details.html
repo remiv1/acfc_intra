@@ -719,18 +719,18 @@
                                         </td>
                                         <td>
                                             <fieldset class="btn-group gap-1" role="group" aria-label="Actions commande">
-                                                <a href="{{ url_for(('commandes', 'detail') | jinja_page_title, id_client=commande.id_client, id_commande=commande.id) }}" 
+                                                <a href="{{ url_for(('commandes', 'detail') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" 
                                                    class="btn btn-sm btn-outline-primary" title="Voir les détails">
                                                     <i class="bi bi-eye me-1"></i>Voir
                                                 </a>
                                                 {% if not commande.is_annulee and not commande.is_facturee %}
-                                                <a href="{{ url_for(('commandes', 'modifier') | jinja_page_title, id_client=commande.id_client, id_commande=commande.id) }}" 
+                                                <a href="{{ url_for(('commandes', 'modifier') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" 
                                                    class="btn btn-sm btn-outline-secondary ms-1" title="Modifier la commande">
                                                     <i class="bi bi-pencil me-1"></i>Modifier
                                                 </a>
                                                 {% elif not commande.is_expediee and not commande.is_facturee and not commande.is_annulee %}
                                                 {% from '_macros.html' import csrf_field %}
-                                                <form class="inline-display" method="POST" action="{{ url_for(('commandes', 'annuler') | jinja_page_title, id_client=commande.id_client, id_commande=commande.id) }}" 
+                                                <form class="inline-display" method="POST" action="{{ url_for(('commandes', 'annuler') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" 
                                                     onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
                                                     {{ csrf_field() }}
                                                     <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Annuler la commande">

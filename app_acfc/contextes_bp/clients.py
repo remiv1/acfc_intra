@@ -33,7 +33,7 @@ from sqlalchemy.orm import Session as SessionBdDType, joinedload, contains_eager
 from sqlalchemy import or_, func
 from werkzeug import Response as ResponseWerkzeug
 from app_acfc.modeles import (get_db_session, Client, Part, Pro, Telephone, Mail,
-                              Commande, Facture, Adresse)
+                              Order, Facture, Adresse)
 from app_acfc.models.templates_models import PrepareTemplates, Constants
 from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE, ADMINISTRATEUR
 from datetime import datetime
@@ -397,7 +397,7 @@ def get_client(id_client: int) -> str:
             client.adresses,
             key=lambda a: (a.is_inactive, a.id)
         )
-        orders: List[Commande] = sorted(client.commandes, key=lambda x: x.id, reverse=True)
+        orders: List[Order] = sorted(client.commandes, key=lambda x: x.id, reverse=True)
         bills: List[Facture] = client.factures
         nom_affichage = client.nom_affichage
         return PrepareTemplates.clients(sub_context='detail', client=client, part=part, pro=pro, phones=phones,

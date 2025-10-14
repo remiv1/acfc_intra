@@ -1,7 +1,7 @@
 // =====================================================================
 // Variables globales
 // =====================================================================
-let ligneCounter = 1000; // Compteur pour les nouvelles lignes
+let ligneCounter = 1000000000; // Compteur pour les nouvelles lignes
 
 // =====================================================================
 // Initialisations au chargement du DOM
@@ -120,7 +120,7 @@ function ajouterProduitsSelectionnes() {
     });
     
     if (ajouts > 0) {
-        calculerTotalCommande();
+        calculerTotalOrder();
         
         // Fermer la modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('selectionProduitsModal'));
@@ -159,9 +159,9 @@ function ajouterLigneProduit(produit, quantite, remise) {
         id: produit.id || 'new',
         reference: produit.reference.toUpperCase() || '',
         designation: produit.designation.toUpperCase() || '',
-        prix: produit.prix || 0,
-        quantite: quantite || 1,
-        remise: (remise/100).toFixed(2) || 0.10
+        prix_unitaire: produit.prix || 0,
+        qte: quantite || 1,
+        remise: remise || 10
     }
     
     // Calcul du total de la ligne
@@ -210,10 +210,10 @@ function ajouterLigneProduit(produit, quantite, remise) {
             ${totalLigne.toFixed(2)} €
         </td>
         <td>
-            <button type="button" class="btn btn-sm btn-outline-primary me-1 btn-dupliquer" title="Dupliquer">
+            <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="dupliquerLigne(this)" title="Dupliquer">
                 <i class="fas fa-copy"></i>
             </button>
-            <button type="button" class="btn btn-sm btn-outline-danger btn-supprimer" title="Supprimer">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="supprimerLigne(this)" title="Supprimer">
                 <i class="fas fa-trash"></i>
             </button>
         </td>
@@ -232,7 +232,7 @@ function ajouterLigneProduit(produit, quantite, remise) {
 // =====================================================================
 // Calculer le total de la commande + MàJ des champs de totaux
 // =====================================================================
-function calculerTotalCommande() {
+function calculerTotalOrder() {
     const totalCells = document.querySelectorAll('#produitsSelectionnesBody .total-ligne');
     let total = 0;
     
@@ -247,7 +247,7 @@ function calculerTotalCommande() {
     });
     
     // Mettre à jour l'affichage du total dans le tableau
-    const totalElement = document.getElementById('totalCommande');
+    const totalElement = document.getElementById('totalOrder');
     if (totalElement) {
         totalElement.textContent = total.toFixed(2) + ' €';
     }
@@ -259,10 +259,16 @@ function calculerTotalCommande() {
     }
 }
 
+// Récupérer les données d'un produit existant dans la commande
+function getExistingProduct(idProduct) {
+    const productRow = document.querySelector(`#produitsSelectionnesBody tr[data-ligne-id="${idProduct}"]`);
+    const productData = productRow ? productRow.querySelector(`input[name^="lignes_"]`).value : null;
+    return productData ? JSON.parse(productData) : null;
+}
+
 function updateSums(rowIndex) {
     // Récupérer la ligne correspondante
     const row = document.querySelector(`#produitsSelectionnesBody tr[data-ligne-id="${rowIndex}"]`);
-    const rowData = document.querySelector(`#produitsSelectionnesBody tr`);
 
     // Si la ligne n'existe pas, sortir de la fonction
     if (!row) return;
@@ -272,23 +278,98 @@ function updateSums(rowIndex) {
     const quantite = parseInt(row.querySelector('.qte-input').value);
     const remise = parseFloat(row.querySelector('.remise-input').value).toFixed(2);
     const totalValue = (quantite * prixUnitaire * (1 - remise / 100)).toFixed(2);
-    let produitContent = {
-        id: rowData.getAttribute('data-produit-id') || 'new',
-        reference: row.cells[1]?.textContent.toUpperCase() || '',
-        designation: row.cells[2]?.textContent.toUpperCase() || '',
-        prix: parseFloat(prixUnitaire) || 0,
-        quantite: quantite || 1,
-        remise: parseFloat(remise) || 0
+
+    // Récupération des données actuelles du produit pour mise à jour
+    let existingProduct = getExistingProduct(rowIndex);
+    if (!existingProduct) {
+        existingProduct = {
+            id: row.getAttribute('data-produit-id') || 'new',
+            reference: row.cells[1]?.textContent.toUpperCase() || '',
+            designation: row.cells[2]?.textContent.toUpperCase() || '',
+            prix_unitaire: parseFloat(prixUnitaire) || 0,
+            qte: quantite || 1,
+            remise: parseFloat(remise) || 0
+        }
+    } else {
+        existingProduct.prix_unitaire = parseFloat(prixUnitaire) || 0;
+        existingProduct.qte = quantite || 1;
+        existingProduct.remise = parseFloat(remise) || 0;
     }
 
     // Mise à jour du formulaire
-    rowData.querySelector('.data-product').textContent = JSON.stringify(produitContent);
-    rowData.setAttribute('data-prix', prixUnitaire);
-    rowData.setAttribute('data-quantite', quantite);
-    rowData.setAttribute('data-remise', remise);
-    rowData.setAttribute('data-sum', totalValue);
+    row.querySelector(`input[name^="lignes_"]`).value = JSON.stringify(existingProduct);
+    row.setAttribute('data-prix', prixUnitaire);
+    row.setAttribute('data-quantite', quantite);
+    row.setAttribute('data-remise', remise);
+    row.setAttribute('data-sum', totalValue);
 
     // Mise à jour des totaux dans la ligne et la commande
     row.querySelector('.total-ligne').textContent = `${totalValue} €`;
-    calculerTotalCommande();
+    calculerTotalOrder();
+}
+
+function dupliquerLigne(button) {
+    const row = button.closest('tr');
+    const produitId = row.getAttribute('data-ligne-id');
+    
+    // Récupérer les valeurs actuelles
+    const prix = parseFloat(row.querySelector('.prix-input').value) || 0;
+    const qte = parseInt(row.querySelector('.qte-input').value) || 1;
+    const remise = parseFloat(row.querySelector('.remise-input').value) || 0;
+    const reference = row.querySelector('.reference').textContent;
+    const designation = row.querySelector('.designation').textContent;
+    console.log('Duplication de la ligne:', { produitId, prix, qte, remise, reference, designation });
+    const produit = {
+        id: produitId,
+        reference: reference,
+        designation: designation,
+        prix: prix
+    };
+    console.log('Produit dupliqué:', produit);
+    ajouterLigneProduit(produit, qte, remise);
+    calculerTotalOrder();
+    showAlert('Ligne dupliquée avec succès !', 'success');
+}
+
+function supprimerLigne(button) {
+    const row = button.closest('tr');
+    
+    // Vérifier si la ligne est facturée
+    if (row.hasAttribute('data-ligne-facturee')) {
+        showAlert('Impossible de supprimer une ligne déjà facturée !', 'error');
+        return;
+    }
+    
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette ligne ?')) {
+        row.remove();
+        verifierPresenceProduits();
+        calculerTotalOrder();
+        showAlert('Ligne supprimée avec succès !', 'success');
+    }
+}
+
+function verifierPresenceProduits() {
+    const tbody = document.getElementById('produitsSelectionnesBody');
+    if (!tbody) return;
+    
+    const lignes = tbody.querySelectorAll('tr[data-ligne-id]');
+    const messageVide = document.getElementById('aucunProduitMessage'); // Utiliser le message du template
+    
+    if (lignes.length === 0) {
+        // Afficher le message existant dans le template
+        if (messageVide) {
+            messageVide.style.display = 'block';
+        }
+        
+        // Supprimer tout message dans le tbody si il existe
+        const messageInTbody = document.getElementById('messageAucunProduit');
+        if (messageInTbody) {
+            messageInTbody.remove();
+        }
+    } else {
+        // Masquer le message du template
+        if (messageVide) {
+            messageVide.style.display = 'none';
+        }
+    }
 }

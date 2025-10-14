@@ -65,7 +65,7 @@
                             <p class="mb-1"><strong>Numéro :</strong> {{ facture.id_fiscal }}</p>
                             <p class="mb-1"><strong>Date d'émission :</strong> {{ facture.date_facturation|strftime }}</p>
                             <p class="mb-1"><strong>Commande liée :</strong> 
-                                <a href="{{ url_for('commandes.commande_details', id_commande=facture.id_commande, id_client=facture.id_client) }}">#{{ facture.id_commande }}</a>
+                                <a href="{{ url_for('commandes.commande_details', id_order=facture.id_order, id_client=facture.id_client) }}">#{{ facture.id_order }}</a>
                             </p>
                             <p class="mb-0">
                                 <span class="badge {% if facture.is_imprime %}bg-info{% else %}bg-warning{% endif %}">
@@ -171,7 +171,7 @@
                         <a href="{{ url_for('commandes.facture_impression', id_facture=facture.id) }}" class="btn btn-primary" target="_blank">
                             <i class="bi bi-printer me-1"></i>Imprimer la facture
                         </a>
-                        <a href="{{ url_for('commandes.commande_details', id_commande=facture.id_commande, id_client=facture.id_client) }}" class="btn btn-outline-secondary">
+                        <a href="{{ url_for('commandes.commande_details', id_order=facture.id_order, id_client=facture.id_client) }}" class="btn btn-outline-secondary">
                             <i class="bi bi-box-seam me-1"></i>Voir la commande
                         </a>
                         <a href="{{ url_for('clients.get_client', id_client=facture.id_client) }}" class="btn btn-outline-primary">

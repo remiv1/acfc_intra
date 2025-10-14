@@ -202,7 +202,7 @@
     <rect style="fill: #ffffff" x="680" y="-400" width="256.4" height="44"/>
     <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="680" y="-400" width="256.4" height="44"/>
     <text font-size="12.8" style="fill: #0000ff;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="808.2" y="-384.8">&lt;&lt;11_commandes&gt;&gt;</text>
-    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="808.2" y="-364">Commande</text>
+    <text font-size="16" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="808.2" y="-364">Order</text>
     <rect style="fill: #ffffff" x="680" y="-356" width="256.4" height="276"/>
     <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="680" y="-356" width="256.4" height="276"/>
     <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="684" y="-342.8">+**id**: INTEGER</text>
@@ -243,7 +243,7 @@
     <rect style="fill: #ffffff" x="1060" y="-356" width="233.3" height="308"/>
     <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #ff5500" x="1060" y="-356" width="233.3" height="308"/>
     <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-342.8">+**id**: INTEGER</text>
-    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-326.8">+id_commande: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-326.8">+id_order: INTEGER</text>
     <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff5500" x1="1064" y1="-320.4" x2="1225.7" y2="-320.4"/>
     <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-310.8">+reference: VARCHAR(100)</text>
     <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1064" y="-294.8">+designation: VARCHAR(255)</text>
@@ -285,7 +285,7 @@
     <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="133.2">+id_fiscal: VARCHAR(20)</text>
     <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="149.2">+id_client: INTEGER</text>
     <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff5500" x1="1164" y1="155.6" x2="1310.3" y2="155.6"/>
-    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="165.2">+id_commande: INTEGER</text>
+    <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="165.2">+id_order: INTEGER</text>
     <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #ff5500" x1="1164" y1="171.6" x2="1325.7" y2="171.6"/>
     <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="181.2">+date_facturation: DATE</text>
     <text font-size="12.8" style="fill: #0000ff;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1164" y="197.2">+montant_facture: NUMERIC(10,2)</text>

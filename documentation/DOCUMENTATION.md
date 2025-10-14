@@ -132,7 +132,7 @@ PasswordHasher(
 
 -- Commercial
 11_commandes (id, id_client, montant_ht, tva, statut...)
-12_lignes_commande (id, id_commande, id_produit, quantite, prix...)
+12_lignes_commande (id, id_order, id_produit, quantite, prix...)
 
 -- Comptabilité
 30_pcg (compte, libelle, type_compte...)
@@ -183,7 +183,7 @@ MONGO_INITDB_ROOT_PASSWORD=mot_de_passe_mongo
 MONGO_INITDB_DATABASE=******
 ```
 
-### Commandes de Déploiement
+### Orders de Déploiement
 
 ```bash
 # Développement

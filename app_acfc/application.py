@@ -32,7 +32,7 @@ from sqlalchemy.sql.functions import func
 from logs.logger import acfc_log, ERROR
 from app_acfc.services import SecureSessionService, AuthenticationService
 from app_acfc.modeles import (
-    User, Commande, Client, init_database, get_db_session,
+    User, Order, Client, init_database, get_db_session,
     GeoMethods
     )
 from app_acfc.models.templates_models import PrepareTemplates, Constants
@@ -103,7 +103,8 @@ def before_request() -> Any:
         return None
 
     # Si l'utilisateur n'est pas connecté, rediriger vers la page de login
-    return redirect(url_for('login'))
+    previous_url = request.url
+    return redirect(url_for('login', next=previous_url))
 
 @acfc.after_request
 def after_request(response: Response) -> Response:
@@ -119,6 +120,9 @@ def after_request(response: Response) -> Response:
     Returns:
         Response: Réponse modifiée si nécessaire
     """
+    if 'db_session' in g:
+        g.db_session.close()
+        g.pop('db_session', None)
     return response
 
 @acfc.teardown_appcontext
@@ -148,7 +152,6 @@ def inject_csrf_token():
         # En cas de problème (ex: pas de session active), renvoyer une valeur vide
         token_to_return = {'csrf_token': ''}
     return token_to_return
-
 
 # ====================================================================
 # FILTRES JINJA2 PERSONNALISÉS
@@ -186,7 +189,7 @@ def jinja_page_title(title_and_subtitle: Tuple[str, str]) -> str:
 # FONCTIONS DE RECHERCHES - HORS ROUTES
 # ====================================================================
 
-def get_current_orders(id_client: int = 0) -> List[Commande]:
+def get_current_orders(id_client: int = 0) -> List[Order]:
     """
     Récupère les commandes en cours pour un client donné.
 
@@ -194,39 +197,39 @@ def get_current_orders(id_client: int = 0) -> List[Commande]:
         id_client (int): ID du client, 0 pour tous les clients
 
     Returns:
-        List[Commande]: Liste des commandes en cours
+        List[Order]: Liste des commandes en cours
     """
     # Ouverture de la session
     db_session: SessionBdDType = get_db_session()
 
     # Récupération des commandes en cours sans notion de client
     if id_client == 0:
-        commandes: List[Commande] = (
-            db_session.query(Commande)
+        commandes: List[Order] = (
+            db_session.query(Order)
             .options(
-                joinedload(Commande.client).joinedload(Client.part),  # Eager loading du client particulier
-                joinedload(Commande.client).joinedload(Client.pro)    # Eager loading du client professionnel
+                joinedload(Order.client).joinedload(Client.part),  # Eager loading du client particulier
+                joinedload(Order.client).joinedload(Client.pro)    # Eager loading du client professionnel
             )
             .filter(or_(
-                Commande.is_facturee.is_(False),
-                Commande.is_expediee.is_(False)
+                Order.is_facturee.is_(False),
+                Order.is_expediee.is_(False)
             ))
             .all()
         )
 
     # Récupération des commandes en cours pour un client spécifique
     else:
-        commandes: List[Commande] = (
-            db_session.query(Commande)
+        commandes: List[Order] = (
+            db_session.query(Order)
             .options(
-                joinedload(Commande.client).joinedload(Client.part),  # Eager loading du client particulier
-                joinedload(Commande.client).joinedload(Client.pro)    # Eager loading du client professionnel
+                joinedload(Order.client).joinedload(Client.part),  # Eager loading du client particulier
+                joinedload(Order.client).joinedload(Client.pro)    # Eager loading du client professionnel
             )
             .filter(and_(
-                Commande.id_client == id_client,
+                Order.id_client == id_client,
                 or_(
-                    Commande.is_facturee.is_(False),
-                    Commande.is_expediee.is_(False)
+                    Order.is_facturee.is_(False),
+                    Order.is_expediee.is_(False)
                 )
             ))
             .all()
@@ -259,50 +262,50 @@ def get_commercial_indicators() -> Dict[str, Any] | None:
         indicators: Dict[str, List[int | float | str]] | None = {
             # Chiffre d'affaire total facturé pour le mois en cours
             "ca_current_month": [
-                round(db_session.query(func.sum(Commande.montant))
+                round(db_session.query(func.sum(Order.montant))
                 .filter(
-                    Commande.is_facturee.is_(True),
-                    Commande.date_commande >= first_day_of_month
+                    Order.is_facturee.is_(True),
+                    Order.date_commande >= first_day_of_month
                 ).scalar() or 0.0, 2),
                 'CA Mensuel'
             ],
 
             # Chiffre d'affaire total facturé pour l'année en cours
             "ca_current_year": [
-                round(db_session.query(func.sum(Commande.montant))
+                round(db_session.query(func.sum(Order.montant))
                 .filter(
-                    Commande.is_facturee.is_(True),
-                    Commande.date_commande >= first_day_of_year
+                    Order.is_facturee.is_(True),
+                    Order.date_commande >= first_day_of_year
                 ).scalar() or 0.0, 2),
                 'CA Annuel'
             ],
 
             # Panier moyen annuel
             "average_basket": [
-                round(db_session.query(func.avg(Commande.montant))
+                round(db_session.query(func.avg(Order.montant))
                 .filter(
-                    Commande.is_facturee.is_(True),
-                    Commande.date_commande >= first_day_of_year
+                    Order.is_facturee.is_(True),
+                    Order.date_commande >= first_day_of_year
                 ).scalar() or 0.0, 2),
                 'Panier Moyen'
             ],
 
             # Clients actifs
             "active_clients": [
-                db_session.query(func.count(func.distinct(Commande.id_client)))
+                db_session.query(func.count(func.distinct(Order.id_client)))
                 .filter(
-                    Commande.is_facturee.is_(True),
-                    Commande.date_commande >= first_day_of_year
+                    Order.is_facturee.is_(True),
+                    Order.date_commande >= first_day_of_year
                 ).scalar() or 0,
                 'Clients Actifs'
             ],
 
             # Nombre de commandes par an
             "orders_per_year": [
-                db_session.query(func.count(Commande.id))
+                db_session.query(func.count(Order.id))
                 .filter(
-                    Commande.is_facturee.is_(True),
-                    Commande.date_commande >= first_day_of_year
+                    Order.is_facturee.is_(True),
+                    Order.date_commande >= first_day_of_year
                 ).scalar() or 0,
                 'Commandes Annuelles'
             ]
@@ -344,7 +347,9 @@ def login() -> Any:
         Any: Template de connexion, redirection vers l'accueil, ou page d'erreur
     """
     # === TRAITEMENT GET : Affichage du formulaire de connexion ===
-    if request.method == 'GET': return PrepareTemplates.login()
+    if request.method == 'GET':
+        previous_url = request.args.get('next', None)
+        return PrepareTemplates.login(next_url=previous_url)
     elif request.method != 'POST':
         message = Constants.messages('error_400', 'wrong_road') \
                   + f'\nMéthode {request.method} non autorisée.' \
@@ -354,19 +359,21 @@ def login() -> Any:
     else:
         user_to_authenticate = AuthenticationService(request)
         result_auth = user_to_authenticate.authenticate()
+        next_url = request.form.get('next', None)
         # Schéma de vérification des identifiants
         try:
             # Si échec de l'authentification, retour au formulaire avec message d'erreur
             if not result_auth: return PrepareTemplates.login(message=INVALID)
             # Si succès, mais mot de passe à changer, redirection vers la page de changement
-            
-            return \
-                PrepareTemplates.login(subcontext='change_password',
+            if user_to_authenticate.is_chg_mdp:
+                return PrepareTemplates.login(subcontext='change_password',
                                        message=Constants.messages('user', 'to_update'),
                                        username=user_to_authenticate.user_pseudo,
-                                       log=True)  \
-                if user_to_authenticate.is_chg_mdp \
-                else redirect(url_for('dashboard'))
+                                       log=True)
+            elif next_url:
+                return redirect(next_url)
+            else:
+                return redirect(url_for('dashboard'))
         except Exception as e:
             message = Constants.messages('error_500', 'default') + 'context : auth' \
                       + f' Utilisateur : {user_to_authenticate.user_pseudo if user_to_authenticate else "inconnu"}' + \

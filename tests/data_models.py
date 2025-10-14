@@ -29,7 +29,7 @@ from app_acfc.services import PasswordService
 try:
     from app_acfc.modeles import (
         User, Client, Part, Pro, Mail, Telephone, Adresse,  # type: ignore
-        Commande, DevisesFactures, Facture, Expeditions,    # type: ignore
+        Order, DevisesFactures, Facture, Expeditions,    # type: ignore
         Catalogue, Operations, Ventilations, Documents,     # type: ignore
         Stock, Villes, IndicatifsTel, Moi                   # type: ignore
     )
@@ -38,7 +38,7 @@ try:
 except ImportError:
     # Pour les tests isolés sans dépendances
     User = Client = Part = Pro = Mail = Telephone = Adresse = None
-    Commande = DevisesFactures = Facture = Expeditions = None
+    Order = DevisesFactures = Facture = Expeditions = None
     Catalogue = None
     Operations = Ventilations = Documents = None
     Stock = Villes = IndicatifsTel = Moi = None
@@ -489,18 +489,18 @@ class AdresseFixtures:
 # FIXTURES - COMMANDES ET FACTURATION
 # ====================================================================
 
-class CommandeFixtures:
-    """Fixtures pour les objets Commande."""
+class OrderFixtures:
+    """Fixtures pour les objets Order."""
     
     @staticmethod
     def commande_simple() -> Mock:
-        """Commande simple non facturée."""
+        """Order simple non facturée."""
         commande = Mock()
         commande.id = 1
         commande.id_client = 1
         commande.is_ad_livraison = False
         commande.id_adresse = 1
-        commande.descriptif = "Commande timbres collection"
+        commande.descriptif = "Order timbres collection"
         commande.date_commande = date(2024, 8, 15)
         commande.montant = Decimal('125.50')
         commande.is_annulee = False
@@ -520,13 +520,13 @@ class CommandeFixtures:
     
     @staticmethod
     def commande_facturee() -> Mock:
-        """Commande déjà facturée."""
+        """Order déjà facturée."""
         commande = Mock()
         commande.id = 2
         commande.id_client = 2
         commande.is_ad_livraison = True
         commande.id_adresse = 2
-        commande.descriptif = "Commande entreprise - timbres courants"
+        commande.descriptif = "Order entreprise - timbres courants"
         commande.date_commande = date(2024, 7, 1)
         commande.montant = Decimal('450.00')
         commande.is_annulee = False
@@ -553,7 +553,7 @@ class DevisesFacturesFixtures:
         """Ligne de commande standard."""
         ligne = Mock()
         ligne.id = 1
-        ligne.id_commande = 1
+        ligne.id_order = 1
         ligne.reference = "EU0850"
         ligne.designation = "MARIANNE 0.85€ x20"
         ligne.qte = 5
@@ -583,7 +583,7 @@ class DevisesFacturesFixtures:
         """Ligne déjà facturée et expédiée."""
         ligne = Mock()
         ligne.id = 2
-        ligne.id_commande = 2
+        ligne.id_order = 2
         ligne.reference = "VPF020"
         ligne.designation = "VALEUR PERMANENTE FRANCE x100"
         ligne.qte = 10
@@ -619,7 +619,7 @@ class FactureFixtures:
         facture.id = 1
         facture.id_fiscal = "2024-07-000001-8"
         facture.id_client = 2
-        facture.id_commande = 2
+        facture.id_order = 2
         facture.is_adresse_facturation = False
         facture.id_adresse = 2
         facture.date_facturation = date(2024, 7, 5)
@@ -630,7 +630,7 @@ class FactureFixtures:
         
         # Relations
         facture.client = ClientFixtures.client_professionnel()
-        facture.commande = CommandeFixtures.commande_facturee()
+        facture.commande = OrderFixtures.commande_facturee()
         facture.composantes_factures = [DevisesFacturesFixtures.ligne_facturee()]
         
         # Méthodes mockées
@@ -646,7 +646,7 @@ class FactureFixtures:
         facture.id = 2
         facture.id_fiscal = "2024-08-000002-3"
         facture.id_client = 1
-        facture.id_commande = 3
+        facture.id_order = 3
         facture.is_adresse_facturation = False
         facture.id_adresse = 1
         facture.date_facturation = date(2024, 8, 20)
@@ -899,12 +899,12 @@ class ClientFactory:
         return client
 
 
-class CommandeFactory:
+class OrderFactory:
     """Factory pour créer des commandes de test personnalisées."""
     
     @staticmethod
     def create_commande(
-        id_commande: int = 1,
+        id_order: int = 1,
         id_client: int = 1,
         montant: float = 100.0,
         date_commande: Optional[date] = None,
@@ -912,11 +912,11 @@ class CommandeFactory:
     ) -> Mock:
         """Crée une commande personnalisée."""
         commande = Mock()
-        commande.id = id_commande
+        commande.id = id_order
         commande.id_client = id_client
         commande.is_ad_livraison = kwargs.get('is_ad_livraison', False)
         commande.id_adresse = kwargs.get('id_adresse', 1)
-        commande.descriptif = kwargs.get('descriptif', "Commande de test")
+        commande.descriptif = kwargs.get('descriptif', "Order de test")
         commande.date_commande = date_commande or date.today()
         commande.montant = Decimal(str(montant))
         commande.is_annulee = kwargs.get('is_annulee', False)
@@ -947,7 +947,7 @@ class FactureBuilder:
         self._facture.id = 1
         self._facture.id_fiscal = "2024-08-000001-5"
         self._facture.id_client = 1
-        self._facture.id_commande = 1
+        self._facture.id_order = 1
         self._facture.is_adresse_facturation = False
         self._facture.id_adresse = 1
         self._facture.date_facturation = date.today()
@@ -1128,7 +1128,7 @@ def client_professionnel():
 @pytest.fixture
 def commande_simple():
     """Fixture pytest pour commande simple."""
-    return CommandeFixtures.commande_simple()
+    return OrderFixtures.commande_simple()
 
 @pytest.fixture
 def facture_simple():

@@ -1,5 +1,5 @@
 <!-- ====================================================================
-    ACFC - Template "Formulaire Commande" (Contenu)
+    ACFC - Template "Formulaire Order" (Contenu)
     ====================================================================
      
     Contenu du formulaire de création/modification de commande.
@@ -19,7 +19,9 @@
     - current_year : Année courante (pour sélection par défaut)
     - today : Date du jour pour le formulaire
 ==================================================================== -->
-
+{% set client = commande.client if commande else client %}
+{% set entrees = commande.devises if commande else None %}
+{% set catalogue_complet = catalogue if catalogue else None %}
 <!-- CSS spécifique aux commandes -->
 <link rel="stylesheet" href="{{ url_for('static', filename='commandes/css/commandes.css') }}">
 
@@ -48,11 +50,11 @@
                         </div>
                         <div class="d-flex gap-2">
                             {% if form_sub_context == 'edit' %}
-                                <a href="{{ url_for('commandes.commande_details', id_client=client.id, id_commande=commande.id) }}" class="btn btn-outline-info">
+                                <a href="{{ url_for(('commandes', 'detail') | jinja_page_title, id_client=client.id, id_order=commande.id) }}" class="btn btn-outline-info">
                                     <i class="fas fa-eye me-1"></i>Voir détails
                                 </a>
                             {% endif %}
-                            <a href="{{ url_for('clients.get_client', id_client=client.id) }}" class="btn btn-outline-secondary">
+                            <a href="{{ url_for(('clients', 'detail') | jinja_page_title, id_client=client.id) }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-arrow-left me-1"></i>Retour au client
                             </a>
                         </div>
@@ -99,13 +101,13 @@
 
     <!-- Formulaire principal -->
     {% from '_macros.html' import csrf_field %}    
-    <form method="POST" id="commandeForm" action="{% if form_sub_context == 'create' %}{{ url_for(('commandes', 'nouvelle') | jinja_page_title, id_client=client.id) }}{% else %}{{ url_for(('commandes', 'modifier') | jinja_page_title, id_client=client.id, id_commande=commande.id) }}{% endif %}">
+    <form method="POST" id="commandeForm" action="{% if form_sub_context == 'create' %}{{ url_for(('commandes', 'nouvelle') | jinja_page_title, id_client=client.id) }}{% else %}{{ url_for(('commandes', 'modifier') | jinja_page_title, id_client=client.id, id_order=commande.id) }}{% endif %}">
         {{ csrf_field() }}
         <div class="row">
             <!-- Informations de la commande -->
             <div class="col-lg-6 mb-4">
                 <div class="card h-100">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header bg-primary-dark text-white">
                         <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informations de la commande</h5>
                     </div>
                     <div class="card-body">
@@ -199,7 +201,7 @@
             <!-- État de la commande -->
             <div class="col-lg-6 mb-4">
                 <div class="card h-100">
-                    <div class="card-header bg-success text-white">
+                    <div class="card-header bg-primary-dark text-white">
                         <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>État de la commande</h5>
                     </div>
                     <div class="card-body">
@@ -277,7 +279,7 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header bg-info text-white">
+                    <div class="card-header bg-primary-dark text-white">
                         <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Produits de la commande</h5>
                     </div>
                     <div class="card-body">
@@ -317,17 +319,20 @@
                                 <tbody id="produitsSelectionnesBody">
                                     {% if commande and entrees %}
                                         {% for ligne in entrees %}
+                                        {% set ligne_json = ligne|entries_jsonify %}
                                         <!-- Ligne de produit -->
-                                        <tr data-id="{{ ligne.id }}" data-id-commande="{{ ligne.id_commande }}"
-                                            data-reference="{{ ligne.reference }}" data-designation="{{ ligne.designation }}"
+                                        <tr data-ligne-id="{{ ligne.id }}"
                                             data-qte="{{ ligne.qte }}" data-prix-unitaire="{{ ligne.prix_unitaire }}"
                                             data-remise="{{ ligne.remise }}"
                                             {% if ligne.is_facture %}data-ligne-facturee="true"{% endif %}>
                                             <!-- Colonnes avec le détail des produits -->
-                                            <td class="data-product d-none">{{ ligne.id }}</td>
-                                            <td class="reference">{{ ligne.produit.ref_auto }}</td>
+                                            <td class="data-product d-none">
+                                                <input type="hidden" name="lignes_{{ ligne.id }}_id"
+                                                       class="data-product" value="{{ ligne_json }}">
+                                            </td>
+                                            <td class="reference">{{ ligne.reference }}</td>
                                             <td class="designation">
-                                                {{ ligne.produit.des_auto }}
+                                                {{ ligne.designation }}
                                                 {% if ligne.is_facture %}
                                                     <span class="badge bg-success ms-2">Facturée</span>
                                                 {% endif %}
@@ -335,9 +340,9 @@
                                             <td>
                                                 <div class="input-group input-group-sm">
                                                     <input type="number" class="form-control prix-input" 
-                                                           name="prix_{{ ligne.produit_id }}_{{ ligne.ligne_id }}" 
-                                                           value="{{ "%.2f"|format(ligne.devise.prix_unitaire) }}" 
-                                                           step="0.01" min="0" onchange="calculerTotalLigne(this)"
+                                                           name="prix_{{ ligne.id }}" 
+                                                           value="{{ "%.2f"|format(ligne.prix_unitaire) }}" 
+                                                           step="0.01" min="0" onchange="updateSums({{ ligne.id }})"
                                                            title="Prix unitaire HT"
                                                            {% if ligne.is_facture %}readonly{% endif %}>
                                                     <span class="input-group-text">€</span>
@@ -345,28 +350,28 @@
                                             </td>
                                             <td>
                                                 <input type="number" class="form-control form-control-sm qte-input" 
-                                                       name="qte_{{ ligne.produit_id }}_{{ ligne.ligne_id }}" 
-                                                       value="{{ ligne.devise.qte }}" 
-                                                       min="1" onchange="calculerTotalLigne(this)"
+                                                       name="qte_{{ ligne.id }}" 
+                                                       value="{{ ligne.qte }}" 
+                                                       min="1" onchange="updateSums({{ ligne.id }})"
                                                        title="Quantité"
                                                        {% if ligne.is_facture %}readonly{% endif %}>
                                             </td>
                                             <td>
                                                 <div class="input-group input-group-sm">
                                                     <input type="number" class="form-control remise-input" 
-                                                           name="remise_{{ ligne.produit_id }}_{{ ligne.ligne_id }}" 
-                                                           value="{{ ((ligne.devise.remise or 0) * 100)|round(1) }}" 
-                                                           step="0.1" min="0" max="100" onchange="calculerTotalLigne(this)"
+                                                           name="remise_{{ ligne.id }}" 
+                                                           value="{{ (ligne.remise or 0)|round(2) }}" 
+                                                           step="0.1" min="0" max="100" onchange="updateSums({{ ligne.id }})"
                                                            title="Remise en pourcentage"
                                                            {% if ligne.is_facture %}readonly{% endif %}>
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </td>
                                             <td class="total-ligne fw-bold">
-                                                {{ "%.2f"|format(ligne.total_ligne) }} €
+                                                {{ "%.2f"|format(ligne.prix_total) }} €
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="duppliquerLigne(this)" title="Dupliquer">
+                                                <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="dupliquerLigne(this)" title="Dupliquer">
                                                     <i class="fas fa-copy"></i>
                                                 </button>
                                                 {% if not ligne.is_facture %}
@@ -386,7 +391,7 @@
                                 <tfoot class="table-light">
                                     <tr>
                                         <td colspan="5" class="text-end fw-bold">Total de la commande :</td>
-                                        <td class="fw-bold" id="totalCommande">
+                                        <td class="fw-bold" id="totalOrder">
                                             {% if commande and commande.montant %}{{ "%.2f"|format(commande.montant) }} €{% else %}0.00 €{% endif %}
                                         </td>
                                         <td></td>
@@ -544,4 +549,4 @@
         </div>
     </div>
 </div>
-<script src="{{ url_for('static', filename='commandes/js/commandes-form-modal.js') }}"></script>
+<script src="{{ url_for('static', filename='commandes/js/commandes-form.js') }}"></script>

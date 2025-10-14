@@ -2,7 +2,9 @@ from typing import List, Dict, Optional, Any
 from flask import render_template, session, Request
 from datetime import datetime
 from logs.logger import INFO, ERROR, acfc_log
-from app_acfc.modeles import Commande, Client, Catalogue, get_db_session
+from app_acfc.modeles import Client, get_db_session
+from app_acfc.models.orders_models import OrdersModel
+from app_acfc.models.products_models import ProductsModel
 from sqlalchemy.orm.session import Session as SessionBdDType
 
 class Constants:
@@ -394,7 +396,7 @@ class PrepareTemplates:
     BASE: str = Constants.templates('base')
 
     @staticmethod
-    def login(*, message: Optional[str]=None, subcontext: str='login', log: bool=False, **kwargs: Any) -> str:
+    def login(*, message: Optional[str]=None, subcontext: str='login', next_url: Optional[str]=None, log: bool=False, **kwargs: Any) -> str:
         '''
         Génère le template de la page de login.
 
@@ -412,6 +414,7 @@ class PrepareTemplates:
                                context='login',
                                subcontext=subcontext,
                                message=message,
+                               next=next_url,
                                **kwargs)
 
     @staticmethod
@@ -471,9 +474,8 @@ class PrepareTemplates:
                                **kwargs)
 
     @staticmethod
-    def orders(*, subcontext: str, commande: Optional[Commande]=None, log: bool=False,
-               message: Optional[str]=None, success_message: Optional[str]=None, error_message: Optional[str]=None,
-               id_client: Optional[int]=None, **kwargs: Any) -> str:
+    def orders(*, subcontext: str, order: Optional[OrdersModel]=None, log: bool=False,
+               **kwargs: Any) -> str:
         '''
         Génère le template de la page commandes.
 
@@ -490,55 +492,24 @@ class PrepareTemplates:
         '''
         # Gestion des logs
         if log:
-            acfc_log.log(level=INFO, message=message or '',
+            acfc_log.log(level=INFO, message=kwargs['message'] or '',
                          specific_logger=Constants.log_files('commandes'),
                          user=session.get('pseudo', 'N/A'), db_log=True)
 
         # Récupération du catalogue filtres et autre paramètres
-        session_db: SessionBdDType = get_db_session()
-        current_year: int = datetime.now().year
-        compleet_catalog: List[Catalogue] = session_db.query(Catalogue).order_by(Catalogue.id.desc()).all()
-        client = session_db.query(Client).filter(Client.id == id_client).first() if id_client else None
-
-        # Récupération des millésimes distincts pour le filtre
-        millesimes = session_db.query(Catalogue.millesime) \
-                            .distinct() \
-                            .filter(Catalogue.millesime.isnot(None)) \
-                            .order_by(Catalogue.millesime.desc()) \
-                            .all()
-        millesimes = [m[0] for m in millesimes if m[0]]
-
-        # Récupération des types de produits distincts pour le filtre
-        product_types = session_db.query(Catalogue.type_produit) \
-                            .distinct() \
-                            .filter(Catalogue.type_produit.isnot(None)) \
-                            .order_by(Catalogue.type_produit) \
-                            .all()
-        product_types = [p[0] for p in product_types if p[0]]
-
-        # Récupération des zones géographiques distinctes pour le filtre
-        geo_areas = session_db.query(Catalogue.geographie) \
-                            .distinct() \
-                            .filter(Catalogue.geographie.isnot(None)) \
-                            .order_by(Catalogue.geographie) \
-                            .all()
-        geo_areas = [g[0] for g in geo_areas if g[0]]
+        catalogue_object = ProductsModel().get_all_products().get_context_catalogue()
 
         # Retour du template
         return render_template(PrepareTemplates.BASE,
                                title='ACFC - Gestion des Commandes',
                                context='commandes',
                                sub_context=subcontext,
-                               message=message,
-                               success_message=success_message,
-                               error_message=error_message,
-                               client=client if id_client else None,
-                               commande=commande,
-                               current_year=current_year,
-                               catalog=compleet_catalog,
-                               millesimes=millesimes,
-                               types_produit=product_types,
-                               geographies=geo_areas,
+                               commande=order,
+                               current_year=datetime.now().year,
+                               catalogue=catalogue_object.catalogue,
+                               millesimes=catalogue_object.millesimes,
+                               types_produit=catalogue_object.product_types,
+                               geographies=catalogue_object.geo_areas,
                                today=datetime.now().strftime('%Y-%m-%d'),
                                **kwargs)
 

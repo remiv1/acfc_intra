@@ -84,7 +84,7 @@ function initDashboardRefresh() {
     // Bouton de rafraîchissement pour les commandes
     const commandesCard = document.querySelector('.card-header:has(.fa-shopping-cart)');
     if (commandesCard) {
-        addRefreshButton(commandesCard, refreshCommandes);
+        addRefreshButton(commandesCard, refreshOrders);
     }
     
     // Bouton de rafraîchissement pour les indicateurs
@@ -125,7 +125,7 @@ function addRefreshButton(header, refreshFunction) {
 async function refreshDashboardData() {
     try {
         await Promise.all([
-            refreshCommandes(),
+            refreshOrders(),
             refreshIndicateurs()
         ]);
         
@@ -140,9 +140,9 @@ async function refreshDashboardData() {
 /**
  * Rafraîchit les commandes en cours
  */
-async function refreshCommandes() {
-    if (typeof loadCommandesEnCours === 'function') {
-        return loadCommandesEnCours();
+async function refreshOrders() {
+    if (typeof loadOrdersEnCours === 'function') {
+        return loadOrdersEnCours();
     }
 }
 
