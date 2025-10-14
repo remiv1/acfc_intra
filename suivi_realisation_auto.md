@@ -1,18 +1,18 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 13 October 2025  
-**Période analysée :** 06 October 2025 - 13 October 2025 (7 jours)  
-**Nombre de commits :** 14  
+**Date du rapport :** 14 October 2025  
+**Période analysée :** 07 October 2025 - 14 October 2025 (7 jours)  
+**Nombre de commits :** 17  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 14 commits sur 7 jours  
-**Volume de code :** 1987 lignes ajoutées, 4912 lignes supprimées  
-**Fichiers impactés :** 106 fichiers modifiés  
-**Productivité moyenne :** 283 lignes/jour
+**Activité de développement :** 17 commits sur 7 jours  
+**Volume de code :** 2644 lignes ajoutées, 5607 lignes supprimées  
+**Fichiers impactés :** 149 fichiers modifiés  
+**Productivité moyenne :** 377 lignes/jour
 
 ---
 
@@ -170,6 +170,28 @@
 
 ### 13 October 2025
 
+#### 19:11 - 1b6aef5 - feat: Créer le répertoire requis pour les files d'attente dans le pipeline CI/CD Docker
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +1 -0 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Mon Oct 13 19:11:49 2025 +0200`
+- `    feat: Créer le répertoire requis pour les files d'attente dans le pipeline CI/CD Docker`
+- ... et 1 autres fichiers
+
+#### 16:37 - 095c7ec - 📊 Mise à jour automatique du rapport de suivi (13/10/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +38 -39 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Mon Oct 13 16:37:11 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (13/10/2025)`
+- ... et 1 autres fichiers
+
 #### 18:36 - b86c37c - feat: Add templates and user management functionality
 
 **Catégorie :** Développement de fonctionnalités  
@@ -182,41 +204,56 @@
 - ... et 25 autres fichiers
 
 
+### 14 October 2025
+
+#### 19:44 - 7ae4d52 - Refactor: Rename 'Commande' to 'Order' across templates, models, and tests
+
+**Catégorie :** Refactoring  
+**Impact :** +618 -656 lignes, 35 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Tue Oct 14 19:44:06 2025 +0200`
+- `    Refactor: Rename 'Commande' to 'Order' across templates, models, and tests`
+- ... et 33 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 5 commits (35.7%)
-- **Interface utilisateur** : 5 commits (35.7%)
-- **Développement général** : 2 commits (14.3%)
-- **Correction de bugs** : 1 commits (7.1%)
-- **Refactoring** : 1 commits (7.1%)
+- **Développement de fonctionnalités** : 6 commits (35.3%)
+- **Interface utilisateur** : 6 commits (35.3%)
+- **Refactoring** : 2 commits (11.8%)
+- **Développement général** : 2 commits (11.8%)
+- **Correction de bugs** : 1 commits (5.9%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 21 fichiers modifiés
-- **JavaScript** : 10 fichiers modifiés
-- **HTML** : 6 fichiers modifiés
-- **Documentation** : 6 fichiers modifiés
-- **YAML/Config** : 2 fichiers modifiés
+- **Python** : 30 fichiers modifiés
+- **JavaScript** : 13 fichiers modifiés
+- **HTML** : 12 fichiers modifiés
+- **Documentation** : 11 fichiers modifiés
+- **YAML/Config** : 3 fichiers modifiés
+- **CSS** : 2 fichiers modifiés
 - **Docker** : 1 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 2.0 commits/jour
-- **Volume de code :** 6899 modifications totales
-- **Ratio ajouts/suppressions :** 0.40
-- **Moyenne lignes par commit :** 493
+- **Fréquence de commit :** 2.4 commits/jour
+- **Volume de code :** 8251 modifications totales
+- **Ratio ajouts/suppressions :** 0.47
+- **Moyenne lignes par commit :** 485
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 1987 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 2644 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 13 October 2025*
+*Rapport généré automatiquement le 14 October 2025*
