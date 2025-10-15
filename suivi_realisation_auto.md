@@ -2,17 +2,17 @@
 
 **Date du rapport :** 15 October 2025  
 **Période analysée :** 08 October 2025 - 15 October 2025 (7 jours)  
-**Nombre de commits :** 21  
+**Nombre de commits :** 23  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 21 commits sur 7 jours  
-**Volume de code :** 3040 lignes ajoutées, 5719 lignes supprimées  
-**Fichiers impactés :** 176 fichiers modifiés  
-**Productivité moyenne :** 434 lignes/jour
+**Activité de développement :** 23 commits sur 7 jours  
+**Volume de code :** 3244 lignes ajoutées, 5756 lignes supprimées  
+**Fichiers impactés :** 188 fichiers modifiés  
+**Productivité moyenne :** 463 lignes/jour
 
 ---
 
@@ -231,6 +231,28 @@
 
 ### 15 October 2025
 
+#### 18:18 - 7df6d10 - feat: Ajouter la gestion de la facturation avec création de factures et mise à jour des lignes facturées
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +134 -14 lignes, 8 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Oct 15 18:18:53 2025 +0200`
+- `    feat: Ajouter la gestion de la facturation avec création de factures et mise à jour des lignes facturées`
+- ... et 5 autres fichiers
+
+#### 11:38 - 4d8a349 - 📊 Mise à jour automatique du rapport de suivi (15/10/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +70 -23 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Wed Oct 15 11:38:39 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (15/10/2025)`
+- ... et 1 autres fichiers
+
 #### 13:38 - 8ce7afd - feat: Réorganiser les routes de facturation et d'expédition, ajouter la gestion des modales pour la facturation et recréation des routes associées
 
 **Catégorie :** Développement de fonctionnalités  
@@ -269,20 +291,20 @@
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 9 commits (42.9%)
-- **Interface utilisateur** : 7 commits (33.3%)
-- **Refactoring** : 2 commits (9.5%)
-- **Développement général** : 2 commits (9.5%)
-- **Correction de bugs** : 1 commits (4.8%)
+- **Développement de fonctionnalités** : 10 commits (43.5%)
+- **Interface utilisateur** : 8 commits (34.8%)
+- **Refactoring** : 2 commits (8.7%)
+- **Développement général** : 2 commits (8.7%)
+- **Correction de bugs** : 1 commits (4.3%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 38 fichiers modifiés
-- **HTML** : 16 fichiers modifiés
-- **JavaScript** : 14 fichiers modifiés
-- **Documentation** : 12 fichiers modifiés
+- **Python** : 40 fichiers modifiés
+- **HTML** : 17 fichiers modifiés
+- **JavaScript** : 16 fichiers modifiés
+- **Documentation** : 13 fichiers modifiés
 - **CSS** : 3 fichiers modifiés
 - **YAML/Config** : 3 fichiers modifiés
 - **Docker** : 1 fichiers modifiés
@@ -291,16 +313,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 3.0 commits/jour
-- **Volume de code :** 8759 modifications totales
-- **Ratio ajouts/suppressions :** 0.53
-- **Moyenne lignes par commit :** 417
+- **Fréquence de commit :** 3.3 commits/jour
+- **Volume de code :** 9000 modifications totales
+- **Ratio ajouts/suppressions :** 0.56
+- **Moyenne lignes par commit :** 391
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 3040 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 3244 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
 *Rapport généré automatiquement le 15 October 2025*
