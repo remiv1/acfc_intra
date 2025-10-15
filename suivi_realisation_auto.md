@@ -1,18 +1,18 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 14 October 2025  
-**Période analysée :** 07 October 2025 - 14 October 2025 (7 jours)  
-**Nombre de commits :** 17  
+**Date du rapport :** 15 October 2025  
+**Période analysée :** 08 October 2025 - 15 October 2025 (7 jours)  
+**Nombre de commits :** 21  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 17 commits sur 7 jours  
-**Volume de code :** 2644 lignes ajoutées, 5607 lignes supprimées  
-**Fichiers impactés :** 149 fichiers modifiés  
-**Productivité moyenne :** 377 lignes/jour
+**Activité de développement :** 21 commits sur 7 jours  
+**Volume de code :** 3040 lignes ajoutées, 5719 lignes supprimées  
+**Fichiers impactés :** 176 fichiers modifiés  
+**Productivité moyenne :** 434 lignes/jour
 
 ---
 
@@ -206,6 +206,17 @@
 
 ### 14 October 2025
 
+#### 17:44 - 1fe9460 - 📊 Mise à jour automatique du rapport de suivi (14/10/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +60 -23 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Tue Oct 14 17:44:56 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (14/10/2025)`
+- ... et 1 autres fichiers
+
 #### 19:44 - 7ae4d52 - Refactor: Rename 'Commande' to 'Order' across templates, models, and tests
 
 **Catégorie :** Refactoring  
@@ -218,42 +229,78 @@
 - ... et 33 autres fichiers
 
 
+### 15 October 2025
+
+#### 13:38 - 8ce7afd - feat: Réorganiser les routes de facturation et d'expédition, ajouter la gestion des modales pour la facturation et recréation des routes associées
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +131 -59 lignes, 9 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Oct 15 13:38:20 2025 +0200`
+- `    feat: Réorganiser les routes de facturation et d'expédition, ajouter la gestion des modales pour la facturation et recréation des routes associées`
+- ... et 6 autres fichiers
+
+#### 10:37 - f95db51 - feat: Ajouter la génération de QR code pour le bon de commande et mise à jour des modèles de données
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +50 -13 lignes, 6 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Oct 15 10:37:36 2025 +0200`
+- `    feat: Ajouter la génération de QR code pour le bon de commande et mise à jour des modèles de données`
+- ... et 3 autres fichiers
+
+#### 10:14 - 7ccfbed - feat: Implémenter la fonctionnalité d'annulation de commande avec gestion des erreurs et mise à jour des modèles
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +155 -17 lignes, 8 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
+- `Date:   Wed Oct 15 10:14:13 2025 +0200`
+- `    feat: Implémenter la fonctionnalité d'annulation de commande avec gestion des erreurs et mise à jour des modèles`
+- ... et 5 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 6 commits (35.3%)
-- **Interface utilisateur** : 6 commits (35.3%)
-- **Refactoring** : 2 commits (11.8%)
-- **Développement général** : 2 commits (11.8%)
-- **Correction de bugs** : 1 commits (5.9%)
+- **Développement de fonctionnalités** : 9 commits (42.9%)
+- **Interface utilisateur** : 7 commits (33.3%)
+- **Refactoring** : 2 commits (9.5%)
+- **Développement général** : 2 commits (9.5%)
+- **Correction de bugs** : 1 commits (4.8%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 30 fichiers modifiés
-- **JavaScript** : 13 fichiers modifiés
-- **HTML** : 12 fichiers modifiés
-- **Documentation** : 11 fichiers modifiés
+- **Python** : 38 fichiers modifiés
+- **HTML** : 16 fichiers modifiés
+- **JavaScript** : 14 fichiers modifiés
+- **Documentation** : 12 fichiers modifiés
+- **CSS** : 3 fichiers modifiés
 - **YAML/Config** : 3 fichiers modifiés
-- **CSS** : 2 fichiers modifiés
 - **Docker** : 1 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 2.4 commits/jour
-- **Volume de code :** 8251 modifications totales
-- **Ratio ajouts/suppressions :** 0.47
-- **Moyenne lignes par commit :** 485
+- **Fréquence de commit :** 3.0 commits/jour
+- **Volume de code :** 8759 modifications totales
+- **Ratio ajouts/suppressions :** 0.53
+- **Moyenne lignes par commit :** 417
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 2644 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 3040 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 14 October 2025*
+*Rapport généré automatiquement le 15 October 2025*
