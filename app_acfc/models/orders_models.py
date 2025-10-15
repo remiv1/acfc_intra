@@ -15,7 +15,7 @@ class OrdersModel:
 
         self.request = request
 
-    def _check_order_status(self, id_order: Optional[int], id_client: int) -> None:
+    def _check_order_status(self, *, id_order: Optional[int], id_client: int, order: Optional[Order]=None) -> None:
         """
         Détermine self.order et self.entries en fonction de l'ID de la commande.
         """
@@ -30,25 +30,71 @@ class OrdersModel:
                 raise ValueError("Aucune entrée trouvée pour cette commande")
         else:
             self.is_new = True
-            self.order = Order()
+            self.order = Order() if not order else order
             self.serveur_entries: List[DevisesFactures] = []
 
-    def _complete_create_or_update(self, entry: DevisesFactures) -> DevisesFactures:
+    def _check_entries_status(self, *, id_order: int, id_client: int) -> None:
+        """
+        Vérifie l'état des entrées de la commande.
+        """
+        # Récupération de la commande depuis la base de données
+        session_db: SessionBdDType = get_db_session()
+        order = session_db.query(Order) \
+                        .options(
+                            joinedload(Order.client),
+                            joinedload(Order.client)
+                                .joinedload(Client.mails),
+                            joinedload(Order.client)
+                                .joinedload(Client.tels),
+                            joinedload(Order.adresse_livraison),
+                            joinedload(Order.adresse_facturation),
+                            joinedload(Order.devises)
+                        ).filter(
+                            Order.id == id_order,
+                            Order.id_client == id_client
+                        ).first()
+
+        # Détermination des états de la commande
+        if order:
+            self.canceled = order.is_annulee
+            self.invoiced = order.is_expediee
+            self.billed = order.is_facturee
+            self.part_billed = False
+            for entry in order.devises:
+                if entry.is_expedie:
+                    self.part_billed = True
+                    break
+        else:
+            self.canceled = False
+            self.invoiced = False
+            self.billed = False
+            self.part_billed = False        
+
+    def _complete_create_or_update(self, *, entry: DevisesFactures) -> DevisesFactures:
         """
         Complète les champs nécessaires pour la création ou la mise à jour d'une entrée.
         """
         if self.is_new: entry.created_by = session.get('pseudo', 'system')
         else: entry.modified_by = session.get('pseudo', 'system')
         return entry
+    
+    def _canceled_entries_filter(self) -> None:
+        """
+        Filtre les entrées annulées.
+        """
+        if self.order_details:
+            self.order_details.devises = [entry for entry in self.order_details.devises if not entry.is_annulee]
+        else:
+            raise ValueError("order_details n'est pas défini")
 
-    def post_order_data(self, id_client: int, id_order: Optional[int]) -> 'OrdersModel':
+    def post_order_data(self, *, id_client: int, id_order: Optional[int]) -> 'OrdersModel':
         """
         Récupère les données de la commande depuis la requête.
 
         Returns:
             OrdersModel: Instance de OrdersModel contenant les données de la commande
         """
-        self._check_order_status(id_order, id_client)
+        self._check_order_status(id_order=id_order, id_client=id_client)
 
         # Gestion de la commande
         self.order.id_client = id_client
@@ -74,7 +120,7 @@ class OrdersModel:
                             qte=int(product.get('qte', 1)),
                             remise=float(product.get('remise', 0.0)) / 100
                         )
-                        entry = self._complete_create_or_update(entry)
+                        entry = self._complete_create_or_update(entry=entry)
                         self.client_entries.append(entry)
                     except json.JSONDecodeError:
                         continue
@@ -89,7 +135,7 @@ class OrdersModel:
 
         return self
     
-    def get_order_data(self, id_order: int) -> 'OrdersModel':
+    def get_order_data(self, *, id_order: int) -> 'OrdersModel':
         """
         Prépare les données de la commande pour l'affichage.
         """
@@ -104,10 +150,11 @@ class OrdersModel:
                             joinedload(Order.adresse_livraison),
                             joinedload(Order.adresse_facturation),
                             joinedload(Order.devises)
-                        ).filter(Order.id == id_order) \
-                        .first()
+                        ).filter(
+                            Order.id == id_order
+                        ).first()
         self.order_details = order_details if order_details else None
-        
+        self._canceled_entries_filter()
         return self
 
     def check_entries_changements(self) -> 'OrdersModel':
@@ -144,3 +191,17 @@ class OrdersModel:
 
         return self
     
+    def cancel_order(self, *, id_client: int, id_order: int) -> 'OrdersModel':
+        """
+        Annule une commande et toutes ses entrées.
+        """
+        # Vérification que les entrées sont toutes non facturées
+        self._check_order_status(id_order=id_order, id_client=id_client)
+        self._check_entries_status(id_order=id_order, id_client=id_client)
+        if self.billed or self.part_billed:
+            raise ValueError("Impossible d'annuler une commande facturée ou partiellement facturée.")
+        else:
+            self.order.is_annulee = True
+            for entry in self.serveur_entries:
+                entry.is_annule = True
+        return self

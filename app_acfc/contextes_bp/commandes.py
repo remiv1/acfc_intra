@@ -172,13 +172,33 @@ def edit_order(id_client: int, id_order: int):
 @validate_habilitation(CLIENTS)
 def cancel_order(id_order: int, id_client: int):
     """Annuler une commande (soft delete)"""
-    pass
+    order_details = OrdersModel(request) \
+                .cancel_order(id_client=id_client, id_order=id_order)
+    session_db: SessionBdDType = get_db_session()
+    try:
+        session_db.merge(order_details.order)
+        for entry in order_details.order.devises:
+            session_db.merge(entry)
+        session_db.commit()
+        message = Constants.messages(type_msg='commandes', second_type_message='deleted')
+        return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+                                id_client=id_client,
+                                id_order=id_order,
+                                success_message=message))
+    except Exception as e:
+        error_message = Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})'
+        return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+                                id_client=id_client,
+                                id_order=id_order,
+                                error_message=error_message))
 
 @commandes_bp.route('/client/<int:id_client>/commandes/<int:id_order>/bon-impression')
 @validate_habilitation(CLIENTS)
 def order_purchase(id_order: int, id_client: int):
     """Afficher le bon de commande pour impression"""
-    pass
+    order = OrdersModel(request) \
+                .get_order_data(id_order=id_order)
+    
 
 # Route pour obtenir les adresses d'un client (AJAX)
 @commandes_bp.route('/api/client/<int:id_client>/adresses')

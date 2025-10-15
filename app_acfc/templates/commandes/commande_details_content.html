@@ -274,6 +274,9 @@
                         
                         <!-- Facturation : toujours disponible s'il y a des lignes non facturées -->
                         {% set has_non_facture = devises_factures|selectattr('is_facture', 'equalto', false)|list %}
+                        {% set has_facture = devises_factures|selectattr('is_facture', 'equalto', true)|list %}
+                        {% set has_non_expedie = devises_factures|selectattr('is_expedie', 'equalto', false)|list %}
+                        {% set has_expedie = devises_factures|selectattr('is_expedie', 'equalto', true)|list %}
                             {% if has_non_facture|length > 0 %}
                                 <!-- Dropdown pour les options d'impression -->
                                 <fieldset class="btn-group" role="group">
@@ -302,6 +305,10 @@
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#facturationModal">
                                     <i class="bi bi-receipt me-1"></i>Facturer
                                 </button>
+                                <a href="{{ url_for(('commandes', 'annuler') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" class="btn btn-danger"
+                                   data-bs-toggle="modal" data-bs-target="#annulationModal">
+                                    <i class="bi bi-x-circle me-1"></i>Annuler la commande
+                                </a>
                             {% endif %}
                             
                             {% if commande.is_facturee and not commande.is_expediee %}
@@ -310,9 +317,12 @@
                                 </button>
                             {% endif %}
                             
-                            {% if commande.is_expediee %}
+                            {% if has_facture and not commande.is_facture %}
                                 <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#expeditionPartielleModal">
                                     <i class="bi bi-truck me-1"></i>Expédition partielle
+                                </button>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#facturationModal">
+                                    <i class="bi bi-receipt me-1"></i>Facturation partielle
                                 </button>
                             {% endif %}
                         {% else %}
@@ -377,7 +387,7 @@
                             <div class="timeline-marker bg-danger"></div>
                             <div class="timeline-content">
                                 <h6 class="mb-1">Commande annulée</h6>
-                                <p class="text-muted mb-0">Commande annulée par l'utilisateur</p>
+                                <p class="text-muted mb-0">Commande annulée par l'utilisateur le {{ commande.modified_at|strftime }}</p>
                             </div>
                         </div>
                         {% endif %}
@@ -407,8 +417,42 @@
 <!-- Les sections de facturation et expédition sont maintenant dans les modales -->
 
 <!-- ====================================================================
-     MODALES DE GESTION FACTURATION ET EXPÉDITION
+     MODALES DE GESTION FACTURATION, ANNULATION ET EXPÉDITION
 ==================================================================== -->
+
+<!-- Modale d'annulation -->
+<div class="modal fade" id="annulationModal" tabindex="-1" aria-labelledby="annulationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="annulationModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2 text-danger"></i>Confirmer l'annulation
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Attention :</strong> Cette action est irréversible. 
+                    La commande sera définitivement annulée.
+                </div>
+                <p>Êtes-vous sûr de vouloir annuler la commande #{{ commande.id }} ?</p>
+                
+                {% from '_macros.html' import csrf_field %}
+                <form method="post" action="{{ url_for(('commandes', 'annuler') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}">
+                    {{ csrf_field() }}
+                    
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-x-circle me-1"></i>Confirmer l'annulation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modale de facturation -->
 <div class="modal fade" id="facturationModal" tabindex="-1" aria-labelledby="facturationModalLabel" aria-hidden="true">

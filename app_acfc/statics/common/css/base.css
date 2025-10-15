@@ -105,8 +105,9 @@ header.site-header {
 .nav-container .titre h1 { font-size: 1.25rem; margin: 0; }
 .nav-actions { display: none; flex: 0 0 auto; }
 .btn, .btn-primary { background-color: var(--bs-primary); color: white; border: none; padding: 0.4rem 0.75rem; border-radius: 4px; cursor: pointer; }
+.btn-warning { background-color: var(--bs-warning); color: var(--dark-color); border: none; padding: 0.4rem 0.75rem; border-radius: 4px; cursor: pointer; }
+.btn-danger { background-color: var(--bs-danger); color: var(--light-color); border: none; padding: 0.4rem 0.75rem; border-radius: 4px; cursor: pointer; }
 .btn:focus { outline: 2px solid var(--secondary-color); }
-.btn.btn:hover { background-color: darken(var(--bs-primary), 5%); }
 .btn-link {min-width: 150px; padding: 0.4rem 0.75rem; border-radius: 4px; cursor: pointer; margin: 0.25rem 0;}
 .nav-toggle { display: block; background: transparent; border: none; font-size: 1.25rem; cursor: pointer; }
 header li {
@@ -130,6 +131,7 @@ button {
 .btn:hover {
     background-color: var(--light-color);
     color: var(--info-color);
+    border: solid 1px var(--info-color);
 }
 .centered-messages {
     display: flex;

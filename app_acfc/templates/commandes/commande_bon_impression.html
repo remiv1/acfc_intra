@@ -1,3 +1,13 @@
+<!--
+============================================================
+    TEMPLATE POUR LE BON DE COMMANDE À IMPRIMER
+============================================================
+    Variables attendues :
+    - commande : Objet commande avec les détails de la commande
+    - qr_code_base64 : Code QR en base64 pour le lien vers la commande
+    - commande_url : URL complète vers la page de la commande
+    - now : Date et heure actuelles pour le pied de page
+-->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -8,6 +18,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='commandes/css/commandes.css') }}">
 </head>
 <body class="bon-commande-body">
+    {% set devises_factures = commande.devises %}
     <div class="bon-commande">
         <!-- En-tête -->
         <div class="header">
