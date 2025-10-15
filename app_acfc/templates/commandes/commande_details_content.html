@@ -414,14 +414,13 @@
     </div>
 </div>
 
-<!-- Les sections de facturation et expédition sont maintenant dans les modales -->
-
 <!-- ====================================================================
      MODALES DE GESTION FACTURATION, ANNULATION ET EXPÉDITION
 ==================================================================== -->
 
-<!-- Modale d'annulation -->
-<div class="modal fade" id="annulationModal" tabindex="-1" aria-labelledby="annulationModalLabel" aria-hidden="true">
+<!-- Modale d'annulation de la commande -->
+<div class="modal fade" id="annulationModal" tabindex="-1" aria-labelledby="annulationModalLabel" aria-hidden="true"
+     data-modale-name="annulation">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -454,8 +453,9 @@
     </div>
 </div>
 
-<!-- Modale de facturation -->
-<div class="modal fade" id="facturationModal" tabindex="-1" aria-labelledby="facturationModalLabel" aria-hidden="true">
+<!-- Modale de facturation complète ou partielle -->
+<div class="modal fade" id="facturationModal" tabindex="-1" aria-labelledby="facturationModalLabel" aria-hidden="true"
+     data-modale-name="facturation">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -466,20 +466,15 @@
             </div>
             <div class="modal-body">
                 {% from '_macros.html' import csrf_field %}
-                <form id="facturationForm" method="post" action="{{ url_for('commandes.facturer_commande') }}">
+                <form id="facturationForm" method="post" action="{{ url_for(('commandes', 'facturer'), id_client=commande.id_client, id_order=commande.id) }}">
                     {{ csrf_field() }}
                     <input type="hidden" name="id_order" value="{{ commande.id }}">
                     
                     <!-- Informations sur la facturation -->
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label for="date_facturation" class="form-label fw-bold">Date de facturation *</label>
                             <input type="date" class="form-control" id="date_facturation" name="date_facturation" value="{{ today }}" required disabled readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="commentaire_facturation" class="form-label">Commentaire (optionnel)</label>
-                            <input type="text" class="form-control" id="commentaire_facturation" name="commentaire_facturation" 
-                                   placeholder="Commentaire sur cette facturation...">
                         </div>
                     </div>
                     
@@ -487,12 +482,6 @@
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="fw-bold mb-0">Lignes à facturer</h6>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="selectAllFacturation" checked>
-                                <label class="form-check-label fw-bold" for="selectAllFacturation">
-                                    Tout sélectionner
-                                </label>
-                            </div>
                         </div>
                         
                         <div class="table-responsive">
@@ -500,7 +489,8 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th class="text-center selectAllLinesHeader" scope="col">
-                                            <i class="bi bi-check-square"></i>
+                                            <input class="form-check-input ligne-facturation-checkbox" type="checkbox" 
+                                                       name="lignes_facturees" id="check-all">
                                         </th>
                                         <th scope="col">Référence</th>
                                         <th scope="col">Désignation</th>
@@ -516,8 +506,8 @@
                                         <tr data-ligne-id="{{ devise.id }}">
                                             <td class="text-center">
                                                 <input class="form-check-input ligne-facturation-checkbox" type="checkbox" 
-                                                       name="lignes_facturees" value="{{ devise.id }}" 
-                                                       id="fact_{{ devise.id }}" checked>
+                                                       name="lignes_facturees" value="{{ devise.prix_total }}" 
+                                                       id="fact_{{ devise.id }}">
                                             </td>
                                             <td><code>{{ devise.reference }}</code></td>
                                             <td>{{ devise.designation }}</td>
@@ -551,21 +541,6 @@
                         </div>
                     </div>
                     
-                    <!-- Informations et alertes -->
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Information :</strong> 
-                        <span id="infoFacturation">
-                            Le numéro de facture sera généré automatiquement.
-                        </span>
-                    </div>
-                    
-                    <div id="alertFacturationPartielle" class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Facturation partielle :</strong> 
-                        Les lignes non sélectionnées resteront en attente et pourront être facturées ultérieurement.
-                    </div>
-                    
                     {% if has_non_facture|length > 0 %}
                     <div class="d-flex justify-content-end">
                         <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Annuler</button>
@@ -580,8 +555,9 @@
     </div>
 </div>
 
-<!-- Modale d'expédition complète -->
-<div class="modal fade" id="expeditionModal" tabindex="-1" aria-labelledby="expeditionModalLabel" aria-hidden="true">
+<!-- Modale d'expédition complète ou partielle -->
+<div class="modal fade" id="expeditionModal" tabindex="-1" aria-labelledby="expeditionModalLabel" aria-hidden="true"
+     data-modale-name="livraison">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -721,3 +697,4 @@
         </div>
     </div>
 </div>
+<script src="{{ url_for('static', filename='commandes/js/commandes-details.js') }}"></script>

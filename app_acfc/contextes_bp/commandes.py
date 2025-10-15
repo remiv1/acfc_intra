@@ -224,29 +224,16 @@ def order_purchase(id_order: int, id_client: int):
                                   qr_code_base64=qr_code_base64,
                                   now=datetime.now())
 
-# Route pour obtenir les adresses d'un client (AJAX)
-@commandes_bp.route('/api/client/<int:id_client>/adresses')
+@commandes_bp.route('/client/<int:id_client>/commandes/<int:id_order>/facturer', methods=['POST'])
 @validate_habilitation(CLIENTS)
-def get_client_adresses(id_client: int):
-    """API pour récupérer les adresses d'un client"""
-    pass
-
-@commandes_bp.route('/traiter_facturation', methods=['POST'])
-@validate_habilitation(CLIENTS)
-def traiter_facturation():
+def order_bill(id_client: int, id_order: int):
     """Traiter la facturation de lignes sélectionnées"""
     pass
 
-@commandes_bp.route('/traiter_expedition', methods=['POST'])
+@commandes_bp.route('/client/<int:id_client>/commandes/<int:id_order>/expedier', methods=['POST'])
 @validate_habilitation(CLIENTS)
-def traiter_expedition():
+def order_ship(id_client: int, id_order: int):
     """Traiter l'expédition de lignes sélectionnées"""
-    pass
-
-@commandes_bp.route('/facturer_commande', methods=['POST'])
-@validate_habilitation(CLIENTS)
-def facturer_commande():
-    """Facturer les lignes sélectionnées d'une commande"""
     pass
 
 @commandes_bp.route('/client/<int:id_client>/facture/<int:id_facture>')

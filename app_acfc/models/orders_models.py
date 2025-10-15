@@ -205,3 +205,4 @@ class OrdersModel:
             for entry in self.serveur_entries:
                 entry.is_annule = True
         return self
+    

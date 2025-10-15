@@ -360,7 +360,8 @@ class Constants:
                 'annuler': 'commandes.cancel_order',
                 'formulaire': 'commandes.order_form',
                 'imprimer': 'commandes.order_purchase',
-                'factures': 'commandes.bills',
+                'facturer': 'commandes.order_bill',
+                'expedier': 'commandes.order_ship',
             },
             'commercial': {
                 'accueil': 'commercial.commercial_index',
@@ -625,3 +626,4 @@ class PrepareTemplates:
         '''
         return render_template(template_name_or_list=template,
                                **kwargs)
+    
