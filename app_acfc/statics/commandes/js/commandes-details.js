@@ -80,3 +80,19 @@ function calculateTotalFacture() {
         selectAllCheckbox.value = total.toFixed(2);
     }
 }
+
+// Fonction de récupération des IDs des lignes facturées
+function updateHiddenFactureIds() {
+    const checkboxes = document.querySelectorAll('.ligne-facturation-checkbox');
+    const ids = [];
+    checkboxes.forEach(checkbox => {
+        if (checkbox.id !== 'check-all' && checkbox.checked) {
+            const idLigne = checkbox.getAttribute('data-ligne-id');
+            // Récupère l'id à partir de l'id du checkbox, ex: "fact_123"
+            if (idLigne) {
+                ids.push(idLigne);
+            }
+        }
+    });
+    document.getElementById('ids_lignes_facturees').value = ids.join(',');
+}

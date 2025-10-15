@@ -366,10 +366,5 @@ function verifierPresenceProduits() {
         if (messageInTbody) {
             messageInTbody.remove();
         }
-    } else {
-        // Masquer le message du template
-        if (messageVide) {
-            messageVide.style.display = 'none';
-        }
-    }
+    } else if (messageVide) messageVide.style.display = 'none';
 }

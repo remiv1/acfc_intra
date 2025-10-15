@@ -466,7 +466,7 @@
             </div>
             <div class="modal-body">
                 {% from '_macros.html' import csrf_field %}
-                <form id="facturationForm" method="post" action="{{ url_for(('commandes', 'facturer'), id_client=commande.id_client, id_order=commande.id) }}">
+                <form id="facturationForm" method="post" action="{{ url_for(('commandes', 'facturer') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}">
                     {{ csrf_field() }}
                     <input type="hidden" name="id_order" value="{{ commande.id }}">
                     
@@ -477,6 +477,7 @@
                             <input type="date" class="form-control" id="date_facturation" name="date_facturation" value="{{ today }}" required disabled readonly>
                         </div>
                     </div>
+                    <input type="hidden" name="ids_lignes_facturees" id="ids_lignes_facturees" value="">
                     
                     <!-- Sélection des lignes à facturer -->
                     <div class="mb-3">
@@ -503,11 +504,11 @@
                                     {% set has_non_facture = devises_factures|selectattr('is_facture', 'equalto', false)|list %}
                                     {% if has_non_facture|length > 0 %}
                                         {% for devise in has_non_facture %}
-                                        <tr data-ligne-id="{{ devise.id }}">
+                                        <tr data-ligne-id="{{ devise.id }}" class="ligne-devisee">
                                             <td class="text-center">
                                                 <input class="form-check-input ligne-facturation-checkbox" type="checkbox" 
                                                        name="lignes_facturees" value="{{ devise.prix_total }}" 
-                                                       id="fact_{{ devise.id }}">
+                                                       id="fact_{{ devise.id }}" data-ligne-id="{{ devise.id }}">
                                             </td>
                                             <td><code>{{ devise.reference }}</code></td>
                                             <td>{{ devise.designation }}</td>

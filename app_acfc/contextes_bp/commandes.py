@@ -15,7 +15,7 @@ Auteur : Développement ACFC
 Version : 1.0
 """
 
-from flask import Blueprint, request, redirect, url_for
+from flask import Blueprint, request, redirect, url_for, session
 from datetime import datetime
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from werkzeug import Response
@@ -30,6 +30,7 @@ from io import BytesIO
 import base64
 from app_acfc.models.templates_models import PrepareTemplates, Constants
 from app_acfc.models.orders_models import OrdersModel
+from app_acfc.models.bills_models import BillsModels
 from app_acfc.models.products_models import ProductsModel
 from typing import Any, Dict
 
@@ -228,7 +229,74 @@ def order_purchase(id_order: int, id_client: int):
 @validate_habilitation(CLIENTS)
 def order_bill(id_client: int, id_order: int):
     """Traiter la facturation de lignes sélectionnées"""
-    pass
+    if request.method == 'POST':
+        # Récupérer les données de facturation depuis la requête avec la classe dédiée
+        order_to_bill = BillsModels(request) \
+                            .post_bill_data(id_client=id_client, id_order=id_order)
+        
+        # Vérifie que la commande existe
+        if order_to_bill.order_serveur:        
+            session_db: SessionBdDType = get_db_session()
+            try:
+                # Création de la facture
+                new_bill = Facture(
+                    id_client=id_client,
+                    id_order=id_order,
+                    date_facturation=order_to_bill.date_facturation.date(),
+                    created_by=session.get('pseudo', 'system'),
+                    created_at=datetime.now()
+                )
+                session_db.add(new_bill)
+                session_db.flush()  # Pour obtenir l'ID de la facture
+
+                # Récupération de l'id de la facture créée
+                id_facture = new_bill.id
+
+                # Marquer les lignes sélectionnées comme facturées
+                for entry in order_to_bill.order_serveur.devises:
+                    entry.is_facture = True
+                    entry.date_facturation = order_to_bill.date_facturation.date()
+                    entry.id_facture = id_facture
+                    entry.modified_by = session.get('pseudo', 'system')
+                    entry.modified_at = datetime.now()
+                    session_db.merge(entry)
+
+                # Commit des changements
+                session_db.commit()
+
+                # Vérifie si c'est la dernière facture pour la commande
+                order_to_bill.check_last_bill_for_order(id_order=id_order)
+
+                # Traitement de la commande suivant les cas
+                if order_to_bill.last:
+                    order_to_bill.order_serveur.is_facturee = True
+                    order_to_bill.order_serveur.date_facturation = order_to_bill.date_facturation.date()
+                order_to_bill.order_serveur.modified_by = session.get('pseudo', 'system')
+                order_to_bill.order_serveur.modified_at = datetime.now()
+                session_db.merge(order_to_bill.order_serveur)
+
+                message = Constants.messages(type_msg='factures', second_type_message='created')
+                return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+                                        id_client=id_client,
+                                        id_order=id_order,
+                                        success_message=message))
+            except Exception as e:
+                error_message = Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})'
+                return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+                                        id_client=id_client,
+                                        id_order=id_order,
+                                        error_message=error_message))
+        else:
+            error_message = Constants.messages(type_msg='error_404', second_type_message='not_found')
+            return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+                                    id_client=id_client,
+                                    id_order=id_order,
+                                    error_message=error_message))
+    else:
+        message = Constants.messages(type_msg='error_400', second_type_message='wrong_road')
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                id_client=id_client,
+                                error_message=message))
 
 @commandes_bp.route('/client/<int:id_client>/commandes/<int:id_order>/expedier', methods=['POST'])
 @validate_habilitation(CLIENTS)
