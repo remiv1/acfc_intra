@@ -612,3 +612,16 @@ class PrepareTemplates:
                                context='500', message=message,
                                status_code=status_code,
                                status_message=status_message)
+
+    @staticmethod
+    def notes(*,template:str, **kwargs: Any) -> str:
+        '''
+        Génère le template de la page notes.
+
+        Args:
+            kwargs (Any): Arguments supplémentaires pour le template.
+        Returns:
+            str: Template de la page notes
+        '''
+        return render_template(template_name_or_list=template,
+                               **kwargs)

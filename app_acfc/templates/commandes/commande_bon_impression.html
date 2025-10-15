@@ -3,9 +3,9 @@
     TEMPLATE POUR LE BON DE COMMANDE À IMPRIMER
 ============================================================
     Variables attendues :
-    - commande : Objet commande avec les détails de la commande
+    - order : Objet commande avec les détails de la commande
     - qr_code_base64 : Code QR en base64 pour le lien vers la commande
-    - commande_url : URL complète vers la page de la commande
+    - order_url : URL complète vers la page de la commande
     - now : Date et heure actuelles pour le pied de page
 -->
 <!DOCTYPE html>
@@ -14,34 +14,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
-    <title>Bon de Commande #{{ commande.id }}</title>
+    <title>Bon de Commande #{{ order.id }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='commandes/css/commandes.css') }}">
 </head>
 <body class="bon-commande-body">
-    {% set devises_factures = commande.devises %}
+    {% set devises_factures = order.devises %}
     <div class="bon-commande">
         <!-- En-tête -->
         <div class="header">
             <div class="titre-principal">BON DE COMMANDE</div>
             <div class="date-commande">
                 Date de commande<br>
-                <strong>{{ commande.date_commande|strftime }}</strong>
+                <strong>{{ order.date_commande|strftime }}</strong>
             </div>
         </div>
 
         <!-- Informations principales -->
         <div class="info-commande">
             <div class="info-left">
-                <div class="numero-commande">N° {{ commande.id }}</div>
-                <div class="client-nom">{{ commande.client.nom_affichage }}</div>
-                {% if commande.descriptif %}
+                <div class="numero-commande">N° {{ order.id }}</div>
+                <div class="client-nom">{{ order.client.nom_affichage }}</div>
+                {% if order.descriptif %}
                 <div class="descriptif-commande">
-                    {{ commande.descriptif }}
+                    {{ order.descriptif }}
                 </div>
                 {% endif %}
             </div>
             <div class="info-right">
-                <div class="montant-commande">{{ "%.2f"|format(commande.montant) }} €</div>
+                <div class="montant-commande">{{ "%.2f"|format(order.montant) }} €</div>
                 <div class="info-articles">
                     {{ devises_factures|length }} article{{ 's' if devises_factures|length > 1 else '' }}
                 </div>
@@ -77,7 +77,7 @@
                 <tfoot>
                     <tr class="total-row">
                         <td colspan="5" class="total-label">TOTAL COMMANDE :</td>
-                        <td class="text-right total-amount">{{ "%.2f"|format(commande.montant) }} €</td>
+                        <td class="text-right total-amount">{{ "%.2f"|format(order.montant) }} €</td>
                     </tr>
                 </tfoot>
             </table>
@@ -89,7 +89,7 @@
                 <div class="qr-code">
                     <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code" width="80" height="80">
                 </div>
-                <div class="qr-url">{{ commande_url }}</div>
+                <div class="qr-url">{{ order_url }}</div>
             </div>
             <div class="footer-info">
                 <div>Généré le {{ now|strftime }}</div>

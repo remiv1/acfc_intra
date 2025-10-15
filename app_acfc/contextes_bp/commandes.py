@@ -196,9 +196,33 @@ def cancel_order(id_order: int, id_client: int):
 @validate_habilitation(CLIENTS)
 def order_purchase(id_order: int, id_client: int):
     """Afficher le bon de commande pour impression"""
+    # Récupérer les données de la commande
     order = OrdersModel(request) \
-                .get_order_data(id_order=id_order)
+                .get_order_data(id_order=id_order).order_details
+
+    # Générer l'URL de gestion de la commande
+    commande_url = url_for(Constants.return_pages('commandes', 'detail'),
+                           id_client=id_client, id_order=id_order, _external=True)
     
+    # Créer le QR code
+    qr = qrcode.QRCode(version=1,
+        error_correction=qrcode.ERROR_CORRECT_L,
+        box_size=3,border=1)
+    qr.add_data(commande_url)
+    qr.make(fit=True)
+
+    # Générer l'image QR code en base64
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffer = BytesIO()
+    img.save(buffer, 'PNG')
+    qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+    # Renvoyer le template avec les données de la commande et le QR code
+    return PrepareTemplates.notes(template='commandes/commande_bon_impression.html',
+                                  order=order,
+                                  order_url=commande_url,
+                                  qr_code_base64=qr_code_base64,
+                                  now=datetime.now())
 
 # Route pour obtenir les adresses d'un client (AJAX)
 @commandes_bp.route('/api/client/<int:id_client>/adresses')
