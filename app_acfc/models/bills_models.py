@@ -1,10 +1,9 @@
 from flask import Request, session
-from typing import List, Optional
-import json
-from modeles import Order, DevisesFactures, Client
+from typing import List
+from modeles import Order, DevisesFactures, Client, Facture
 from datetime import datetime
 from app_acfc.modeles import get_db_session, SessionBdDType
-from sqlalchemy.orm import joinedload, with_loader_criteria
+from sqlalchemy.orm import joinedload
 
 class BillsModels:
     def __init__(self, request: Request) -> None:
@@ -14,20 +13,26 @@ class BillsModels:
         """
         Récupère les données nécessaires pour la facturation d'une commande.
         """
+        self.id_order = id_order
+        self.id_client = id_client
         return self
 
     def post_bill_data(self, *, id_client: int, id_order: int) -> 'BillsModels':
         """
         Traite les données de facturation soumises pour une commande.
         """
+        self.id_order = id_order
+        self.id_client = id_client
         date_facturation = self.request.form.get('date_facturation', datetime.now().strftime('%Y-%m-%d'))
         self.date_facturation = datetime.strptime(date_facturation, '%Y-%m-%d')
         ids_lignes_facturees = self.request.form.get('ids_lignes_facturees', None)
-        self.ids_lignes_facturees = ids_lignes_facturees.split(",") if ids_lignes_facturees else []
-
+        if ids_lignes_facturees:
+            self.ids_lignes_facturees = [int(x) for x in ids_lignes_facturees.split(",") if x]
+        else:
+            self.ids_lignes_facturees = []
         # Récupération de la commande et de ses composantes
-        session_db: SessionBdDType = get_db_session()
-        self.order_serveur = session_db \
+        self.session_db: SessionBdDType = get_db_session()
+        self.order_serveur = self.session_db \
                     .query(Order) \
                     .options(
                         joinedload(Order.client),
@@ -37,27 +42,80 @@ class BillsModels:
                             .joinedload(Client.tels),
                         joinedload(Order.adresse_livraison),
                         joinedload(Order.adresse_facturation),
-                        joinedload(Order.devises),
-                        with_loader_criteria(
-                            DevisesFactures,
-                            lambda cls: cls.id.in_(ids_lignes_facturees),
-                            include_aliases=True
-                        )
+                        joinedload(Order.devises)
                     ).filter(
-                        Order.id == id_order,
+                        Order.id == self.id_order,
                         Order.id_client == id_client
                     ).first()
 
         return self
     
-    def check_last_bill_for_order(self, *, id_order: int) -> None:
+    def _check_last_bill_for_order(self) -> bool:
         """
         Vérifie qu'il s'agit de la dernière facture
         """
-        session_db: SessionBdDType = get_db_session()
-        order_entries: List[DevisesFactures] = session_db.query(DevisesFactures) \
+        order_entries: List[DevisesFactures] = self.session_db.query(DevisesFactures) \
                                                     .filter(
-                                                        DevisesFactures.id_order == id_order,
+                                                        DevisesFactures.id_order == self.id_order,
                                                         DevisesFactures.is_facture == True
                                                     ).all()
         self.last = len(order_entries) == 0
+        return self.last
+
+    def create_new_bill(self) -> 'BillsModels':
+        """
+        Crée une nouvelle facture dans la base de données.
+        """
+        # Création de la nouvelle facture dans un premier temps
+        new_bill = Facture(
+            id_client=self.id_client,
+            id_order=self.id_order,
+            date_facturation=datetime.now(),
+            created_by=session.get('pseudo', 'system'),
+            created_at=self.date_facturation,
+            montant_facture=0.0
+        )
+
+        # Ajout de la nouvelle facture à la session et flush pour obtenir l'ID
+        self.session_db.add(new_bill)
+        self.session_db.flush()
+        id_facture = new_bill.id
+
+        # Charger explicitement les devises à facturer pour garantir qu'elles soient attachées à la session
+        self.devises_a_facturer = self.session_db.query(DevisesFactures).filter(
+            DevisesFactures.id.in_(self.ids_lignes_facturees),
+            DevisesFactures.id_order == self.id_order
+        ).all()
+
+        # Mise à jour des entrées de devises pour les marquer comme facturées
+        total_amount = 0.0
+        for entry in self.devises_a_facturer:
+            entry.is_facture = True
+            entry.id_facture = id_facture
+            entry.date_facturation = self.date_facturation.date()
+            entry.modified_by = session.get('pseudo', 'system')
+            total_amount += entry.prix_total
+
+        # Mise à jour du montant total de la facture
+        new_bill.montant_facture = total_amount
+        self.session_db.merge(new_bill)
+
+        return self
+    
+    def mark_order_as_billed(self) -> 'BillsModels':
+        """
+        Marque une commande comme facturée.
+        """
+        # Vérifie si c'est la dernière facture pour la commande
+        self._check_last_bill_for_order()
+
+        # Met à jour le statut de la commande. Si c'est la dernière facture, marque comme facturée
+        if self.order_serveur:
+            if self.last:
+                self.order_serveur.is_facturee = True
+                self.order_serveur.date_facturation = self.date_facturation.date()
+            self.order_serveur.modified_by = session.get('pseudo', 'system')
+            self.order_serveur.modified_at = self.date_facturation.date()
+            self.session_db.merge(self.order_serveur)
+        
+        return self

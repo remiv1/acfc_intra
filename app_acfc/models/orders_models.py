@@ -4,6 +4,7 @@ import json
 from modeles import Order, DevisesFactures, Client
 from datetime import datetime
 from app_acfc.modeles import get_db_session, SessionBdDType
+from logs.logger import acfc_log, WARNING
 from sqlalchemy.orm import joinedload
 
 class OrdersModel:
@@ -86,6 +87,23 @@ class OrdersModel:
             self.order_details.devises = [entry for entry in self.order_details.devises if not entry.is_annulee]
         else:
             raise ValueError("order_details n'est pas défini")
+        
+    def _is_new_line(self, *, entry_id: str, is_new_order: bool = False) -> Optional[int]:
+        """
+        Détermine si une entrée est nouvelle en fonction de son ID.
+
+        Args:
+            entry_id (str): L'ID de l'entrée à vérifier.
+
+        Returns:
+            Optional[int]: None si l'entrée est nouvelle, sinon l'ID converti en int.
+        """
+        if is_new_order:
+            return None
+        elif str(entry_id).startswith('new'):
+            return None
+        else:
+            return int(entry_id)
 
     def post_order_data(self, *, id_client: int, id_order: Optional[int]) -> 'OrdersModel':
         """
@@ -107,13 +125,17 @@ class OrdersModel:
         # Extraction des entrées du formulaire
         self.client_entries: List[DevisesFactures] = []
         for key in self.request.form:
+            # Toutes les clés de lignes sont censées commencer par 'lignes_'
             if key.startswith('lignes_'):
+                # Ici, on récupère les données JSON de la ligne dans le champs caché
                 raw_json = self.request.form.get(key)
                 if raw_json:
                     try:
+                        # Ensuite, on transforme la chaîne JSON en objet de classe (base de données)
                         product = json.loads(raw_json)
+                        _id = self._is_new_line(entry_id=product.get('id', None), is_new_order=self.is_new)
                         entry = DevisesFactures(
-                            id=product.get('id', None),
+                            id=_id,
                             reference=product.get('reference', ''),
                             designation=product.get('designation', ''),
                             prix_unitaire=float(product.get('prix_unitaire', 0.0)),
@@ -124,6 +146,8 @@ class OrdersModel:
                         self.client_entries.append(entry)
                     except json.JSONDecodeError:
                         continue
+
+        # Validation du montant total entre le client et le serveur, avec une tolérance de 0.01
         sum_client_value = float(self.request.form.get('montant', '0').replace(',', '.'))
         sum_server_value = round(float(
             sum(entry.prix_unitaire * entry.qte * (1 - entry.remise) for entry in self.serveur_entries)
@@ -131,6 +155,11 @@ class OrdersModel:
         if abs(sum_client_value - sum_server_value) > 0.01:
             self.order.montant = sum_client_value
         else:
+            # Log d'une erreur importante de montant pour correction par équipe technique
+            acfc_log.log(level=WARNING,
+                         message=f'Erreur importante de montant détectée pour la commande ID {self.order.id} du client ID {id_client} : {sum_client_value} != {sum_server_value}',
+                         db_log=True
+                         )
             self.order.montant = sum_server_value
 
         return self
@@ -165,8 +194,8 @@ class OrdersModel:
         client_entries = {entry.id: entry for entry in self.client_entries}
 
         # Ajouter les nouveaux produits
-        
-        entries_to_add: List[DevisesFactures] = [entry for entry in self.client_entries if entry.id == 'new']
+
+        entries_to_add: List[DevisesFactures] = [entry for entry in self.client_entries if entry.id == None]
 
         # Mettre à jour les produits existants
         entries_to_update: List[DevisesFactures] = [entry for entry in self.client_entries if entry.id in serveur_dict]

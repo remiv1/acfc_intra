@@ -15,9 +15,9 @@
 ==================================================================== -->
 
 {% if sub_context == 'form' %}
-    {% include 'commandes/commande_form_content.html' %}
+    {% include 'orders/order_form_content.html' %}
 {% elif sub_context == 'details' %}
-    {% include 'commandes/commande_details_content.html' %}
-{% elif sub_context == 'facture_details' %}
-    {% include 'commandes/facture_detail.html' %}
+    {% include 'orders/order_details_content.html' %}
+{% elif sub_context == 'bill_details' %}
+    {% include 'orders/bill_detail.html' %}
 {% endif %}

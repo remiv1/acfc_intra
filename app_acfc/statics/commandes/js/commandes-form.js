@@ -15,41 +15,60 @@ document.addEventListener('DOMContentLoaded', function() {
 // Filtrer les produits dans le catalogue modal
 // =====================================================================
 function filtrerProduitsCatalogue() {
-    const rechercheInput = document.getElementById('rechercheProductsInput')?.value.toLowerCase() || '';
-    const millesimeInput = document.getElementById('modalFilterMillesime')?.value || '';
-    const typeInput = document.getElementById('modalFilterType')?.value || '';
-    const geographieInput = document.getElementById('modalFilterGeographie')?.value || '';
-    
+    const filters = getFilterValues();
     const rows = document.querySelectorAll('#modalCatalogueBody .modal-catalogue-row');
     let visibleCount = 0;
     
-    rows.forEach(row => {
-        // Récupérer les données depuis la ligne et les cellules
-        const millesime = row.dataset.millesime || '';
-        const type = row.dataset.type || '';
-        const geographie = row.dataset.geographie || '';
-        const reference = row.dataset.reference || '';
-        const designation = row.dataset.designation || '';
-        const referenceContent = reference ? reference.toLowerCase() : '';
-        const designationContent = designation ? designation.toLowerCase() : '';
-        
-        let visible = true;
-        
-        // Filtre de recherche
-        if (rechercheInput && !referenceContent.includes(rechercheInput) && !designationContent.includes(rechercheInput)) {
-            visible = false;
-        }
-        
-        // Filtres spécifiques
-        if (millesimeInput && millesime !== millesimeInput) visible = false;
-        if (typeInput && type !== typeInput) visible = false;
-        if (geographieInput && geographie !== geographieInput) visible = false;
+    for (const row of rows) {
+        const rowData = extractRowData(row);
+        const visible = isRowVisible(rowData, filters);
         
         row.style.display = visible ? '' : 'none';
         if (visible) visibleCount++;
-    });
+    }
     
-    // Afficher/masquer le message "aucun produit"
+    updateNoProductMessage(visibleCount);
+}
+
+function getFilterValues() {
+    return {
+        recherche: document.getElementById('rechercheProductsInput')?.value.toLowerCase() || '',
+        millesime: document.getElementById('modalFilterMillesime')?.value || '',
+        type: document.getElementById('modalFilterType')?.value || '',
+        geographie: document.getElementById('modalFilterGeographie')?.value || ''
+    };
+}
+
+function extractRowData(row) {
+    return {
+        millesime: row.dataset.millesime || '',
+        type: row.dataset.type || '',
+        geographie: row.dataset.geographie || '',
+        reference: (row.dataset.reference || '').toLowerCase(),
+        designation: (row.dataset.designation || '').toLowerCase()
+    };
+}
+
+function isRowVisible(rowData, filters) {
+    if (filters.recherche && !matchesSearchFilter(rowData, filters.recherche)) {
+        return false;
+    }
+    
+    return matchesSpecificFilters(rowData, filters);
+}
+
+function matchesSearchFilter(rowData, searchTerm) {
+    return rowData.reference.includes(searchTerm) || rowData.designation.includes(searchTerm);
+}
+
+function matchesSpecificFilters(rowData, filters) {
+    if (filters.millesime && rowData.millesime !== filters.millesime) return false;
+    if (filters.type && rowData.type !== filters.type) return false;
+    if (filters.geographie && rowData.geographie !== filters.geographie) return false;
+    return true;
+}
+
+function updateNoProductMessage(visibleCount) {
     const messageDiv = document.getElementById('modalAucunProduitMessage');
     if (messageDiv) {
         messageDiv.style.display = visibleCount === 0 ? 'block' : 'none';
@@ -76,10 +95,10 @@ function reinitialiserFiltresModal() {
         { id: 'modalFilterGeographie', value: 'FRANCE' }
     ];
     
-    elementsToReset.forEach(element => {
+    for (const element of elementsToReset) {
         const el = document.getElementById(element.id);
         if (el) el.value = element.value;
-    });
+    }
     
     filtrerProduitsCatalogue();
 }
@@ -89,7 +108,7 @@ function reinitialiserFiltresModal() {
 // =====================================================================
 function ajouterProduitsSelectionnes() {
     const checkboxes = document.querySelectorAll('#modalCatalogueBody .modal-product-checkbox:checked');
-    const remiseParDefaut = parseFloat(document.getElementById('remise_client')?.value) || 0.10; // Valeur par défaut de la remise
+    const remiseParDefaut = Number.parseFloat(document.getElementById('remise_client')?.value) || 0.1; // Valeur par défaut de la remise
     
     if (checkboxes.length === 0) {
         showAlert('Veuillez sélectionner au moins un produit.', 'warning');
@@ -98,26 +117,26 @@ function ajouterProduitsSelectionnes() {
     
     let ajouts = 0;
     
-    checkboxes.forEach(checkbox => {
+    for (const checkbox of checkboxes) {
         const row = checkbox.closest('.modal-catalogue-row');
         // Récupération des données produits pour chaque ligne sélectionnée
         const reference = row.dataset.reference || '';
         const designation = row.dataset.designation || '';
         const prix = row.cells[6];
         const quantiteInput = row.querySelector('.modal-qte-input');
-        const quantite = parseInt(quantiteInput?.value) || 1;
+        const quantite = Number.parseInt(quantiteInput?.value) || 1;
         
         const produit = {
             reference: reference,
             designation: designation,
-            prix: prix ? parseFloat(prix.textContent.replace(' €', '').replace(',', '.')) : 0
+            prix: prix ? Number.parseFloat(prix.textContent.replace(' €', '').replace(',', '.')) : 0
         };
         
         ajouterLigneProduit(produit, quantite, remiseParDefaut);
         checkbox.checked = false;
         if (quantiteInput) quantiteInput.value = 1;
         ajouts++;
-    });
+    }
     
     if (ajouts > 0) {
         calculerTotalOrder();
@@ -133,7 +152,7 @@ function ajouterProduitsSelectionnes() {
 // =====================================================================
 // Ajouter une ligne produit dans le tableau de la commande
 // =====================================================================
-function ajouterLigneProduit(produit, quantite, remise) {
+function ajouterLigneProduit(produit, quantite, remise, isDuplicate = false) {
     // Vérifier si le message "Aucun produit" est affiché
     let isNoneProduct = !!document.getElementById('aucunProduitMessage');
     // Incrémenter le compteur de lignes
@@ -147,16 +166,15 @@ function ajouterLigneProduit(produit, quantite, remise) {
     const row = document.createElement('tr');
 
     // Attributs data pour la ligne
-    row.setAttribute('data-produit-id', produit.id || 'new');
-    row.setAttribute('data-ligne-id', ligneCounter);
-    row.setAttribute('data-sum', quantite * produit.prix * (1 - remise / 100));
-    row.setAttribute('data-remise', remise);
-    row.setAttribute('data-quantite', quantite);
-    row.setAttribute('data-prix', produit.prix);
+    row.dataset.ligneId = isDuplicate ? `new${ligneCounter}` : produit.id;
+    row.dataset.sum = quantite * produit.prix * (1 - remise / 100);
+    row.dataset.remise = remise;
+    row.dataset.quantite = quantite;
+    row.dataset.prix = produit.prix;
 
     // Création de l'objet produit pour stockage JSON
     let produitContent = {
-        id: produit.id || 'new',
+        id: isDuplicate ? `new${ligneCounter}` : produit.id,
         reference: produit.reference.toUpperCase() || '',
         designation: produit.designation.toUpperCase() || '',
         prix_unitaire: produit.prix || 0,
@@ -183,7 +201,7 @@ function ajouterLigneProduit(produit, quantite, remise) {
                        value="${produit.prix.toFixed(2)}" 
                        step="0.01" min="0"
                        title="Prix unitaire HT"
-                       onchange=updateSums(${ligneCounter})>
+                       onchange=updateSums('new${ligneCounter}')>
                 <span class="input-group-text">€</span>
             </div>
         </td>
@@ -193,7 +211,7 @@ function ajouterLigneProduit(produit, quantite, remise) {
                    value="${quantite}" 
                    min="1"
                    title="Quantité"
-                   onchange=updateSums(${ligneCounter})>
+                   onchange=updateSums('new${ligneCounter}')>
         </td>
         <td>
             <div class="input-group input-group-sm">
@@ -202,7 +220,7 @@ function ajouterLigneProduit(produit, quantite, remise) {
                        value="${remise.toFixed(1)}" 
                        step="0.1" min="0" max="100"
                        title="Remise en pourcentage"
-                       onchange=updateSums(${ligneCounter})>
+                       onchange=updateSums('new${ligneCounter}')>
                 <span class="input-group-text">%</span>
             </div>
         </td>
@@ -236,15 +254,15 @@ function calculerTotalOrder() {
     const totalCells = document.querySelectorAll('#produitsSelectionnesBody .total-ligne');
     let total = 0;
     
-    totalCells.forEach((cell, index) => {
+    for (const cell of totalCells) {
         const cellText = cell.textContent.trim();
         
         // Nettoyer le texte pour extraire le nombre
-        const cleanValue = cellText.replace(/[€\s]/g, '').replace(',', '.');
-        const value = parseFloat(cleanValue) || 0;
+        const cleanValue = cellText.replaceAll(/[€\s]/g, '').replaceAll(',', '.');
+        const value = Number.parseFloat(cleanValue) || 0;
         
         total += value;
-    });
+    }
     
     // Mettre à jour l'affichage du total dans le tableau
     const totalElement = document.getElementById('totalOrder');
@@ -274,34 +292,34 @@ function updateSums(rowIndex) {
     if (!row) return;
 
     // Récupérer les éléments de la ligne
-    const prixUnitaire = parseFloat(row.querySelector('.prix-input').value).toFixed(2);
-    const quantite = parseInt(row.querySelector('.qte-input').value);
-    const remise = parseFloat(row.querySelector('.remise-input').value).toFixed(2);
+    const prixUnitaire = Number.parseFloat(row.querySelector('.prix-input').value).toFixed(2);
+    const quantite = Number.parseInt(row.querySelector('.qte-input').value);
+    const remise = Number.parseFloat(row.querySelector('.remise-input').value).toFixed(2);
     const totalValue = (quantite * prixUnitaire * (1 - remise / 100)).toFixed(2);
 
     // Récupération des données actuelles du produit pour mise à jour
     let existingProduct = getExistingProduct(rowIndex);
-    if (!existingProduct) {
+    if (existingProduct === null) {
         existingProduct = {
-            id: row.getAttribute('data-produit-id') || 'new',
+            id: row.dataset.produitId || `new${rowIndex}`,
             reference: row.cells[1]?.textContent.toUpperCase() || '',
             designation: row.cells[2]?.textContent.toUpperCase() || '',
-            prix_unitaire: parseFloat(prixUnitaire) || 0,
+            prix_unitaire: Number.parseFloat(prixUnitaire) || 0,
             qte: quantite || 1,
-            remise: parseFloat(remise) || 0
+            remise: Number.parseFloat(remise) || 0
         }
     } else {
-        existingProduct.prix_unitaire = parseFloat(prixUnitaire) || 0;
+        existingProduct.prix_unitaire = Number.parseFloat(prixUnitaire) || 0;
         existingProduct.qte = quantite || 1;
-        existingProduct.remise = parseFloat(remise) || 0;
+        existingProduct.remise = Number.parseFloat(remise) || 0;
     }
 
     // Mise à jour du formulaire
     row.querySelector(`input[name^="lignes_"]`).value = JSON.stringify(existingProduct);
-    row.setAttribute('data-prix', prixUnitaire);
-    row.setAttribute('data-quantite', quantite);
-    row.setAttribute('data-remise', remise);
-    row.setAttribute('data-sum', totalValue);
+    row.dataset.prix = prixUnitaire;
+    row.dataset.quantite = quantite;
+    row.dataset.remise = remise;
+    row.dataset.sum = totalValue;
 
     // Mise à jour des totaux dans la ligne et la commande
     row.querySelector('.total-ligne').textContent = `${totalValue} €`;
@@ -310,23 +328,21 @@ function updateSums(rowIndex) {
 
 function dupliquerLigne(button) {
     const row = button.closest('tr');
-    const produitId = row.getAttribute('data-ligne-id');
+    const produitId = row.dataset.ligneId;
     
     // Récupérer les valeurs actuelles
-    const prix = parseFloat(row.querySelector('.prix-input').value) || 0;
-    const qte = parseInt(row.querySelector('.qte-input').value) || 1;
-    const remise = parseFloat(row.querySelector('.remise-input').value) || 0;
+    const prix = Number.parseFloat(row.querySelector('.prix-input').value) || 0;
+    const qte = Number.parseInt(row.querySelector('.qte-input').value) || 1;
+    const remise = Number.parseFloat(row.querySelector('.remise-input').value) || 0;
     const reference = row.querySelector('.reference').textContent;
     const designation = row.querySelector('.designation').textContent;
-    console.log('Duplication de la ligne:', { produitId, prix, qte, remise, reference, designation });
     const produit = {
         id: produitId,
         reference: reference,
         designation: designation,
         prix: prix
     };
-    console.log('Produit dupliqué:', produit);
-    ajouterLigneProduit(produit, qte, remise);
+    ajouterLigneProduit(produit, qte, remise, true);
     calculerTotalOrder();
     showAlert('Ligne dupliquée avec succès !', 'success');
 }
@@ -335,7 +351,7 @@ function supprimerLigne(button) {
     const row = button.closest('tr');
     
     // Vérifier si la ligne est facturée
-    if (row.hasAttribute('data-ligne-facturee')) {
+    if (row.dataset.ligneFacturee) {
         showAlert('Impossible de supprimer une ligne déjà facturée !', 'error');
         return;
     }

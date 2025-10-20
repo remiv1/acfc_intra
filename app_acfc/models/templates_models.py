@@ -2,10 +2,8 @@ from typing import List, Dict, Optional, Any
 from flask import render_template, session, Request
 from datetime import datetime
 from logs.logger import INFO, ERROR, acfc_log
-from app_acfc.modeles import Client, get_db_session
 from app_acfc.models.orders_models import OrdersModel
 from app_acfc.models.products_models import ProductsModel
-from sqlalchemy.orm.session import Session as SessionBdDType
 
 class Constants:
     '''
@@ -260,12 +258,12 @@ class Constants:
                 'client-detail': 'clients/client_detail.html',
                 'client-form': 'clients/client_form.html',
                 'client-search': 'clients/client_search.html',
-            'commandes': 'commandes/commandes.html',
-                'commande-detail': 'commandes/commande_detail_content.html',
-                'commande-form': 'commandes/commande_form_content.html',
-                'commande-print': 'commandes/commande_bon_impression.html',
-                'factures': 'commandes/factures_details.html',
-                'facture-print': 'commandes/facture_impression.html',
+            'commandes': 'orders/orders.html',
+                'commande-detail': 'orders/order_detail_content.html',
+                'commande-form': 'orders/order_form_content.html',
+                'commande-print': 'orders/order_print.html',
+                'factures': 'orders/bill_details.html',
+                'facture-print': 'orders/bill_print.html',
             'commercial': 'commercial/commercial.html',
                 'commercial-clt-target': 'commercial/commercial_clients_target.html',
             'comptabilite': 'comptabilite/comptabilite.html',
@@ -484,7 +482,7 @@ class PrepareTemplates:
             subcontext (str): Sous-contexte de la page commandes :
                 - 'form' : Formulaire de création/modification de commande
                 - 'detail' : Détails d'une commande
-                - 'facture_details' : Détails d'une facture
+                - 'bill_details' : Détails d'une facture
             message (Optional[str]): Message à afficher sur la page commandes.
             success_message (Optional[str]): Message de succès à afficher.
             error_message (Optional[str]): Message d'erreur à afficher.
