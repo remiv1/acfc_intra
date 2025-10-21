@@ -144,7 +144,7 @@
                                 {% set adresse_livraison = commande.id_adresse_livraison if commande else adresse_principale.id %}
                                 {% set adresses_actives = client.adresses|selectattr('is_inactive', 'equalto', false)|list %}
                                 
-                                {% if client.adresses_actives|length == 1 or (commande and commande.id_adresse_livraison == adresse_principale.id) %}
+                                {% if adresses_actives|length == 1 or (commande and commande.id_adresse_livraison == adresse_principale.id) %}
                                     <!-- Une seule adresse ou même adresse pour facturation et livraison -->
                                     <label for="id_adresse_{{ adresse_principale.id }}" class="form-label fw-bold">Adresse de Facturation & Livraison</label>
                                     <input type="hidden" name="id_adresse_facturation" value="{{ adresse_principale.id }}">
@@ -160,6 +160,7 @@
                                         <div class="col-md-6">
                                             <label for="adresse_facturation" class="form-label fw-bold">Adresse de Facturation</label>
                                             <div name="adresse_facturation" class="form-control-plaintext border p-2 bg-light">
+                                                <input type="hidden" name="id_adresse_facturation" value="{{ adresse_principale.id }}">
                                                 {{ adresse_principale.adresse_l1 }}<br>
                                                 {% if adresse_principale.adresse_l2 %}{{ adresse_principale.adresse_l2 }}<br>{% endif %}
                                                 {{ adresse_principale.code_postal }} {{ adresse_principale.ville }}
@@ -169,7 +170,6 @@
                                             <label for="nb_adresses" class="form-label fw-bold">Adresse de Livraison</label>
                                             {% if adresses_actives|length > 1 %}
                                             <input type="hidden" name="nb_adresses" value="{{ adresses_actives|length }}" title="Nombre d'adresses disponibles">
-                                            <input type="hidden" name="id_adresse_facturation" value="{{ adresse_principale.id }}">
                                                 {% for adresse in adresses_actives %}
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="radio" name="id_adresse_livraison" id="adresse_{{ adresse.id }}" 

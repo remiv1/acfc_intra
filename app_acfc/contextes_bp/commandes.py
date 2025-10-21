@@ -141,11 +141,10 @@ def edit_order(id_client: int, id_order: int):
             order = OrdersModel(request) \
                         .post_order_data(id_client=id_client, id_order=id_order) \
                         .check_entries_changements()
-            session_db: SessionBdDType = get_db_session()
             for entry in order.entries_to_merge:
-                session_db.merge(entry)
-            session_db.merge(order.order)
-            session_db.commit()
+                order.db_session.merge(entry)
+            order.db_session.merge(order.order)
+            order.db_session.commit()
             message = Constants.messages(type_msg='commandes', second_type_message='updated')
             return redirect(url_for(Constants.return_pages('commandes', 'detail'),
                                     id_client=id_client,

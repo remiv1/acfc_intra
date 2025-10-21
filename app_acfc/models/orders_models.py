@@ -13,20 +13,21 @@ class OrdersModel:
         self.message = request.args.get('message', None)
         self.error_message = request.args.get('error_message', None)
         self.success_message = request.args.get('success_message', None)
-
+        self.db_session: SessionBdDType = get_db_session()
         self.request = request
 
     def _check_order_status(self, *, id_order: Optional[int], id_client: int, order: Optional[Order]=None) -> None:
         """
         Détermine self.order et self.entries en fonction de l'ID de la commande.
         """
-        session_db: SessionBdDType = get_db_session()
         if id_order:
             self.is_new = False
-            self.order: Order = session_db.query(Order).filter_by(id=id_order, id_client=id_client).first()
+            self.order: Order = self.db_session.query(Order) \
+                                        .filter_by(id=id_order, id_client=id_client) \
+                                        .first()
             if not self.order:
                 raise ValueError("Order non trouvée")
-            self.serveur_entries: List[DevisesFactures] = session_db.query(DevisesFactures).filter_by(id_order=id_order).all()
+            self.serveur_entries: List[DevisesFactures] = self.db_session.query(DevisesFactures).filter_by(id_order=id_order).all()
             if not self.serveur_entries:
                 raise ValueError("Aucune entrée trouvée pour cette commande")
         else:
@@ -39,8 +40,7 @@ class OrdersModel:
         Vérifie l'état des entrées de la commande.
         """
         # Récupération de la commande depuis la base de données
-        session_db: SessionBdDType = get_db_session()
-        order = session_db.query(Order) \
+        order = self.db_session.query(Order) \
                         .options(
                             joinedload(Order.client),
                             joinedload(Order.client)
@@ -88,7 +88,7 @@ class OrdersModel:
         else:
             raise ValueError("order_details n'est pas défini")
         
-    def _is_new_line(self, *, entry_id: str, is_new_order: bool = False) -> Optional[int]:
+    def _is_new_line(self, *, entry_id: str | None, is_new_order: bool = False) -> Optional[int]:
         """
         Détermine si une entrée est nouvelle en fonction de son ID.
 
@@ -100,7 +100,7 @@ class OrdersModel:
         """
         if is_new_order:
             return None
-        elif str(entry_id).startswith('new'):
+        elif str(entry_id).startswith('new') or entry_id is None:
             return None
         else:
             return int(entry_id)
@@ -117,10 +117,10 @@ class OrdersModel:
         # Gestion de la commande
         self.order.id_client = id_client
         self.order.date_commande = datetime.strptime(self.request.form.get('date_commande', ''), '%Y-%m-%d').date()
-        self.order.adresse_facturation = self.request.form.get('id_adresse_facturation', None)
-        self.order.adresse_livraison = self.request.form.get('id_adresse_livraison', self.order.adresse_facturation)
+        self.order.id_adresse_facturation = self.request.form.get('id_adresse_facturation', None)
+        self.order.id_adresse_livraison = self.request.form.get('id_adresse_livraison', self.order.id_adresse_facturation)
         self.order.descriptif = self.request.form.get('descriptif', '').strip()
-        self.order.is_ad_livraison = (self.order.adresse_livraison != self.order.adresse_facturation)
+        self.order.is_ad_livraison = (self.order.id_adresse_livraison != self.order.id_adresse_facturation)
 
         # Extraction des entrées du formulaire
         self.client_entries: List[DevisesFactures] = []
@@ -168,8 +168,7 @@ class OrdersModel:
         """
         Prépare les données de la commande pour l'affichage.
         """
-        session_db: SessionBdDType = get_db_session()
-        order_details = session_db.query(Order) \
+        order_details = self.db_session.query(Order) \
                         .options(
                             joinedload(Order.client),
                             joinedload(Order.client)
@@ -205,17 +204,20 @@ class OrdersModel:
 
         # Création d'une liste combinée pour les mises à jour
         self.entries_to_merge: List[DevisesFactures] = []
-
+        import logging
         for entry in entries_to_add:
             entry.id = None  # Pour forcer l'insertion
             entry.id_order = self.order.id
+            logging.error(f"Type entry à merger : {type(entry)} | entry={entry}")
             self.entries_to_merge.append(entry)
 
         for entry in entries_to_update:
+            logging.error(f"Type entry à merger : {type(entry)} | entry={entry}")
             self.entries_to_merge.append(entry)
 
         for entry in entries_to_delete:
             entry.is_annulee = True
+            logging.error(f"Type entry à merger : {type(entry)} | entry={entry}")
             self.entries_to_merge.append(entry)
 
         return self
