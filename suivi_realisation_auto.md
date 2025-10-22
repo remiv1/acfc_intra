@@ -1,7 +1,7 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 21 October 2025  
-**Période analysée :** 14 October 2025 - 21 October 2025 (7 jours)  
+**Date du rapport :** 22 October 2025  
+**Période analysée :** 15 October 2025 - 22 October 2025 (7 jours)  
 **Nombre de commits :** 11  
 **Générateur :** Script automatique v1.0
 
@@ -10,38 +10,13 @@
 ## Résumé exécutif
 
 **Activité de développement :** 11 commits sur 7 jours  
-**Volume de code :** 1563 lignes ajoutées, 1235 lignes supprimées  
-**Fichiers impactés :** 108 fichiers modifiés  
-**Productivité moyenne :** 223 lignes/jour
+**Volume de code :** 930 lignes ajoutées, 575 lignes supprimées  
+**Fichiers impactés :** 77 fichiers modifiés  
+**Productivité moyenne :** 132 lignes/jour
 
 ---
 
 ## Analyse des commits par période
-
-
-### 14 October 2025
-
-#### 17:44 - 1fe9460 - 📊 Mise à jour automatique du rapport de suivi (14/10/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +60 -23 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Tue Oct 14 17:44:56 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (14/10/2025)`
-- ... et 1 autres fichiers
-
-#### 19:44 - 7ae4d52 - Refactor: Rename 'Commande' to 'Order' across templates, models, and tests
-
-**Catégorie :** Refactoring  
-**Impact :** +618 -656 lignes, 35 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Tue Oct 14 19:44:06 2025 +0200`
-- `    Refactor: Rename 'Commande' to 'Order' across templates, models, and tests`
-- ... et 33 autres fichiers
 
 
 ### 15 October 2025
@@ -140,6 +115,17 @@
 
 ### 21 October 2025
 
+#### 12:08 - 53a1659 - 📊 Mise à jour automatique du rapport de suivi (21/10/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +44 -19 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Tue Oct 21 12:08:28 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (21/10/2025)`
+- ... et 1 autres fichiers
+
 #### 14:08 - 3025f48 - refactor: Simplifier la gestion des sessions de base de données dans le module de commandes.
 
 **Catégorie :** Refactoring  
@@ -152,38 +138,53 @@
 - ... et 6 autres fichiers
 
 
+### 22 October 2025
+
+#### 08:39 - 8491fcc - Ajout du sous-module mariadb/prepare_base_datas/_confidential (dépôt privé)
+
+**Catégorie :** Développement général  
+**Impact :** +1 -0 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: remiv1 <remiv1@gmail.com>`
+- `Date:   Wed Oct 22 08:39:34 2025 +0200`
+- `    Ajout du sous-module mariadb/prepare_base_datas/_confidential (dépôt privé)`
+- ... et 1 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
 - **Développement de fonctionnalités** : 5 commits (45.5%)
 - **Interface utilisateur** : 4 commits (36.4%)
-- **Refactoring** : 2 commits (18.2%)
+- **Développement général** : 1 commits (9.1%)
+- **Refactoring** : 1 commits (9.1%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 25 fichiers modifiés
-- **HTML** : 19 fichiers modifiés
-- **Documentation** : 8 fichiers modifiés
-- **JavaScript** : 7 fichiers modifiés
-- **CSS** : 3 fichiers modifiés
+- **Python** : 16 fichiers modifiés
+- **HTML** : 13 fichiers modifiés
+- **Documentation** : 4 fichiers modifiés
+- **JavaScript** : 4 fichiers modifiés
+- **CSS** : 1 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
 - **Fréquence de commit :** 1.6 commits/jour
-- **Volume de code :** 2798 modifications totales
-- **Ratio ajouts/suppressions :** 1.27
-- **Moyenne lignes par commit :** 254
+- **Volume de code :** 1505 modifications totales
+- **Ratio ajouts/suppressions :** 1.62
+- **Moyenne lignes par commit :** 137
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 1563 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 930 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 21 October 2025*
+*Rapport généré automatiquement le 22 October 2025*
