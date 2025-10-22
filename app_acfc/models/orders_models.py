@@ -208,16 +208,13 @@ class OrdersModel:
         for entry in entries_to_add:
             entry.id = None  # Pour forcer l'insertion
             entry.id_order = self.order.id
-            logging.error(f"Type entry à merger : {type(entry)} | entry={entry}")
             self.entries_to_merge.append(entry)
 
         for entry in entries_to_update:
-            logging.error(f"Type entry à merger : {type(entry)} | entry={entry}")
             self.entries_to_merge.append(entry)
 
         for entry in entries_to_delete:
             entry.is_annulee = True
-            logging.error(f"Type entry à merger : {type(entry)} | entry={entry}")
             self.entries_to_merge.append(entry)
 
         return self

@@ -14,6 +14,7 @@
         - phones : Liste des objets Telephone liés au client
         - mails : Liste des objets Mail liés au client
         - orders : Liste des objets Commande liés au client
+        - devises : Liste des objets entrées de commandes liées au client
         - bills : Liste des objets Facture liés au client
      - success_message (optionnel) : Message de succès à afficher
      - error_message (optionnel) : Message d'erreur à afficher
@@ -701,7 +702,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for commande in orders %}
+                                    {% set sorted_orders = orders|custom_order %}
+                                    {% for commande in sorted_orders %}
+                                    {% set billed_length = commande.devises | selectattr('is_facture', 'equalto', True) | list | length %}
                                     <tr {% if commande.is_annulee %}class="table-danger"{% endif %}>
                                         <td><strong>#{{ commande.id }}</strong></td>
                                         <td>{{ commande.date_commande.strftime('%d/%m/%Y') }}</td>
@@ -719,18 +722,18 @@
                                         </td>
                                         <td>
                                             <fieldset class="btn-group gap-1" role="group" aria-label="Actions commande">
-                                                <a href="{{ url_for(('commandes', 'detail') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" 
+                                                <a href="{{ url_for(('commandes', 'detail') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}"
                                                    class="btn btn-sm btn-outline-primary" title="Voir les détails">
                                                     <i class="bi bi-eye me-1"></i>Voir
                                                 </a>
-                                                {% if not commande.is_annulee and not commande.is_facturee %}
-                                                <a href="{{ url_for(('commandes', 'modifier') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" 
+                                                {% if not commande.is_annulee and not commande.is_facturee and billed_length == 0 %}
+                                                <a href="{{ url_for(('commandes', 'modifier') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}"
                                                    class="btn btn-sm btn-outline-secondary ms-1" title="Modifier la commande">
                                                     <i class="bi bi-pencil me-1"></i>Modifier
                                                 </a>
-                                                {% elif not commande.is_expediee and not commande.is_facturee and not commande.is_annulee %}
+                                                {% elif not commande.is_expediee and not commande.is_facturee and not commande.is_annulee and billed_length == 0 %}
                                                 {% from '_macros.html' import csrf_field %}
-                                                <form class="inline-display" method="POST" action="{{ url_for(('commandes', 'annuler') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" 
+                                                <form class="inline-display" method="POST" action="{{ url_for(('commandes', 'annuler') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}"
                                                     onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
                                                     {{ csrf_field() }}
                                                     <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Annuler la commande">
@@ -749,6 +752,10 @@
                                                 {% elif commande.is_expediee %}
                                                     <span class="text-muted">
                                                         <i class="bi bi-truck me-1"></i>Commande expédiée
+                                                    </span>
+                                                {% elif billed_length > 0 %}
+                                                    <span class="text-muted">
+                                                        <i class="bi bi-check-circle me-1"></i>Commande partiellement facturée
                                                     </span>
                                                 {% endif %}
                                             </fieldset>
@@ -794,7 +801,8 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for facture in bills %}
+                                    {% set sorted_bills = bills|custom_bill %}
+                                    {% for facture in sorted_bills %}
                                     <tr>
                                         <td class="hidden"><strong>#{{ facture.id }}</strong></td>
                                         <td><code>{{ facture.id_fiscal }}</code></td>

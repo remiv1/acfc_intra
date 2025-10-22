@@ -1,4 +1,4 @@
-FROM mongo:8.0.13
+FROM docker.io/library/mongo:8.0.13
 
 # Installe gettext pour utiliser envsubst
 RUN apt-get update && apt-get install -y gettext-base

@@ -29,11 +29,11 @@ Version : 1.0
 """
 from flask import (Blueprint, jsonify, request, redirect, url_for, Request,
                    session)
-from sqlalchemy.orm import Session as SessionBdDType, joinedload, contains_eager
+from sqlalchemy.orm import Session as SessionBdDType, joinedload, contains_eager, subqueryload
 from sqlalchemy import or_, func
 from werkzeug import Response as ResponseWerkzeug
 from app_acfc.modeles import (get_db_session, Client, Part, Pro, Telephone, Mail,
-                              Order, Facture, Adresse)
+                              Order, Facture, Adresse, DevisesFactures)
 from app_acfc.models.templates_models import PrepareTemplates, Constants
 from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE, ADMINISTRATEUR
 from datetime import datetime
@@ -381,6 +381,12 @@ def get_client(id_client: int) -> str:
         joinedload(Client.factures)
     ).get(id_client)
 
+    # Chargement séparé des devises pour chaque commande avec une requête explicite
+    if client:
+        for order in client.commandes:
+            # Requête explicite pour charger les devises
+            order.devises = db_session.query(DevisesFactures).filter_by(id_order=order.id).all()
+
     # Récupération du contexte du client et retour
     if client:
         part = client.part
@@ -397,7 +403,7 @@ def get_client(id_client: int) -> str:
             client.adresses,
             key=lambda a: (a.is_inactive, a.id)
         )
-        orders: List[Order] = sorted(client.commandes, key=lambda x: x.id, reverse=True)
+        orders: List[Order] = client.commandes
         bills: List[Facture] = client.factures
         nom_affichage = client.nom_affichage
         return PrepareTemplates.clients(sub_context='detail', client=client, part=part, pro=pro, phones=phones,

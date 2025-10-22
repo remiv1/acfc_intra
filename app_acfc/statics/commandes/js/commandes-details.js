@@ -63,7 +63,6 @@ function verifySelectAllCheckbox() {
 // Calcul du total facturé
 function calculateTotalFacture() {
     total = 0;
-    console.log(`total remis à ${total}`);
     const checkboxes = document.querySelectorAll('.ligne-facturation-checkbox');
     const totalDisplay = document.getElementById('totalFacturation');
     const selectAllCheckbox = document.getElementById('check-all');
@@ -71,7 +70,6 @@ function calculateTotalFacture() {
         if (checkbox.id !== 'check-all' && checkbox.checked) {
             const montant = parseFloat(checkbox.value) || 0;
             total += montant;
-            console.log(`ajout de ${montant}, total=${total}`);
         }
     });
     totalDisplay.textContent = `${total.toFixed(2)} €`;
@@ -96,3 +94,21 @@ function updateHiddenFactureIds() {
     });
     document.getElementById('ids_lignes_facturees').value = ids.join(',');
 }
+
+// Ajout de l'écouteur sur le formulaire de facturation pour mettre à jour les IDs avant soumission
+document.addEventListener('DOMContentLoaded', function() {
+    const facturationForm = document.getElementById('facturationForm');
+    if (facturationForm) {
+        facturationForm.addEventListener('submit', function(event) {
+            updateHiddenFactureIds();
+            
+            // Vérifier qu'au moins une ligne est sélectionnée
+            const idsLignesFacturees = document.getElementById('ids_lignes_facturees').value;
+            if (!idsLignesFacturees || idsLignesFacturees.trim() === '') {
+                event.preventDefault();
+                alert('Veuillez sélectionner au moins une ligne à facturer.');
+                return false;
+            }
+        });
+    }
+});

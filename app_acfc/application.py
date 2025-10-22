@@ -33,7 +33,7 @@ from logs.logger import acfc_log, ERROR
 from app_acfc.services import SecureSessionService, AuthenticationService
 from app_acfc.modeles import (
     User, Order, Client, init_database, get_db_session,
-    GeoMethods
+    GeoMethods, Facture
     )
 from app_acfc.models.templates_models import PrepareTemplates, Constants
 from app_acfc.models.users_models import MyAccount
@@ -184,6 +184,55 @@ def format_date_input(value: datetime | date | None):
 def jinja_page_title(title_and_subtitle: Tuple[str, str]) -> str:
     """Filtre pour générer le titre de la page dans le format Jinja2."""
     return Constants.return_pages(title_and_subtitle[0], title_and_subtitle[1])
+
+@acfc.template_filter('custom_order')
+def order_status_sort(orders: List[Order]) -> List[Order]:
+    """
+    Filtre pour trier les commandes selon leur statut :
+        - Annulée (3)
+        - Expédiée (2)
+        - Facturée (1)
+        - En cours (0)
+    """
+    def get_custom_order(commande):
+        """Retourne l'ordre personnalisé pour le tri des commandes."""
+        # Trie sur le statut
+        today = date.today()
+        if commande.is_annulee:
+            statut = 3
+        elif commande.is_expediee:
+            statut = 2
+        elif commande.is_facturee:
+            statut = 1
+        else:
+            statut = 0
+        # Trie sur la date (les plus récentes en premier)
+        id_rank = -commande.id
+        return (statut, id_rank)
+
+    return sorted(orders, key=get_custom_order)
+
+@acfc.template_filter('custom_bill')
+def bill_status_sort(bills: List[Facture]) -> List[Facture]:
+    """
+    Filtre pour trier les factures selon leur statut :
+        - Imprimée (1)
+        - En attente (0)
+    """
+    today = date.today()
+    def get_custom_order(bill):
+        """Retourne l'ordre personnalisé pour le tri des factures."""
+        # Trie sur le statut
+        if bill.is_imprime:
+            statut = 1
+        else:
+            statut = 0
+        # Trie sur la date (les plus récentes en premier)
+        id_rank = -bill.id
+
+        return (statut, id_rank)
+
+    return sorted(bills, key=get_custom_order)
 
 # ====================================================================
 # FONCTIONS DE RECHERCHES - HORS ROUTES

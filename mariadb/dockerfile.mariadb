@@ -2,7 +2,7 @@
 # DOCKERFILE - BASE DE DONNÉES MARIADB
 # ====================================================================
 # Configuration Docker pour la base de données MariaDB de l'application ACFC
-# 
+#
 # Fonctionnalités :
 # - Base de données relationnelle haute performance
 # - Initialisation automatique du schéma
@@ -10,19 +10,19 @@
 # - Support des transactions ACID pour l'intégrité comptable
 # - Optimisations pour les applications d'entreprise
 # - Données de référence pré-chargées (PCG, villes françaises, indicatifs téléphoniques)
-# 
+#
 # Sécurité :
 # - Variables d'environnement pour les mots de passe
 # - Utilisateur dédié non-root pour l'application
 # - Isolation réseau via docker-compose
-# 
+#
 # Maintenu par : ACFC Development Team
 # Dernière mise à jour : Août 2025
 
 # Utilisation de l'image officielle MariaDB (dernière version stable)
 # MariaDB est un fork performant de MySQL, 100% compatible
 # Avantages : Open source, performances optimisées, développement actif
-FROM mariadb:12.0.2
+FROM docker.io/library/mariadb:12.0.2
 
 # Configuration des métadonnées
 LABEL maintainer="Rémi Verschuur"

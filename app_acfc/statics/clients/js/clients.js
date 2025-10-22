@@ -299,7 +299,6 @@ function editEmail(emailId, buttonElement) {
     
     // Si les données sont vides, essayer avec getAttribute (méthode de fallback)
     if (!data.mail) {
-        console.log('Fallback vers getAttribute pour email');
         data = {
             id: emailId,
             mail: buttonElement.getAttribute('data-email-mail'),
@@ -413,7 +412,6 @@ function editAddress(addressId, buttonElement) {
     
     // Si les données sont vides, essayer avec getAttribute (méthode de fallback)
     if (!data.adresse_l1) {
-        console.log('Fallback vers getAttribute pour adresse');
         data = {
             id: addressId,
             adresse_l1: buttonElement.getAttribute('data-address-l1'),

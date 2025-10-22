@@ -276,10 +276,10 @@
                         {% if not commande.is_annulee %}
                         
                         <!-- Facturation : toujours disponible s'il y a des lignes non facturées -->
-                        {% set has_non_facture = devises_factures|selectattr('is_facture', 'equalto', false)|list %}
-                        {% set has_facture = devises_factures|selectattr('is_facture', 'equalto', true)|list %}
-                        {% set has_non_expedie = devises_factures|selectattr('is_expedie', 'equalto', false)|list %}
-                        {% set has_expedie = devises_factures|selectattr('is_expedie', 'equalto', true)|list %}
+                        {% set has_non_facture = devises_factures|selectattr('is_facture', 'equalto', False)|list %}
+                        {% set has_facture = devises_factures|selectattr('is_facture', 'equalto', True)|list %}
+                        {% set has_non_expedie = has_facture|selectattr('is_expedie', 'equalto', False)|list %}
+                        {% set has_expedie = has_facture|selectattr('is_expedie', 'equalto', True)|list %}
                             {% if has_non_facture|length > 0 %}
                                 <!-- Dropdown pour les options d'impression -->
                                 <fieldset class="btn-group" role="group">
@@ -302,28 +302,32 @@
                                         </li>
                                     </ul>
                                 </fieldset>
-                                <a href="{{ url_for(('commandes', 'modifier') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-pencil me-1"></i>Modifier la commande
-                                </a>
-                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#facturationModal">
-                                    <i class="bi bi-receipt me-1"></i>Facturer
-                                </button>
-                                <a href="{{ url_for(('commandes', 'annuler') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" class="btn btn-danger"
-                                   data-bs-toggle="modal" data-bs-target="#annulationModal">
-                                    <i class="bi bi-x-circle me-1"></i>Annuler la commande
-                                </a>
+                                {% if has_facture|length == 0 %}
+                                    <a href="{{ url_for(('commandes', 'modifier') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-pencil me-1"></i>Modifier la commande
+                                    </a>
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#facturationModal">
+                                        <i class="bi bi-receipt me-1"></i>Facturer
+                                    </button>
+                                    <a href="{{ url_for(('commandes', 'annuler') | jinja_page_title, id_client=commande.id_client, id_order=commande.id) }}" class="btn btn-danger"
+                                    data-bs-toggle="modal" data-bs-target="#annulationModal">
+                                        <i class="bi bi-x-circle me-1"></i>Annuler la commande
+                                    </a>
+                                {% endif %}
                             {% endif %}
-                            
-                            {% if commande.is_facturee and not commande.is_expediee %}
+                            <!-- Expédition : disponible si des lignes sont facturées mais non expédiées -->
+                            {% if commande.is_facturee and has_non_expedie|length > 0 %}
                                 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#expeditionModal">
                                     <i class="bi bi-truck me-1"></i>Expédier la commande
                                 </button>
                             {% endif %}
-                            
-                            {% if has_facture and not commande.is_facture %}
-                                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#expeditionPartielleModal">
+                            <!-- Expédition : disponible si des lignes sont facturées mais non expédiées -->
+                            {% if not commande.is_facturee and has_non_expedie|length > 0 %}
+                                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#expeditionModal">
                                     <i class="bi bi-truck me-1"></i>Expédition partielle
                                 </button>
+                            {% endif %}
+                            {% if not commande.is_facturee and has_facture|length > 0 %}
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#facturationModal">
                                     <i class="bi bi-receipt me-1"></i>Facturation partielle
                                 </button>

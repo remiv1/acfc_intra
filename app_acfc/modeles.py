@@ -22,7 +22,7 @@ Contient les modèles SQLAlchemy pour tous les modules métiers :
 
 Modules couverts :
 - Gestion des utilisateurs et authentification
-- CRM (Client Relationship Management)  
+- CRM (Client Relationship Management)
 - Gestion des contacts (emails, téléphones, adresses)
 - Comptabilité et plan comptable
 - Gestion des commandes et facturation
@@ -60,7 +60,7 @@ def verify_env() -> bool:
         
     Variables requises :
         - DB_USER : Nom d'utilisateur de la base de données
-        - DB_PASSWORD : Mot de passe de la base de données  
+        - DB_PASSWORD : Mot de passe de la base de données
         - DB_HOST : Adresse du serveur de base de données
         - DB_NAME : Nom de la base de données
     """
@@ -131,7 +131,7 @@ class Configuration:
         # === VALIDATION ET CHARGEMENT DES VARIABLES CRITIQUES ===
         if verify_env():
             self.db_name: str = getenv("DB_NAME", "acfc_db")
-            self.db_user: str = getenv("DB_USER", "acfc_user") 
+            self.db_user: str = getenv("DB_USER", "acfc_user")
             self.db_password: str = getenv("DB_PASSWORD", "secure_password")
             self.db_host: str = getenv("DB_HOST", "localhost")
             self.api_key_l: str = getenv("API_URL", "default_api_key")
@@ -171,7 +171,7 @@ db_url = URL.create(
 
 # Création de l'engine SQLAlchemy avec optimisations de performance
 engine = create_engine(
-    db_url, 
+    db_url,
     echo=False,                         # Désactive le logging SQL (à activer en debug)
     pool_size=10,                       # Taille du pool de connexions
     max_overflow=20,                    # Connexions supplémentaires autorisées
@@ -253,13 +253,13 @@ class User(Base):
     
     # === SÉCURITÉ ET AUTHENTIFICATION ===
     sha_mdp = mapped_column(String(255), nullable=False, comment="Mot de passe haché avec Argon2")
-    is_chg_mdp = mapped_column(Boolean, default=False, nullable=False, 
+    is_chg_mdp = mapped_column(Boolean, default=False, nullable=False,
                               comment="Force le changement de mot de passe à la prochaine connexion")
-    date_chg_mdp = mapped_column(Date, default=func.now(), nullable=False, 
+    date_chg_mdp = mapped_column(Date, default=func.now(), nullable=False,
                                  comment="Date du dernier changement de mot de passe")
-    nb_errors = mapped_column(Integer, default=0, nullable=False, 
+    nb_errors = mapped_column(Integer, default=0, nullable=False,
                              comment="Nombre d'erreurs d'authentification consécutives")
-    is_locked = mapped_column(Boolean, default=False, nullable=False, 
+    is_locked = mapped_column(Boolean, default=False, nullable=False,
                              comment="Compte verrouillé après trop d'échecs d'authentification")
     permission = mapped_column(String(10), nullable=False, comment="Habilitations de l'utilisateur")
 
@@ -472,7 +472,7 @@ class Mail(Base):
     type_mail = mapped_column(String(100), nullable=False, comment="Type: professionnel/personnel/facturation/marketing")
     detail = mapped_column(String(255), nullable=True, comment="Précision libre sur l'usage de cet email")
     mail = mapped_column(String(255), nullable=False, comment="Adresse email (validation format requise)")
-    is_principal = mapped_column(Boolean, default=False, nullable=False, 
+    is_principal = mapped_column(Boolean, default=False, nullable=False,
                                 comment="Email principal pour ce client (un seul par client)")
     
     # === MÉTADONNÉES ===
@@ -532,7 +532,7 @@ class Telephone(Base):
     client = relationship("Client", back_populates="tels")
 
     # === CLASSIFICATION ===
-    type_telephone = mapped_column(String(100), nullable=False, 
+    type_telephone = mapped_column(String(100), nullable=False,
                                   comment="Type: fixe_pro/mobile_pro/fixe_perso/mobile_perso/fax")
     detail = mapped_column(String(255), nullable=True, comment="Précision sur l'usage ou horaires de contact")
     
@@ -593,7 +593,7 @@ class Adresse(Base):
     detail = mapped_column(String(255), nullable=True, comment="Précision libre sur l'adresse")
 
     # === MÉTADONNÉES ===
-    is_principal = mapped_column(Boolean, default=False, nullable=False, 
+    is_principal = mapped_column(Boolean, default=False, nullable=False,
                                 comment="Adresse principale pour ce client (une seule par client)")
     created_at = mapped_column(Date, default=func.now(), nullable=False)
     created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé l'adresse")
@@ -694,10 +694,10 @@ class DevisesFactures(Base):
     is_annulee = mapped_column(Boolean, default=False, nullable=False)
     
     # === ÉTAT DE FACTURATION ET EXPÉDITION ===
-    is_facture = mapped_column(Boolean, default=False, nullable=False, 
+    is_facture = mapped_column(Boolean, default=False, nullable=False,
                               comment="Indique si cette ligne a été facturée")
     id_facture = mapped_column(Integer, nullable=True)
-    facture = relationship("Facture", back_populates="composantes_factures", 
+    facture = relationship("Facture", back_populates="composantes_factures",
                           primaryjoin="foreign(DevisesFactures.id_facture) == Facture.id")
     facture_by = mapped_column(String(100), nullable=True,
                               comment="Utilisateur qui a facturé cette ligne")

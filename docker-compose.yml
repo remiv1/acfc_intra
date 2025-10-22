@@ -2,7 +2,7 @@
 # DOCKER COMPOSE - INFRASTRUCTURE ACFC
 # ====================================================================
 # Configuration de l'architecture micro-services pour l'application ACFC
-# 
+#
 # Services déployés :
 # - acfc-app      : Application web Flask
 # - acfc-api-back : API interne FastAPI
@@ -12,7 +12,7 @@
 #
 # Réseau : acfc-network (isolé, communication inter-services)
 # Volumes : Persistance des données (base, logs, documents --factures, commandes, remises de chèques--)
-# 
+#
 # Environnement : Development/Production (configurable via .env)
 # Maintenu par : Rémi Verschuur
 # Version : 1.0
@@ -29,7 +29,7 @@ services:
     ports:
       - "5000:5000"                           # Mapping port Flask (dev uniquement)
     volumes:
-      - ./logs:/app/logs                      # Volume pour logs (persistance)
+      - ./logs:/app/logs:z                    # Volume pour logs (persistance)
     environment:
       # Variables DB passées au conteneur pour que l'application se connecte au service acfc-db
       - DB_HOST=${DB_HOST}
@@ -60,13 +60,12 @@ services:
   # ================================================================
   acfc-proxy:
     container_name: acfc-nginx
-    image: nginx:1.29.1                       # Image officielle Nginx
+    image: nginx:1.29.1                      # Image officielle Nginx
     ports:
       - "80:80"                              # Port HTTP standard
       - "443:443"                            # Port HTTPS (certificats à configurer)
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro  # Configuration personnalisée
-      - ./nginx/certs:/etc/nginx/certs:ro            # Certificats SSL
+      - ./nginx/:/etc/nginx/:Z               # Configuration personnalisée
     networks:
       - acfc-network
     depends_on:
@@ -175,7 +174,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./queues
+      device: ./queues:z
 
 # ================================================================
 # RÉSEAUX
