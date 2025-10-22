@@ -1,0 +1,3 @@
+[submodule "mariadb/prepare_base_datas/_confidential"]
+	path = mariadb/prepare_base_datas/_confidential
+	url = https://github.com/remiv1/acfc_confidential.git
