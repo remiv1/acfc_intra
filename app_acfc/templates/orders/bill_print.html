@@ -1,3 +1,13 @@
+<!--
+============================================================
+    TEMPLATE POUR LA FACTURE À IMPRIMER
+============================================================
+    Variables attendues :
+    - bill : Objet facture avec les détails de la facture
+    - qr_code_base64 : Code QR en base64 pour le numéro de facture (sera remplacé par le lien de règlement)
+    - now : Date et heure actuelles pour le pied de page
+-->
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,6 +19,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='commandes/css/facture_impression.css') }}">
 </head>
 <body>
+    {% set two_adresses = bill.commande.is_ad_livraison %}
     <div class="facture-container">
         
         <!-- En-tête de la facture (2/5 de la hauteur) -->
@@ -30,7 +41,7 @@
             
             <div class="facture-title">
                 FACTURE<br>
-                <strong>{{ facture.date_facturation|strftime }}</strong>
+                <strong>{{ order.date_facturation|strftime }}</strong>
             </div>
             
             <!-- Adresses de facturation et livraison -->
@@ -44,20 +55,20 @@
                                 Facturé et livré à :
                             {% endif %}
                         </div>
-                        <div class="client-name">{{ facture.client.nom_affichage }}</div>
-                        {% if facture.client.adresses %}
-                            {% set adresse = facture.client.adresses[0] %}
+                        <div class="client-name">{{ bill.order.client.nom_affichage }}</div>
+                        {% if not two_adresses %}
+                            {% set adresse_facturation = bill.order.adresse_facturation %}
                             <div class="client-address">
-                                {{ adresse.adresse_l1 }}<br>
-                                {% if adresse.adresse_l2 %}{{ adresse.adresse_l2 }}<br>{% endif %}
-                                {{ adresse.code_postal }} {{ adresse.ville }}<br>
-                                {% if adresse.pays and adresse.pays != 'FRANCE' %}{{ adresse.pays }}{% endif %}
+                                {{ adresse_facturation.adresse_l1 }}<br>
+                                {% if adresse_facturation.adresse_l2 %}{{ adresse_facturation.adresse_l2 }}<br>{% endif %}
+                                {{ adresse_facturation.code_postal }} {{ adresse_facturation.ville }}<br>
+                                {% if adresse_facturation.pays and adresse_facturation.pays != 'FRANCE' %}{{ adresse_facturation.pays }}{% endif %}
                             </div>
                         {% endif %}
-                        {% if facture.client.pro.siren or facture.client.pro.rna %}
+                        {% if bill.order.client.pro.siren or bill.order.client.pro.rna %}
                             <div class="small-text mt-1">
-                                {% if facture.client.pro.siren %}SIREN : {{ facture.client.pro.siren }}
-                                {% elif facture.client.pro.rna %}RNA : {{ facture.client.pro.rna }}{% endif %}
+                                {% if bill.order.client.pro.siren %}SIREN : {{ bill.order.client.pro.siren }}
+                                {% elif bill.order.client.pro.rna %}RNA : {{ bill.order.client.pro.rna }}{% endif %}
                             </div>
                         {% endif %}
                     </div>
@@ -65,12 +76,12 @@
                     <div class="address-livraison">
                         <div class="address-label">Livré à :</div>
                         <div class="client-name">{{ facture.client.nom_affichage }}</div>
-                        {% if facture.client.adresses and facture.client.adresses|length > 1 %}
-                            {% set adresse_livraison = facture.client.adresses[1] %}
+                        {% if bill.order.adresse_livraison %}
+                            {% set adresse_livraison = bill.order.adresse_livraison %}
                             <div class="client-address">
-                                {{ adresse_livraison.voie }}<br>
-                                {% if adresse_livraison.complement %}{{ adresse_livraison.complement }}<br>{% endif %}
-                                {{ adresse_livraison.cp }} {{ adresse_livraison.ville }}<br>
+                                {{ adresse_livraison.adresse_l1 }}<br>
+                                {% if adresse_livraison.adresse_l2 %}{{ adresse_livraison.adresse_l2 }}<br>{% endif %}
+                                {{ adresse_livraison.code_postal }} {{ adresse_livraison.ville }}<br>
                                 {% if adresse_livraison.pays and adresse_livraison.pays != 'FRANCE' %}{{ adresse_livraison.pays }}{% endif %}
                             </div>
                         {% else %}
@@ -88,8 +99,14 @@
             <div class="info-row">
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="numero-facture mb-2">N° de facture : <strong>{{ facture.id_fiscal }}</strong></div>
-                        <div class="numero-commande">N° de commande : <strong>{{ facture.id_order }}</strong></div>
+                        <div class="numero-facture mb-2">
+                            N° de facture : <strong>{{ bill.id_fiscal }}</strong>
+                        </div>
+                        <div class="numero-commande">
+                            <small>
+                                N° de commande : <strong>{{ bill.id_order }}</strong>
+                            </small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -106,33 +123,34 @@
                             <th id="th_remise" class="text-center">
                                 Remise
                                 {% set economie_totale = 0 %}
-                                {% for ligne in lignes_facturees %}
-                                    {% if ligne.remise > 0 %}
-                                        {% set economie_totale = economie_totale + (ligne.prix_unitaire * ligne.qte * ligne.remise) %}
+                                {% for entry in bill.commande.devises %}
+                                    {% if entry.remise > 0 %}
+                                        {% set economie_totale = economie_totale + (entry.prix_unitaire * entry.qte * entry.remise) %}
                                     {% endif %}
                                 {% endfor %}
                                 {% if economie_totale > 0 %}
-                                    <br><small class="text-success">(Économies : {{ "%.2f"|format(economie_totale) }}€)</small>
+                                    <br><em class="text-success">(Économies réalisées : {{ "%.2f"|format(economie_totale) }}€)</em>
                                 {% endif %}
                             </th>
                             <th id="th_total" class="text-end">Total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for ligne in lignes_facturees %}
+                        {% set billed_entries = bill.commande.devises | selectattr('is_facture', 'equalto', True) | list %}
+                        {% for entry in billed_entries %}
                         <tr>
-                            <td><code class="text-primary">{{ ligne.reference }}</code></td>
-                            <td>{{ ligne.designation }}</td>
-                            <td class="text-center">{{ ligne.qte }}</td>
-                            <td class="text-end">{{ "%.2f"|format(ligne.prix_unitaire) }} €</td>
+                            <td><code class="text-primary">{{ entry.reference }}</code></td>
+                            <td>{{ entry.designation }}</td>
+                            <td class="text-center">{{ entry.qte }}</td>
+                            <td class="text-end">{{ "%.2f"|format(entry.prix_unitaire) }} €</td>
                             <td class="text-center">
-                                {% if ligne.remise > 0 %}
-                                    <span class="badge bg-warning">{{ "%.0f"|format(ligne.remise * 100) }}%</span>
+                                {% if entry.remise > 0 %}
+                                    <span class="badge bg-warning">{{ "%.0f"|format(entry.remise * 100) }}%</span>
                                 {% else %}
                                     -
                                 {% endif %}
                             </td>
-                            <td class="text-end"><strong>{{ "%.2f"|format(ligne.qte * ligne.prix_unitaire * (1 - ligne.remise)) }} €</strong></td>
+                            <td class="text-end"><strong>{{ "%.2f"|format(entry.qte * entry.prix_unitaire * (1 - entry.remise)) }} €</strong></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -145,14 +163,14 @@
                     <div>
                         <div class="small-text mb-2"><strong>Mentions légales :</strong></div>
                         <div class="small-text">TVA : Non Soumis à TVA, Article 261C-3° du Code Général des Impôts.</div>
-                        <div class="small-text">{{ lignes_facturees|length }} article{{ 's' if lignes_facturees|length > 1 else '' }}</div>
+                        <div class="small-text">{{ billed_entries|length }} article{{ 's' if billed_entries|length > 1 else '' }}</div>
                     </div>
                     <div class="text-end">
                         <h5 class="mb-2">Total à payer</h5>
-                        <h3 class="montant-highlight mb-0">{{ "%.2f"|format(facture.montant_facture) }} € TTC</h3>
+                        <h3 class="montant-highlight mb-0">{{ "%.2f"|format(bill.montant_facture) }} € TTC</h3>
                         <div class="economy-info mt-2">
-                            💰 Économie client : 
-                            {{ "%.2f"|format(lignes_facturees|map(attribute='remise_euro')|sum) }} €
+                            💰 Économie client :
+                            {{ "%.2f"|format(billed_entries|map(attribute='remise_euro')|sum) }} €
                         </div>
                     </div>
                 </div>
@@ -163,11 +181,15 @@
         <div class="footer-section">
             <div class="payment-section">
                 <div class="bordereau-content">
-                    <h6 class="mb-2">Bordereau de paiement (chèque)</h6>
+                    <h6 class="mb-2">Bordereau de paiement (chèque - virement)</h6>
                     <div class="bordereau-style">
                         <div><strong>À libeller à l'ordre de :</strong> Au Collectionneur Franc-Comtois</div>
-                        <div><strong>Adresse :</strong> 180 rue des glaciers, 39190 Cousance</div>
-                        <div><strong>N° facture :</strong> {{ facture.id_fiscal }} — <strong>Montant :</strong> {{ "%.2f"|format(facture.montant_facture) }} €</div>
+                        <small><strong>Chez :</strong> Madame Marie-Madeleine Verschuur</small>
+                        <small><strong>Adresse :</strong> 6 rue du jeu de quilles, 39270 Chavéria</small>
+                        <small><strong>N° facture :</strong> {{ bill.id_fiscal }} — <strong>Montant :</strong> {{ "%.2f"|format(bill.montant_facture) }} €</small>
+                        <small><strong>IBAN :</strong> FR76 1250 6390 0356 0382 3694 715</small>
+                        <small><strong>BIC :</strong> AGRIFRPP825</small>
+                        <small><strong>Titulaire :</strong> Au Collectionneur Franc-Comtois</small>
                     </div>
                 </div>
                 <div class="qr-section">
@@ -179,7 +201,7 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='commandes/js/commande_details.js') }}"></script>
+    <script src="{{ url_for('static', filename='commandes/js/bill-print.js') }}"></script>
     <script>
         // Si des initialisations spécifiques sont nécessaires pour l'impression
         if (typeof initializeBonImpressionFeatures === 'function') { initializeBonImpressionFeatures(); }

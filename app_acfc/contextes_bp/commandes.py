@@ -17,10 +17,10 @@ Version : 1.0
 
 from flask import Blueprint, request, redirect, url_for
 from datetime import datetime
-from sqlalchemy.orm import Session as SessionBdDType
+from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from werkzeug import Response
 from werkzeug.exceptions import NotFound
-from app_acfc.modeles import (Client, DevisesFactures, get_db_session)
+from app_acfc.modeles import (Client, DevisesFactures, Facture, Order, get_db_session)
 from app_acfc.habilitations import validate_habilitation, CLIENTS
 import qrcode
 from io import BytesIO
@@ -260,6 +260,54 @@ def order_ship(id_client: int, id_order: int):
 def bill_details(id_client: int, id_facture: int):
     """Afficher les détails d'une facture"""
     pass
+
+@commandes_bp.route('/client-<int:id_client>/facture-<int:id_facture>/imprimer', methods=['POST'])
+@validate_habilitation(CLIENTS)
+def bill_print(id_client: int, id_facture: int):
+    """Imprimer la facture immédiatement
+    Vérifie si la facture peut être imprimée (non déjà imprimée)."""
+    session_db: SessionBdDType = get_db_session()
+    bill = session_db \
+                .query(Facture) \
+                .options(
+                    joinedload(Facture.commande)
+                        .joinedload(Order.client),
+                    joinedload(Facture.commande)
+                        .joinedload(Order.devises),
+                    joinedload(Order.adresse_facturation),
+                    joinedload(Order.adresse_livraison)
+                ).filter(
+                    Facture.id == id_facture,
+                    Facture.id_client == id_client
+                ).first()
+    if not bill:
+        raise NotFound(Constants.messages(type_msg='error_404', second_type_message='not_found'))
+    elif bill.is_imprime:
+        error_message = Constants.messages(type_msg='factures', second_type_message='exists')
+        return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+                                id_client=id_client,
+                                id_facture=id_facture,
+                                error_message=error_message))
+    else:
+        # Marquer la facture comme imprimée
+        bill.is_imprime = True
+        bill.date_impression = datetime.now()
+        try:
+            session_db.merge(bill)
+            session_db.commit()
+        except Exception as e:
+            error_message = Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})'
+            return redirect(url_for(Constants.return_pages('commandes', 'bill_detail'),
+                                    id_client=id_client,
+                                    id_facture=id_facture,
+                                    error_message=error_message))
+        
+        #TODO: Générer le PDF de la facture et l'enregistrer dans le système de fichiers ou le service de stockage
+        
+        # Rediriger vers la page d'impression de la facture
+        return redirect(url_for(Constants.return_pages('commandes', 'bill_print'),
+                                id_client=id_client,
+                                id_facture=id_facture))
 
 @commandes_bp.route('/client/<int:id_client>/facture/<int:id_facture>/impression')
 @validate_habilitation(CLIENTS)
