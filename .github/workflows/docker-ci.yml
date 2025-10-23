@@ -67,8 +67,8 @@ jobs:
           FLASK_HOST=localhost
           FLASK_PORT=5000
 
-      - name: Create required directories
-        run: mkdir -p queues
+      - name: Clean podman --> Docker migration artifacts
+        run: sed -i 's/:z//g' docker-compose.yml
 
       - name: Build all Docker images
         run: |
