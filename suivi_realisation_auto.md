@@ -1,18 +1,18 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 22 October 2025  
-**Période analysée :** 15 October 2025 - 22 October 2025 (7 jours)  
-**Nombre de commits :** 8  
+**Date du rapport :** 23 October 2025  
+**Période analysée :** 16 October 2025 - 23 October 2025 (7 jours)  
+**Nombre de commits :** 11  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 8 commits sur 7 jours  
-**Volume de code :** 726 lignes ajoutées, 583 lignes supprimées  
-**Fichiers impactés :** 67 fichiers modifiés  
-**Productivité moyenne :** 103 lignes/jour
+**Activité de développement :** 11 commits sur 7 jours  
+**Volume de code :** 782 lignes ajoutées, 680 lignes supprimées  
+**Fichiers impactés :** 81 fichiers modifiés  
+**Productivité moyenne :** 111 lignes/jour
 
 ---
 
@@ -71,6 +71,17 @@
 
 ### 22 October 2025
 
+#### 17:23 - 26f3ecf - 📊 Mise à jour automatique du rapport de suivi (22/10/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +52 -87 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Wed Oct 22 17:23:39 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (22/10/2025)`
+- ... et 1 autres fichiers
+
 #### 19:23 - 91ac9d9 - feat: Ajouter la fonctionnalité d'impression des factures avec gestion des erreurs et auto-impression
 
 **Catégorie :** Développement de fonctionnalités  
@@ -116,40 +127,67 @@
 - ... et 1 autres fichiers
 
 
+### 23 October 2025
+
+#### 19:11 - 2ddcad2 - fix: Corriger les options de montage pour les volumes dans docker-compose supprimer une route dupliquée posant problème lors du lancement de l'API Flask
+
+**Catégorie :** Correction de bugs  
+**Impact :** +2 -8 lignes, 6 fichiers
+
+**Fichiers modifiés :**
+- `Author: remiv1 <remiv1@gmail.com>`
+- `Date:   Thu Oct 23 19:11:10 2025 +0200`
+- `    fix: Corriger les options de montage pour les volumes dans docker-compose`
+- `    supprimer une route dupliquée posant problème lors du lancement de l'API Flask`
+- ... et 3 autres fichiers
+
+#### 14:24 - 08fa115 - refactor: Nettoyer les artefacts de migration de podman vers Docker dans le pipeline CI/CD
+
+**Catégorie :** Refactoring  
+**Impact :** +2 -2 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: remiv1 <remiv1@gmail.com>`
+- `Date:   Thu Oct 23 14:24:10 2025 +0200`
+- `    refactor: Nettoyer les artefacts de migration de podman vers Docker dans le pipeline CI/CD`
+- ... et 1 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Développement de fonctionnalités** : 3 commits (37.5%)
-- **Interface utilisateur** : 3 commits (37.5%)
-- **Développement général** : 1 commits (12.5%)
-- **Refactoring** : 1 commits (12.5%)
+- **Interface utilisateur** : 4 commits (36.4%)
+- **Développement de fonctionnalités** : 3 commits (27.3%)
+- **Refactoring** : 2 commits (18.2%)
+- **Correction de bugs** : 1 commits (9.1%)
+- **Développement général** : 1 commits (9.1%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 12 fichiers modifiés
+- **Python** : 13 fichiers modifiés
 - **HTML** : 11 fichiers modifiés
+- **Documentation** : 4 fichiers modifiés
 - **JavaScript** : 4 fichiers modifiés
-- **Documentation** : 3 fichiers modifiés
+- **YAML/Config** : 3 fichiers modifiés
 - **Docker** : 2 fichiers modifiés
-- **YAML/Config** : 1 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 1.1 commits/jour
-- **Volume de code :** 1309 modifications totales
-- **Ratio ajouts/suppressions :** 1.25
-- **Moyenne lignes par commit :** 164
+- **Fréquence de commit :** 1.6 commits/jour
+- **Volume de code :** 1462 modifications totales
+- **Ratio ajouts/suppressions :** 1.15
+- **Moyenne lignes par commit :** 133
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **développement de fonctionnalités**. Le volume de 726 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 782 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 22 October 2025*
+*Rapport généré automatiquement le 23 October 2025*
