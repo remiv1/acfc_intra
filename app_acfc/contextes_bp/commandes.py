@@ -308,9 +308,3 @@ def bill_print(id_client: int, id_facture: int):
         return redirect(url_for(Constants.return_pages('commandes', 'bill_print'),
                                 id_client=id_client,
                                 id_facture=id_facture))
-
-@commandes_bp.route('/client/<int:id_client>/facture/<int:id_facture>/impression')
-@validate_habilitation(CLIENTS)
-def bill_print(id_client: int, id_facture: int):
-    """Afficher la facture pour impression"""
-    pass

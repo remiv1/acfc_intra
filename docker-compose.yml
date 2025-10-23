@@ -89,7 +89,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}            # Mot de passe utilisateur
     volumes:
       - acfc-db-data:/var/lib/mysql          # Persistance des données
-      - ./mariadb/:/docker-entrypoint-initdb.d/:ro  # Script d'initialisation
+      - ./mariadb/:/docker-entrypoint-initdb.d/:z  # Script d'initialisation
     healthcheck:
       # Vérification de santé pour démarrage ordonné des services
       # Test avec l'utilisateur application pour s'assurer qu'il est créé et fonctionnel
@@ -174,7 +174,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./queues:z
+      device: ./queues
 
 # ================================================================
 # RÉSEAUX
