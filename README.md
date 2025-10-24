@@ -127,12 +127,12 @@ acfc_base/
 
 ```bash
 # Base de données MariaDB
-DB_HOST=localhost
-DB_PORT=3306  
-DB_NAME=******
-DB_USER=******
-DB_PASSWORD=mot_de_passe_securise
-DB_ROOT_PASSWORD=mot_de_passe_root
+MYSQL_HOST=localhost
+MYSQL_PORT=3306  
+MYSQL_DATABASE=******
+MYSQL_USER=******
+MYSQL_PASSWORD=mot_de_passe_securise
+MYSQL_ROOT_PASSWORD=mot_de_passe_root
 
 # Sécurité sessions
 SESSION_PASSKEY=cle_secrete_longue_et_aleatoire

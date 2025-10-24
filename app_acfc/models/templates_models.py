@@ -2,6 +2,7 @@ from typing import List, Dict, Optional, Any
 from flask import render_template, session, Request
 from datetime import datetime
 from logs.logger import INFO, ERROR, acfc_log
+from modeles import Facture
 from app_acfc.models.orders_models import OrdersModel
 from app_acfc.models.products_models import ProductsModel
 
@@ -320,7 +321,10 @@ class Constants:
                     - 'filtrage-api'
                 Si domain == 'comptabilite' :
                     - 'accueil'
-                Si domain == 'factures', 'users' :
+                Si domain == 'factures' :
+                    - 'detail'
+                    - 'imprimer'
+                Si domain == 'users' :
                     Aucun sous-domaine
                 Si domain == 'stock', 'catalogue' :
                     - 'accueil'
@@ -360,6 +364,7 @@ class Constants:
                 'imprimer': 'commandes.order_purchase',
                 'facturer': 'commandes.order_bill',
                 'expedier': 'commandes.order_ship',
+                'factures': 'commandes.bills_details',
             },
             'commercial': {
                 'accueil': 'commercial.commercial_index',
@@ -372,6 +377,7 @@ class Constants:
             'factures': {
                 'detail': 'commandes.bill_details',
                 'imprimer': 'commandes.bill_print',
+                'telecharger': 'commandes.bill_download',
             },
             'stocks': {
                 'accueil': 'stocks.stocks_index',
@@ -510,6 +516,29 @@ class PrepareTemplates:
                                types_produit=catalogue_object.product_types,
                                geographies=catalogue_object.geo_areas,
                                today=datetime.now().strftime('%Y-%m-%d'),
+                               **kwargs)
+
+    @staticmethod
+    def bill(*, bill: Facture, log: bool=False, **kwargs: Any) -> str:
+        '''
+        Génère le template de la page facture.
+
+        Args:
+            bill (Facture): Facture à afficher.
+            log (bool): Indique si l'action doit être loggée.
+        Returns:
+            str: Template de la page facture
+        '''
+        if log:
+            acfc_log.log(level=INFO, message=f'Affichage de la facture ID : {bill.id}',
+                         specific_logger=Constants.log_files('factures'),
+                         user=session.get('pseudo', 'N/A'), db_log=True)
+
+        return render_template(PrepareTemplates.BASE,
+                               title='ACFC - Facture',
+                               context='factures',
+                               bill_id=bill.id,
+                               bill=bill,
                                **kwargs)
 
     @staticmethod

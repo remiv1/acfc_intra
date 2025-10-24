@@ -27,8 +27,9 @@ from io import BytesIO
 import base64
 from app_acfc.models.templates_models import PrepareTemplates, Constants
 from app_acfc.models.orders_models import OrdersModel
-from app_acfc.models.bills_models import BillsModels
+from app_acfc.models.bills_models import BillsModels, BILLS_PATH
 from app_acfc.models.templates_models import Constants
+from app_acfc.common import generate_pdf
 
 # Création du blueprint
 commandes_bp = Blueprint(name='commandes',
@@ -104,7 +105,7 @@ def new_order(id_client: int) -> str | Response:
                                 id_client=id_client,
                                 error_message=message))
 
-@commandes_bp.route('/client/<int:id_client>/commandes/<int:id_order>/details')
+@commandes_bp.route('/client-<int:id_client>/commande-<int:id_order>/details')
 @validate_habilitation(CLIENTS)
 def order_details(id_order: int, id_client: int):
     """Afficher les détails d'une commande"""
@@ -164,7 +165,7 @@ def edit_order(id_client: int, id_order: int):
                                 error_message=message,
                                 tab='order'))
 
-@commandes_bp.route('/client/<int:id_client>/commandes/<int:id_order>/annuler', methods=['POST'])
+@commandes_bp.route('/client-<int:id_client>/commande-<int:id_order>/annuler', methods=['POST'])
 @validate_habilitation(CLIENTS)
 def cancel_order(id_order: int, id_client: int):
     """Annuler une commande (soft delete)"""
@@ -188,7 +189,7 @@ def cancel_order(id_order: int, id_client: int):
                                 id_order=id_order,
                                 error_message=error_message))
 
-@commandes_bp.route('/client/<int:id_client>/commandes/<int:id_order>/bon-impression')
+@commandes_bp.route('/client-<int:id_client>/commande-<int:id_order>/bon-impression')
 @validate_habilitation(CLIENTS)
 def order_purchase(id_order: int, id_client: int):
     """Afficher le bon de commande pour impression"""
@@ -220,7 +221,7 @@ def order_purchase(id_order: int, id_client: int):
                                   qr_code_base64=qr_code_base64,
                                   now=datetime.now())
 
-@commandes_bp.route('/client/<int:id_client>/commandes/<int:id_order>/facturer', methods=['POST'])
+@commandes_bp.route('/client-<int:id_client>/commande-<int:id_order>/facturer', methods=['POST'])
 @validate_habilitation(CLIENTS)
 def order_bill(id_client: int, id_order: int):
     """Traiter la facturation de lignes sélectionnées"""
@@ -244,28 +245,21 @@ def order_bill(id_client: int, id_order: int):
             raise ValueError(Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})')
 
         message = Constants.messages(type_msg='factures', second_type_message='created')
-        return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+        return redirect(url_for(Constants.return_pages('factures', 'detail'),
                                 id_client=id_client,
                                 id_order=id_order,
                                 success_message=message))
 
-@commandes_bp.route('/client/<int:id_client>/commandes/<int:id_order>/expedier', methods=['POST'])
+@commandes_bp.route('/client-<int:id_client>/commande-<int:id_order>/expedier', methods=['POST'])
 @validate_habilitation(CLIENTS)
 def order_ship(id_client: int, id_order: int):
     """Traiter l'expédition de lignes sélectionnées"""
     pass
 
-@commandes_bp.route('/client/<int:id_client>/facture/<int:id_facture>')
+@commandes_bp.route('/client-<int:id_client>/facture-<int:id_facture>/details', methods=['GET'])
 @validate_habilitation(CLIENTS)
 def bill_details(id_client: int, id_facture: int):
-    """Afficher les détails d'une facture"""
-    pass
-
-@commandes_bp.route('/client-<int:id_client>/facture-<int:id_facture>/imprimer', methods=['POST'])
-@validate_habilitation(CLIENTS)
-def bill_print(id_client: int, id_facture: int):
-    """Imprimer la facture immédiatement
-    Vérifie si la facture peut être imprimée (non déjà imprimée)."""
+    """Affiche le détail d'une facture"""
     session_db: SessionBdDType = get_db_session()
     bill = session_db \
                 .query(Facture) \
@@ -274,37 +268,31 @@ def bill_print(id_client: int, id_facture: int):
                         .joinedload(Order.client),
                     joinedload(Facture.commande)
                         .joinedload(Order.devises),
-                    joinedload(Order.adresse_facturation),
-                    joinedload(Order.adresse_livraison)
+                    joinedload(Facture.commande)
+                        .joinedload(Order.adresse_facturation),
+                    joinedload(Facture.commande)
+                        .joinedload(Order.adresse_livraison)
                 ).filter(
                     Facture.id == id_facture,
                     Facture.id_client == id_client
                 ).first()
     if not bill:
         raise NotFound(Constants.messages(type_msg='error_404', second_type_message='not_found'))
-    elif bill.is_imprime:
-        error_message = Constants.messages(type_msg='factures', second_type_message='exists')
-        return redirect(url_for(Constants.return_pages('commandes', 'detail'),
-                                id_client=id_client,
-                                id_facture=id_facture,
-                                error_message=error_message))
-    else:
-        # Marquer la facture comme imprimée
-        bill.is_imprime = True
-        bill.date_impression = datetime.now()
-        try:
-            session_db.merge(bill)
-            session_db.commit()
-        except Exception as e:
-            error_message = Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})'
-            return redirect(url_for(Constants.return_pages('commandes', 'bill_detail'),
-                                    id_client=id_client,
-                                    id_facture=id_facture,
-                                    error_message=error_message))
-        
-        #TODO: Générer le PDF de la facture et l'enregistrer dans le système de fichiers ou le service de stockage
-        
-        # Rediriger vers la page d'impression de la facture
-        return redirect(url_for(Constants.return_pages('commandes', 'bill_print'),
-                                id_client=id_client,
-                                id_facture=id_facture))
+    # Rediriger vers la page de la facture
+    return PrepareTemplates.bill(sub_context='detail',
+                                 id_client=id_client,
+                                 bill=bill)
+
+@commandes_bp.route('/client-<int:id_client>/facture-<int:id_facture>/imprimer-sauvegarder', methods=['GET'])
+@validate_habilitation(CLIENTS)
+def bill_print(id_client: int, id_facture: int):
+    """Générer le PDF d'une facture pour impression"""
+    generate_pdf(template=Constants.templates('facture-pdf'),
+                 path=BILLS_PATH,
+                 css_style='statics/commandes/css/facture_impression.css')
+
+@commandes_bp.route('/client-<int:id_client>/facture-<int:id_facture>/telecharger', methods=['GET'])
+@validate_habilitation(CLIENTS)
+def bill_download(id_client: int, id_facture: int):
+    """Téléchargement du document PDF de la facture"""
+    pass

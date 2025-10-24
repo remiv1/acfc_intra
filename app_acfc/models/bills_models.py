@@ -6,8 +6,9 @@ from app_acfc.modeles import get_db_session, SessionBdDType
 from sqlalchemy.orm import joinedload
 from decimal import Decimal
 from logging import getLogger
+from os import getenv
 
-log = getLogger(__name__).warning
+BILLS_PATH = getenv('BILLS_PATH', 'app/official/bills/')
 
 class BillsModels:
     def __init__(self, request: Request) -> None:

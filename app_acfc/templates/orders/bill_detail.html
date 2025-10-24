@@ -21,13 +21,13 @@
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <h2 class="mb-1 text-success">
-                                <i class="bi bi-receipt me-2"></i>Facture {{ facture.id_fiscal }}
+                            <h2 class="mb-1 text-dark">
+                                <i class="bi bi-receipt me-2"></i>Facture {{ bill.id_fiscal }}
                             </h2>
                             <p class="text-muted mb-0">
-                                Émise le {{ facture.date_facturation|strftime }}
-                                {% if facture.is_imprime %}
-                                    - Imprimée le {{ facture.date_impression|strftime if facture.date_impression }}
+                                Émise le {{ bill.date_facturation|strftime }}
+                                {% if bill.is_imprime %}
+                                    - Imprimée le {{ bill.date_impression|strftime if bill.date_impression }}
                                 {% endif %}
                             </p>
                         </div>
@@ -42,34 +42,35 @@
         <div class="col-lg-8 mb-4">
             <!-- Informations client et facturation -->
             <div class="card mb-4">
-                <div class="card-header bg-success text-white">
+                <div class="card-header bg-primary-dark text-white">
                     <h5 class="mb-0"><i class="bi bi-building me-2"></i>Informations de Facturation</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <h6 class="text-muted mb-2">CLIENT FACTURÉ</h6>
-                            <p class="mb-1"><strong>{{ facture.client.nom_affichage }}</strong></p>
-                            {% if facture.client.adresses %}
-                                {% set adresse = facture.client.adresses[0] %}
-                                <p class="mb-1">{{ adresse.voie }}</p>
-                                {% if adresse.complement %}
-                                    <p class="mb-1">{{ adresse.complement }}</p>
+                            <p class="mb-1"><strong>{{ bill.client.nom_affichage }}</strong></p>
+                            {% if bill.commande.adresse_facturation %}
+                                {% set adresse = bill.commande.adresse_facturation %}
+                                <p class="mb-1">{{ adresse.adresse_l1 }}</p>
+                                {% if adresse.adresse_l2 %}
+                                    <p class="mb-1">{{ adresse.adresse_l2 }}</p>
                                 {% endif %}
-                                <p class="mb-0">{{ adresse.cp }} {{ adresse.ville }}</p>
+                                <p class="mb-0">{{ adresse.code_postal }} {{ adresse.ville }}</p>
+                                <p class="mb-0">{{ adresse.pays }}</p>
                             {% endif %}
                         </div>
                         
                         <div class="col-md-6">
                             <h6 class="text-muted mb-2">INFORMATIONS FACTURE</h6>
-                            <p class="mb-1"><strong>Numéro :</strong> {{ facture.id_fiscal }}</p>
-                            <p class="mb-1"><strong>Date d'émission :</strong> {{ facture.date_facturation|strftime }}</p>
-                            <p class="mb-1"><strong>Commande liée :</strong> 
-                                <a href="{{ url_for('commandes.commande_details', id_order=facture.id_order, id_client=facture.id_client) }}">#{{ facture.id_order }}</a>
+                            <p class="mb-1"><strong>Numéro :</strong> {{ bill.id_fiscal }}</p>
+                            <p class="mb-1"><strong>Date d'émission :</strong> {{ bill.date_facturation|strftime }}</p>
+                            <p class="mb-1"><strong>Commande liée :</strong>
+                                <a href="{{ url_for(('commandes', 'detail') | jinja_page_title, id_order=bill.id_order, id_client=bill.id_client) }}">#{{ bill.id_order }}</a>
                             </p>
                             <p class="mb-0">
-                                <span class="badge {% if facture.is_imprime %}bg-info{% else %}bg-warning{% endif %}">
-                                    {% if facture.is_imprime %}
+                                <span class="badge {% if bill.is_imprime %}bg-success{% else %}bg-warning{% endif %}">
+                                    {% if bill.is_imprime %}
                                         <i class="bi bi-printer-fill me-1"></i>Imprimée
                                     {% else %}
                                         <i class="bi bi-printer me-1"></i>Non imprimée
@@ -83,7 +84,7 @@
 
             <!-- Lignes facturées -->
             <div class="card">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header bg-primary-dark text-white">
                     <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Détail de la Facture</h5>
                 </div>
                 <div class="card-body p-0">
@@ -100,7 +101,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for ligne in lignes_facturees %}
+                                {% for ligne in bill.commande.devises if ligne.is_facture %}
                                 <tr>
                                     <td><code>{{ ligne.reference }}</code></td>
                                     <td>{{ ligne.designation }}</td>
@@ -115,7 +116,7 @@
                                 <tr>
                                     <th scope="row" colspan="5" class="text-end">Total de la facture :</th>
                                     <th scope="col" class="text-end">
-                                        <span class="fs-5 text-success">{{ "%.2f"|format(facture.montant_facture) }} €</span>
+                                        <span class="fs-5 text-success">{{ "%.2f"|format(bill.montant_facture) }} €</span>
                                     </th>
                                 </tr>
                             </tfoot>
@@ -129,7 +130,7 @@
         <div class="col-lg-4">
             <!-- Résumé financier -->
             <div class="card mb-4">
-                <div class="card-header bg-success text-white">
+                <div class="card-header bg-primary-dark text-white">
                     <h5 class="mb-0"><i class="bi bi-currency-euro me-2"></i>Résumé Financier</h5>
                 </div>
                 <div class="card-body">
@@ -138,7 +139,7 @@
                             <p class="mb-1 text-muted">Montant HT :</p>
                         </div>
                         <div class="col-6 text-end">
-                            <p class="mb-1"><strong>{{ "%.2f"|format(facture.montant_facture) }} €</strong></p>
+                            <p class="mb-1"><strong>{{ "%.2f"|format(bill.montant_facture) }} €</strong></p>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -155,7 +156,7 @@
                             <p class="mb-0"><strong>Total TTC :</strong></p>
                         </div>
                         <div class="col-6 text-end">
-                            <p class="mb-0 fs-5 text-success"><strong>{{ "%.2f"|format(facture.montant_facture) }} €</strong></p>
+                            <p class="mb-0 fs-5 text-success"><strong>{{ "%.2f"|format(bill.montant_facture) }} €</strong></p>
                         </div>
                     </div>
                 </div>
@@ -163,18 +164,24 @@
 
             <!-- Actions rapides -->
             <div class="card mb-4">
-                <div class="card-header bg-info text-white">
+                <div class="card-header bg-primary-dark text-white">
                     <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Actions</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ url_for('commandes.facture_impression', id_facture=facture.id) }}" class="btn btn-primary" target="_blank">
-                            <i class="bi bi-printer me-1"></i>Imprimer la facture
-                        </a>
-                        <a href="{{ url_for('commandes.commande_details', id_order=facture.id_order, id_client=facture.id_client) }}" class="btn btn-outline-secondary">
+                        {% if not bill.is_imprime %}
+                            <a href="{{ url_for(('factures', 'imprimer') | jinja_page_title, id_client=bill.id_client, id_facture=bill.id) }}" class="btn btn-primary" target="_blank">
+                                <i class="bi bi-printer me-1"></i>Imprimer la facture
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for(('factures', 'telecharger') | jinja_page_title, id_client=bill.id_client, id_facture=bill.id) }}" class="btn btn-primary" target="_blank">
+                                <i class="bi bi-download me-1"></i>Télécharger la facture
+                            </a>
+                        {% endif %}
+                        <a href="{{ url_for(('commandes', 'detail') | jinja_page_title, id_order=bill.id_order, id_client=bill.id_client) }}" class="btn btn-outline-secondary">
                             <i class="bi bi-box-seam me-1"></i>Voir la commande
                         </a>
-                        <a href="{{ url_for('clients.get_client', id_client=facture.id_client) }}" class="btn btn-outline-primary">
+                        <a href="{{ url_for(('clients', 'detail') | jinja_page_title, id_client=bill.id_client) }}" class="btn btn-outline-primary">
                             <i class="bi bi-person me-1"></i>Fiche du client
                         </a>
                     </div>
@@ -183,15 +190,14 @@
 
             <!-- Informations techniques -->
             <div class="card">
-                <div class="card-header bg-secondary text-white">
+                <div class="card-header bg-primary-dark text-white">
                     <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Informations Techniques</h5>
                 </div>
                 <div class="card-body">
-                    <p class="mb-2"><strong>ID interne :</strong> {{ facture.id }}</p>
-                    <p class="mb-2"><strong>ID fiscal :</strong> {{ facture.id_fiscal }}</p>
-                    <p class="mb-2"><strong>Lignes facturées :</strong> {{ lignes_facturees|length }}</p>
-                    {% if facture.is_imprime %}
-                        <p class="mb-0"><strong>Première impression :</strong> {{ facture.date_impression|strftime if facture.date_impression else 'N/A' }}</p>
+                    <p class="mb-2"><strong>N° de facture :</strong> {{ bill.id_fiscal }}</p>
+                    <p class="mb-2"><strong>Lignes facturées :</strong> {{ bill.commande.devises|length }}</p>
+                    {% if bill.is_imprime %}
+                        <p class="mb-0"><strong>Imprimée le :</strong> {{ bill.date_impression|strftime if bill.date_impression else 'N/A' }}</p>
                     {% else %}
                         <p class="mb-0 text-warning"><strong>Statut :</strong> Non imprimée</p>
                     {% endif %}

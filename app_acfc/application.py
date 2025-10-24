@@ -197,7 +197,6 @@ def order_status_sort(orders: List[Order]) -> List[Order]:
     def get_custom_order(commande):
         """Retourne l'ordre personnalisé pour le tri des commandes."""
         # Trie sur le statut
-        today = date.today()
         if commande.is_annulee:
             statut = 3
         elif commande.is_expediee:
@@ -219,7 +218,6 @@ def bill_status_sort(bills: List[Facture]) -> List[Facture]:
         - Imprimée (1)
         - En attente (0)
     """
-    today = date.today()
     def get_custom_order(bill):
         """Retourne l'ordre personnalisé pour le tri des factures."""
         # Trie sur le statut

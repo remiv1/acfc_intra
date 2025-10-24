@@ -13,7 +13,8 @@
 
 # Fichiers secrets
 *.pem
-.env
+.env*
+!.env.*
 **/*confidential*/*
 
 # Fichiers de session Flask

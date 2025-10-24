@@ -30,22 +30,11 @@ services:
       - "5000:5000"                           # Mapping port Flask (dev uniquement)
     volumes:
       - ./logs:/app/logs:z                    # Volume pour logs (persistance)
-    environment:
-      # Variables DB passées au conteneur pour que l'application se connecte au service acfc-db
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      # Configuration sécurisée pour Docker
-      - FLASK_HOST=${FLASK_HOST}              # Nécessaire dans le conteneur Docker
-      - FLASK_PORT=${FLASK_PORT}
-      # Variables MongoDB pour logging
-      - MONGO_HOST=${MONGO_HOST}
-      - MONGO_PORT=${MONGO_PORT}
-      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
-      - MONGO_APP_USER=${MONGO_APP_USER}
-      - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
+      - acfc_official_documents_storage:/app/official:Z
+    env_file:
+      - .env-common
+      - .env-path
+      - .env-app
     networks:
       - acfc-network                          # Réseau privé inter-services
     depends_on:
@@ -78,22 +67,19 @@ services:
   acfc-db:
     container_name: acfc-db
     build:
-      context: .                   # Dossier contenant Dockerfile et scripts
+      context: .                             # Dossier contenant Dockerfile et scripts
       dockerfile: ./mariadb/dockerfile.mariadb         # Dockerfile spécialisé MariaDB
     restart: always                          # Redémarrage permanent (service critique)
-    environment:
-      # Variables d'environnement sécurisées via fichier .env
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}  # Mot de passe administrateur
-      MYSQL_DATABASE: ${DB_NAME}                # Base de données application
-      MYSQL_USER: ${DB_USER}                    # Utilisateur application
-      MYSQL_PASSWORD: ${DB_PASSWORD}            # Mot de passe utilisateur
+    env_file:
+      - .env-common
+      - .env-db
     volumes:
       - acfc-db-data:/var/lib/mysql          # Persistance des données
       - ./mariadb/:/docker-entrypoint-initdb.d/:z  # Script d'initialisation
     healthcheck:
       # Vérification de santé pour démarrage ordonné des services
       # Test avec l'utilisateur application pour s'assurer qu'il est créé et fonctionnel
-      test: ["CMD", "mariadb", "-u", "${DB_USER}", "-p${DB_PASSWORD}", "-h", "localhost", "-D", "${DB_NAME}", "-e", "SELECT * FROM 21_catalogue LIMIT 1;"]
+      test: ["CMD", "sh", "-c", "mariadb -u$$MYSQL_USER -p$$MYSQL_PASSWORD -hlocalhost -D$$MYSQL_DATABASE -e 'SELECT 1;'"]
       interval: 15s                          # Vérification toutes les 15 secondes
       timeout: 10s                           # Timeout par tentative plus long
       retries: 20                            # Plus de tentatives (script init long)
@@ -112,15 +98,9 @@ services:
     volumes:
       - acfc-logs-data:/data/db              # Persistance des logs
       - ./mongo/mongod.conf:/etc/mongod.conf:ro           # Configuration MongoDB
-    environment:
-      # Configuration d'authentification MongoDB
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_HOST: ${MONGO_HOST}
-      MONGO_PORT: ${MONGO_PORT}
-      MONGO_APP_USER: ${MONGO_APP_USER}
-      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
+    env_file:
+      - .env-common
+      - .env-mongo
     networks:
       - acfc-network
     restart: always
@@ -145,9 +125,8 @@ services:
       - acfc-queues:/data
     networks:
       - acfc-network
-    environment:
-      - PYTHONUNBUFFERED=1
-      - PYTHONDONTWRITEBYTECODE=1
+    env_file:
+      - .env-api
     restart: unless-stopped
     # Aucun port exposé, usage interne uniquement (autres conteneurs ou cron)
 
@@ -162,19 +141,20 @@ volumes:
   acfc-logs-data:
     driver: local                            # Stockage local pour logs MongoDB
     name: acfc_logs_data
-  acfc-factures:
-    driver: local                            # Stockage pour documents PDF de facturation
-    name: acfc_invoices_storage
-  acfc-rch:
-    driver: local                            # Stockage pour documents de remises de chèques
-    name: acfc_research_storage
+  acfc_official_documents_storage:
+    driver: local                            # Stockage pour documents PDF
+    name: acfc_official_documents_storage
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/official
   acfc-queues:
     driver: local                            # Stockage pour files d'attente (si besoin futur)
     name: acfc_queues_storage
     driver_opts:
       type: none
       o: bind
-      device: ./queues
+      device: ${PWD}/queues
 
 # ================================================================
 # RÉSEAUX

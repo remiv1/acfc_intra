@@ -1,0 +1,18 @@
+<!-- ====================================================================
+     ACFC - Template Principal "Factures"
+     ====================================================================
+     
+     Template principal pour le module factures, gère les sous-contextes :
+     - detail : Détails d'une facture
+     - list : Liste des factures
+     
+     Variables Jinja attendues :
+     - sub_context : Type de vue ('detail', 'list')
+     - Autres variables selon le sous-contexte
+     
+     Architecture cohérente avec les autres modules ACFC.
+==================================================================== -->
+
+{% if sub_context == 'detail' %}
+    {% include 'orders/bill_detail.html' %}
+{% endif %}

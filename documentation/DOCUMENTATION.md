@@ -47,12 +47,6 @@ Deploy:    Docker + Docker Compose
 │   FastAPI (Back-Office API)                   │
 │   └─ acfc-api-back (service interne)          │
 ├───────────────────────────────────────────────┤
-│   Service Emails                              │
-│   └─ acfc-mails (gestion emails, IMAP/SMTP)   │
-├───────────────────────────────────────────────┤
-│   Redis (Cache & File d'attente)              │
-│   └─ acfc-redis (Port 6379)                   │
-├───────────────────────────────────────────────┤
 │   MariaDB (Port 3306) │ MongoDB (Port 27017)  │
 │   Données métiers     │ Logs système          │
 └───────────────────────────────────────────────┘
@@ -60,27 +54,9 @@ Deploy:    Docker + Docker Compose
 
 ## 📁 Structure du Projet
 
-```ini
-acfc_base/
-├── app_acfc/                    # Application principale
-│   ├── application.py           # Point d'entrée Flask
-│   ├── modeles.py              # Modèles SQLAlchemy
-│   ├── services.py             # Services (sécurité, etc.)
-│   ├── contextes_bp/           # Modules métiers (Blueprints)
-│   │   ├── clients.py          # Module CRM
-│   │   ├── catalogue.py        # Module Catalogue
-│   │   ├── commercial.py       # Module Commercial
-│   │   ├── comptabilite.py     # Module Comptabilité
-│   │   └── stocks.py           # Module Stocks
-│   ├── templates/              # Templates HTML
-│   └── statics/                # Ressources statiques (CSS/JS)
-├── mariadb/                    # Configuration base de données
-│   ├── dockerfile.mariadb      # Dockerfile MariaDB
-│   └── init_db.sql            # Script d'initialisation
-├── nginx/                      # Configuration reverse proxy
-├── mongo/                      # Configuration MongoDB
-├── docker-compose.yml          # Orchestration des services
-└── requirements-app.txt        # Dépendances Python
+TODO: Refaire...
+```txt
+
 ```
 
 ## 🔐 Sécurité Implémentée
@@ -150,7 +126,7 @@ PasswordHasher(
 - **Traçabilité complète** : created_at, updated_at sur toutes les entités
 - **Soft delete** : is_active pour conservation historique
 
-## 🐳 Déploiement Docker
+## 🐳 Déploiement Docker/Podman
 
 ### Services Déployés
 
@@ -167,12 +143,12 @@ services:
 
 ```bash
 # Base de données
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=******
-DB_USER=******
-DB_PASSWORD=mot_de_passe_securise
-DB_ROOT_PASSWORD=mot_de_passe_root_securise
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_DATABASE=******
+MYSQL_USER=******
+MYSQL_PASSWORD=mot_de_passe_securise
+MYSQL_ROOT_PASSWORD=mot_de_passe_root_securise
 
 # Sessions
 SESSION_PASSKEY=cle_secrete_tres_longue_et_aleatoire
@@ -254,7 +230,7 @@ cp .env.example .env
 # Éditer .env avec vos paramètres
 
 # Démarrage des services
-docker-compose up -d
+docker compose up -d
 
 # Test de l'application
 curl http://localhost:5000
@@ -266,8 +242,8 @@ curl http://localhost:5000
 # application.py - Mode développement
 if __name__ == '__main__':
     app.run(
-        host="0.0.0.0", 
-        port=5000, 
+        host="0.0.0.0",
+        port=5000,
         debug=True,        # Rechargement automatique
         use_reloader=True  # Surveillance des fichiers
     )

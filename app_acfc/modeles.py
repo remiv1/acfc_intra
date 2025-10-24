@@ -59,10 +59,10 @@ def verify_env() -> bool:
         ValueError: Si des variables critiques sont manquantes
         
     Variables requises :
-        - DB_USER : Nom d'utilisateur de la base de données
-        - DB_PASSWORD : Mot de passe de la base de données
-        - DB_HOST : Adresse du serveur de base de données
-        - DB_NAME : Nom de la base de données
+        - MYSQL_USER : Nom d'utilisateur de la base de données
+        - MYSQL_PASSWORD : Mot de passe de la base de données
+        - MYSQL_HOST : Adresse du serveur de base de données
+        - MYSQL_DATABASE : Nom de la base de données
     """
     # Essayer de charger le .env si disponible (développement local)
     # En production/Docker, les variables sont directement dans l'environnement
@@ -72,14 +72,14 @@ def verify_env() -> bool:
         # Pas de fichier .env, on utilise les variables d'environnement directement
         pass
     
-    db_user: str | None = getenv("DB_USER")
-    db_password: str | None = getenv("DB_PASSWORD")
-    db_host: str | None = getenv("DB_HOST")
-    db_name: str | None = getenv("DB_NAME")
+    db_user: str | None = getenv("MYSQL_USER")
+    db_password: str | None = getenv("MYSQL_PASSWORD")
+    db_host: str | None = getenv("MYSQL_HOST")
+    db_name: str | None = getenv("MYSQL_DATABASE")
     
     if db_user is None or db_password is None or db_host is None or db_name is None:
         raise ValueError(
-            "Les variables d'environnement DB_USER, DB_PASSWORD, DB_HOST et DB_NAME "
+            "Les variables d'environnement MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST et MYSQL_DATABASE "
             "doivent être définies (fichier .env ou variables d'environnement système)"
         )
     return True
@@ -118,7 +118,7 @@ class Configuration:
             pass
         
         # === CONFIGURATION DU PORT DE BASE DE DONNÉES ===
-        db_port_env: str | None = getenv("DB_PORT")
+        db_port_env: str | None = getenv("MYSQL_PORT")
         if db_port_env is not None:
             try:
                 self.db_port: int = int(db_port_env)
@@ -130,10 +130,10 @@ class Configuration:
         
         # === VALIDATION ET CHARGEMENT DES VARIABLES CRITIQUES ===
         if verify_env():
-            self.db_name: str = getenv("DB_NAME", "acfc_db")
-            self.db_user: str = getenv("DB_USER", "acfc_user")
-            self.db_password: str = getenv("DB_PASSWORD", "secure_password")
-            self.db_host: str = getenv("DB_HOST", "localhost")
+            self.db_name: str = getenv("MYSQL_DATABASE", "acfc_db")
+            self.db_user: str = getenv("MYSQL_USER", "acfc_user")
+            self.db_password: str = getenv("MYSQL_PASSWORD", "secure_password")
+            self.db_host: str = getenv("MYSQL_HOST", "localhost")
             self.api_key_l: str = getenv("API_URL", "default_api_key")
             self.api_secret_l: str = getenv("API_SECRET", "default_api_secret")
         else:
@@ -144,7 +144,7 @@ class Configuration:
         if not all([self.db_user, self.db_password, self.db_host, self.db_name]):
             raise ValueError(
                 "Configuration incomplète : Une ou plusieurs variables d'environnement "
-                "de base de données (DB_USER, DB_PASSWORD, DB_HOST, DB_NAME) ne sont pas définies."
+                "de base de données (MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST, MYSQL_DATABASE) ne sont pas définies."
             )
 
 # ====================================================================

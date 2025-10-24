@@ -23,6 +23,8 @@
     {% include 'default.html' %}
 {% elif context == 'commandes' %}
     {% include 'orders/orders.html' %}
+{% elif context == 'factures' %}
+    {% include 'orders/bills.html' %}
 {% else %}
     {# template par défaut si `context` absent ou inconnu #}
     {% include 'default.html' %}

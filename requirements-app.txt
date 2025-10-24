@@ -9,3 +9,4 @@ pymongo==4.14.1
 qrcode[pil]==8.2
 pillow==11.3.0
 flask-wtf==1.2.2
+weasyprint==66.0

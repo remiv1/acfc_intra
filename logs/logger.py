@@ -87,7 +87,7 @@ class CustomLogger:
         # Initialisation de la connexion à la base de données NoSQL
         try:
             self.client: MongoClient[Any] | None = MongoClient(
-                db_uri, 
+                db_uri,
                 serverSelectionTimeoutMS=5000,  # Timeout de 5 secondes
                 connectTimeoutMS=5000,
                 socketTimeoutMS=5000
@@ -200,7 +200,7 @@ class CustomLogger:
             
         Comportement :
         - ERROR : Écrit dans error.log
-        - WARNING : Écrit dans warning.log  
+        - WARNING : Écrit dans warning.log
         - INFO : Écrit dans info.log
         - DEBUG : Écrit dans debug.log
         - Si specific_logger fourni : Écrit aussi dans le fichier spécifique

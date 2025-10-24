@@ -41,17 +41,17 @@ jobs:
         run: |
           cat > .env << EOF
           # CI Environment Variables
-          DB_HOST=localhost
-          DB_PORT=3306
-          DB_NAME=acfc_db
-          DB_USER=acfc_user
-          DB_PASSWORD=secure_password
+          MYSQL_HOST=localhost
+          MYSQL_PORT=3306
+          MYSQL_DATABASE=acfc_db
+          MYSQL_USER=acfc_user
+          MYSQL_PASSWORD=secure_password
           MYSQL_ROOT_PASSWORD=root_secure_password
           MYSQL_DATABASE=acfc_db
           MYSQL_USER=acfc_user
           MYSQL_PASSWORD=exemple_pwd
-          DB_ROOT_PASSWORD=root_secure_password
-          DB_HOST=acfc-db
+          MYSQL_ROOT_PASSWORD=root_secure_password
+          MYSQL_HOST=acfc-db
           MONGO_INITDB_DATABASE=acfc_logs
           MONGO_INITDB_ROOT_USERNAME=admin
           MONGO_INITDB_ROOT_PASSWORD=changeme
