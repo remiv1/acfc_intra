@@ -29,7 +29,7 @@ from app_acfc.models.templates_models import PrepareTemplates, Constants
 from app_acfc.models.orders_models import OrdersModel
 from app_acfc.models.bills_models import BillsModels, BILLS_PATH
 from app_acfc.models.templates_models import Constants
-from app_acfc.common import generate_pdf
+from app_acfc.common import BillsDocument
 
 # Création du blueprint
 commandes_bp = Blueprint(name='commandes',
@@ -283,13 +283,40 @@ def bill_details(id_client: int, id_facture: int):
                                  id_client=id_client,
                                  bill=bill)
 
-@commandes_bp.route('/client-<int:id_client>/facture-<int:id_facture>/imprimer-sauvegarder', methods=['GET'])
+@commandes_bp.route('/client-<int:id_client>/facture-<int:id_facture>/imprimer-sauvegarder-<fiscal_id>', methods=['GET'])
 @validate_habilitation(CLIENTS)
-def bill_print(id_client: int, id_facture: int):
+def bill_print(id_client: int, id_facture: int, fiscal_id: str):
     """Générer le PDF d'une facture pour impression"""
-    generate_pdf(template=Constants.templates('facture-pdf'),
-                 path=BILLS_PATH,
-                 css_style='statics/commandes/css/facture_impression.css')
+    # Récupération du lieu d'impression
+    print_location = request.args.get('print_location', default='local', type=str)
+
+    # Générer le PDF de la facture
+    session_db: SessionBdDType = get_db_session()
+    bill = session_db.query(Facture).filter(
+        Facture.id == id_facture,
+        Facture.id_client == id_client
+    ).first()
+
+    # Créer le QR code pour le lien de règlement
+    bill_url = url_for(Constants.return_pages('factures', 'detail'),
+                       id_client=id_client,
+                       id_order=bill.id_order,
+                       _external=True)
+    qr = qrcode.QRCode(version=1,
+        error_correction=qrcode.ERROR_CORRECT_L,
+        box_size=3,border=1)
+    qr.add_data(bill_url)
+    qr.make(fit=True)
+    qr_code_base64 = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+
+
+    template = PrepareTemplates.bill_pdf(bill=bill, qr_code_base64=qr_code_base64)
+    bill_document = BillsDocument().upload(ref=fiscal_id, rendered_template=template)
+
+    if print_location == 'local':
+        return bill_document.download(ref=fiscal_id)
+    else:
+        return bill_document.print_with_cups()
 
 @commandes_bp.route('/client-<int:id_client>/facture-<int:id_facture>/telecharger', methods=['GET'])
 @validate_habilitation(CLIENTS)

@@ -805,7 +805,7 @@ def add_email(id_client: int) -> ResponseWerkzeug:
         db_session.commit()
 
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
-                                id_client=id_client, success_message="Email ajouté avec succès"))
+                                id_client=id_client, success_message=Constants.messages('email', 'valid')))
 
     except Exception as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
@@ -872,7 +872,7 @@ def mod_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
 
         db_session.commit()
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
-                                id_client=id_client, success_message=Constants.messages('email', 'valid')))
+                                id_client=id_client, success_message=Constants.messages('email', 'updated')))
 
     except Exception as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
@@ -915,7 +915,7 @@ def del_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         db_session.commit()
 
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
-                                id_client=id_client, success_message=Constants.messages('email', 'delete')))
+                                id_client=id_client, success_message=Constants.messages('email', 'deleted')))
 
     except Exception as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
@@ -1056,7 +1056,7 @@ def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
         address_obj.modified_by = session.get('pseudo', 'N/A')
         db_session.commit()
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                                id_client=id_client, success_message=Constants.messages('address', 'valid')))
+                                id_client=id_client, success_message=Constants.messages('address', 'updated')))
     except Exception as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                 id_client=id_client, log=True, tab='add',
@@ -1096,7 +1096,7 @@ def del_address(id_client: int, id_address: int) -> ResponseWerkzeug:
         db_session.commit()
 
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                                id_client=id_client, success_message=Constants.messages('address', 'delete')))
+                                id_client=id_client, success_message=Constants.messages('address', 'deleted')))
 
     except Exception as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),

@@ -167,7 +167,6 @@ class SecureSessionService:
         # === AJOUT D'UNE PROTECTION CONTRE LES ATTAQUES CSRF ===
         self.csrf = CSRFProtect(self.app)  # Protection CSRF via Flask-WTF
 
-
 class AuthenticationService:
     """
     Service de gestion de l'authentification des utilisateurs.

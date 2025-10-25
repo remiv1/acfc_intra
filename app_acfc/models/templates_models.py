@@ -76,7 +76,7 @@ class Constants:
                 'detail': "Détails du client affichés avec succès.",
                 'form': "Formulaire de client prêt à être rempli.",
                 'search': "Résultats de la recherche de clients affichés.",
-                'delete_forbidden': "Suppression interdite : Le client a des commandes ou des factures associées de moins de 5 ans."
+                'delete_forbidden': "Suppression interdite : Le client a des commandes ou des factures associées de moins de 5 ans.",
             },
             'phone': {
                 'missing': "Le numéro de téléphone est obligatoire.",
@@ -85,22 +85,31 @@ class Constants:
                 'valid': "Le numéro de téléphone a bien été ajouté.",
                 'default': "Vérification du numéro de téléphone effectuée.",
                 'not_found': "Numéro de téléphone non trouvé ou déjà désactivé.",
+                'updated': "Le numéro de téléphone a bien été mis à jour.",
+                'deleted': "Le numéro de téléphone a bien été supprimé.",
+                'reactivated': "Le numéro de téléphone a bien été réactivé.",
             },
             'email': {
                 'missing': "L'adresse email est obligatoire.",
                 'invalid': "Le format de l'adresse email est invalide.",
                 'exists': "L'adresse email existe déjà.",
                 'valid': "L'adresse email a bien été ajoutée.",
+                'updated': "L'adresse email a bien été mise à jour.",
+                'deleted': "L'adresse email a bien été supprimée.",
                 'default': "Vérification de l'adresse email effectuée.",
-                'not_found': "Adresse email non trouvée ou déjà désactivée."
+                'not_found': "Adresse email non trouvée ou déjà désactivée.",
+                'reactivated': "Adresse email réactivée avec succès.",
             },
             'address': {
                 'missing': "L'adresse complète est obligatoire.",
                 'invalid': "Le format de l'adresse est invalide.",
                 'exists': "L'adresse existe déjà.",
                 'valid': "L'adresse a bien été ajoutée.",
+                'updated': "L'adresse a bien été mise à jour.",
+                'deleted': "L'adresse a bien été supprimée.",
+                'reactivated': "L'adresse a bien été réactivée.",
                 'default': "Vérification de l'adresse effectuée.",
-                'not_found': "Adresse non trouvée ou déjà désactivée."
+                'not_found': "Adresse non trouvée ou déjà désactivée.",
             },
             'user': {
                 'create': "Nouvel utilisateur créé avec succès.",
@@ -112,10 +121,10 @@ class Constants:
                 'list': "Liste des utilisateurs chargée avec succès.",
                 'detail': "Détails de l'utilisateur affichés avec succès.",
                 'form': "Formulaire d'utilisateur prêt à être rempli.",
-                'search': "Résultats de la recherche d'utilisateurs affichés."
+                'search': "Résultats de la recherche d'utilisateurs affichés.",
             },
             'security': {
-                'default': "Action de sécurité enregistrée."
+                'default': "Action de sécurité enregistrée.",
             },
             'commandes': {
                 'create': "Merci de remplir le formulaire de commande.",
@@ -127,7 +136,7 @@ class Constants:
                 'list': "Liste des commandes chargée avec succès.",
                 'detail': "Détails de la commande affichés avec succès.",
                 'form': "Formulaire de commande prêt à être rempli.",
-                'search': "Résultats de la recherche de commandes affichés."
+                'search': "Résultats de la recherche de commandes affichés.",
             },
             'factures': {
                 'create': "Nouvelle facture créée avec succès.",
@@ -138,7 +147,7 @@ class Constants:
                 'list': "Liste des factures chargée avec succès.",
                 'detail': "Détails de la facture affichés avec succès.",
                 'form': "Formulaire de facture prêt à être rempli.",
-                'search': "Résultats de la recherche de factures affichés."
+                'search': "Résultats de la recherche de factures affichés.",
             },
             'comptabilite': {
                 'create': "Nouvelle opération comptable créée avec succès.",
@@ -149,7 +158,7 @@ class Constants:
                 'list': "Liste des opérations comptables chargée avec succès.",
                 'detail': "Détails de l'opération comptable affichés avec succès.",
                 'form': "Formulaire d'opération comptable prêt à être rempli.",
-                'search': "Résultats de la recherche d'opérations comptables affichés."
+                'search': "Résultats de la recherche d'opérations comptables affichés.",
             },
             'stock': {
                 'update': "Stock mis à jour avec succès.",
@@ -157,7 +166,7 @@ class Constants:
                 'list': "Liste des produits en stock chargée avec succès.",
                 'detail': "Détails du produit en stock affichés avec succès.",
                 'form': "Formulaire de produit en stock prêt à être rempli.",
-                'search': "Résultats de la recherche de produits en stock affichés."
+                'search': "Résultats de la recherche de produits en stock affichés.",
             },
             'commercial': {
                 'create': "Nouvelle cible commerciale créée avec succès.",
@@ -168,16 +177,16 @@ class Constants:
                 'list': "Liste des cibles commerciales chargée avec succès.",
                 'detail': "Détails de la cible commerciale affichés avec succès.",
                 'form': "Formulaire de cible commerciale prêt à être rempli.",
-                'search': "Résultats de la recherche de cibles commerciales affichés."
+                'search': "Résultats de la recherche de cibles commerciales affichés.",
             },
             'warning': {
-                'default': "Avertissement : Veuillez vérifier les informations fournies."
+                'default': "Avertissement : Veuillez vérifier les informations fournies.",
             },
             'debug': {
-                'default': "Debug : Informations de débogage enregistrées."
+                'default': "Debug : Informations de débogage enregistrées.",
             },
             'info': {
-                'default': "Info : Opération effectuée avec succès."
+                'default': "Info : Opération effectuée avec succès.",
             }
         }
         type_messages = messages.get(type_msg, {})
@@ -540,6 +549,21 @@ class PrepareTemplates:
                                bill_id=bill.id,
                                bill=bill,
                                **kwargs)
+
+    @staticmethod
+    def bill_pdf(*, bill: Facture, qr_code_base64: str) -> str:
+        '''
+        Génère le template PDF de la page facture.
+
+        Args:
+            bill (Facture): Facture à afficher.
+            qr_code_base64 (str): Code QR en base64 à inclure dans la facture.
+        Returns:
+            str: Template PDF de la page facture
+        '''
+        return render_template('orders/bill_print.html',
+                               bill=bill,
+                               qr_code_base64=qr_code_base64)
 
     @staticmethod
     def users(*, subcontext: Optional[str]=None, message: Optional[str]=None, log: bool=False, **kwargs: Any) -> str:
