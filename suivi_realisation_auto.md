@@ -1,18 +1,18 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 24 October 2025  
-**Période analysée :** 17 October 2025 - 24 October 2025 (7 jours)  
-**Nombre de commits :** 13  
+**Date du rapport :** 25 October 2025  
+**Période analysée :** 18 October 2025 - 25 October 2025 (7 jours)  
+**Nombre de commits :** 15  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 13 commits sur 7 jours  
-**Volume de code :** 1621 lignes ajoutées, 972 lignes supprimées  
-**Fichiers impactés :** 130 fichiers modifiés  
-**Productivité moyenne :** 231 lignes/jour
+**Activité de développement :** 15 commits sur 7 jours  
+**Volume de code :** 1928 lignes ajoutées, 1040 lignes supprimées  
+**Fichiers impactés :** 145 fichiers modifiés  
+**Productivité moyenne :** 275 lignes/jour
 
 ---
 
@@ -166,6 +166,17 @@
 
 ### 24 October 2025
 
+#### 18:08 - efe919e - 📊 Mise à jour automatique du rapport de suivi (24/10/2025)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +48 -22 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Fri Oct 24 18:08:39 2025 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (24/10/2025)`
+- ... et 1 autres fichiers
+
 #### 20:08 - 41dab9e - Add initial environment configuration and directory structure
 
 **Catégorie :** Développement de fonctionnalités  
@@ -178,23 +189,38 @@
 - ... et 43 autres fichiers
 
 
+### 25 October 2025
+
+#### 19:05 - 8507542 - feat: Ajouter la gestion des documents de facturation avec génération et impression de PDF Création d'une classe commune pour la génération, le dépôt, la génération et l'impression de documents (facture, documents comptables + d'autres à venir)
+
+**Catégorie :** Développement de fonctionnalités  
+**Impact :** +259 -46 lignes, 11 fichiers
+
+**Fichiers modifiés :**
+- `Author: remiv1 <remiv1@gmail.com>`
+- `Date:   Sat Oct 25 19:05:57 2025 +0200`
+- `    feat: Ajouter la gestion des documents de facturation avec génération et impression de PDF`
+- `    Création d'une classe commune pour la génération, le dépôt, la génération et l'impression de documents (facture, documents comptables + d'autres à venir)`
+- ... et 8 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 5 commits (38.5%)
-- **Développement de fonctionnalités** : 4 commits (30.8%)
-- **Refactoring** : 2 commits (15.4%)
-- **Correction de bugs** : 1 commits (7.7%)
-- **Développement général** : 1 commits (7.7%)
+- **Interface utilisateur** : 6 commits (40.0%)
+- **Développement de fonctionnalités** : 5 commits (33.3%)
+- **Refactoring** : 2 commits (13.3%)
+- **Correction de bugs** : 1 commits (6.7%)
+- **Développement général** : 1 commits (6.7%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 20 fichiers modifiés
-- **HTML** : 14 fichiers modifiés
-- **Documentation** : 8 fichiers modifiés
+- **Python** : 25 fichiers modifiés
+- **HTML** : 15 fichiers modifiés
+- **Documentation** : 9 fichiers modifiés
 - **YAML/Config** : 5 fichiers modifiés
 - **JavaScript** : 4 fichiers modifiés
 - **Docker** : 2 fichiers modifiés
@@ -204,16 +230,16 @@
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 1.9 commits/jour
-- **Volume de code :** 2593 modifications totales
-- **Ratio ajouts/suppressions :** 1.67
-- **Moyenne lignes par commit :** 199
+- **Fréquence de commit :** 2.1 commits/jour
+- **Volume de code :** 2968 modifications totales
+- **Ratio ajouts/suppressions :** 1.85
+- **Moyenne lignes par commit :** 198
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 1621 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 1928 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 24 October 2025*
+*Rapport généré automatiquement le 25 October 2025*
