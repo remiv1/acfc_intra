@@ -1,9 +1,17 @@
+"""
+Module de gestion du compte utilisateur et des paramètres.
+Fournit des méthodes pour récupérer les informations utilisateur,
+vérifier les permissions, valider les entrées de formulaire et gérer
+les paramètres du compte.
+"""
+
+import re
 from typing import Any, List
 from flask import session
 from werkzeug.exceptions import Forbidden
 from werkzeug.wrappers import Request
 from sqlalchemy.orm import Session as SessionBdDType
-from app_acfc.modeles import User
+from app_acfc.db_models.users import User
 from app_acfc.models.templates_models import PrepareTemplates, Constants
 
 class MyAccount:
@@ -27,7 +35,7 @@ class MyAccount:
         user: User = db_session.query(User).filter_by(pseudo=pseudo).first()
         if not user:
             return PrepareTemplates.error_4xx(status_code=404, log=True,
-                                              status_message=Constants.messages('user', 'not_found'))
+                                            status_message=Constants.messages('user', 'not_found'))
         return user
 
     @staticmethod
@@ -77,23 +85,18 @@ class MyAccount:
                 1. Format invalide
                 2. Email déjà utilisé
         """
-        import re
         email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
 
-        if not re.match(email_pattern, mail): return PrepareTemplates.users(
-            message="Le format de l'adresse email n'est pas valide.",
-            objects=[user],
-            subcontext='parameters'
-        )
+        if not re.match(email_pattern, mail):
+            return PrepareTemplates.users(message="Le format de l'adresse email n'est pas valide.",
+                                          objects=[user], subcontext='parameters')
         elif mail != user.email:
             existing_user = db_session.query(User).filter_by(email=mail).first()
-            if existing_user: return PrepareTemplates.users(
-                message="Cette adresse email est déjà utilisée par un autre compte.",
-                objects=[user],
-                subcontext='parameters'
-            )
+            if existing_user:
+                return PrepareTemplates.users(message="Mail déjà utilisée par un autre compte.",
+                                              objects=[user], subcontext='parameters')
         return re.match(email_pattern, mail) is not None
-    
+
     @staticmethod
     def update_user_settings(user: User, data_list: str | List[str]):
         """
@@ -107,5 +110,5 @@ class MyAccount:
         session['last_name'] = user.nom = data_list[1]
         session['email'] = user.email = data_list[2]
         session['telephone'] = user.telephone = data_list[3]
-    
+
         return user

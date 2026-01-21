@@ -1,18 +1,29 @@
-from flask import Request, session
+"""Modèle pour la gestion des factures."""
+
 from typing import List
-from modeles import Order, DevisesFactures, Client, Facture
 from datetime import datetime
-from app_acfc.modeles import get_db_session, SessionBdDType
-from sqlalchemy.orm import joinedload
 from decimal import Decimal
-from logging import getLogger
 from os import getenv
+from flask import Request, session
+from sqlalchemy.orm import joinedload
+from app_acfc.db_models.orders import Order, DevisesFactures, Facture
+from app_acfc.db_models.clients import Client
+from app_acfc.config.config_models import get_db_session, SessionBdDType
 
 BILLS_PATH = getenv('BILLS_PATH', 'app/official/bills/')
 
 class BillsModels:
+    """Modèle pour la gestion des factures."""
     def __init__(self, request: Request) -> None:
         self.request = request
+        self.id_order: int
+        self.id_client: int
+        self.date_facturation: datetime
+        self.ids_lignes_facturees: List[int]
+        self.devises_a_facturer: List[DevisesFactures]
+        self.session_db: SessionBdDType
+        self.order_serveur: Order
+        self.last: bool
 
     def get_bill_data(self, *, id_client: int, id_order: int) -> 'BillsModels':
         """
@@ -28,7 +39,8 @@ class BillsModels:
         """
         self.id_order = id_order
         self.id_client = id_client
-        date_facturation = self.request.form.get('date_facturation', datetime.now().strftime('%Y-%m-%d'))
+        date_facturation = self.request.form.get('date_facturation',
+                                                 datetime.now().strftime('%Y-%m-%d'))
         self.date_facturation = datetime.strptime(date_facturation, '%Y-%m-%d')
         ids_lignes_facturees = self.request.form.get('ids_lignes_facturees', None)
         if ids_lignes_facturees:
@@ -54,27 +66,27 @@ class BillsModels:
                     ).first()
 
         return self
-    
+
     def _check_last_bill_for_order(self) -> bool:
         """
         Vérifie s'il reste des lignes non facturées dans la commande.
         Si toutes les lignes sont facturées, c'est la dernière facture.
         """
-        
         # Utilise directement les devises de la commande chargée plutôt qu'une nouvelle requête
         if self.order_serveur and self.order_serveur.devises:
             # Vérifie si toutes les lignes de la commande sont maintenant facturées
-            all_facturees = all(devise.is_facture for devise in self.order_serveur.devises if not devise.is_annulee)
+            all_facturees = all(devise.is_facture for devise in self.order_serveur.devises
+                                if not devise.is_annulee)
             self.last = all_facturees
         else:
             # Fallback sur requête si les devises ne sont pas chargées
             self.session_db.flush()
             order_entries: List[DevisesFactures] = self.session_db.query(DevisesFactures) \
-                                                        .filter(
-                                                            DevisesFactures.id_order == self.id_order,
-                                                            DevisesFactures.is_facture == False
-                                                        ).all()
-            self.last = order_entries == None or len(order_entries) == 0
+                                                    .filter(
+                                                        DevisesFactures.id_order == self.id_order,
+                                                        DevisesFactures.is_facture == False # pylint: disable=singleton-comparison
+                                                    ).all()
+            self.last = len(order_entries) == 0
         return self.last
 
     def create_new_bill(self) -> 'BillsModels':
@@ -96,7 +108,8 @@ class BillsModels:
         self.session_db.flush()
         id_facture = new_bill.id
 
-        # Charger explicitement les devises à facturer pour garantir qu'elles soient attachées à la session
+        # Charger explicitement les devises à facturer pour garantir qu'elles
+        # soient attachées à la session
         self.devises_a_facturer = self.session_db.query(DevisesFactures).filter(
             DevisesFactures.id.in_(self.ids_lignes_facturees),
             DevisesFactures.id_order == self.id_order
@@ -116,7 +129,7 @@ class BillsModels:
         self.session_db.merge(new_bill)
 
         return self
-    
+
     def mark_order_as_billed(self) -> 'BillsModels':
         """
         Marque une commande comme facturée.
@@ -137,11 +150,11 @@ class BillsModels:
 
         # Met à jour le statut de la commande. Si c'est la dernière facture, marque comme facturée
         if self.order_serveur:
-            if self.last == True:
+            if self.last is True:
                 self.order_serveur.is_facturee = True
                 self.order_serveur.date_facturation = self.date_facturation.date()
             self.order_serveur.modified_by = session.get('pseudo', 'system')
             self.order_serveur.modified_at = self.date_facturation.date()
             self.session_db.merge(self.order_serveur)
-        
+
         return self

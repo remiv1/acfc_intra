@@ -1,0 +1,15 @@
+{
+    "400": "error_400.log",
+    "500": "error_500.log",
+    "client": "client.log",
+    "user": "users.log",
+    "security": "security.log",
+    "commandes": "commandes.log",
+    "factures": "factures.log",
+    "comptabilite": "comptabilite.log",
+    "stock": "stock.log",
+    "commercial": "commercial.log",
+    "warning": "warning.log",
+    "debug": "debug.log",
+    "info": "info.log"
+}

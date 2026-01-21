@@ -18,13 +18,13 @@ Authentification : Sessions sécurisées avec hachage Argon2
 Auteur : ACFC Development Team
 Version : 1.0
 '''
-
+import os
 from typing import Any, Dict, Tuple, List, Optional
 from datetime import datetime, date
 from waitress import serve
 from flask import Flask, Response, request, Blueprint, session, url_for, redirect, jsonify, g
 from flask_session import Session
-from flask_wtf.csrf import generate_csrf, validate_csrf # type: ignore
+from flask_wtf.csrf import generate_csrf, validate_csrf # pylint: disable=unused-import
 from werkzeug.exceptions import HTTPException
 from sqlalchemy import text, and_, or_
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
@@ -44,7 +44,7 @@ from app_acfc.contextes_bp.commercial import commercial_bp   # Module Commercial
 from app_acfc.contextes_bp.comptabilite import comptabilite_bp # Module Comptabilité - Facturation
 from app_acfc.contextes_bp.stocks import stocks_bp          # Module Stocks - Inventaire
 from app_acfc.contextes_bp.admin import admin_bp            # Module Administration - Utilisateurs
-from app_acfc.contextes_bp.commandes import commandes_bp    # Module Commandes - Gestion des commandes
+from app_acfc.contextes_bp.commandes import commandes_bp    # Module Commandes - Gestion commandes
 
 # Création de l'instance Flask principale avec configuration des dossiers statiques et templates
 acfc = Flask(__name__,
@@ -62,7 +62,8 @@ SecureSessionService(acfc)
 Session(acfc)
 
 # Regroupement des blueprints pour faciliter l'enregistrement en masse
-acfc_blueprints: Tuple[Blueprint, ...] = (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp, stocks_bp, admin_bp, commandes_bp)
+acfc_blueprints: Tuple[Blueprint, ...] = (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp,
+                                          stocks_bp, admin_bp, commandes_bp)
 
 # Messages d'erreur standardisés pour l'authentification
 INVALID: str = 'Identifiants invalides.'
@@ -71,7 +72,7 @@ WRONG_ROAD: str = 'Méthode non autorisée ou droits insuffisants.'
 # Création automatique des tables si elles n'existent pas (avec retry)
 try:
     init_database()
-except Exception as e:
+except (OSError) as e:
     print(f"❌ Erreur critique lors de l'initialisation de la base : {e}")
     exit(1)
 
@@ -93,14 +94,15 @@ def before_request() -> Any:
     # Si l'utilisateur est déjà connecté
     if 'user_id' in session:
         return None
-    
+
     # Autoriser la page de login
     if request.endpoint == 'login':
         return None
-    
+
     # Autoriser les statiques (app + blueprints)
     static_url = acfc.static_url_path or '/static'
-    if request.path.startswith(static_url) or (request.endpoint and request.endpoint.endswith('.static')):
+    if request.path.startswith(static_url) or (request.endpoint
+                                               and request.endpoint.endswith('.static')):
         return None
 
     # Si l'utilisateur n'est pas connecté, rediriger vers la page de login
@@ -134,19 +136,23 @@ def teardown_appcontext(exception: Optional[BaseException]=None) -> None:
     Permet de libérer les ressources, de fermer les connexions, ou de gérer les erreurs.
     
     Args:
-        exception (Exception | None): Exception levée pendant le traitement de la requête, si elle existe
+        exception (Exception | None): Exception levée pdt le traitemt de la requête, si elle existe
     """
     db_session = g.pop('db_session', None)
     if db_session is not None:
         if exception is not None:
             db_session.rollback()
         db_session.close()
-    
+
     if exception:
-        acfc_log.log(level=ERROR, message=str(exception), specific_logger=Constants.log_files('warning'))
+        acfc_log.log(level=ERROR, message=str(exception),
+                     specific_logger=Constants.log_files('warning'))
 
 @acfc.context_processor
 def inject_csrf_token():
+    """
+    Injecte un token CSRF dans le contexte global des templates Jinja2.
+    """
     try:
         token_to_return: Dict[str, str] = {'csrf_token': generate_csrf()}
     except Exception:
@@ -176,7 +182,13 @@ def format_datetime(value: datetime | date | None, fmt: str='%d/%m/%Y'):
 
 @acfc.template_filter('date_input')
 def format_date_input(value: datetime | date | None):
-    """Filtre spécifique pour les champs input[type=date] qui attendent le format ISO (YYYY-MM-DD)"""
+    """
+    Filtre spécifique pour les champs input[type=date] qui attendent le format ISO (YYYY-MM-DD)
+    Args:
+        value: Date ou datetime à formater
+    Returns:
+        str: Date formatée au format ISO ou chaîne vide si None
+    """
     if isinstance(value, (datetime, date)):
         return value.strftime('%Y-%m-%d')
     return value
@@ -195,7 +207,7 @@ def order_status_sort(orders: List[Order]) -> List[Order]:
         - Facturée (1)
         - En cours (0)
     """
-    def get_custom_order(commande):
+    def get_custom_order(commande: Order):
         """Retourne l'ordre personnalisé pour le tri des commandes."""
         # Trie sur le statut
         if commande.is_annulee:
@@ -219,7 +231,7 @@ def bill_status_sort(bills: List[Facture]) -> List[Facture]:
         - Imprimée (1)
         - En attente (0)
     """
-    def get_custom_order(bill):
+    def get_custom_order(bill: Facture):
         """Retourne l'ordre personnalisé pour le tri des factures."""
         # Trie sur le statut
         if bill.is_imprime:
@@ -255,8 +267,8 @@ def get_current_orders(id_client: int = 0) -> List[Order]:
         commandes: List[Order] = (
             db_session.query(Order)
             .options(
-                joinedload(Order.client).joinedload(Client.part),  # Eager loading du client particulier
-                joinedload(Order.client).joinedload(Client.pro)    # Eager loading du client professionnel
+                joinedload(Order.client).joinedload(Client.part),  # Eager loading du client part
+                joinedload(Order.client).joinedload(Client.pro)    # Eager loading du client pro
             )
             .filter(or_(
                 Order.is_facturee.is_(False),
@@ -270,8 +282,8 @@ def get_current_orders(id_client: int = 0) -> List[Order]:
         commandes: List[Order] = (
             db_session.query(Order)
             .options(
-                joinedload(Order.client).joinedload(Client.part),  # Eager loading du client particulier
-                joinedload(Order.client).joinedload(Client.pro)    # Eager loading du client professionnel
+                joinedload(Order.client).joinedload(Client.part),  # Eager loading du client part
+                joinedload(Order.client).joinedload(Client.pro)    # Eager loading du client pro
             )
             .filter(and_(
                 Order.id_client == id_client,
@@ -411,7 +423,8 @@ def login() -> Any:
         # Schéma de vérification des identifiants
         try:
             # Si échec de l'authentification, retour au formulaire avec message d'erreur
-            if not result_auth: return PrepareTemplates.login(message=INVALID)
+            if not result_auth:
+                return PrepareTemplates.login(message=INVALID)
             # Si succès, mais mot de passe à changer, redirection vers la page de changement
             if user_to_authenticate.is_chg_mdp:
                 return PrepareTemplates.login(subcontext='change_password',
@@ -424,9 +437,10 @@ def login() -> Any:
                 return redirect(url_for('dashboard'))
         except Exception as e:
             message = Constants.messages('error_500', 'default') + 'context : auth' \
-                      + f' Utilisateur : {user_to_authenticate.user_pseudo if user_to_authenticate else "inconnu"}' + \
+                      + f' Utilisateur : {user_to_authenticate.user_pseudo
+                                          if user_to_authenticate else "inconnu"}' + \
                         f' Détail : {str(e)}'
-            raise 
+            raise
 
 @acfc.route('/logout')
 def logout() -> Any:
@@ -455,7 +469,7 @@ def health() -> Any:
             db_session.execute(text("SELECT 1"))
         except Exception as e:
             db_status = f"error: {str(e)}"
-        
+
         health_data: Dict[str, Any] = {
             "status": "healthy" if db_status == "ok" else "degraded",
             "timestamp": datetime.now().isoformat(),
@@ -465,16 +479,16 @@ def health() -> Any:
             },
             "version": "1.0"
         }
-        
+
         return jsonify(health_data), 200 if db_status == "ok" else 503
-        
+
     except Exception as e:
         return jsonify({
             "status": "unhealthy",
             "error": str(e),
             "timestamp": datetime.now().isoformat()
         }), 500
-    
+
 @acfc.route('/dashboard')
 def dashboard() -> Any:
     """
@@ -500,13 +514,13 @@ def my_account(pseudo: str) -> Any:
     # Vérification des autorisations
     MyAccount.check_user_permission(pseudo)
 
-    # Recherche de l'utilisateur ou gestion de l'erreur 
+    # Recherche de l'utilisateur ou gestion de l'erreur
     user = MyAccount.get_user_or_error(db_session, pseudo)
 
     #=== Gestion de la requête GET ===
     if request.method == 'GET':
         PrepareTemplates.users(objects=[user])
-    
+
     #=== Gestion de la requête POST ===
     elif request.method == 'POST':
         try:
@@ -535,8 +549,8 @@ def my_account(pseudo: str) -> Any:
 
     #=== Gestion de toutes les autres méthodes ===
     else: return PrepareTemplates.error_4xx(status_code=405,
-                                            status_message=Constants.messages('error 400', 'wrong_road'),
-                                            log=True)
+                                    status_message=Constants.messages('error 400', 'wrong_road'),
+                                    log=True)
 
 @acfc.route('/user/<pseudo>/parameters', methods=['GET', 'POST'])
 def user_parameters(pseudo: str) -> Any:
@@ -551,12 +565,15 @@ def user_parameters(pseudo: str) -> Any:
     if request.method == 'GET':
         db_session = get_db_session()
         user = db_session.query(User).filter_by(pseudo=pseudo).first()
-        if not user: return PrepareTemplates.error_4xx(status_code=404, status_message="Utilisateur introuvable", log=True)
+        if not user:
+            return PrepareTemplates.error_4xx(status_code=404,
+                                              status_message="Utilisateur introuvable", log=True)
         return PrepareTemplates.users(subcontext='parameters', objects=[user])
     elif request.method == 'POST':
         return redirect(url_for('my_account', pseudo=pseudo))
     else:
-        return PrepareTemplates.error_4xx(status_code=405, status_message="Méthode non autorisée", log=True)
+        return PrepareTemplates.error_4xx(status_code=405,
+                                          status_message="Méthode non autorisée", log=True)
 
 @acfc.route('/chg_pwd', methods=['POST'])
 def chg_pwd() -> Any:
@@ -606,7 +623,7 @@ def handle_4xx_errors(error: HTTPException) -> str:
     
     Traite les erreurs de type :
     - 400 Bad Request : Requête malformée
-    - 401 Unauthorized : Authentification requise  
+    - 401 Unauthorized : Authentification requise
     - 403 Forbidden : Accès interdit
     - 404 Not Found : Ressource non trouvée
     
@@ -617,7 +634,7 @@ def handle_4xx_errors(error: HTTPException) -> str:
         str: Template d'erreur personnalisé avec code et message
     """
     return PrepareTemplates.error_4xx(status_code=error.code or 400, log=True, request=request,
-                                      status_message=error.description or Constants.messages('error_400', 'default'))
+                    status_message=error.description or Constants.messages('error_400', 'default'))
 
 @acfc.errorhandler(500)
 @acfc.errorhandler(502)
@@ -639,8 +656,9 @@ def handle_5xx_errors(error: HTTPException) -> str:
     Returns:
         str: Template d'erreur personnalisé avec code et message
     """
-    return PrepareTemplates.error_5xx(status_code=error.code or 500, log=True, specific_log=Constants.log_files('500'),
-                                      status_message=error.description or Constants.messages('error_500', 'default'))
+    return PrepareTemplates.error_5xx(status_code=error.code or 500, log=True,
+                    specific_log=Constants.log_files('500'),
+                    status_message=error.description or Constants.messages('error_500', 'default'))
 
 # ====================================================================
 # Routes utilitaires diverses
@@ -659,8 +677,8 @@ def get_indic_tel() -> Any:
     """
     if request.method != 'GET':
         return PrepareTemplates.error_4xx(status_code=405,
-                                          status_message=Constants.messages('error_400', 'wrong_road'),
-                                          log=True)
+                                    status_message=Constants.messages('error_400', 'wrong_road'),
+                                    log=True)
     try:
         indicatifs = GeoMethods.get_indicatifs_tel()
         indicatifs_list: List[Dict[str, str]] = [
@@ -672,8 +690,8 @@ def get_indic_tel() -> Any:
         return jsonify(indicatifs_list), 200
     except Exception as e:
         return PrepareTemplates.error_5xx(status_code=500,
-                                          status_message=f"Erreur lors de la récupération des indicatifs : {str(e)}",
-                                          log=True, specific_log=Constants.log_files('500'))
+                        status_message=f"Erreur lors de la récupération des indicatifs : {str(e)}",
+                        log=True, specific_log=Constants.log_files('500'))
 
 # ====================================================================
 # ENREGISTREMENT DES MODULES MÉTIERS
@@ -698,15 +716,12 @@ def start_server():
     Note: En production, l'application est généralement déployée derrière
     un reverse proxy (Nginx) pour la gestion SSL et la distribution de charge.
     """
-    import os
-    
     # Configuration sécurisée de l'host
     # En développement: localhost uniquement (plus sécurisé)
     # En production Docker: 0.0.0.0 pour permettre l'accès depuis le conteneur
     host = os.environ.get('FLASK_HOST', 'localhost')
     port = int(os.environ.get('FLASK_PORT', 5000))
-    
-    serve(acfc, host=host, port=port)
 
+    serve(acfc, host=host, port=port)
 
 if __name__ == '__main__': start_server()

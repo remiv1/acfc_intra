@@ -1,6 +1,11 @@
-from sqlalchemy.orm import Session as SessionBdDType
-from app_acfc.modeles import Catalogue, get_db_session
+"""
+Modèle pour gérer les produits du catalogue
+"""
+
 from typing import List
+from sqlalchemy.orm import Session as SessionBdDType
+from app_acfc.db_models.products import Catalogue
+from app_acfc.config.config_models import get_db_session
 
 class ProductsModel:
     """
@@ -35,7 +40,7 @@ class ProductsModel:
         not_products: List[Catalogue] = []
         self.product = product if product else not_products
         return self
-    
+
     def get_all_products(self) -> 'ProductsModel':
         """
         Récupère tous les produits du catalogue
@@ -47,7 +52,7 @@ class ProductsModel:
         not_catalogue: List[Catalogue] = []
         self.catalogue = catalogue if catalogue else not_catalogue
         return self
-    
+
     def get_context_catalogue(self) -> 'ProductsModel':
         """
         Récupère les millésimes, catégories et types de produits pour le contexte

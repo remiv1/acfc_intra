@@ -1,0 +1,56 @@
+{
+    "admin": {
+        "accueil": "admin.admin_list",
+        "logs-dashboard": "admin.logs_dashboard",
+        "logs-export": "admin.logs_export"
+    },
+    "clients": {
+        "recherche": "clients.clients_list",
+        "recherche-api": "clients.recherche_avancee",
+        "creation": "clients.create_client",
+        "detail": "clients.get_client",
+        "modifier-get": "clients.edit_client",
+        "modifier-post": "clients.update_client",
+        "supprimer": "clients.delete_client",
+        "phone-add": "clients.add_phone",
+        "phone-mod": "clients.mod_phone",
+        "phone-del": "clients.del_phone",
+        "mail-add": "clients.add_email",
+        "mail-mod": "clients.mod_email",
+        "mail-del": "clients.del_email",
+        "address-add": "clients.add_address",
+        "address-mod": "clients.mod_address",
+        "address-del": "clients.del_address"
+    },
+    "commandes": {
+        "nouvelle": "commandes.new_order",
+        "detail": "commandes.order_details",
+        "modifier": "commandes.edit_order",
+        "annuler": "commandes.cancel_order",
+        "formulaire": "commandes.order_form",
+        "imprimer": "commandes.order_purchase",
+        "facturer": "commandes.order_bill",
+        "expedier": "commandes.order_ship",
+        "factures": "commandes.bills_details"
+    },
+    "commercial": {
+        "accueil": "commercial.commercial_index",
+        "filtrage": "commercial.clients_liste",
+        "filtrage-api": "commercial.clients_api_search"
+    },
+    "comptabilite": {
+        "accueil": "comptabilite.comptabilite_index"
+    },
+    "factures": {
+        "detail": "commandes.bill_details",
+        "imprimer": "commandes.bill_print",
+        "telecharger": "commandes.bill_download"
+    },
+    "stocks": {
+        "accueil": "stocks.stocks_index"
+    },
+    "users": {},
+    "catalogue":{
+        "accueil": "catalogue.index"
+    }
+}
