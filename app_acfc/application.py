@@ -19,22 +19,23 @@ Auteur : ACFC Development Team
 Version : 1.0
 '''
 
+from typing import Any, Dict, Tuple, List, Optional
+from datetime import datetime, date
+from waitress import serve
 from flask import Flask, Response, request, Blueprint, session, url_for, redirect, jsonify, g
 from flask_session import Session
 from flask_wtf.csrf import generate_csrf, validate_csrf # type: ignore
-from waitress import serve
-from typing import Any, Dict, Tuple, List, Optional
 from werkzeug.exceptions import HTTPException
-from datetime import datetime, date
 from sqlalchemy import text, and_, or_
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
 from sqlalchemy.sql.functions import func
 from logs.logger import acfc_log, ERROR
 from app_acfc.services import SecureSessionService, AuthenticationService
-from app_acfc.modeles import (
-    User, Order, Client, init_database, get_db_session,
-    GeoMethods, Facture
-    )
+from app_acfc.db_models.users import User
+from app_acfc.db_models.orders import Order
+from app_acfc.db_models.clients import Client
+from app_acfc.db_models.orders import Facture
+from app_acfc.config.config_models import init_database, get_db_session, GeoMethods
 from app_acfc.models.templates_models import PrepareTemplates, Constants
 from app_acfc.models.users_models import MyAccount
 from app_acfc.contextes_bp.clients import clients_bp         # Module CRM - Gestion clients
