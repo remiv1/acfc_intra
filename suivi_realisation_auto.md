@@ -1,245 +1,75 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 25 October 2025  
-**Période analysée :** 18 October 2025 - 25 October 2025 (7 jours)  
-**Nombre de commits :** 15  
+**Date du rapport :** 21 January 2026  
+**Période analysée :** 14 January 2026 - 21 January 2026 (7 jours)  
+**Nombre de commits :** 2  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 15 commits sur 7 jours  
-**Volume de code :** 1928 lignes ajoutées, 1040 lignes supprimées  
-**Fichiers impactés :** 145 fichiers modifiés  
-**Productivité moyenne :** 275 lignes/jour
+**Activité de développement :** 2 commits sur 7 jours  
+**Volume de code :** 2090 lignes ajoutées, 1650 lignes supprimées  
+**Fichiers impactés :** 39 fichiers modifiés  
+**Productivité moyenne :** 298 lignes/jour
 
 ---
 
 ## Analyse des commits par période
 
 
-### 20 October 2025
+### 21 January 2026
 
-#### 18:23 - 0026b16 - 📊 Mise à jour automatique du rapport de suivi (20/10/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +45 -209 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Mon Oct 20 18:23:41 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (20/10/2025)`
-- ... et 1 autres fichiers
-
-#### 20:23 - 4b50e98 - feat: Add order management templates and print functionality
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +238 -182 lignes, 18 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Mon Oct 20 20:23:28 2025 +0200`
-- `    feat: Add order management templates and print functionality`
-- ... et 16 autres fichiers
-
-
-### 21 October 2025
-
-#### 12:08 - 53a1659 - 📊 Mise à jour automatique du rapport de suivi (21/10/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +44 -19 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Tue Oct 21 12:08:28 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (21/10/2025)`
-- ... et 1 autres fichiers
-
-#### 14:08 - 3025f48 - refactor: Simplifier la gestion des sessions de base de données dans le module de commandes.
+#### 19:43 - 12fbd01 - refactor:
 
 **Catégorie :** Refactoring  
-**Impact :** +21 -20 lignes, 8 fichiers
-
-**Fichiers modifiés :**
-- `Author: Rémi Verschuur <167684225+remiv1@users.noreply.github.com>`
-- `Date:   Tue Oct 21 14:08:08 2025 +0200`
-- `    refactor: Simplifier la gestion des sessions de base de données dans le module de commandes.`
-- ... et 6 autres fichiers
-
-
-### 22 October 2025
-
-#### 17:23 - 26f3ecf - 📊 Mise à jour automatique du rapport de suivi (22/10/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +52 -87 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Wed Oct 22 17:23:39 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (22/10/2025)`
-- ... et 1 autres fichiers
-
-#### 19:23 - 91ac9d9 - feat: Ajouter la fonctionnalité d'impression des factures avec gestion des erreurs et auto-impression
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +161 -40 lignes, 6 fichiers
+**Impact :** +561 -434 lignes, 22 fichiers
 
 **Fichiers modifiés :**
 - `Author: remiv1 <remiv1@gmail.com>`
-- `Date:   Wed Oct 22 19:23:19 2025 +0200`
-- `    feat: Ajouter la fonctionnalité d'impression des factures avec gestion des erreurs et auto-impression`
-- ... et 3 autres fichiers
+- `Date:   Wed Jan 21 19:43:33 2026 +0100`
+- `    refactor:`
+- ... et 21 autres fichiers
 
-#### 18:19 - 8e8092f - feat: Ajouter des filtres personnalisés pour trier les commandes et les factures par statut
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +174 -72 lignes, 19 fichiers
-
-**Fichiers modifiés :**
-- `Author: remiv1 <remiv1@gmail.com>`
-- `Date:   Wed Oct 22 18:19:59 2025 +0200`
-- `    feat: Ajouter des filtres personnalisés pour trier les commandes et les factures par statut`
-- ... et 19 autres fichiers
-
-#### 06:39 - 8d33101 - 📊 Mise à jour automatique du rapport de suivi (22/10/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +42 -41 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Wed Oct 22 06:39:57 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (22/10/2025)`
-- ... et 1 autres fichiers
-
-#### 08:39 - 8491fcc - Ajout du sous-module mariadb/prepare_base_datas/_confidential (dépôt privé)
-
-**Catégorie :** Développement général  
-**Impact :** +1 -0 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: remiv1 <remiv1@gmail.com>`
-- `Date:   Wed Oct 22 08:39:34 2025 +0200`
-- `    Ajout du sous-module mariadb/prepare_base_datas/_confidential (dépôt privé)`
-- ... et 1 autres fichiers
-
-
-### 23 October 2025
-
-#### 17:11 - a140829 - 📊 Mise à jour automatique du rapport de suivi (23/10/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +58 -20 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Thu Oct 23 17:11:30 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (23/10/2025)`
-- ... et 1 autres fichiers
-
-#### 19:11 - 2ddcad2 - fix: Corriger les options de montage pour les volumes dans docker-compose supprimer une route dupliquée posant problème lors du lancement de l'API Flask
-
-**Catégorie :** Correction de bugs  
-**Impact :** +2 -8 lignes, 6 fichiers
-
-**Fichiers modifiés :**
-- `Author: remiv1 <remiv1@gmail.com>`
-- `Date:   Thu Oct 23 19:11:10 2025 +0200`
-- `    fix: Corriger les options de montage pour les volumes dans docker-compose`
-- `    supprimer une route dupliquée posant problème lors du lancement de l'API Flask`
-- ... et 3 autres fichiers
-
-#### 14:24 - 08fa115 - refactor: Nettoyer les artefacts de migration de podman vers Docker dans le pipeline CI/CD
+#### 16:25 - 5591718 - Refactor code structure for improved readability and maintainability
 
 **Catégorie :** Refactoring  
-**Impact :** +2 -2 lignes, 4 fichiers
+**Impact :** +1529 -1216 lignes, 17 fichiers
 
 **Fichiers modifiés :**
 - `Author: remiv1 <remiv1@gmail.com>`
-- `Date:   Thu Oct 23 14:24:10 2025 +0200`
-- `    refactor: Nettoyer les artefacts de migration de podman vers Docker dans le pipeline CI/CD`
-- ... et 1 autres fichiers
-
-
-### 24 October 2025
-
-#### 18:08 - efe919e - 📊 Mise à jour automatique du rapport de suivi (24/10/2025)
-
-**Catégorie :** Interface utilisateur  
-**Impact :** +48 -22 lignes, 4 fichiers
-
-**Fichiers modifiés :**
-- `Author: GitHub Action - Progress Report <action@github.com>`
-- `Date:   Fri Oct 24 18:08:39 2025 +0000`
-- `    📊 Mise à jour automatique du rapport de suivi (24/10/2025)`
-- ... et 1 autres fichiers
-
-#### 20:08 - 41dab9e - Add initial environment configuration and directory structure
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +781 -272 lignes, 45 fichiers
-
-**Fichiers modifiés :**
-- `Author: remiv1 <remiv1@gmail.com>`
-- `Date:   Fri Oct 24 20:08:19 2025 +0200`
-- `    Add initial environment configuration and directory structure`
-- ... et 43 autres fichiers
-
-
-### 25 October 2025
-
-#### 19:05 - 8507542 - feat: Ajouter la gestion des documents de facturation avec génération et impression de PDF Création d'une classe commune pour la génération, le dépôt, la génération et l'impression de documents (facture, documents comptables + d'autres à venir)
-
-**Catégorie :** Développement de fonctionnalités  
-**Impact :** +259 -46 lignes, 11 fichiers
-
-**Fichiers modifiés :**
-- `Author: remiv1 <remiv1@gmail.com>`
-- `Date:   Sat Oct 25 19:05:57 2025 +0200`
-- `    feat: Ajouter la gestion des documents de facturation avec génération et impression de PDF`
-- `    Création d'une classe commune pour la génération, le dépôt, la génération et l'impression de documents (facture, documents comptables + d'autres à venir)`
-- ... et 8 autres fichiers
+- `Date:   Wed Jan 21 16:25:51 2026 +0100`
+- `    Refactor code structure for improved readability and maintainability`
+- ... et 14 autres fichiers
 
 
 ---
 
 ## Analyse par type d'activité
 
-- **Interface utilisateur** : 6 commits (40.0%)
-- **Développement de fonctionnalités** : 5 commits (33.3%)
-- **Refactoring** : 2 commits (13.3%)
-- **Correction de bugs** : 1 commits (6.7%)
-- **Développement général** : 1 commits (6.7%)
+- **Refactoring** : 2 commits (100.0%)
 
 ---
 
 ## Technologies et langages utilisés
 
-- **Python** : 25 fichiers modifiés
-- **HTML** : 15 fichiers modifiés
-- **Documentation** : 9 fichiers modifiés
-- **YAML/Config** : 5 fichiers modifiés
-- **JavaScript** : 4 fichiers modifiés
-- **Docker** : 2 fichiers modifiés
-- **CSS** : 1 fichiers modifiés
+- **Python** : 21 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 2.1 commits/jour
-- **Volume de code :** 2968 modifications totales
-- **Ratio ajouts/suppressions :** 1.85
-- **Moyenne lignes par commit :** 198
+- **Fréquence de commit :** 0.3 commits/jour
+- **Volume de code :** 3740 modifications totales
+- **Ratio ajouts/suppressions :** 1.27
+- **Moyenne lignes par commit :** 1870
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **interface utilisateur**. Le volume de 1928 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
+Période de développement **modérée** avec un focus principal sur **refactoring**. Le volume de 2090 lignes ajoutées témoigne d'un travail de développement substantiel. L'équilibre entre ajouts et suppressions suggère un travail de maintenance et d'amélioration du code existant.
 
 ---
-*Rapport généré automatiquement le 25 October 2025*
+*Rapport généré automatiquement le 21 January 2026*
