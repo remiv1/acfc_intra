@@ -559,7 +559,7 @@ class LogTestUtils:
             int: Nombre de logs du niveau spécifié
         """
         return database.count_documents({'level': level})
-    
+
     @staticmethod
     def get_latest_log(database: SQLiteLogDatabase) -> Optional[Dict[str, Any]]:
         """

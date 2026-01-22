@@ -557,7 +557,7 @@ function initClientSearchPage() {
         loadingDiv.classList.remove('d-none');
         
         // Effectuer la recherche
-        fetch(`/clients/recherche_avancee?q=${encodeURIComponent(searchTerm)}&type=${searchType}&search-inactive=${searchInactive}`)
+        fetch(`/clients/recherche-avancee?q=${encodeURIComponent(searchTerm)}&type=${searchType}&search-inactive=${searchInactive}`)
             .then(response => response.json())
             .then(data => {
                 loadingDiv.classList.add('d-none');

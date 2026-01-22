@@ -1,17 +1,15 @@
 """Modèles de données de base pour l'application ACFC."""
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.engine.url import URL
 from app_acfc.config.config_models import Configuration
-from app_acfc.db_models import (accounting, clients, users, orders, contacts, products, technical)  # type: ignore # pylint: disable=unused-import
+import app_acfc.db_models as db_models  # type: ignore # pylint: disable=unused-import
+from app_acfc.config.orm_base import Base
 
 # ====================================================================
 # CONFIGURATION DE LA BASE DE DONNÉES
 # ====================================================================
-
-# Définition de la base déclarative pour les modèles
-Base = declarative_base()
 
 # Instance de configuration globale
 conf: Configuration = Configuration()

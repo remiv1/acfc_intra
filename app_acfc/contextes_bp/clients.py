@@ -27,125 +27,22 @@ Sécurité :
 Auteur : Rémi Verschuur - Module CRM
 Version : 1.0
 """
-from flask import (Blueprint, jsonify, request, redirect, url_for, Request,
-                   session)
-from sqlalchemy.orm import Session as SessionBdDType, joinedload, contains_eager, subqueryload
-from sqlalchemy import or_, func
-from werkzeug import Response as ResponseWerkzeug
-from app_acfc.modeles import (get_db_session, Client, Part, Pro, Telephone, Mail,
-                              Order, Facture, Adresse, DevisesFactures)
-from app_acfc.models.templates_models import PrepareTemplates, Constants
-from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE, ADMINISTRATEUR
+
 from datetime import datetime
 from typing import List
+from flask import Blueprint, jsonify, redirect, url_for, request, session
+from sqlalchemy import or_, func
+from sqlalchemy.orm import Session as SessionBdDType, joinedload, contains_eager
+from sqlalchemy.exc import SQLAlchemyError
+from werkzeug import Response as ResponseWerkzeug
+from app_acfc.db_models import (Client, Part, Pro, Telephone, Mail,
+                              Order, Facture, Adresse, DevisesFactures)
+from app_acfc.config.config_models import get_db_session
+from app_acfc.functions.clients import ClientMethods, validate_mail
+from app_acfc.models.templates_models import PrepareTemplates, Constants
+from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE, ADMINISTRATEUR
 
-# ================================================================
-# CONFIGURATION DU BLUEPRINT CRM CLIENTS
-# ================================================================
-
-clients_bp = Blueprint(
-    'clients',                              # Nom interne du blueprint
-    __name__,                               # Module de référence
-    url_prefix='/clients',                  # Préfixe pour toutes les routes (/clients/...)
-    static_folder='statics/clients'         # Dossier statique spécialisé (CSS, JS, images)
-)
-
-# ================================================================
-# FONCTIONS ET CLASSES HORS ROUTES
-# ================================================================
-
-class ClientMethods:
-    """
-    Classe utilitaire pour les méthodes liées aux clients.
-
-    Methodes statiques pour :
-        - Récupération du taux de réduction
-        - Création/modification de clients particuliers ou professionnels
-    """
-    
-    @staticmethod
-    def get_reduces(request: Request) -> float:
-        """
-        Récupère le taux de réduction depuis la requête.
-
-        Args:
-            request (Request): Objet de requête Flask
-
-        Returns:
-            float: Taux de réduction (0.10 par défaut si non spécifié)
-        """
-        reduces_str = request.form.get('reduces', '0.10')
-        try:
-            return float(reduces_str) / 100  # Conversion pourcentage vers décimal
-        except (ValueError, TypeError):
-            return 10.0  # Valeur par défaut : 10%
-
-    @staticmethod
-    def create_or_modify_client(request: Request, type_client: int, client: Client,
-                                db_session: SessionBdDType, type_test: str = 'create') -> None:
-        '''
-        Teste la création d'un client particulier ou professionnel.
-        Création du client suivant le type.
-        '''
-        if type_client == 1:  # Particulier
-            ClientMethods.create_or_modify_part(request, client, db_session, type_test)
-
-        elif type_client == 2:  # Professionnel
-            ClientMethods.create_or_modify_pro(request, client, db_session, type_test)
-
-    @staticmethod
-    def create_or_modify_part(request: Request, client: Client, db_session: SessionBdDType,
-                              type_test: str = 'create') -> None:
-        """
-        Crée ou modifie un client particulier.
-
-        Args:
-            request (Request): Objet de requête Flask
-            client (Client): Objet client à modifier ou à créer
-            db_session (SessionBdDType): Session de base de données
-            type_test (str): Type de test ('create' ou 'update')
-        """
-        # Récupération des données spécifiques au particulier depuis le formulaire
-        prenom = request.form.get('prenom', '')
-        nom = request.form.get('nom', '')
-        date_naissance_str = request.form.get('date_naissance', None)
-        lieu_naissance = request.form.get('lieu_naissance', '')
-
-        # Création ou récupération du client particulier
-        part = Part(id_client=client.id) if type_test == 'create' else client.part
-        part.prenom = prenom
-        part.nom = nom
-        part.date_naissance = datetime.strptime(date_naissance_str, '%Y-%m-%d').date() if date_naissance_str else None
-        part.lieu_naissance = lieu_naissance if lieu_naissance else None
-
-        db_session.add(part) if type_test == 'create' else db_session.merge(part)
-
-    @staticmethod
-    def create_or_modify_pro(request: Request, client: Client,
-                             db_session: SessionBdDType, type_test: str = 'create') -> None:
-        """
-        Crée ou modifie un client professionnel.
-
-        Args:
-            request (Request): Objet de requête Flask
-            client (Client): Objet client à modifier ou à créer
-            db_session (SessionBdDType): Session de base de données
-            type_test (str): Type de test ('create' ou 'update')
-        """
-        # Récupération des données spécifiques au professionnel depuis le formulaire
-        raison_sociale = request.form.get('raison_sociale', '')
-        type_pro_str = request.form.get('type_pro', '')
-        siren = request.form.get('siren', '')
-        rna = request.form.get('rna', '')
-
-        # Création ou récupération du client professionnel
-        pro = Pro(id_client=client.id) if type_test == 'create' else client.pro
-        pro.raison_sociale = raison_sociale
-        pro.type_pro = int(type_pro_str)
-        pro.siren = siren if siren else None
-        pro.rna = rna if rna else None
-
-        db_session.add(pro) if type_test == 'create' else db_session.merge(pro)
+clients_bp = Blueprint('clients', __name__, url_prefix='/clients', static_folder='statics/clients')
 
 # ================================================================
 # ROUTES - INTERFACE DE RECHERCHE CLIENTS
@@ -177,7 +74,7 @@ def clients_list() -> str:
 # ================================================================
 
 @validate_habilitation([GESTIONNAIRE, CLIENTS], _and=False)
-@clients_bp.route('/recherche_avancee', methods=['GET'])
+@clients_bp.route('/recherche-avancee', methods=['GET'])
 def recherche_avancee() -> ResponseWerkzeug | str:
     """
     API REST : Recherche avancée de clients.
@@ -196,109 +93,79 @@ def recherche_avancee() -> ResponseWerkzeug | str:
     search_term = request.args.get('q', '').strip()
     search_type = request.args.get('type', 'part').strip()
     search_is_inactive = request.args.get('search-inactive', 'false').strip().lower() == 'true'
-    search_inactive_phone = or_(Telephone.is_inactive == True, Telephone.is_inactive == False) if (
-        search_is_inactive
-        and ('1' in session['habilitations'] or '2' in session['habilitations'])
-    ) else Telephone.is_inactive == False
-    search_inactive_mail = or_(Mail.is_inactive == True, Mail.is_inactive == False) if (
-        search_is_inactive
-        and ('1' in session['habilitations'] or '2' in session['habilitations'])
-    ) else Mail.is_inactive == False
-    search_inactive_address = or_(Adresse.is_inactive == True, Adresse.is_inactive == False) if (
-        search_is_inactive
-        and ('1' in session['habilitations'] or '2' in session['habilitations'])
-    ) else Adresse.is_inactive == False
-    search_active_clients = or_(Client.is_active == True, Client.is_active == False) if (
-        not search_is_inactive
-        and ('1' in session['habilitations'] or '2' in session['habilitations'])
-    ) else Client.is_active == True
+    search_inactive_phone = or_(Telephone.is_inactive == True,          # pylint: disable=singleton-comparison
+                                Telephone.is_inactive == False) if (    # pylint: disable=singleton-comparison
+                                    search_is_inactive
+                                    and ('1' in session['habilitations']
+                                        or '2' in session['habilitations'])
+                                ) else Telephone.is_inactive == False   # pylint: disable=singleton-comparison
+    search_inactive_mail = or_(Mail.is_inactive == True,                # pylint: disable=singleton-comparison
+                               Mail.is_inactive == False) if (          # pylint: disable=singleton-comparison
+                                    search_is_inactive
+                                    and ('1' in session['habilitations']
+                                        or '2' in session['habilitations'])
+                                ) else Mail.is_inactive == False        # pylint: disable=singleton-comparison
+    search_inactive_address = or_(Adresse.is_inactive == True,          # pylint: disable=singleton-comparison
+                                  Adresse.is_inactive == False) if (    # pylint: disable=singleton-comparison
+                                    search_is_inactive
+                                    and ('1' in session['habilitations']
+                                        or '2' in session['habilitations'])
+                                ) else Adresse.is_inactive == False     # pylint: disable=singleton-comparison
+    search_active_clients = or_(Client.is_active == True,               # pylint: disable=singleton-comparison
+                                Client.is_active == False) if (         # pylint: disable=singleton-comparison
+                                    not search_is_inactive
+                                    and ('1' in session['habilitations']
+                                        or '2' in session['habilitations'])
+                                ) else Client.is_active == True         # pylint: disable=singleton-comparison
 
 
     # Récupération de la session de base de données
     db_session: SessionBdDType = get_db_session()
-    
+
     try:
         clients = []
-        
+
         match search_type:
             case 'part':
                 # Recherche dans les particuliers (prénom + nom)
-                clients = (
-                    db_session.query(Client)
-                    .join(Client.part)
-                    .filter(
-                        search_active_clients,
-                        or_(
-                            Part.prenom.ilike(f'%{search_term}%'),
-                            Part.nom.ilike(f'%{search_term}%'),
-                            func.concat(Part.prenom, ' ', Part.nom).ilike(f'%{search_term}%')
-                        )
-                    )
-                    .all()
-                )
+                clients = (db_session.query(Client).join(Client.part).filter(
+                        search_active_clients, or_(Part.prenom.ilike(f'%{search_term}%'),
+                                                   Part.nom.ilike(f'%{search_term}%'),
+                                                   func.concat(Part.prenom, ' ', Part.nom) # pylint: disable=not-callable
+                                                   .ilike(f'%{search_term}%'))).all())
             case 'pro':
                 # Recherche dans les professionnels (raison sociale)
-                clients = (
-                    db_session.query(Client)
-                    .join(Client.pro)
-                    .filter(
-                        search_active_clients,
-                        Pro.raison_sociale.ilike(f'%{search_term}%')
-                    )
-                    .all()
-                )
+                clients = (db_session.query(Client).join(Client.pro).filter(
+                        search_active_clients, Pro.raison_sociale.ilike(f'%{search_term}%')).all())
             case 'mail':
                 # Recherche par email
-                clients = (
-                    db_session.query(Client)
-                    .join(Client.mails)
-                    .filter(
-                        search_active_clients,
-                        Mail.mail.ilike(f'%{search_term}%'),
-                        search_inactive_mail
-                    )
-                    .distinct()
-                    .all()
-                )
+                clients = (db_session.query(Client).join(Client.mails).filter(
+                        search_active_clients, Mail.mail.ilike(f'%{search_term}%'),
+                        search_inactive_mail).distinct().all())
             case 'telephone':
                 # Recherche par téléphone
-                clients = (
-                    db_session.query(Client)
-                    .join(Client.tels)
-                    .filter(
-                        search_active_clients,
-                        Telephone.telephone.ilike(f'%{search_term}%'),
-                        search_inactive_phone
-                    )
-                    .distinct()
-                    .all()
-                )
+                clients = (db_session.query(Client).join(Client.tels).filter(
+                        search_active_clients, Telephone.telephone.ilike(f'%{search_term}%'),
+                        search_inactive_phone).distinct().all())
             case _:
                 # Recherche par adresse (adresse, code postal ou ville)
-                clients = (
-                    db_session.query(Client)
-                    .join(Client.adresses)
-                    .filter(
+                clients = (db_session.query(Client).join(Client.adresses).filter(
                         search_active_clients,
-                        or_(
-                            Adresse.adresse_l1.ilike(f'%{search_term}%'),
+                        or_(Adresse.adresse_l1.ilike(f'%{search_term}%'),
                             Adresse.adresse_l2.ilike(f'%{search_term}%'),
                             Adresse.code_postal.ilike(f'%{search_term}%'),
                             Adresse.ville.ilike(f'%{search_term}%'),
-                            search_inactive_address
-                        )
-                    )
-                    .distinct()
-                    .all()
-                )
-        
+                            search_inactive_address)).distinct().all())
+
         # Conversion en dictionnaire et retour
         return jsonify([client.to_dict() for client in clients[:20]])  # Limite à 20 résultats
-        
-    except Exception as e:
-        return PrepareTemplates.error_5xx(status_code=500, status_message=str(e),
-                                          log=True, specific_log=Constants.log_files('client') + str(e))
 
+    except SQLAlchemyError as e:
+        return PrepareTemplates.error_5xx(status_code=500, status_message=str(e),
+                                    log=True, specific_log=Constants.log_files('client') + str(e))
+    except (KeyError, ValueError) as e:
+        return PrepareTemplates.error_4xx(status_code=400, status_message=str(e),
+                                    log=True, specific_log=Constants.log_files('client') + str(e))
 
 # ================================================================
 # DONNÉES CLIENTS INDIVIDUELLES
@@ -316,16 +183,17 @@ def create_client() -> str | ResponseWerkzeug:
     # === L'utilisateur demande le formulaire ===
     if request.method == 'GET':
         return PrepareTemplates.clients(sub_context='create')
-    
+
     # === L'utilisateur soumet le formulaire ===
     db_session = get_db_session()
     try:
         # Validation des données requises
         type_client = int(request.form.get('type_client', -1)) or -1
-        if type_client == -1: raise ValueError("Le type de client est obligatoire")
+        if type_client == -1:
+            raise ValueError("Le type de client est obligatoire")
         notes = request.form.get('notes', '')
         reduces = ClientMethods.get_reduces(request)
-        
+
         # Création du client de base
         new_client = Client(
             type_client=type_client,
@@ -335,18 +203,21 @@ def create_client() -> str | ResponseWerkzeug:
         )
         db_session.add(new_client)
         db_session.flush()  # Pour obtenir l'ID
-        
+
         # Création du client particulier ou professionnel suivant type
         ClientMethods.create_or_modify_client(request, type_client, new_client, db_session)
 
         # Envoi du client en base de données
-        db_session.commit()        
-        
+        db_session.commit()
+
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                 id_client=new_client.id,
                                 success_message=Constants.messages('client', 'create')))
-    except Exception as e:
+    except SQLAlchemyError as e:
         return PrepareTemplates.error_5xx(status_code=500, status_message=str(e),
+                                          log=True, specific_log=Constants.log_files('client'))
+    except (KeyError, ValueError) as e:
+        return PrepareTemplates.error_4xx(status_code=400, status_message=str(e),
                                           log=True, specific_log=Constants.log_files('client'))
 
 @clients_bp.route('/<int:id_client>', methods=['GET'])
@@ -391,25 +262,17 @@ def get_client(id_client: int) -> str:
     if client:
         part = client.part
         pro = client.pro
-        phones: List[Telephone] = sorted(
-            client.tels,
-            key=lambda p: (p.is_inactive, p.id)
-        )
-        mails: List[Mail] = sorted(
-            client.mails,
-            key=lambda m: (m.is_inactive, m.id)
-        )
-        addresses: List[Adresse] = sorted(
-            client.adresses,
-            key=lambda a: (a.is_inactive, a.id)
-        )
+        phones: List[Telephone] = sorted(client.tels, key=lambda p: (p.is_inactive, p.id))
+        mails: List[Mail] = sorted(client.mails, key=lambda m: (m.is_inactive, m.id))
+        addresses: List[Adresse] = sorted(client.adresses, key=lambda a: (a.is_inactive, a.id))
         orders: List[Order] = client.commandes
         bills: List[Facture] = client.factures
         nom_affichage = client.nom_affichage
-        return PrepareTemplates.clients(sub_context='detail', client=client, part=part, pro=pro, phones=phones,
-                                        mails=mails, addresses=addresses, orders=orders, bills=bills,
-                                        nom_affichage=nom_affichage, log=True, tab=tab, message=message,
-                                        success_message=success_message, error_message=error_message)
+        return PrepareTemplates.clients(sub_context='detail', client=client, part=part, pro=pro,
+                                        phones=phones, mails=mails, addresses=addresses,
+                                        orders=orders, bills=bills, nom_affichage=nom_affichage,
+                                        message=message, success_message=success_message,
+                                        log=True, tab=tab, error_message=error_message)
     else:
         return PrepareTemplates.error_4xx(status_code=404, log=True,
                                           status_message=Constants.messages('client', 'not_found'))
@@ -426,17 +289,13 @@ def edit_client(id_client: int) -> str:
         str: Template HTML du formulaire de modification avec les données pré-remplies
     """
     db_session: SessionBdDType = get_db_session()
-    client: Client | None = db_session.query(Client).options(
-        joinedload(Client.part),
-        joinedload(Client.pro)
-    ).get(id_client)
-    
+    client: Client | None = db_session.query(Client).options(joinedload(Client.part),
+                                joinedload(Client.pro)).get(id_client)
     if client:
         # Récupération du nom d'affichage avant de fermer la session
         nom_affichage = client.nom_affichage
         id_client = client.id
-        return PrepareTemplates.clients(sub_context='edit', client=client,
-                                        id_client=id_client,
+        return PrepareTemplates.clients(sub_context='edit', client=client, id_client=id_client,
                                         nom_affichage=nom_affichage)
     else:
         return PrepareTemplates.error_4xx(status_code=404, log=True,
@@ -461,21 +320,17 @@ def update_client(id_client: int) -> ResponseWerkzeug | str:
     db_session = get_db_session()
     client = None
     nom_affichage = None
-    
     try:
         # Récupération du client à modifier
-        client = db_session.query(Client).options(
-            joinedload(Client.part),
-            joinedload(Client.pro)
-        ).get(id_client)
-        
+        client = db_session.query(Client).options(joinedload(Client.part),
+                                                  joinedload(Client.pro)).get(id_client)
         # Gestion de l'absence de retours
         if not client:
             return redirect(url_for(Constants.return_pages('clients', 'recherche')))
-        
+
         # Récupération du nom d'affichage au début pour éviter les problèmes de session
         nom_affichage = client.nom_affichage
-        
+
         # Mise à jour des données de base
         notes = request.form.get('notes', '')
         client.notes = notes
@@ -485,22 +340,27 @@ def update_client(id_client: int) -> ResponseWerkzeug | str:
         client.modified_by = session.get('pseudo', 'N/A')
 
         # Création du client part ou pro suivant le context
-        ClientMethods.create_or_modify_client(request=request, type_client=type_client,
+        ClientMethods.create_or_modify_client(http_request=request, type_client=type_client,
                                               client=client, db_session=db_session,
                                               type_test='update')
 
         # Intégration dans la base de données
         db_session.commit()
-        
+
         # Redirection vers la page de détails du client avec message de succès
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                 success_message=Constants.messages('client', 'update'),
                                 id_client=client.id))
-    except Exception as e:
+    except SQLAlchemyError as e:
         return PrepareTemplates.clients(sub_context='edit', client=client, log=True,
-                                        id_client=client.id if client else id_client,
-                                        nom_affichage=nom_affichage if nom_affichage else f"Client {id_client}",
-                                        error_message=Constants.messages('error_500', 'default') + f" : {e}")
+                            id_client=client.id if client else id_client,
+                            nom_affichage=nom_affichage if nom_affichage else f"Client {id_client}",
+                            error_message=Constants.messages('error_500', 'default') + f" : {e}")
+    except (KeyError, ValueError) as e:
+        return PrepareTemplates.clients(sub_context='edit', client=client, log=True,
+                            id_client=client.id if client else id_client,
+                            nom_affichage=nom_affichage if nom_affichage else f"Client {id_client}",
+                            error_message=Constants.messages('error_500', 'default') + f" : {e}")
 
 @clients_bp.route('/<int:id_client>/delete/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -553,11 +413,15 @@ def delete_client(id_client: int) -> ResponseWerkzeug:
 
         return redirect(url_for(Constants.return_pages('clients', 'recherche'),
                                 success_message=Constants.messages('client', 'delete')))
-    
-    except Exception as e:
+
+    except SQLAlchemyError as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=id_client, log=True,
-                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                            id_client=id_client, log=True,
+                            error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+    except (KeyError, ValueError) as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                            id_client=id_client, log=True,
+                            error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/add-phone/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -585,13 +449,15 @@ def add_phone(id_client: int) -> ResponseWerkzeug:
     try:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
-        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+        if not client:
+            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
 
         # Validation du numéro de téléphone
         telephone = request.form.get('telephone', '').strip()
-        if not telephone: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                                  id_client=id_client, tab='phone',
-                                                  error_message=Constants.messages('phone', 'missing')))
+        if not telephone:
+            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                            id_client=id_client, tab='phone',
+                                            error_message=Constants.messages('phone', 'missing')))
 
         # Récupération des autres données (type de téléphone, indicatif, détail, si principal)
         type_telephone = request.form.get('type_telephone', 'mobile_pro')
@@ -600,32 +466,32 @@ def add_phone(id_client: int) -> ResponseWerkzeug:
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
 
         # Si c'est le téléphone principal, désactiver les autres
-        if is_principal: db_session.query(Telephone).filter_by(
-            id_client=client.id, is_principal=True
-            ).update({'is_principal': False})
+        if is_principal:
+            db_session.query(Telephone).filter_by(id_client=client.id, is_principal=True) \
+                .update({'is_principal': False})
 
         # Création du nouveau téléphone
-        new_telephone = Telephone(
-            id_client=client.id,
-            telephone=telephone,
-            type_telephone=type_telephone,
-            indicatif=indicatif if indicatif else None,
-            detail=detail if detail else None,
-            is_principal=is_principal,
-            created_by=session.get('pseudo', 'N/A')
-        )
-        
+        new_telephone = Telephone(id_client=client.id, telephone=telephone,
+                                  type_telephone=type_telephone,
+                                  indicatif=indicatif if indicatif else None,
+                                  detail=detail if detail else None, is_principal=is_principal,
+                                  created_by=session.get('pseudo', 'N/A'))
+
         # Enregistrement en base de données
         db_session.add(new_telephone)
         db_session.commit()
 
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='phone',
-                                id_client=id_client, success_message=Constants.messages('phone', 'valid')))
+                        id_client=id_client, success_message=Constants.messages('phone', 'valid')))
 
-    except Exception as e:
+    except SQLAlchemyError as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                 id_client=id_client, log=True, tab='phone',
-                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                        id_client=id_client, log=True, tab='phone',
+                        error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+    except (KeyError, ValueError) as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                        id_client=id_client, log=True, tab='phone',
+                        error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/modify-phone/<int:id_phone>/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -651,7 +517,8 @@ def mod_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
     db_session = get_db_session()
 
     try:
-        # Récupération et validation des données (client, téléphone, type, indicatif, détail, si principal)
+        # Récupération et validation des données
+        # (client, téléphone, type, indicatif, détail, si principal)
         client = db_session.query(Client).get(id_client)
         phone = request.form.get('telephone', '').strip()
         type_phone = request.form.get('type_telephone', 'mobile_pro')
@@ -660,27 +527,30 @@ def mod_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
 
         # Récupération du téléphone à modifier
-        phone_obj = db_session.query(Telephone).filter_by(id=id_phone, id_client=id_client, is_inactive=False).first()
+        phone_obj = db_session.query(Telephone) \
+                        .filter_by(id=id_phone, id_client=id_client, is_inactive=False).first()
 
         # Gestion de l'absence de retours (absence client, absence téléphone, absence numéro)
         # L'absence de client est peu probable, mais on la gère quand même
-        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+        if not client:
+            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
         # L'absence de téléphone est peu probable aussi (mauvais ID ou téléphone déjà supprimé)
-        if not phone_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                         id_client=id_client, tab='phone',
-                                         error_message=Constants.messages('phone', 'not_found')))
+        if not phone_obj:
+            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                    id_client=id_client, tab='phone',
+                                    error_message=Constants.messages('phone', 'not_found')))
         # Le numéro de téléphone est obligatoire : retour avec message d'erreur
-        if not phone: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                                  id_client=id_client, tab='phone',
-                                                  error_message=Constants.messages('phone', 'missing')))
+        if not phone:
+            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                    id_client=id_client, tab='phone',
+                                    error_message=Constants.messages('phone', 'missing')))
 
         # Si c'est le téléphone principal, désactiver les autres
         if is_principal:
-            db_session.query(Telephone).filter(
-                Telephone.id_client == client.id,
-                Telephone.id != id_phone,
-                Telephone.is_principal == True
-            ).update({'is_principal': False})
+            db_session.query(Telephone).filter(Telephone.id_client == client.id,
+                                               Telephone.id != id_phone,
+                                               Telephone.is_principal == True   # pylint: disable=singleton-comparison
+                                      ).update({'is_principal': False})
             db_session.commit()
 
         # Mise à jour du téléphone existant
@@ -692,14 +562,14 @@ def mod_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         phone_obj.modified_by = session.get('pseudo', 'N/A')
         db_session.commit()
 
-        # Redirection vers la page de détails du client sur l'onglet téléphone avec message de succès
+        # Redirection vers la page détails du client sur l'onglet téléphone avec message de succès
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                 id_client=id_client, log=True, tab='phone',
-                                 success_message=Constants.messages('phone', 'updated')))
-    except Exception as e:
+                            id_client=id_client, log=True, tab='phone',
+                            success_message=Constants.messages('phone', 'updated')))
+    except (SQLAlchemyError, KeyError, ValueError) as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                 id_client=id_client, log=True, tab='phone',
-                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                            id_client=id_client, log=True, tab='phone',
+                            error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/delete-phone/<int:id_phone>/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -722,11 +592,12 @@ def del_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
         phone_obj = db_session.query(Telephone).filter_by(id=id_phone, id_client=id_client).first()
-        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
-        if not phone_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                         id_client=id_client, tab='phone',
-                                         error_message=Constants.messages('phone', 'not_found')))
-
+        if not client:
+            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+        if not phone_obj:
+            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                    id_client=id_client, tab='phone',
+                                    error_message=Constants.messages('phone', 'not_found')))
         # Suppression logique
         phone_obj.is_inactive = True
         phone_obj.modified_by = session.get('pseudo', 'N/A')
@@ -734,12 +605,12 @@ def del_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         phone_obj.modified_at = datetime.now()
         db_session.commit()
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                 id_client=id_client, log=True, tab='phone',
-                                 success_message=Constants.messages('phone', 'deleted')))
-    except Exception as e:
+                            id_client=id_client, log=True, tab='phone',
+                            success_message=Constants.messages('phone', 'deleted')))
+    except (SQLAlchemyError, KeyError, ValueError) as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                 id_client=id_client, log=True, tab='phone',
-                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                            id_client=id_client, log=True, tab='phone',
+                            error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/add-email/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -766,52 +637,41 @@ def add_email(id_client: int) -> ResponseWerkzeug:
     try:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
-        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
-
+        if not client:
+            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
         # Validation de l'email
         email = request.form.get('mail', '').strip()
-        if not email: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                                  id_client=id_client, tab='mail',
-                                                  error_message=Constants.messages('email', 'missing')))
-
-        # Validation basique du format email
-        if '@' not in email or '.' not in email.split('@')[-1]:
+        is_email = validate_mail(email)
+        if not is_email[0]:
             return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                                  id_client=id_client, tab='mail',
-                                                  error_message=Constants.messages('email', 'invalid')))
-
+                                        id_client=id_client, tab='mail',
+                                        error_message=Constants.messages('email', is_email[1])))
         # Récupération des autres données
         type_mail = request.form.get('type_mail', 'professionnel')
         detail = request.form.get('detail', '').strip()
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
 
         # Si c'est l'email principal, désactiver les autres
-        if is_principal: db_session.query(Mail).filter_by(
-            id_client=client.id, is_principal=True
-            ).update({'is_principal': False})
-
+        if is_principal:
+            db_session.query(Mail).filter_by(id_client=client.id, is_principal=True) \
+                                  .update({'is_principal': False})
         # Création du nouvel email
-        new_mail = Mail(
-            id_client=client.id,
-            mail=email,
-            type_mail=type_mail,
-            detail=detail if detail else None,
-            is_principal=is_principal,
-            created_by=session.get('pseudo', 'N/A')
-        )
-        
+        new_mail = Mail(id_client=client.id, mail=email, type_mail=type_mail,
+                        detail=detail if detail else None, is_principal=is_principal,
+                        created_by=session.get('pseudo', 'N/A'))
+
         # Enregistrement en base de données
         db_session.add(new_mail)
         db_session.commit()
 
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
-                                id_client=id_client, success_message=Constants.messages('email', 'valid')))
+                        id_client=id_client, success_message=Constants.messages('email', 'valid')))
 
-    except Exception as e:
+    except (SQLAlchemyError, KeyError, ValueError) as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=id_client, log=True, tab='mail',
-                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
-    
+                        id_client=id_client, log=True, tab='mail',
+                        error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+
 @clients_bp.route('/<int:id_client>/modify-email/<int:id_mail>/', methods=['POST'])
 @validate_habilitation(CLIENTS)
 def mod_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
@@ -840,30 +700,26 @@ def mod_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         client = db_session.query(Client).get(id_client)
         mail_obj = db_session.query(Mail).filter_by(id=id_mail, id_client=id_client).first()
         email = request.form.get('mail', '').strip()
-        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
-        if not mail_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                         id_client=id_client, tab='mail',
-                                         error_message=Constants.messages('email', 'not_found')))
-        if not email: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                                  id_client=id_client, tab='mail',
-                                                  error_message=Constants.messages('email', 'missing')))
-
-        # Validation basique du format email
-        if '@' not in email or '.' not in email.split('@')[-1]:
+        if not client:
+            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+        if not mail_obj:
             return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                                  id_client=id_client, tab='mail',
-                                                  error_message=Constants.messages('email', 'invalid')))
-
+                                    id_client=id_client, tab='mail',
+                                    error_message=Constants.messages('email', 'not_found')))
+        is_email = validate_mail(email)
+        if not is_email[0]:
+            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                    id_client=id_client, tab='mail',
+                                    error_message=Constants.messages('email', is_email[1])))
         # Récupération des autres données
         type_mail = request.form.get('type_mail', 'professionnel')
         detail = request.form.get('detail', '').strip()
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
 
         # Si c'est l'email principal, désactiver les autres
-        if is_principal: db_session.query(Mail).filter_by(
-            id_client=client.id, is_principal=True
-            ).update({'is_principal': False})
-
+        if is_principal:
+            db_session.query(Mail).filter_by(id_client=client.id, is_principal=True) \
+                                  .update({'is_principal': False})
         # Mise à jour de l'email
         mail_obj.mail = email
         mail_obj.type_mail = type_mail
@@ -872,12 +728,12 @@ def mod_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
 
         db_session.commit()
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
-                                id_client=id_client, success_message=Constants.messages('email', 'updated')))
+                    id_client=id_client, success_message=Constants.messages('email', 'updated')))
 
-    except Exception as e:
+    except (SQLAlchemyError, KeyError, ValueError) as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=id_client, log=True, tab='mail',
-                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                    id_client=id_client, log=True, tab='mail',
+                    error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/delete-email/<int:id_mail>/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -902,10 +758,12 @@ def del_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
         mail_obj = db_session.query(Mail).filter_by(id=id_mail, id_client=id_client).first()
-        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
-        if not mail_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                         id_client=id_client, tab='mail',
-                                         error_message=Constants.messages('email', 'not_found')))
+        if not client:
+            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+        if not mail_obj:
+            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+                                    id_client=id_client, tab='mail',
+                                    error_message=Constants.messages('email', 'not_found')))
 
         # Suppression logique
         mail_obj.is_inactive = True
@@ -915,12 +773,12 @@ def del_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         db_session.commit()
 
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
-                                id_client=id_client, success_message=Constants.messages('email', 'deleted')))
+                    id_client=id_client, success_message=Constants.messages('email', 'deleted')))
 
-    except Exception as e:
+    except (SQLAlchemyError, KeyError, ValueError) as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=id_client, log=True, tab='mail',
-                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                    id_client=id_client, log=True, tab='mail',
+                    error_message=Constants.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/add-address/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -951,7 +809,8 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         client = db_session.query(Client).get(id_client)
         if not client:
             return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                                    id_client=id_client, error_message=Constants.messages('client', 'not_found')))
+                                    id_client=id_client,
+                                    error_message=Constants.messages('client', 'not_found')))
 
         # Validation des données d'adresse
         adresse_l1 = request.form.get('adresse_l1', '').strip()
@@ -960,39 +819,31 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         adresse_l2 = request.form.get('adresse_l2', '').strip()
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
         detail = request.form.get('detail', '').strip()
-        if not adresse_l1 or not code_postal or not ville: return redirect(
-            url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                    id_client=id_client, error_message=Constants.messages('address', 'missing')
-                    )
-            )
+        if not adresse_l1 or not code_postal or not ville:
+            return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
+                    id_client=id_client, error_message=Constants.messages('address', 'missing')))
 
         # Si c'est l'adresse principale, désactiver les autres
-        if is_principal: db_session.query(Adresse).filter_by(
-            id_client=client.id, is_principal=True
-            ).update({'is_principal': False})
+        if is_principal:
+            db_session.query(Adresse).filter_by(id_client=client.id, is_principal=True) \
+                                     .update({'is_principal': False})
 
         # Création de la nouvelle adresse
-        new_adresse = Adresse(
-            id_client=client.id,
-            adresse_l1=adresse_l1,
-            adresse_l2=adresse_l2 if adresse_l2 else None,
-            code_postal=code_postal,
-            ville=ville,
-            detail=detail if detail else None,
-            is_principal=is_principal,
-            created_by=session.get('pseudo', 'N/A')
-        )
-        
+        new_adresse = Adresse(id_client=client.id, adresse_l1=adresse_l1,
+                              adresse_l2=adresse_l2 if adresse_l2 else None,
+                              code_postal=code_postal, ville=ville,
+                              detail=detail if detail else None, is_principal=is_principal,
+                              created_by=session.get('pseudo', 'N/A'))
         # Enregistrement en base de données
         db_session.add(new_adresse)
         db_session.commit()
 
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                                id_client=id_client, success_message=Constants.messages('address', 'valid')))
+                    id_client=id_client, success_message=Constants.messages('address', 'valid')))
 
-    except Exception as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), id_client=id_client, tab='add',
-                                error_message=Constants.messages('error_500', 'default') + f" : {e}", log=True))
+    except (SQLAlchemyError, KeyError, ValueError) as e:
+        return redirect(url_for(Constants.return_pages('clients', 'detail'), id_client=id_client,
+        tab='add', error_message=Constants.messages('error_500', 'default') + f" : {e}", log=True))
 
 @clients_bp.route('/<int:id_client>/modify-address/<int:id_address>/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -1021,13 +872,15 @@ def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
     try:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
-        address_obj = db_session.query(Adresse).filter_by(id=id_address, id_client=id_client).first()
+        address_obj = db_session.query(Adresse) \
+                                .filter_by(id=id_address, id_client=id_client) \
+                                .first()
         if not client:
             return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                                    id_client=id_client, error_message=Constants.messages('client', 'not_found')))
+                    id_client=id_client, error_message=Constants.messages('client', 'not_found')))
         if not address_obj:
             return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                                    id_client=id_client, error_message=Constants.messages('address', 'not_found')))
+                    id_client=id_client, error_message=Constants.messages('address', 'not_found')))
 
         # Validation des données d'adresse
         adresse_l1 = request.form.get('adresse_l1', '').strip()
@@ -1036,16 +889,15 @@ def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
         ville = request.form.get('ville', '').strip()
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
         detail = request.form.get('detail', '').strip()
-        if not adresse_l1 or not code_postal or not ville: return redirect(
-            url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                    id_client=id_client, error_message=Constants.messages('address', 'missing')
-                    )
-            )
+        if not adresse_l1 or not code_postal or not ville:
+            return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
+                    id_client=id_client, error_message=Constants.messages('address', 'missing')))
 
         # Si c'est l'adresse principale, désactiver les autres
-        if is_principal: db_session.query(Adresse).filter_by(
-            id_client=client.id, is_principal=True
-            ).update({'is_principal': False})
+        if is_principal:
+            db_session.query(Adresse) \
+                      .filter_by(id_client=client.id, is_principal=True) \
+                      .update({'is_principal': False})
         # Mise à jour de l'adresse
         address_obj.adresse_l1 = adresse_l1
         address_obj.adresse_l2 = adresse_l2 if adresse_l2 else None
@@ -1057,7 +909,7 @@ def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
         db_session.commit()
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
                                 id_client=id_client, success_message=Constants.messages('address', 'updated')))
-    except Exception as e:
+    except (SQLAlchemyError, KeyError, ValueError) as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                 id_client=id_client, log=True, tab='add',
                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
@@ -1192,7 +1044,7 @@ def activate_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='phone',
                                 id_client=id_client, success_message=Constants.messages('phone', 'reactivated')))
 
-    except Exception as e:
+    except (SQLAlchemyError, KeyError, ValueError) as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                 id_client=id_client, log=True, tab='phone',
                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))
@@ -1239,7 +1091,7 @@ def activate_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
                                 id_client=id_client, success_message=Constants.messages('email', 'reactivated')))
 
-    except Exception as e:
+    except (SQLAlchemyError, KeyError, ValueError) as e:
         return redirect(url_for(Constants.return_pages('clients', 'detail'),
                                 id_client=id_client, log=True, tab='mail',
                                 error_message=Constants.messages('error_500', 'default') + f" : {e}"))

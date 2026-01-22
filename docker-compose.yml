@@ -30,7 +30,7 @@ services:
       - "5000:5000"                           # Mapping port Flask (dev uniquement)
     volumes:
       - ./logs:/app/logs:z                    # Volume pour logs (persistance)
-      - acfc_official_documents_storage:/app/official:Z
+      - ./official:/app/official:Z
     env_file:
       - .env-common
       - .env-path
@@ -96,7 +96,7 @@ services:
       context: .                              # Dossier contenant Dockerfile et scripts
       dockerfile: mongo/dockerfile.mongo      # Dockerfile spécialisé MongoDB
     volumes:
-      - acfc-logs-data:/data/db              # Persistance des logs
+      - ./logs:/data/db              # Persistance des logs
       - ./mongo/mongod.conf:/etc/mongod.conf:ro           # Configuration MongoDB
     env_file:
       - .env-common
@@ -122,7 +122,7 @@ services:
       dockerfile: api_acfc/dockerfile.api
     volumes:
       - ./api_acfc:/app
-      - acfc-queues:/data
+      - ./queues:/data
     networks:
       - acfc-network
     env_file:
@@ -141,20 +141,20 @@ volumes:
   acfc-logs-data:
     driver: local                            # Stockage local pour logs MongoDB
     name: acfc_logs_data
-  acfc_official_documents_storage:
-    driver: local                            # Stockage pour documents PDF
-    name: acfc_official_documents_storage
-    driver_opts:
-      type: none
-      o: bind
-      device: ${PWD}/official
-  acfc-queues:
-    driver: local                            # Stockage pour files d'attente (si besoin futur)
-    name: acfc_queues_storage
-    driver_opts:
-      type: none
-      o: bind
-      device: ${PWD}/queues
+  # acfc_official_documents_storage:
+  #   driver: local                            # Stockage pour documents PDF
+  #   name: acfc_official_documents_storage
+  #   driver_opts:
+  #     type: none
+  #     o: bind
+  #     device: ${pwd}/official
+  # acfc-queues:
+  #   driver: local                            # Stockage pour files d'attente (si besoin futur)
+  #   name: acfc_queues_storage
+  #   driver_opts:
+  #     type: none
+  #     o: bind
+  #     device: ${pwd}/queues
 
 # ================================================================
 # RÉSEAUX

@@ -4,7 +4,7 @@ from typing import Any, Dict
 from sqlalchemy import Boolean, Date, Integer, String, DateTime, func
 from sqlalchemy.orm import mapped_column, relationship
 from sqlalchemy import ForeignKey
-from app_acfc.db_models.base import Base
+from app_acfc.config.orm_base import Base
 from app_acfc.db_models.constants import PK_CLIENTS
 
 # ====================================================================

@@ -2,17 +2,17 @@
 # DOCKERFILE - APPLICATION ACFC
 # ====================================================================
 # Configuration Docker pour l'application web ACFC (Accounting, CRM, Billing & Stock Management)
-# 
+#
 # Architecture : Application Flask + Waitress WSGI Server
 # Base : Python 3.12 sur Debian Bookworm (LTS, sécurisé)
 # Port : 5000 (standard Flask, mappé par docker-compose)
-# 
+#
 # Optimisations incluses :
 # - Image officielle Python optimisée
 # - Cache pip désactivé pour réduire la taille
 # - Isolation des dépendances
 # - Configuration multi-stage possible (future optimisation)
-# 
+#
 # Maintenu par : ACFC Development Team
 # Dernière mise à jour : Août 2025
 
@@ -38,7 +38,8 @@ LABEL version="1.0"
 # Installation des dépendances Python avec optimisations
 # --no-cache-dir : Évite le stockage du cache pip (réduit la taille de l'image)
 # --upgrade : Force la mise à jour vers les dernières versions compatibles
-RUN pip install --no-cache-dir --upgrade pip && \
+RUN apt-get update && apt-get install -y gettext-base libcups2-dev && \
+    pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # === PHASE 2: COPIE DU CODE APPLICATION ===

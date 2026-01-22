@@ -28,3 +28,15 @@ Architecture :
 Auteur : ACFC Development Team
 Version : 2.0
 """
+
+from app_acfc.db_models.accounting import PCG, Operations, Ventilations, Documents # type: ignore
+from app_acfc.db_models.clients import Client, Part, Pro # type: ignore
+from app_acfc.db_models.contacts import Telephone, Mail, Adresse # type: ignore
+from app_acfc.db_models.orders import Order, Facture, DevisesFactures # type: ignore
+from app_acfc.db_models.constants import (PK_ADRESSE, PK_CLIENTS, PK_COMMANDE,  # type: ignore
+                                          PK_EXPEDITION, # type: ignore
+                                          PK_FACTURE, PK_OPERATION, # type: ignore
+                                          PK_COMPTE, UNIQUE_ID) # type: ignore
+from app_acfc.db_models.products import Catalogue, Stock # type: ignore
+from app_acfc.db_models.technical import Moi, IndicatifsTel, Villes # type: ignore
+from app_acfc.db_models.users import User # type: ignore

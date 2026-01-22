@@ -2,6 +2,7 @@
 Module des modèles pour la gestion des templates de l'application ACFC.
 """
 import json
+from os.path import dirname, join
 from typing import List, Dict, Optional, Any
 from datetime import datetime
 from flask import render_template, session, Request
@@ -9,6 +10,8 @@ from logs.logger import INFO, ERROR, acfc_log
 from app_acfc.db_models.orders import Facture
 from app_acfc.models.orders_models import OrdersModel
 from app_acfc.models.products_models import ProductsModel
+
+JSONS_PATH = join(dirname(__file__), 'jsons')
 
 class Constants:
     '''
@@ -61,7 +64,7 @@ class Constants:
         Returns:
             str: Message formaté
         """
-        with open('./jsons/messages.json', 'r', encoding='utf-8') as file:
+        with open(f'{JSONS_PATH}/messages.json', 'r', encoding='utf-8') as file:
             messages: Dict[str, Dict[str, str]] = json.load(file)
         type_messages = messages.get(type_msg, {})
         return type_messages.get(second_type_message, "Action effectuée.")
@@ -89,7 +92,7 @@ class Constants:
         Returns:
             str: Nom du fichier de log
         """
-        with open('./jsons/logs.json', 'r', encoding='utf-8') as file:
+        with open(f'{JSONS_PATH}/logs.json', 'r', encoding='utf-8') as file:
             log_files: Dict[str, str] = json.load(file)
         return log_files.get(type_log, 'general.log')
 
@@ -114,7 +117,7 @@ class Constants:
         Returns:
             str: Nom du template
         """
-        with open('./jsons/templates.json', 'r', encoding='utf-8') as file:
+        with open(f'{JSONS_PATH}/templates.json', 'r', encoding='utf-8') as file:
             templates: Dict[str, str] = json.load(file)
         return templates.get(name, '')
 
@@ -172,7 +175,7 @@ class Constants:
         Returns:
             str: Nom du template de la page
         """
-        with open('./jsons/pages.json', 'r', encoding='utf-8') as file:
+        with open(f'{JSONS_PATH}/pages.json', 'r', encoding='utf-8') as file:
             pages: Dict[str, Dict[str, str]] = json.load(file)
         return pages.get(domain, {}).get(sub_domain, '')
 

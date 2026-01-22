@@ -1,4 +1,4 @@
-'''
+"""
 ACFC - Application de Gestion d'Entreprise
 ===========================================
 
@@ -17,34 +17,28 @@ Authentification : Sessions sécurisées avec hachage Argon2
 
 Auteur : ACFC Development Team
 Version : 1.0
-'''
-import os
+"""
+import sys
 from typing import Any, Dict, Tuple, List, Optional
 from datetime import datetime, date
-from waitress import serve
 from flask import Flask, Response, request, Blueprint, session, url_for, redirect, jsonify, g
 from flask_session import Session
-from flask_wtf.csrf import generate_csrf, validate_csrf # pylint: disable=unused-import
+from flask_wtf.csrf import generate_csrf, validate_csrf # pylint: disable=unused-import # type: ignore
 from werkzeug.exceptions import HTTPException
-from sqlalchemy import text, and_, or_
-from sqlalchemy.orm import Session as SessionBdDType, joinedload
-from sqlalchemy.sql.functions import func
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from logs.logger import acfc_log, ERROR
 from app_acfc.services import SecureSessionService, AuthenticationService
 from app_acfc.db_models.users import User
 from app_acfc.db_models.orders import Order
-from app_acfc.db_models.clients import Client
 from app_acfc.db_models.orders import Facture
-from app_acfc.config.config_models import init_database, get_db_session, GeoMethods
+from app_acfc.config.config_models import init_database, get_db_session
 from app_acfc.models.templates_models import PrepareTemplates, Constants
 from app_acfc.models.users_models import MyAccount
-from app_acfc.contextes_bp.clients import clients_bp         # Module CRM - Gestion clients
-from app_acfc.contextes_bp.catalogue import catalogue_bp     # Module Catalogue produits
-from app_acfc.contextes_bp.commercial import commercial_bp   # Module Commercial - Devis, commandes
-from app_acfc.contextes_bp.comptabilite import comptabilite_bp # Module Comptabilité - Facturation
-from app_acfc.contextes_bp.stocks import stocks_bp          # Module Stocks - Inventaire
-from app_acfc.contextes_bp.admin import admin_bp            # Module Administration - Utilisateurs
-from app_acfc.contextes_bp.commandes import commandes_bp    # Module Commandes - Gestion commandes
+from app_acfc.contextes_bp import (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp,
+                                   commandes_bp, stocks_bp, admin_bp)
+from app_acfc.functions.orders import get_current_orders, get_commercial_indicators
+from app_acfc.functions.utilitaries import start_server
 
 # Création de l'instance Flask principale avec configuration des dossiers statiques et templates
 acfc = Flask(__name__,
@@ -65,16 +59,12 @@ Session(acfc)
 acfc_blueprints: Tuple[Blueprint, ...] = (clients_bp, catalogue_bp, commercial_bp, comptabilite_bp,
                                           stocks_bp, admin_bp, commandes_bp)
 
-# Messages d'erreur standardisés pour l'authentification
-INVALID: str = 'Identifiants invalides.'
-WRONG_ROAD: str = 'Méthode non autorisée ou droits insuffisants.'
-
 # Création automatique des tables si elles n'existent pas (avec retry)
 try:
     init_database()
 except (OSError) as e:
     print(f"❌ Erreur critique lors de l'initialisation de la base : {e}")
-    exit(1)
+    sys.exit(1)
 
 # ====================================================================
 # MIDDLEWARES - GESTION DES REQUÊTES GLOBALES
@@ -155,7 +145,7 @@ def inject_csrf_token():
     """
     try:
         token_to_return: Dict[str, str] = {'csrf_token': generate_csrf()}
-    except Exception:
+    except RuntimeError:
         # En cas de problème (ex: pas de session active), renvoyer une valeur vide
         token_to_return = {'csrf_token': ''}
     return token_to_return
@@ -246,135 +236,6 @@ def bill_status_sort(bills: List[Facture]) -> List[Facture]:
     return sorted(bills, key=get_custom_order)
 
 # ====================================================================
-# FONCTIONS DE RECHERCHES - HORS ROUTES
-# ====================================================================
-
-def get_current_orders(id_client: int = 0) -> List[Order]:
-    """
-    Récupère les commandes en cours pour un client donné.
-
-    Args:
-        id_client (int): ID du client, 0 pour tous les clients
-
-    Returns:
-        List[Order]: Liste des commandes en cours
-    """
-    # Ouverture de la session
-    db_session: SessionBdDType = get_db_session()
-
-    # Récupération des commandes en cours sans notion de client
-    if id_client == 0:
-        commandes: List[Order] = (
-            db_session.query(Order)
-            .options(
-                joinedload(Order.client).joinedload(Client.part),  # Eager loading du client part
-                joinedload(Order.client).joinedload(Client.pro)    # Eager loading du client pro
-            )
-            .filter(or_(
-                Order.is_facturee.is_(False),
-                Order.is_expediee.is_(False)
-            ))
-            .all()
-        )
-
-    # Récupération des commandes en cours pour un client spécifique
-    else:
-        commandes: List[Order] = (
-            db_session.query(Order)
-            .options(
-                joinedload(Order.client).joinedload(Client.part),  # Eager loading du client part
-                joinedload(Order.client).joinedload(Client.pro)    # Eager loading du client pro
-            )
-            .filter(and_(
-                Order.id_client == id_client,
-                or_(
-                    Order.is_facturee.is_(False),
-                    Order.is_expediee.is_(False)
-                )
-            ))
-            .all()
-        )
-
-    return commandes
-
-def get_commercial_indicators() -> Dict[str, Any] | None:
-    """
-    Récupère les indicateurs commerciaux:
-        - Chiffre d'affaire mensuel
-        - Chiffre d'affaire annuel
-        - Panier moyen
-        - Clients actifs
-        - Commandes annuelles
-
-    Returns:
-        Dict[str, Any]: Dictionnaire des indicateurs commerciaux
-    """
-    # Ouverture de la session
-    db_session: SessionBdDType = get_db_session()
-
-    # Récupération des dates de référence
-    today = date.today()
-    first_day_of_month = today.replace(day=1)
-    first_day_of_year = today.replace(month=1, day=1)
-
-    # Récupération des indicateurs commerciaux et gestion des exceptions
-    try:
-        indicators: Dict[str, List[int | float | str]] | None = {
-            # Chiffre d'affaire total facturé pour le mois en cours
-            "ca_current_month": [
-                round(db_session.query(func.sum(Order.montant))
-                .filter(
-                    Order.is_facturee.is_(True),
-                    Order.date_commande >= first_day_of_month
-                ).scalar() or 0.0, 2),
-                'CA Mensuel'
-            ],
-
-            # Chiffre d'affaire total facturé pour l'année en cours
-            "ca_current_year": [
-                round(db_session.query(func.sum(Order.montant))
-                .filter(
-                    Order.is_facturee.is_(True),
-                    Order.date_commande >= first_day_of_year
-                ).scalar() or 0.0, 2),
-                'CA Annuel'
-            ],
-
-            # Panier moyen annuel
-            "average_basket": [
-                round(db_session.query(func.avg(Order.montant))
-                .filter(
-                    Order.is_facturee.is_(True),
-                    Order.date_commande >= first_day_of_year
-                ).scalar() or 0.0, 2),
-                'Panier Moyen'
-            ],
-
-            # Clients actifs
-            "active_clients": [
-                db_session.query(func.count(func.distinct(Order.id_client)))
-                .filter(
-                    Order.is_facturee.is_(True),
-                    Order.date_commande >= first_day_of_year
-                ).scalar() or 0,
-                'Clients Actifs'
-            ],
-
-            # Nombre de commandes par an
-            "orders_per_year": [
-                db_session.query(func.count(Order.id))
-                .filter(
-                    Order.is_facturee.is_(True),
-                    Order.date_commande >= first_day_of_year
-                ).scalar() or 0,
-                'Commandes Annuelles'
-            ]
-        }
-    except Exception:
-        indicators = None
-    return indicators
-
-# ====================================================================
 # ROUTES PRINCIPALES DE L'APPLICATION
 # ====================================================================
 
@@ -410,6 +271,7 @@ def login() -> Any:
     if request.method == 'GET':
         previous_url = request.args.get('next', None)
         return PrepareTemplates.login(next_url=previous_url)
+    # === GESTION DES AUTRES MÉTHODES NON AUTORISÉES ===
     elif request.method != 'POST':
         message = Constants.messages('error_400', 'wrong_road') \
                   + f'\nMéthode {request.method} non autorisée.' \
@@ -424,7 +286,7 @@ def login() -> Any:
         try:
             # Si échec de l'authentification, retour au formulaire avec message d'erreur
             if not result_auth:
-                return PrepareTemplates.login(message=INVALID)
+                return PrepareTemplates.login(message='Identifiants invalides.',)
             # Si succès, mais mot de passe à changer, redirection vers la page de changement
             if user_to_authenticate.is_chg_mdp:
                 return PrepareTemplates.login(subcontext='change_password',
@@ -463,12 +325,9 @@ def health() -> Any:
     """
     try:
         # Vérification de la base de données
+        db_session = get_db_session()
+        db_session.execute(text("SELECT 1"))
         db_status = "ok"
-        try:
-            db_session = get_db_session()
-            db_session.execute(text("SELECT 1"))
-        except Exception as e:
-            db_status = f"error: {str(e)}"
 
         health_data: Dict[str, Any] = {
             "status": "healthy" if db_status == "ok" else "degraded",
@@ -482,7 +341,7 @@ def health() -> Any:
 
         return jsonify(health_data), 200 if db_status == "ok" else 503
 
-    except Exception as e:
+    except SQLAlchemyError as e:
         return jsonify({
             "status": "unhealthy",
             "error": str(e),
@@ -519,7 +378,7 @@ def my_account(pseudo: str) -> Any:
 
     #=== Gestion de la requête GET ===
     if request.method == 'GET':
-        PrepareTemplates.users(objects=[user])
+        return PrepareTemplates.users(objects=[user])
 
     #=== Gestion de la requête POST ===
     elif request.method == 'POST':
@@ -539,7 +398,7 @@ def my_account(pseudo: str) -> Any:
             # Redirection vers la page de consultation avec message de succès
             message = "Vos informations ont été mises à jour avec succès."
             return PrepareTemplates.users(objects=[user], success_message=message)
-        except Exception as e:
+        except (ValueError, SQLAlchemyError) as e:
             # Si user n'a pas pu être récupéré, on crée un objet vide pour le template
             if ('user' not in locals()) or (not user):
                 user = User()
@@ -580,7 +439,7 @@ def chg_pwd() -> Any:
     """
     Changement de mot de passe utilisateur.
     """
-    def _get_key_message(param: Dict[str, bool]) -> str:
+    def __get_key_message(param: Dict[str, bool]) -> str:
         for key, value in param.items():
             if value is False:
                 return key
@@ -597,7 +456,7 @@ def chg_pwd() -> Any:
         # Si échec, retour au formulaire avec message d'erreur
         if not chg_pwd_is_ok:
             # Récupération de la clé du message d'erreur
-            key_message = _get_key_message(user_to_chg_pwd.pwd_param)
+            key_message = __get_key_message(user_to_chg_pwd.pwd_param)
 
             # Le message d'erreur est retourné dans le template
             return PrepareTemplates.login(subcontext='change_password',
@@ -660,38 +519,6 @@ def handle_5xx_errors(error: HTTPException) -> str:
                     specific_log=Constants.log_files('500'),
                     status_message=error.description or Constants.messages('error_500', 'default'))
 
-# ====================================================================
-# Routes utilitaires diverses
-# ====================================================================
-
-@acfc.route('/api/indic-tel', methods=['GET'])
-def get_indic_tel() -> Any:
-    """
-    API REST pour récupérer les indicatifs téléphoniques par pays.
-    
-    Args:
-        ilike_pays (str): Nom du pays (partiel, insensible à la casse)
-        
-    Returns:
-        JSON: Liste des indicatifs téléphoniques
-    """
-    if request.method != 'GET':
-        return PrepareTemplates.error_4xx(status_code=405,
-                                    status_message=Constants.messages('error_400', 'wrong_road'),
-                                    log=True)
-    try:
-        indicatifs = GeoMethods.get_indicatifs_tel()
-        indicatifs_list: List[Dict[str, str]] = [
-            {
-                'label': f'{ind.pays} ({ind.indicatif})',
-                'value': f'+{ind.indicatif}'
-            } for ind in indicatifs
-        ]
-        return jsonify(indicatifs_list), 200
-    except Exception as e:
-        return PrepareTemplates.error_5xx(status_code=500,
-                        status_message=f"Erreur lors de la récupération des indicatifs : {str(e)}",
-                        log=True, specific_log=Constants.log_files('500'))
 
 # ====================================================================
 # ENREGISTREMENT DES MODULES MÉTIERS
@@ -700,28 +527,5 @@ def get_indic_tel() -> Any:
 for bp in acfc_blueprints:
     acfc.register_blueprint(bp)
 
-# ====================================================================
-# POINT D'ENTRÉE DE L'APPLICATION
-# ====================================================================
-
-def start_server():
-    """
-    Démarrage de l'application en mode production avec Waitress.
-    
-    Waitress est un serveur WSGI production-ready qui remplace le serveur 
-    de développement Flask. Configuration :
-    - Host: configurable via variable d'environnement (défaut: localhost)
-    - Port: 5000 (port standard de l'application)
-    
-    Note: En production, l'application est généralement déployée derrière
-    un reverse proxy (Nginx) pour la gestion SSL et la distribution de charge.
-    """
-    # Configuration sécurisée de l'host
-    # En développement: localhost uniquement (plus sécurisé)
-    # En production Docker: 0.0.0.0 pour permettre l'accès depuis le conteneur
-    host = os.environ.get('FLASK_HOST', 'localhost')
-    port = int(os.environ.get('FLASK_PORT', 5000))
-
-    serve(acfc, host=host, port=port)
-
-if __name__ == '__main__': start_server()
+if __name__ == '__main__':
+    start_server(acfc)

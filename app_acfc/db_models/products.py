@@ -3,7 +3,7 @@
 from typing import Dict, Any
 from sqlalchemy import Date, Integer, String, DateTime, Numeric, func, Computed
 from sqlalchemy.orm import mapped_column
-from app_acfc.db_models.base import Base
+from app_acfc.config.orm_base import Base
 
 # ====================================================================
 # MODÈLES DE DONNÉES - MODULE GESTION DES PRODUITS

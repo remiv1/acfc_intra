@@ -3,7 +3,7 @@
 from typing import Any, Dict
 from sqlalchemy import Boolean, Date, Integer, String, func
 from sqlalchemy.orm import mapped_column
-from app_acfc.db_models.base import Base
+from app_acfc.config.orm_base import Base
 from app_acfc.db_models.constants import UNIQUE_ID
 
 # ====================================================================

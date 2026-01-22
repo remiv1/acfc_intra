@@ -182,7 +182,8 @@ def init_database(max_retries: int = 30, retry_delay: int = 2) -> None:
     Raises:
         ConnectionError: Si impossible de se connecter après toutes les tentatives
     """
-    from app_acfc.db_models.base import engine, Base #pylint: disable=import-outside-toplevel
+    from app_acfc.db_models.base import engine #pylint: disable=import-outside-toplevel
+    from app_acfc.config.orm_base import Base #pylint: disable=import-outside-toplevel
     from sqlalchemy import text #pylint: disable=import-outside-toplevel
 
     for attempt in range(1, max_retries + 1):

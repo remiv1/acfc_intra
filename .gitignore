@@ -10,6 +10,7 @@
 
 # Fichiers compilés
 *.pyc
+WiredTiger*
 
 # Fichiers secrets
 *.pem
@@ -25,3 +26,11 @@
 .pytest_cache
 .benchmarks
 **/__pycache__/
+
+# Logs
+_mdb_*
+collection-*
+index-*
+*.lock
+*.wt
+*.bson

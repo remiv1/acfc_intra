@@ -7,7 +7,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import Computed, event
 from sqlalchemy.engine import Connection
 from sqlalchemy.orm import Mapper
-from app_acfc.db_models.base import Base
+from app_acfc.config.orm_base import Base
 from app_acfc.db_models.constants import PK_CLIENTS, PK_ADRESSE, PK_COMMANDE, PK_EXPEDITION
 
 # ====================================================================
