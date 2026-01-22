@@ -4,12 +4,9 @@ from typing import Any, Dict, List
 from flask.blueprints import Blueprint
 from flask import request, jsonify
 from app_acfc.config.config_models import GeoMethods
-from app_acfc.models.templates_models import PrepareTemplates, Constants
+from app_acfc.models.templates_models import PrepareTemplates, Constants as c
 
-api_bp = Blueprint('api',
-                   __name__,
-                   url_prefix='/api',
-                   static_folder='statics/api')
+api_bp = Blueprint('api', __name__, url_prefix='/api', static_folder='statics/api')
 
 # ====================================================================
 # Routes utilitaires diverses
@@ -28,7 +25,7 @@ def get_indic_tel() -> Any:
     """
     if request.method != 'GET':
         return PrepareTemplates.error_4xx(status_code=405,
-                                    status_message=Constants.messages('error_400', 'wrong_road'),
+                                    status_message=c.messages('error_400', 'wrong_road'),
                                     log=True)
     try:
         indicatifs = GeoMethods.get_indicatifs_tel()
@@ -43,9 +40,9 @@ def get_indic_tel() -> Any:
         message = f"Erreur d'attribut lors de la récupération des indicatifs : {str(e)}"
         return PrepareTemplates.error_5xx(status_code=500,
                                           status_message=message,
-                                          log=True, specific_log=Constants.log_files('500'))
+                                          log=True, specific_log=c.log_files('500'))
     except TypeError as e:
         message = f"Erreur de type lors de la récupération des indicatifs : {str(e)}"
         return PrepareTemplates.error_5xx(status_code=500,
                                           status_message=message,
-                                          log=True, specific_log=Constants.log_files('500'))
+                                          log=True, specific_log=c.log_files('500'))

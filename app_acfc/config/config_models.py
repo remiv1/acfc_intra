@@ -114,7 +114,6 @@ class GeoMethods:
             Villes.code_postal.ilike(f'{code_postal}'
             )).all()
 
-
 def verify_env() -> bool:
     """
     Vérification et chargement des variables d'environnement critiques.

@@ -7,7 +7,7 @@ Cette documentation présente la suite de tests complète du projet ACFC Intra a
 ## 📊 Statistiques Globales
 
 | Métrique | Valeur |
-|----------|---------|
+| -------- | ------- |
 | **Tests totaux** | 175 |
 | **Tests réussis** | 175 (100%) |
 | **Tests échoués** | 0 (0%) |
@@ -523,7 +523,7 @@ markers =
 ## 📈 Métriques de Qualité
 
 | Métrique | Valeur | Statut |
-|----------|---------|---------|
+| -------- | ------- | ------- |
 | Taux de réussite | 100% | ✅ Excellent |
 | Couverture fonctionnelle | Complète | ✅ Excellent |
 | Temps d'exécution | < 5 secondes | ✅ Optimal |
@@ -559,6 +559,6 @@ La suppression des tests non pertinents a permis de se concentrer sur la valeur 
 
 ---
 
-*Document généré le 29 août 2025*  
-*Version : 1.0*  
+*Document généré le 29 août 2025*
+*Version : 1.0*
 *Auteur : ACFC Development Team*

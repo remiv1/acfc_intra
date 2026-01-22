@@ -15,26 +15,23 @@ Auteur : Développement ACFC
 Version : 1.0
 """
 
-from flask import Blueprint, request, redirect, url_for
 from datetime import datetime
+from flask import Blueprint, request, redirect, url_for
 from sqlalchemy.orm import Session as SessionBdDType, joinedload
+from sqlalchemy.exc import SQLAlchemyError
 from werkzeug import Response
 from werkzeug.exceptions import NotFound
-from app_acfc.modeles import (Client, DevisesFactures, Facture, Order, get_db_session)
-from app_acfc.habilitations import validate_habilitation, CLIENTS
-import qrcode
-from io import BytesIO
-import base64
-from app_acfc.models.templates_models import PrepareTemplates, Constants
+from app_acfc.db_models import (Client, DevisesFactures, Facture, Order)
+from app_acfc.config.config_models import get_db_session
+from app_acfc.habilitations import validate_habilitation, CLIENTS, FORCE_DE_VENTE
+from app_acfc.models.templates_models import PrepareTemplates, Constants as c
 from app_acfc.models.orders_models import OrdersModel
-from app_acfc.models.bills_models import BillsModels, BILLS_PATH
-from app_acfc.models.templates_models import Constants
+from app_acfc.models.bills_models import BillsModels
+from app_acfc.functions.visuals import generate_qrcode
 from app_acfc.common import BillsDocument
 
 # Création du blueprint
-commandes_bp = Blueprint(name='commandes',
-                         import_name=__name__,
-                         url_prefix='/commandes')
+commandes_bp = Blueprint(name='commandes', import_name=__name__, url_prefix='/commandes')
 
 # ====================================================================
 # FILTRES JINJA2 PERSONNALISÉS
@@ -55,7 +52,7 @@ def entries_jsonify(entry: DevisesFactures) -> str:
 # ====================================================================
 
 @commandes_bp.route('/client-<int:id_client>/nouvelle-commande', methods=['GET', 'POST'])
-@validate_habilitation(CLIENTS)
+@validate_habilitation([CLIENTS, FORCE_DE_VENTE])
 def new_order(id_client: int) -> str | Response:
     """
     Créer une nouvelle commande pour un client.
@@ -65,66 +62,78 @@ def new_order(id_client: int) -> str | Response:
         - Type d'action
     """
 
-    # === Gestion de la demande de formulaire ===
+    # === GET : Gestion de la demande de formulaire ===
     if request.method == 'GET':
         session_db: SessionBdDType = get_db_session()
         client = session_db.query(Client).filter(Client.id == id_client).first()
-        return PrepareTemplates.orders(subcontext='form',
-                                       id_client=id_client,
-                                       form_sub_context='create',
-                                       client=client)
+        return PrepareTemplates.orders(subcontext='form', id_client=id_client,
+                                       form_sub_context='create', client=client)
 
-    # === Gestion de la soumission du formulaire ===
+    # === POST : Gestion de la soumission du formulaire ===
     elif request.method == 'POST':
-        new_order = OrdersModel(request) \
-                        .post_order_data(id_client=id_client, id_order=None)
         session_db: SessionBdDType = get_db_session()
+
+        # Créer la nouvelle commande avec les données du formulaire
+        new_order_object = OrdersModel(request) \
+                                .post_order_data(id_client=id_client, id_order=None)
         try:
-            session_db.add(new_order.order)
+            # Enregistrer la commande et ses entrées associées
+            session_db.add(new_order_object.order)
             session_db.flush()  # Pour obtenir l'ID de la commande
-            for entry in new_order.client_entries:
+
+            # Enregistrer les entrées associées
+            for entry in new_order_object.client_entries:
                 entry.id = None
-                entry.id_order = new_order.order.id
+                entry.id_order = new_order_object.order.id
                 session_db.add(entry)
+
+            # Finaliser la transaction
             session_db.commit()
-            message = Constants.messages(type_msg='commandes', second_type_message='created')
-            return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+
+            # Retourner à la fiche de la commande nouvellement créée
+            message = c.messages(type_msg='commandes', second_type_message='created')
+            return redirect(url_for(c.return_pages('commandes', 'detail'),
                                     id_client=id_client,
-                                    id_order=new_order.order.id))
-        except Exception as e:
-            error_message = Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})'
-            return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+                                    id_order=new_order_object.order.id))
+        except SQLAlchemyError as e:
+            error_message = c.messages(type_msg='error_500',
+                                       second_type_message='default') + f' : ({e})'
+            return redirect(url_for(c.return_pages('commandes', 'detail'),
                                     id_client=id_client,
-                                    id_order=new_order.order.id,
+                                    id_order=new_order_object.order.id,
                                     error_message=error_message))
-        
+
     # === Par défaut, rediriger vers la fiche client ===
     else:
-        message = Constants.messages(type_msg='error_400', second_type_message='wrong_road')
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        message = c.messages(type_msg='error_400', second_type_message='wrong_road')
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                                 id_client=id_client,
                                 error_message=message))
 
 @commandes_bp.route('/client-<int:id_client>/commande-<int:id_order>/details')
-@validate_habilitation(CLIENTS)
+@validate_habilitation([CLIENTS, FORCE_DE_VENTE])
 def order_details(id_order: int, id_client: int):
     """Afficher les détails d'une commande"""
     try:
-        order = OrdersModel(request) \
+        # Récupérer les données de la commande
+        order_details_object = OrdersModel(request) \
                     .get_order_data(id_order=id_order)
         return PrepareTemplates.orders(subcontext='details',
-                                       order=order.order_details,
-                                       log=True,
-                                       id_client=id_client,
-                                       message=order.message,
-                                       error_message=order.error_message,
-                                       success_message=order.success_message)
-        
-    except Exception as e:
-        raise NotFound(Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})')
+                                       order=order_details_object.order_details, log=True,
+                                       id_client=id_client, message=order_details_object.message,
+                                       error_message=order_details_object.error_message,
+                                       success_message=order_details_object.success_message)
 
-@commandes_bp.route('/client-<int:id_client>/commande-<int:id_order>/modifier', methods=['GET', 'POST'])
-@validate_habilitation(CLIENTS)
+    except SQLAlchemyError as e:
+        message = c.messages(type_msg='error_500', second_type_message='default') + f' : ({e})'
+        return redirect(url_for(c.return_pages('clients', 'detail'),
+                                id_client=id_client,
+                                error_message=message,
+                                tab='order'))
+
+@commandes_bp.route('/client-<int:id_client>/commande-<int:id_order>/modifier',
+                    methods=['GET', 'POST'])
+@validate_habilitation([CLIENTS, FORCE_DE_VENTE])
 def edit_order(id_client: int, id_order: int):
     """Modifier une commande existante"""
     # === Gestion de la demande de formulaire ===
@@ -132,35 +141,43 @@ def edit_order(id_client: int, id_order: int):
         order = OrdersModel(request) \
                     .get_order_data(id_order=id_order)
         if not order.order_details:
-            raise NotFound(Constants.messages(type_msg='error_404', second_type_message='not_found'))
+            raise NotFound(c.messages(type_msg='error_404', second_type_message='not_found'))
         return PrepareTemplates.orders(subcontext='form',
                                        form_sub_context='edit',
                                        order=order.order_details)
+
     # === Gestion de la soumission du formulaire ===
     elif request.method == 'POST':
         try:
+            # Mettre à jour la commande avec les nouvelles données
             order = OrdersModel(request) \
                         .post_order_data(id_client=id_client, id_order=id_order) \
                         .check_entries_changements()
+
+            # Mettre à jour les éléments de la commande dans la base de données
             for entry in order.entries_to_merge:
                 order.db_session.merge(entry)
+
+            # Mettre à jour la commande en base de données
             order.db_session.merge(order.order)
             order.db_session.commit()
-            message = Constants.messages(type_msg='commandes', second_type_message='updated')
-            return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+
+            # Retourner à la fiche de la commande modifiée
+            message = c.messages(type_msg='commandes', second_type_message='updated')
+            return redirect(url_for(c.return_pages('commandes', 'detail'),
                                     id_client=id_client,
                                     id_order=id_order,
                                     success_message=message))
-        except Exception as e:
-            error_message = Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})'
-            return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+        except SQLAlchemyError as e:
+            message = c.messages(type_msg='error_500', second_type_message='default') + f' : ({e})'
+            return redirect(url_for(c.return_pages('commandes', 'detail'),
                                     id_client=id_client,
                                     id_order=id_order,
-                                    error_message=error_message))
+                                    error_message=message))
     # === Par défaut, rediriger vers la fiche client ===
     else:
-        message = Constants.messages(type_msg='error_400', second_type_message='wrong_road')
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        message = c.messages(type_msg='error_400', second_type_message='wrong_road')
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                                 id_client=id_client,
                                 error_message=message,
                                 tab='order'))
@@ -169,25 +186,34 @@ def edit_order(id_client: int, id_order: int):
 @validate_habilitation(CLIENTS)
 def cancel_order(id_order: int, id_client: int):
     """Annuler une commande (soft delete)"""
-    order_details = OrdersModel(request) \
-                .cancel_order(id_client=id_client, id_order=id_order)
     session_db: SessionBdDType = get_db_session()
+
+    # Récupérer les données de la commande
+    order_details_object = OrdersModel(request) \
+                .cancel_order(id_client=id_client, id_order=id_order)
     try:
-        session_db.merge(order_details.order)
-        for entry in order_details.order.devises:
+        # Mettre à jour la commande et ses entrées associées
+        session_db.merge(order_details_object.order)
+        for entry in order_details_object.order.devises:
             session_db.merge(entry)
+
+        # Finaliser la transaction
         session_db.commit()
-        message = Constants.messages(type_msg='commandes', second_type_message='deleted')
-        return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+
+        # Retourner à la fiche de la commande annulée
+        message = c.messages(type_msg='commandes', second_type_message='deleted')
+        return redirect(url_for(c.return_pages('commandes', 'detail'),
                                 id_client=id_client,
                                 id_order=id_order,
                                 success_message=message))
-    except Exception as e:
-        error_message = Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})'
-        return redirect(url_for(Constants.return_pages('commandes', 'detail'),
+
+    # === Gestion des erreurs de la base de données ===
+    except SQLAlchemyError as e:
+        message = c.messages(type_msg='error_500', second_type_message='default') + f' : ({e})'
+        return redirect(url_for(c.return_pages('commandes', 'detail'),
                                 id_client=id_client,
                                 id_order=id_order,
-                                error_message=error_message))
+                                error_message=message))
 
 @commandes_bp.route('/client-<int:id_client>/commande-<int:id_order>/bon-impression')
 @validate_habilitation(CLIENTS)
@@ -198,27 +224,15 @@ def order_purchase(id_order: int, id_client: int):
                 .get_order_data(id_order=id_order).order_details
 
     # Générer l'URL de gestion de la commande
-    commande_url = url_for(Constants.return_pages('commandes', 'detail'),
+    commande_url = url_for(c.return_pages('commandes', 'detail'),
                            id_client=id_client, id_order=id_order, _external=True)
-    
-    # Créer le QR code
-    qr = qrcode.QRCode(version=1,
-        error_correction=qrcode.ERROR_CORRECT_L,
-        box_size=3,border=1)
-    qr.add_data(commande_url)
-    qr.make(fit=True)
 
-    # Générer l'image QR code en base64
-    img = qr.make_image(fill_color="black", back_color="white")
-    buffer = BytesIO()
-    img.save(buffer, 'PNG')
-    qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+    # Générer le QR code pour l'URL de la commande
+    qr_code_base64 = generate_qrcode(commande_url)
 
     # Renvoyer le template avec les données de la commande et le QR code
-    return PrepareTemplates.notes(template=Constants.templates('commande-print'),
-                                  order=order,
-                                  order_url=commande_url,
-                                  qr_code_base64=qr_code_base64,
+    return PrepareTemplates.notes(template=c.templates('commande-print'), order=order,
+                                  order_url=commande_url, qr_code_base64=qr_code_base64,
                                   now=datetime.now())
 
 @commandes_bp.route('/client-<int:id_client>/commande-<int:id_order>/facturer', methods=['POST'])
@@ -232,28 +246,40 @@ def order_bill(id_client: int, id_order: int):
                             .post_bill_data(id_client=id_client, id_order=id_order) \
                             .create_new_bill()
         try:
+            # Enregistrer la nouvelle facture en base de données
             order_to_bill.session_db.commit()
-        except Exception as e:
-            raise ValueError(Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})')
-        
-        # Mettre à jour la commande associée
-        order_to_bill.mark_order_as_billed()
 
-        try:
+            # Mettre à jour la commande associée
+            order_to_bill.mark_order_as_billed()
+
+            # Finaliser la transaction
             order_to_bill.session_db.commit()
-        except Exception as e:
-            raise ValueError(Constants.messages(type_msg='error_500', second_type_message='default') + f' : ({e})')
 
-        message = Constants.messages(type_msg='factures', second_type_message='created')
-        return redirect(url_for(Constants.return_pages('factures', 'detail'),
+            # Retourner à la fiche de la commande facturée
+            message = c.messages(type_msg='factures', second_type_message='created')
+            return redirect(url_for(c.return_pages('factures', 'detail'),
+                                    id_client=id_client,
+                                    id_order=id_order,
+                                    success_message=message))
+
+        except SQLAlchemyError as e:
+            message = c.messages(type_msg='error_500', second_type_message='default') + f' : ({e})'
+            return redirect(url_for(c.return_pages('commandes', 'detail'),
+                                    id_client=id_client,
+                                    id_order=id_order,
+                                    error_message=message))
+    else:
+        message = c.messages(type_msg='error_400', second_type_message='wrong_road')
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                                 id_client=id_client,
-                                id_order=id_order,
-                                success_message=message))
+                                error_message=message,
+                                tab='order'))
 
 @commandes_bp.route('/client-<int:id_client>/commande-<int:id_order>/expedier', methods=['POST'])
 @validate_habilitation(CLIENTS)
 def order_ship(id_client: int, id_order: int):
     """Traiter l'expédition de lignes sélectionnées"""
+    #TODO: Créer la fonction d'expédition des commandes
     pass
 
 @commandes_bp.route('/client-<int:id_client>/facture-<int:id_facture>/details', methods=['GET'])
@@ -261,29 +287,20 @@ def order_ship(id_client: int, id_order: int):
 def bill_details(id_client: int, id_facture: int):
     """Affiche le détail d'une facture"""
     session_db: SessionBdDType = get_db_session()
-    bill = session_db \
-                .query(Facture) \
-                .options(
-                    joinedload(Facture.commande)
-                        .joinedload(Order.client),
-                    joinedload(Facture.commande)
-                        .joinedload(Order.devises),
-                    joinedload(Facture.commande)
-                        .joinedload(Order.adresse_facturation),
-                    joinedload(Facture.commande)
-                        .joinedload(Order.adresse_livraison)
-                ).filter(
-                    Facture.id == id_facture,
-                    Facture.id_client == id_client
-                ).first()
+    bill = session_db.query(Facture) \
+                     .options(joinedload(Facture.commande).joinedload(Order.client),
+                              joinedload(Facture.commande).joinedload(Order.devises),
+                              joinedload(Facture.commande).joinedload(Order.adresse_facturation),
+                              joinedload(Facture.commande).joinedload(Order.adresse_livraison)) \
+                     .filter(Facture.id == id_facture, Facture.id_client == id_client) \
+                     .first()
     if not bill:
-        raise NotFound(Constants.messages(type_msg='error_404', second_type_message='not_found'))
+        raise NotFound(c.messages(type_msg='error_404', second_type_message='not_found'))
     # Rediriger vers la page de la facture
-    return PrepareTemplates.bill(sub_context='detail',
-                                 id_client=id_client,
-                                 bill=bill)
+    return PrepareTemplates.bill(sub_context='detail', id_client=id_client, bill=bill)
 
-@commandes_bp.route('/client-<int:id_client>/facture-<int:id_facture>/imprimer-sauvegarder-<fiscal_id>', methods=['GET'])
+@commandes_bp.route('/client-<int:id_client>/facture-<int:id_facture>/print-save-<fiscal_id>',
+                    methods=['GET'])
 @validate_habilitation(CLIENTS)
 def bill_print(id_client: int, id_facture: int, fiscal_id: str):
     """Générer le PDF d'une facture pour impression"""
@@ -292,34 +309,29 @@ def bill_print(id_client: int, id_facture: int, fiscal_id: str):
 
     # Générer le PDF de la facture
     session_db: SessionBdDType = get_db_session()
-    bill = session_db.query(Facture).filter(
-        Facture.id == id_facture,
-        Facture.id_client == id_client
-    ).first()
+    bill = session_db.query(Facture) \
+                     .filter(Facture.id == id_facture, Facture.id_client == id_client) \
+                     .first()
+
+    if not bill:
+        raise NotFound(c.messages(type_msg='error_404', second_type_message='not_found'))
 
     # Créer le QR code pour le lien de règlement
-    bill_url = url_for(Constants.return_pages('factures', 'detail'),
-                       id_client=id_client,
-                       id_order=bill.id_order,
-                       _external=True)
-    qr = qrcode.QRCode(version=1,
-        error_correction=qrcode.ERROR_CORRECT_L,
-        box_size=3,border=1)
-    qr.add_data(bill_url)
-    qr.make(fit=True)
-    qr_code_base64 = qr.make_image(fill_color="black", back_color="white").convert("RGB")
-
+    bill_url = url_for(c.return_pages('factures', 'detail'), id_client=id_client,
+                       id_order=bill.id_order, _external=True)
+    qr_code_base64 = generate_qrcode(bill_url)
 
     template = PrepareTemplates.bill_pdf(bill=bill, qr_code_base64=qr_code_base64)
-    bill_document = BillsDocument().upload(ref=fiscal_id, rendered_template=template)
+    bill_document = BillsDocument()
+    bill_document.upload(ref=fiscal_id, rendered_template=template)
 
     if print_location == 'local':
         return bill_document.download(ref=fiscal_id)
-    else:
-        return bill_document.print_with_cups()
+    return bill_document.print_with_cups()
 
 @commandes_bp.route('/client-<int:id_client>/facture-<int:id_facture>/telecharger', methods=['GET'])
 @validate_habilitation(CLIENTS)
 def bill_download(id_client: int, id_facture: int):
     """Téléchargement du document PDF de la facture"""
+    #TODO: Créer la fonction de téléchargement des factures
     pass

@@ -39,7 +39,7 @@ from app_acfc.db_models import (Client, Part, Pro, Telephone, Mail,
                               Order, Facture, Adresse, DevisesFactures)
 from app_acfc.config.config_models import get_db_session
 from app_acfc.functions.clients import ClientMethods, validate_mail
-from app_acfc.models.templates_models import PrepareTemplates, Constants
+from app_acfc.models.templates_models import PrepareTemplates, Constants as c
 from app_acfc.habilitations import validate_habilitation, CLIENTS, GESTIONNAIRE, ADMINISTRATEUR
 
 clients_bp = Blueprint('clients', __name__, url_prefix='/clients', static_folder='statics/clients')
@@ -162,10 +162,10 @@ def recherche_avancee() -> ResponseWerkzeug | str:
 
     except SQLAlchemyError as e:
         return PrepareTemplates.error_5xx(status_code=500, status_message=str(e),
-                                    log=True, specific_log=Constants.log_files('client') + str(e))
+                                    log=True, specific_log=c.log_files('client') + str(e))
     except (KeyError, ValueError) as e:
         return PrepareTemplates.error_4xx(status_code=400, status_message=str(e),
-                                    log=True, specific_log=Constants.log_files('client') + str(e))
+                                    log=True, specific_log=c.log_files('client') + str(e))
 
 # ================================================================
 # DONNÉES CLIENTS INDIVIDUELLES
@@ -210,15 +210,15 @@ def create_client() -> str | ResponseWerkzeug:
         # Envoi du client en base de données
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                                 id_client=new_client.id,
-                                success_message=Constants.messages('client', 'create')))
+                                success_message=c.messages('client', 'create')))
     except SQLAlchemyError as e:
         return PrepareTemplates.error_5xx(status_code=500, status_message=str(e),
-                                          log=True, specific_log=Constants.log_files('client'))
+                                          log=True, specific_log=c.log_files('client'))
     except (KeyError, ValueError) as e:
         return PrepareTemplates.error_4xx(status_code=400, status_message=str(e),
-                                          log=True, specific_log=Constants.log_files('client'))
+                                          log=True, specific_log=c.log_files('client'))
 
 @clients_bp.route('/<int:id_client>', methods=['GET'])
 @validate_habilitation(CLIENTS)
@@ -275,7 +275,7 @@ def get_client(id_client: int) -> str:
                                         log=True, tab=tab, error_message=error_message)
     else:
         return PrepareTemplates.error_4xx(status_code=404, log=True,
-                                          status_message=Constants.messages('client', 'not_found'))
+                                          status_message=c.messages('client', 'not_found'))
 
 @clients_bp.route('/<int:id_client>/modify', methods=['GET'])
 @validate_habilitation(CLIENTS)
@@ -299,7 +299,7 @@ def edit_client(id_client: int) -> str:
                                         nom_affichage=nom_affichage)
     else:
         return PrepareTemplates.error_4xx(status_code=404, log=True,
-                                          status_message=Constants.messages('client', 'not_found'))
+                                          status_message=c.messages('client', 'not_found'))
 
 @validate_habilitation(CLIENTS)
 @clients_bp.route('/<int:id_client>/update', methods=['POST'])
@@ -326,7 +326,7 @@ def update_client(id_client: int) -> ResponseWerkzeug | str:
                                                   joinedload(Client.pro)).get(id_client)
         # Gestion de l'absence de retours
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+            return redirect(url_for(c.return_pages('clients', 'recherche')))
 
         # Récupération du nom d'affichage au début pour éviter les problèmes de session
         nom_affichage = client.nom_affichage
@@ -348,19 +348,19 @@ def update_client(id_client: int) -> ResponseWerkzeug | str:
         db_session.commit()
 
         # Redirection vers la page de détails du client avec message de succès
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                success_message=Constants.messages('client', 'update'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
+                                success_message=c.messages('client', 'update'),
                                 id_client=client.id))
     except SQLAlchemyError as e:
         return PrepareTemplates.clients(sub_context='edit', client=client, log=True,
                             id_client=client.id if client else id_client,
                             nom_affichage=nom_affichage if nom_affichage else f"Client {id_client}",
-                            error_message=Constants.messages('error_500', 'default') + f" : {e}")
+                            error_message=c.messages('error_500', 'default') + f" : {e}")
     except (KeyError, ValueError) as e:
         return PrepareTemplates.clients(sub_context='edit', client=client, log=True,
                             id_client=client.id if client else id_client,
                             nom_affichage=nom_affichage if nom_affichage else f"Client {id_client}",
-                            error_message=Constants.messages('error_500', 'default') + f" : {e}")
+                            error_message=c.messages('error_500', 'default') + f" : {e}")
 
 @clients_bp.route('/<int:id_client>/delete/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -387,8 +387,8 @@ def delete_client(id_client: int) -> ResponseWerkzeug:
             joinedload(Client.factures)
         ).get(id_client)
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'recherche'),
-                        error_message=Constants.messages('client', 'not_found')))
+            return redirect(url_for(c.return_pages('clients', 'recherche'),
+                        error_message=c.messages('client', 'not_found')))
 
         # Vérification de commandes ou factures de moins de 5 ans
         now = datetime.now()
@@ -402,26 +402,26 @@ def delete_client(id_client: int) -> ResponseWerkzeug:
             for f in client.factures
         )
         if recent_commande or recent_facture:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+            return redirect(url_for(c.return_pages('clients', 'detail'),
                         id_client=id_client,
-                        error_message=Constants.messages('client', 'delete_forbidden')))
+                        error_message=c.messages('client', 'delete_forbidden')))
 
         # Suppression logique
         client.is_active = False
         client.modified_by = session.get('pseudo', 'N/A')
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'recherche'),
-                                success_message=Constants.messages('client', 'delete')))
+        return redirect(url_for(c.return_pages('clients', 'recherche'),
+                                success_message=c.messages('client', 'delete')))
 
     except SQLAlchemyError as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                             id_client=id_client, log=True,
-                            error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                            error_message=c.messages('error_500', 'default') + f" : {e}"))
     except (KeyError, ValueError) as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                             id_client=id_client, log=True,
-                            error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                            error_message=c.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/add-phone/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -450,14 +450,14 @@ def add_phone(id_client: int) -> ResponseWerkzeug:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+            return redirect(url_for(c.return_pages('clients', 'recherche')))
 
         # Validation du numéro de téléphone
         telephone = request.form.get('telephone', '').strip()
         if not telephone:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+            return redirect(url_for(c.return_pages('clients', 'detail'),
                                             id_client=id_client, tab='phone',
-                                            error_message=Constants.messages('phone', 'missing')))
+                                            error_message=c.messages('phone', 'missing')))
 
         # Récupération des autres données (type de téléphone, indicatif, détail, si principal)
         type_telephone = request.form.get('type_telephone', 'mobile_pro')
@@ -481,17 +481,17 @@ def add_phone(id_client: int) -> ResponseWerkzeug:
         db_session.add(new_telephone)
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='phone',
-                        id_client=id_client, success_message=Constants.messages('phone', 'valid')))
+        return redirect(url_for(c.return_pages('clients', 'detail'), tab='phone',
+                        id_client=id_client, success_message=c.messages('phone', 'valid')))
 
     except SQLAlchemyError as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                         id_client=id_client, log=True, tab='phone',
-                        error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                        error_message=c.messages('error_500', 'default') + f" : {e}"))
     except (KeyError, ValueError) as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                         id_client=id_client, log=True, tab='phone',
-                        error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                        error_message=c.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/modify-phone/<int:id_phone>/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -533,17 +533,17 @@ def mod_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         # Gestion de l'absence de retours (absence client, absence téléphone, absence numéro)
         # L'absence de client est peu probable, mais on la gère quand même
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+            return redirect(url_for(c.return_pages('clients', 'recherche')))
         # L'absence de téléphone est peu probable aussi (mauvais ID ou téléphone déjà supprimé)
         if not phone_obj:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+            return redirect(url_for(c.return_pages('clients', 'detail'),
                                     id_client=id_client, tab='phone',
-                                    error_message=Constants.messages('phone', 'not_found')))
+                                    error_message=c.messages('phone', 'not_found')))
         # Le numéro de téléphone est obligatoire : retour avec message d'erreur
         if not phone:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+            return redirect(url_for(c.return_pages('clients', 'detail'),
                                     id_client=id_client, tab='phone',
-                                    error_message=Constants.messages('phone', 'missing')))
+                                    error_message=c.messages('phone', 'missing')))
 
         # Si c'est le téléphone principal, désactiver les autres
         if is_principal:
@@ -563,13 +563,13 @@ def mod_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         db_session.commit()
 
         # Redirection vers la page détails du client sur l'onglet téléphone avec message de succès
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                             id_client=id_client, log=True, tab='phone',
-                            success_message=Constants.messages('phone', 'updated')))
+                            success_message=c.messages('phone', 'updated')))
     except (SQLAlchemyError, KeyError, ValueError) as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                             id_client=id_client, log=True, tab='phone',
-                            error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                            error_message=c.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/delete-phone/<int:id_phone>/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -593,24 +593,24 @@ def del_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         client = db_session.query(Client).get(id_client)
         phone_obj = db_session.query(Telephone).filter_by(id=id_phone, id_client=id_client).first()
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+            return redirect(url_for(c.return_pages('clients', 'recherche')))
         if not phone_obj:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+            return redirect(url_for(c.return_pages('clients', 'detail'),
                                     id_client=id_client, tab='phone',
-                                    error_message=Constants.messages('phone', 'not_found')))
+                                    error_message=c.messages('phone', 'not_found')))
         # Suppression logique
         phone_obj.is_inactive = True
         phone_obj.modified_by = session.get('pseudo', 'N/A')
         phone_obj.is_principal = False  # Ne peut plus être principal
         phone_obj.modified_at = datetime.now()
         db_session.commit()
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                             id_client=id_client, log=True, tab='phone',
-                            success_message=Constants.messages('phone', 'deleted')))
+                            success_message=c.messages('phone', 'deleted')))
     except (SQLAlchemyError, KeyError, ValueError) as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                             id_client=id_client, log=True, tab='phone',
-                            error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                            error_message=c.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/add-email/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -638,14 +638,14 @@ def add_email(id_client: int) -> ResponseWerkzeug:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+            return redirect(url_for(c.return_pages('clients', 'recherche')))
         # Validation de l'email
         email = request.form.get('mail', '').strip()
         is_email = validate_mail(email)
         if not is_email[0]:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+            return redirect(url_for(c.return_pages('clients', 'detail'),
                                         id_client=id_client, tab='mail',
-                                        error_message=Constants.messages('email', is_email[1])))
+                                        error_message=c.messages('email', is_email[1])))
         # Récupération des autres données
         type_mail = request.form.get('type_mail', 'professionnel')
         detail = request.form.get('detail', '').strip()
@@ -664,13 +664,13 @@ def add_email(id_client: int) -> ResponseWerkzeug:
         db_session.add(new_mail)
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
-                        id_client=id_client, success_message=Constants.messages('email', 'valid')))
+        return redirect(url_for(c.return_pages('clients', 'detail'), tab='mail',
+                        id_client=id_client, success_message=c.messages('email', 'valid')))
 
     except (SQLAlchemyError, KeyError, ValueError) as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                         id_client=id_client, log=True, tab='mail',
-                        error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                        error_message=c.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/modify-email/<int:id_mail>/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -701,16 +701,16 @@ def mod_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         mail_obj = db_session.query(Mail).filter_by(id=id_mail, id_client=id_client).first()
         email = request.form.get('mail', '').strip()
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+            return redirect(url_for(c.return_pages('clients', 'recherche')))
         if not mail_obj:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+            return redirect(url_for(c.return_pages('clients', 'detail'),
                                     id_client=id_client, tab='mail',
-                                    error_message=Constants.messages('email', 'not_found')))
+                                    error_message=c.messages('email', 'not_found')))
         is_email = validate_mail(email)
         if not is_email[0]:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+            return redirect(url_for(c.return_pages('clients', 'detail'),
                                     id_client=id_client, tab='mail',
-                                    error_message=Constants.messages('email', is_email[1])))
+                                    error_message=c.messages('email', is_email[1])))
         # Récupération des autres données
         type_mail = request.form.get('type_mail', 'professionnel')
         detail = request.form.get('detail', '').strip()
@@ -727,13 +727,13 @@ def mod_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         mail_obj.is_principal = is_principal
 
         db_session.commit()
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
-                    id_client=id_client, success_message=Constants.messages('email', 'updated')))
+        return redirect(url_for(c.return_pages('clients', 'detail'), tab='mail',
+                    id_client=id_client, success_message=c.messages('email', 'updated')))
 
     except (SQLAlchemyError, KeyError, ValueError) as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                     id_client=id_client, log=True, tab='mail',
-                    error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                    error_message=c.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/delete-email/<int:id_mail>/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -759,11 +759,11 @@ def del_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         client = db_session.query(Client).get(id_client)
         mail_obj = db_session.query(Mail).filter_by(id=id_mail, id_client=id_client).first()
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'recherche')))
+            return redirect(url_for(c.return_pages('clients', 'recherche')))
         if not mail_obj:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'),
+            return redirect(url_for(c.return_pages('clients', 'detail'),
                                     id_client=id_client, tab='mail',
-                                    error_message=Constants.messages('email', 'not_found')))
+                                    error_message=c.messages('email', 'not_found')))
 
         # Suppression logique
         mail_obj.is_inactive = True
@@ -772,13 +772,13 @@ def del_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         mail_obj.modified_at = datetime.now()
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
-                    id_client=id_client, success_message=Constants.messages('email', 'deleted')))
+        return redirect(url_for(c.return_pages('clients', 'detail'), tab='mail',
+                    id_client=id_client, success_message=c.messages('email', 'deleted')))
 
     except (SQLAlchemyError, KeyError, ValueError) as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                     id_client=id_client, log=True, tab='mail',
-                    error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                    error_message=c.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/add-address/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -808,9 +808,9 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
+            return redirect(url_for(c.return_pages('clients', 'detail'), tab='add',
                                     id_client=id_client,
-                                    error_message=Constants.messages('client', 'not_found')))
+                                    error_message=c.messages('client', 'not_found')))
 
         # Validation des données d'adresse
         adresse_l1 = request.form.get('adresse_l1', '').strip()
@@ -820,8 +820,8 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
         detail = request.form.get('detail', '').strip()
         if not adresse_l1 or not code_postal or not ville:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                    id_client=id_client, error_message=Constants.messages('address', 'missing')))
+            return redirect(url_for(c.return_pages('clients', 'detail'), tab='add',
+                    id_client=id_client, error_message=c.messages('address', 'missing')))
 
         # Si c'est l'adresse principale, désactiver les autres
         if is_principal:
@@ -838,12 +838,12 @@ def add_address(id_client: int) -> ResponseWerkzeug:
         db_session.add(new_adresse)
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                    id_client=id_client, success_message=Constants.messages('address', 'valid')))
+        return redirect(url_for(c.return_pages('clients', 'detail'), tab='add',
+                    id_client=id_client, success_message=c.messages('address', 'valid')))
 
     except (SQLAlchemyError, KeyError, ValueError) as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), id_client=id_client,
-        tab='add', error_message=Constants.messages('error_500', 'default') + f" : {e}", log=True))
+        return redirect(url_for(c.return_pages('clients', 'detail'), id_client=id_client,
+        tab='add', error_message=c.messages('error_500', 'default') + f" : {e}", log=True))
 
 @clients_bp.route('/<int:id_client>/modify-address/<int:id_address>/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -876,12 +876,11 @@ def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
                                 .filter_by(id=id_address, id_client=id_client) \
                                 .first()
         if not client:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                    id_client=id_client, error_message=Constants.messages('client', 'not_found')))
+            return redirect(url_for(c.return_pages('clients', 'detail'), tab='add',
+                    id_client=id_client, error_message=c.messages('client', 'not_found')))
         if not address_obj:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                    id_client=id_client, error_message=Constants.messages('address', 'not_found')))
-
+            return redirect(url_for(c.return_pages('clients', 'detail'), tab='add',
+                    id_client=id_client, error_message=c.messages('address', 'not_found')))
         # Validation des données d'adresse
         adresse_l1 = request.form.get('adresse_l1', '').strip()
         adresse_l2 = request.form.get('adresse_l2', '').strip()
@@ -890,8 +889,8 @@ def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
         is_principal = request.form.get('is_principal', 'false').lower() == 'true'
         detail = request.form.get('detail', '').strip()
         if not adresse_l1 or not code_postal or not ville:
-            return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                    id_client=id_client, error_message=Constants.messages('address', 'missing')))
+            return redirect(url_for(c.return_pages('clients', 'detail'), tab='add',
+                    id_client=id_client, error_message=c.messages('address', 'missing')))
 
         # Si c'est l'adresse principale, désactiver les autres
         if is_principal:
@@ -907,12 +906,12 @@ def mod_address(id_client: int, id_address: int) -> ResponseWerkzeug:
         address_obj.detail = detail if detail else None
         address_obj.modified_by = session.get('pseudo', 'N/A')
         db_session.commit()
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                                id_client=id_client, success_message=Constants.messages('address', 'updated')))
+        return redirect(url_for(c.return_pages('clients', 'detail'), tab='add',
+                    id_client=id_client, success_message=c.messages('address', 'updated')))
     except (SQLAlchemyError, KeyError, ValueError) as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=id_client, log=True, tab='add',
-                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+        return redirect(url_for(c.return_pages('clients', 'detail'),
+                    id_client=id_client, log=True, tab='add',
+                    error_message=c.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/delete-address/<int:id_address>/', methods=['POST'])
 @validate_habilitation(CLIENTS)
@@ -936,25 +935,28 @@ def del_address(id_client: int, id_address: int) -> ResponseWerkzeug:
     try:
         # Récupération et validation des données
         client = db_session.query(Client).get(id_client)
-        address_obj = db_session.query(Adresse).filter_by(id=id_address, id_client=id_client).first()
-        if not client: return redirect(url_for(Constants.return_pages('clients', 'recherche')))
-        if not address_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                         id_client=id_client, tab='add',
-                                         error_message=Constants.messages('address', 'not_found')))
-
+        address_obj = db_session.query(Adresse) \
+                                .filter_by(id=id_address, id_client=id_client) \
+                                .first()
+        if not client:
+            return redirect(url_for(c.return_pages('clients', 'recherche')))
+        if not address_obj:
+            return redirect(url_for(c.return_pages('clients', 'detail'),
+                                    id_client=id_client, tab='add',
+                                    error_message=c.messages('address', 'not_found')))
         # Suppression logique
         address_obj.is_inactive = True
         address_obj.modified_by = session.get('pseudo', 'N/A')
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                                id_client=id_client, success_message=Constants.messages('address', 'deleted')))
+        return redirect(url_for(c.return_pages('clients', 'detail'), tab='add',
+                    id_client=id_client, success_message=c.messages('address', 'deleted')))
 
-    except Exception as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=id_client, log=True, tab='add',
-                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
-    
+    except (SQLAlchemyError, KeyError, ValueError) as e:
+        return redirect(url_for(c.return_pages('clients', 'detail'),
+                            id_client=id_client, log=True, tab='add',
+                            error_message=c.messages('error_500', 'default') + f" : {e}"))
+
 @clients_bp.route('/<int:id_client>/activate-address-<int:id_address>/', methods=['POST'])
 @validate_habilitation([CLIENTS, ADMINISTRATEUR], _and=True)
 @validate_habilitation([CLIENTS, GESTIONNAIRE], _and=True)
@@ -975,18 +977,16 @@ def activate_address(id_client: int, id_address: int) -> ResponseWerkzeug:
 
     try:
         # Récupération et validation des données
-        client = (db_session
-            .query(Client).join(Client.adresses)
-            .options(
-                contains_eager(Client.adresses)
-            ).filter(
-                Client.id == id_client, Adresse.id == id_address
-            ).first()
-        )
+        client = db_session.query(Client) \
+                            .join(Client.adresses) \
+                            .options(contains_eager(Client.adresses)) \
+                            .filter(Client.id == id_client, Adresse.id == id_address) \
+                            .first()
         address_obj = client.adresses[0] if client and client.adresses else None
-        if not address_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                         id_client=id_client, tab='add',
-                                         error_message=Constants.messages('address', 'not_found')))
+        if not address_obj:
+            return redirect(url_for(c.return_pages('clients', 'detail'),
+                                    id_client=id_client, tab='add',
+                                    error_message=c.messages('address', 'not_found')))
 
         # Réactivation logique
         address_obj.is_inactive = False
@@ -994,13 +994,13 @@ def activate_address(id_client: int, id_address: int) -> ResponseWerkzeug:
         address_obj.modified_at = datetime.now()
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='add',
-                                id_client=id_client, success_message=Constants.messages('address', 'reactivated')))
+        return redirect(url_for(c.return_pages('clients', 'detail'), tab='add',
+                id_client=id_client, success_message=c.messages('address', 'reactivated')))
 
-    except Exception as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                id_client=id_client, log=True, tab='add',
-                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+    except (SQLAlchemyError, KeyError, ValueError) as e:
+        return redirect(url_for(c.return_pages('clients', 'detail'),
+                id_client=id_client, log=True, tab='add',
+                error_message=c.messages('error_500', 'default') + f" : {e}"))
 
 @clients_bp.route('/<int:id_client>/activate-phone-<int:id_phone>/', methods=['POST'])
 @validate_habilitation([CLIENTS, ADMINISTRATEUR], _and=True)
@@ -1009,7 +1009,7 @@ def activate_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
     """
     Réactivation d'un numéro de téléphone inactif pour un client.
     
-    Endpoint REST pour réactiver un numéro de téléphone précédemment supprimé (logiquement) d'un client.
+    Endpoint REST pour réactiver un téléphone précédemment supprimé (logiquement) d'un client.
     
     Form Data:
         - id_client (int): ID du client
@@ -1031,9 +1031,10 @@ def activate_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
             ).first()
         )
         phone_obj = client.tels[0] if client and client.tels else None
-        if not phone_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                         id_client=id_client, tab='phone',
-                                         error_message=Constants.messages('phone', 'not_found')))
+        if not phone_obj:
+            return redirect(url_for(c.return_pages('clients', 'detail'),
+                                    id_client=id_client, tab='phone',
+                                    error_message=c.messages('phone', 'not_found')))
 
         # Réactivation logique
         phone_obj.is_inactive = False
@@ -1041,14 +1042,14 @@ def activate_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         phone_obj.modified_at = datetime.now()
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='phone',
-                                id_client=id_client, success_message=Constants.messages('phone', 'reactivated')))
+        return redirect(url_for(c.return_pages('clients', 'detail'), tab='phone',
+                id_client=id_client, success_message=c.messages('phone', 'reactivated')))
 
     except (SQLAlchemyError, KeyError, ValueError) as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                                 id_client=id_client, log=True, tab='phone',
-                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
-    
+                                error_message=c.messages('error_500', 'default') + f" : {e}"))
+
 @clients_bp.route('/<int:id_client>/activate-email-<int:id_mail>/', methods=['POST'])
 @validate_habilitation([CLIENTS, ADMINISTRATEUR], _and=True)
 @validate_habilitation([CLIENTS, GESTIONNAIRE], _and=True)
@@ -1078,9 +1079,10 @@ def activate_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
             ).first()
         )
         mail_obj = client.mails[0] if client and client.mails else None
-        if not mail_obj: return redirect(url_for(Constants.return_pages('clients', 'detail'),
-                                         id_client=id_client, tab='mail',
-                                         error_message=Constants.messages('email', 'not_found')))
+        if not mail_obj:
+            return redirect(url_for(c.return_pages('clients', 'detail'),
+                                    id_client=id_client, tab='mail',
+                                    error_message=c.messages('email', 'not_found')))
 
         # Réactivation logique
         mail_obj.is_inactive = False
@@ -1088,10 +1090,10 @@ def activate_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         mail_obj.modified_at = datetime.now()
         db_session.commit()
 
-        return redirect(url_for(Constants.return_pages('clients', 'detail'), tab='mail',
-                                id_client=id_client, success_message=Constants.messages('email', 'reactivated')))
+        return redirect(url_for(c.return_pages('clients', 'detail'), tab='mail',
+                        id_client=id_client, success_message=c.messages('email', 'reactivated')))
 
     except (SQLAlchemyError, KeyError, ValueError) as e:
-        return redirect(url_for(Constants.return_pages('clients', 'detail'),
+        return redirect(url_for(c.return_pages('clients', 'detail'),
                                 id_client=id_client, log=True, tab='mail',
-                                error_message=Constants.messages('error_500', 'default') + f" : {e}"))
+                                error_message=c.messages('error_500', 'default') + f" : {e}"))

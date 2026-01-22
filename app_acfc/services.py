@@ -24,7 +24,7 @@ from flask_wtf import CSRFProtect
 from sqlalchemy.orm import Session as SessionBdDType
 from logs.logger import acfc_log, INFO
 from app_acfc.db_models.users import User
-from app_acfc.models.templates_models import Constants
+from app_acfc.models.templates_models import Constants as c
 from app_acfc.config.config_models import get_db_session
 
 class PasswordService:
@@ -255,10 +255,7 @@ class AuthenticationService:
             message (str): Le message à enregistrer
             level (int): Le niveau de log (INFO, ERROR, etc.)
         """
-        acfc_log.log(level=level,
-                            message=message,
-                            specific_logger=Constants.log_files('user'),
-                            db_log=True)
+        acfc_log.log(level=level, message=message, specific_logger=c.log_files('user'), db_log=True)
 
     def __bad_password(self, user: User):
         """
@@ -284,20 +281,21 @@ class AuthenticationService:
         self.user_dict = user.to_dict()
         # Stocker les propriétés nécessaires avant de détacher l'objet de la session
         self.is_chg_mdp = user.is_chg_mdp
-        acfc_log.log(level=INFO,
-                            message=f'Changement de mot de passe requis pour l\'utilisateur: {self.is_chg_mdp}',
-                            specific_logger=Constants.log_files('security'),
-                            db_log=True)
+        message = f'Changement de mot de passe requis: {self.is_chg_mdp}'
+        acfc_log.log(level=INFO, message=message, db_log=True,
+                     specific_logger=c.log_files('security'))
         self.user_pseudo = user.pseudo
         user.nb_errors = 0
         user.is_locked = False
-        if ph_acfc.needs_rehash(user.sha_mdp): user.sha_mdp = ph_acfc.hash_password(user.sha_mdp)
+        if ph_acfc.needs_rehash(user.sha_mdp):
+            user.sha_mdp = ph_acfc.hash_password(user.sha_mdp)
 
     def __get_user(self) -> Tuple[User | None, SessionBdDType]:
         """
         Récupère l'utilisateur depuis la base de données.
         Returns:
-            Tuple[User | None, SessionBdDType]: L'utilisateur trouvé et la session de base de données
+            Tuple[User | None, SessionBdDType]: L'utilisateur trouvé et la session de
+                                                base de données
         """
         session_db = get_db_session()
         user = session_db.query(User).filter_by(pseudo=self.user).first()

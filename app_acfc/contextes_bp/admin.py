@@ -1,4 +1,4 @@
-'''
+"""
 Blueprint d'administration pour l'application ACFC.
 Ce module définit les routes et la logique associée à l'administration, incluant :
 - La page d'accueil de l'administration avec statistiques générales.
@@ -25,8 +25,7 @@ Dépendances :
 - Modules internes : habilitations, modèles, templates, logs
 Sécurité :
 Toutes les routes sont protégées par le décorateur `validate_habilitation(ADMINISTRATEUR)`.
-
-'''
+"""
 
 from datetime import datetime, timedelta
 from typing import Any, Dict
@@ -35,14 +34,11 @@ from flask import Blueprint, request, make_response, session
 from sqlalchemy.orm import Session as SessionBdDType
 from logs.logger import acfc_log, DB_URI, DB_NAME, COLLECTION_NAME, QueryLogs
 from app_acfc.habilitations import validate_habilitation, ADMINISTRATEUR
-from app_acfc.models.templates_models import PrepareTemplates, Constants
+from app_acfc.models.templates_models import PrepareTemplates, Constants as c
 from app_acfc.config.config_models import get_db_session
 from app_acfc.db_models import User
 
-admin_bp = Blueprint('admin',
-                     __name__,
-                     url_prefix='/admin',
-                     static_folder='statics/admin')
+admin_bp = Blueprint('admin', __name__, url_prefix='/admin', static_folder='statics/admin')
 
 @validate_habilitation(ADMINISTRATEUR)
 @admin_bp.route('/')
@@ -76,11 +72,11 @@ def admin_list():
         return PrepareTemplates.admin(subcontext='dashboard', stats=stats)
 
     except (ConnectionError, RuntimeError, ValueError) as e:
-        message = Constants.messages('error_500', 'default') \
+        message = c.messages('error_500', 'default') \
                     + '\ncode erreur : 500' \
                     + f'\ndétail erreur : {str(e)}'
         return PrepareTemplates.error_5xx(status_code=500, status_message=message,
-                                          log=True, specific_log=Constants.log_files('security'))
+                                          log=True, specific_log=c.log_files('security'))
 
 @validate_habilitation(ADMINISTRATEUR)
 @admin_bp.route('/logs')
@@ -95,10 +91,10 @@ def logs_dashboard():
 
         # Construction de la requête MongoDB
         query_logs.get_log_form_filter() \
-            .construct_query() \
-            .construct_pagination() \
-            .construct_stats() \
-            .get_filters()
+                  .construct_query() \
+                  .construct_pagination() \
+                  .construct_stats() \
+                  .get_filters()
 
         # Pagination simple
         pagination: Dict[str, Any] = {
@@ -121,11 +117,11 @@ def logs_dashboard():
                                 log=True)
 
     except (ConnectionError, RuntimeError, ValueError) as e:
-        message = Constants.messages('error_500', 'default') \
+        message = c.messages('error_500', 'default') \
                     + '\ncode erreur : 500' \
                     + f'\ndétail erreur : {str(e)}'
         return PrepareTemplates.error_5xx(status_code=500, status_message=message,
-                                          log=True, specific_log=Constants.log_files('security'))
+                                          log=True, specific_log=c.log_files('security'))
 
 @validate_habilitation(ADMINISTRATEUR)
 @admin_bp.route('/logs/export', methods=['POST'])
@@ -140,9 +136,9 @@ def logs_export():
 
         # Opérations de filtrage de données
         query_logs.get_log_form_filter() \
-            .construct_query() \
-            .construct_list() \
-            .build_csv()
+                  .construct_query() \
+                  .construct_list() \
+                  .build_csv()
 
         # Nom du fichier avec timestamp
         filename = f"logs_acfc_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
@@ -156,6 +152,6 @@ def logs_export():
 
     except (ConnectionError, RuntimeError, ValueError) as e:
         acfc_log.log(40, f"Erreur export logs: {str(e)}",
-                    specific_logger=Constants.log_files('security'),
+                    specific_logger=c.log_files('security'),
                     db_log=True, user=session.get('pseudo', 'N/A'))
         return "Erreur lors de l'export des logs", 500
