@@ -602,7 +602,6 @@ def del_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         phone_obj.is_inactive = True
         phone_obj.modified_by = session.get('pseudo', 'N/A')
         phone_obj.is_principal = False  # Ne peut plus être principal
-        phone_obj.modified_at = datetime.now()
         db_session.commit()
         return redirect(url_for(c.return_pages('clients', 'detail'),
                             id_client=id_client, log=True, tab='phone',
@@ -769,7 +768,6 @@ def del_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         mail_obj.is_inactive = True
         mail_obj.modified_by = session.get('pseudo', 'N/A')
         mail_obj.is_principal = False  # Ne peut plus être principal
-        mail_obj.modified_at = datetime.now()
         db_session.commit()
 
         return redirect(url_for(c.return_pages('clients', 'detail'), tab='mail',
@@ -991,7 +989,6 @@ def activate_address(id_client: int, id_address: int) -> ResponseWerkzeug:
         # Réactivation logique
         address_obj.is_inactive = False
         address_obj.modified_by = session.get('pseudo', 'N/A')
-        address_obj.modified_at = datetime.now()
         db_session.commit()
 
         return redirect(url_for(c.return_pages('clients', 'detail'), tab='add',
@@ -1039,7 +1036,6 @@ def activate_phone(id_client: int, id_phone: int) -> ResponseWerkzeug:
         # Réactivation logique
         phone_obj.is_inactive = False
         phone_obj.modified_by = session.get('pseudo', 'N/A')
-        phone_obj.modified_at = datetime.now()
         db_session.commit()
 
         return redirect(url_for(c.return_pages('clients', 'detail'), tab='phone',
@@ -1087,7 +1083,6 @@ def activate_email(id_client: int, id_mail: int) -> ResponseWerkzeug:
         # Réactivation logique
         mail_obj.is_inactive = False
         mail_obj.modified_by = session.get('pseudo', 'N/A')
-        mail_obj.modified_at = datetime.now()
         db_session.commit()
 
         return redirect(url_for(c.return_pages('clients', 'detail'), tab='mail',

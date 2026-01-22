@@ -39,11 +39,11 @@ class Client(Base):
                                 comment="Type: 1=Particulier, 2=Professionnel")
 
     # === MÉTADONNÉES ===
-    created_at = mapped_column(DateTime, default=func.current_date, nullable=False,
+    created_at = mapped_column(DateTime, default=func.current_date(), nullable=False,   # pylint: disable=not-callable
                                comment="Date de création du client")
     created_by = mapped_column(String(100), nullable=True,
                                comment="Utilisateur ayant créé le client")
-    modified_at = mapped_column(Date, default=func.current_date, onupdate=func.current_date,
+    modified_at = mapped_column(Date, default=func.current_date(), onupdate=func.current_date(),    # pylint: disable=not-callable
                                 nullable=False, comment="Date de modification du client")
     modified_by = mapped_column(String(100), nullable=True,
                                 comment="Utilisateur ayant modifié le client")

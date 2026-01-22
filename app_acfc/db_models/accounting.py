@@ -57,11 +57,11 @@ class Operations(Base):
     documents = relationship("Documents", back_populates="operation")
 
     # === MÉTADONNÉES ===
-    created_at = mapped_column(DateTime, default=func.current_timestamp, nullable=False)
+    created_at = mapped_column(DateTime, default=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     created_by = mapped_column(String(100), nullable=True,
                                comment="Utilisateur ayant créé l'opération")
-    modified_at = mapped_column(DateTime, default=func.current_timestamp,
-                                onupdate=func.current_timestamp, nullable=False)
+    modified_at = mapped_column(DateTime, default=func.current_timestamp(), # pylint: disable=not-callable
+                                onupdate=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     modified_by = mapped_column(String(100), nullable=True,
                                 comment="Utilisateur ayant modifié l'opération")
     is_inactive = mapped_column(Boolean, default=False, nullable=False,
@@ -109,11 +109,11 @@ class Ventilations(Base):
     operation = relationship("Operations", back_populates="ventilations")
 
     # === MÉTADONNÉES ===
-    created_at = mapped_column(DateTime, default=func.current_timestamp, nullable=False)
+    created_at = mapped_column(DateTime, default=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     created_by = mapped_column(String(100), nullable=True,
                                comment="Utilisateur ayant créé la ventilation")
-    modified_at = mapped_column(DateTime, default=func.current_timestamp,
-                                onupdate=func.current_timestamp, nullable=False)
+    modified_at = mapped_column(DateTime, default=func.current_timestamp(), # pylint: disable=not-callable
+                                onupdate=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     modified_by = mapped_column(String(100), nullable=True,
                                 comment="Utilisateur ayant modifié la ventilation")
     is_inactive = mapped_column(Boolean, default=False, nullable=False,
@@ -161,11 +161,11 @@ class Documents(Base):
     operation = relationship("Operations", back_populates="documents")
 
     # === MÉTADONNÉES ===
-    created_at = mapped_column(DateTime, default=func.current_timestamp, nullable=False)
+    created_at = mapped_column(DateTime, default=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     created_by = mapped_column(String(100), nullable=True,
                                comment="Utilisateur ayant créé le document")
-    modified_at = mapped_column(DateTime, default=func.current_timestamp,
-                                onupdate=func.current_timestamp, nullable=False)
+    modified_at = mapped_column(DateTime, default=func.current_timestamp(), # pylint: disable=not-callable
+                                onupdate=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     modified_by = mapped_column(String(100), nullable=True,
                                 comment="Utilisateur ayant modifié le document")
     is_inactive = mapped_column(Boolean, default=False, nullable=False,

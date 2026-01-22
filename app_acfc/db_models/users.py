@@ -45,7 +45,7 @@ class User(Base):
     sha_mdp = mapped_column(String(255), nullable=False, comment="Mot de passe haché avec Argon2")
     is_chg_mdp = mapped_column(Boolean, default=False, nullable=False,
                               comment="Force le changement de mdp à la prochaine connexion")
-    date_chg_mdp = mapped_column(Date, default=func.current_date, nullable=False,
+    date_chg_mdp = mapped_column(Date, default=func.current_date(), nullable=False,  # pylint: disable=not-callable
                                  comment="Date du dernier changement de mot de passe")
     nb_errors = mapped_column(Integer, default=0, nullable=False,
                              comment="Nombre d'erreurs d'authentification consécutives")
@@ -54,10 +54,10 @@ class User(Base):
     permission = mapped_column(String(10), nullable=False, comment="Habilitations de l'utilisateur")
 
     # === CYCLE DE VIE ET ACTIVATION ===
-    created_at = mapped_column(Date, default=func.current_date, nullable=False,
+    created_at = mapped_column(Date, default=func.current_date(), nullable=False,   # pylint: disable=not-callable
                                comment="Date de création du compte")
     is_active = mapped_column(Boolean, default=True, nullable=False, comment="Compte actif/inactif")
-    debut = mapped_column(Date, nullable=False, default=func.current_date,
+    debut = mapped_column(Date, nullable=False, default=func.current_date(),    # pylint: disable=not-callable
                           comment="Date de début de validité")
     fin = mapped_column(Date, nullable=True, comment="Date de fin de validité (optionnelle)")
 

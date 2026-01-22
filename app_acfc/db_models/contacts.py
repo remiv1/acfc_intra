@@ -50,10 +50,10 @@ class Mail(Base):
                                 comment="Email principal pour ce client (un seul par client)")
 
     # === MÉTADONNÉES ===
-    created_at = mapped_column(Date, default=func.current_date, nullable=False)
+    created_at = mapped_column(Date, default=func.current_date(), nullable=False)  # pylint: disable=not-callable
     created_by = mapped_column(String(100), nullable=True, comment="Utilisateur ayant créé l'email")
-    modified_at = mapped_column(DateTime, default=func.current_timestamp,
-                                onupdate=func.current_timestamp, nullable=False)
+    modified_at = mapped_column(DateTime, default=func.current_timestamp(), # pylint: disable=not-callable
+                                onupdate=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     modified_by = mapped_column(String(100), nullable=True,
                                 comment="Utilisateur ayant modifié l'email")
     is_inactive = mapped_column(Boolean, default=False, nullable=False)
@@ -121,11 +121,11 @@ class Telephone(Base):
     is_principal = mapped_column(Boolean, default=False, nullable=False)
 
     # === MÉTADONNÉES ===
-    created_at = mapped_column(Date, default=func.current_date, nullable=False)
+    created_at = mapped_column(Date, default=func.current_date(), nullable=False)   # pylint: disable=not-callable
     created_by = mapped_column(String(100), nullable=True,
                                comment="Utilisateur ayant créé le téléphone")
-    modified_at = mapped_column(DateTime, default=func.current_timestamp,
-                                onupdate=func.current_timestamp, nullable=False,
+    modified_at = mapped_column(DateTime, default=func.now(),   # pylint: disable=not-callable
+                                onupdate=func.now(), nullable=False,    # pylint: disable=not-callable
                                 comment="Date de modification du téléphone")
     modified_by = mapped_column(String(100), nullable=True,
                                 comment="Utilisateur ayant modifié le téléphone")
@@ -179,11 +179,11 @@ class Adresse(Base):
     # === MÉTADONNÉES ===
     is_principal = mapped_column(Boolean, default=False, nullable=False,
                                 comment="Adresse principale pour ce client (une seule par client)")
-    created_at = mapped_column(Date, default=func.current_date, nullable=False)
+    created_at = mapped_column(Date, default=func.current_date(), nullable=False)  # pylint: disable=not-callable
     created_by = mapped_column(String(100), nullable=True,
                                comment="Utilisateur ayant créé l'adresse")
-    modified_at = mapped_column(DateTime, default=func.current_timestamp,
-                                onupdate=func.current_timestamp, nullable=False)
+    modified_at = mapped_column(DateTime, default=func.current_timestamp(), # pylint: disable=not-callable
+                                onupdate=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     modified_by = mapped_column(String(100), nullable=True,
                                 comment="Utilisateur ayant modifié l'adresse")
     is_inactive = mapped_column(Boolean, default=False, nullable=False)

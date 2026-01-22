@@ -1,11 +1,9 @@
-"""
-Module de configuration des modèles de l'application ACFC.
-"""
+"""Module de configuration des modèles de l'application ACFC."""
+
 import time
 from os import getenv
 from typing import List
 from dotenv import load_dotenv
-from sqlalchemy.orm.session import Session as SessionBdD
 from sqlalchemy.orm import Session as SessionBdDType
 from sqlalchemy.exc import OperationalError, DatabaseError
 from flask import g
@@ -162,6 +160,7 @@ def get_db_session() -> SessionBdDType:
     Returns:
         SessionBdDType: Session SQLAlchemy pour la base de données
     """
+    from app_acfc.db_models.base import SessionBdD #pylint: disable=import-outside-toplevel
     if 'db_session' not in g:
         g.db_session = SessionBdD()
     return g.db_session

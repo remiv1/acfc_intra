@@ -37,7 +37,7 @@ class Order(Base):
     adresse_facturation = relationship("Adresse", foreign_keys=[id_adresse_facturation],
                                        back_populates="commandes_facturees")
     descriptif = mapped_column(String(255), nullable=True)
-    date_commande = mapped_column(Date, default=func.current_date, nullable=False)
+    date_commande = mapped_column(Date, default=func.current_date(), nullable=False)  # pylint: disable=not-callable
     montant = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
     devises = relationship("DevisesFactures", back_populates="commande")
     facture = relationship("Facture", back_populates="commande")
@@ -56,11 +56,11 @@ class Order(Base):
                                     comment="Date de dernière facturation (compatibilité)")
 
     # === MÉTADONNÉES ===
-    created_at = mapped_column(DateTime, default=func.current_timestamp, nullable=False)
+    created_at = mapped_column(DateTime, default=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     created_by = mapped_column(String(100), nullable=True,
                                comment="Utilisateur ayant créé la commande")
-    modified_at = mapped_column(DateTime, default=func.current_timestamp,
-                                onupdate=func.current_timestamp, nullable=False)
+    modified_at = mapped_column(DateTime, default=func.current_timestamp(),  # pylint: disable=not-callable
+                                onupdate=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     modified_by = mapped_column(String(100), nullable=True,
                                 comment="Utilisateur ayant modifié la commande")
 
@@ -134,12 +134,12 @@ class DevisesFactures(Base):
                               comment="Utilisateur qui a expédié cette ligne")
 
     # === MÉTADONNÉES ===
-    created_at = mapped_column(DateTime, default=func.current_timestamp, nullable=False,
+    created_at = mapped_column(DateTime, default=func.current_timestamp(), nullable=False,  # pylint: disable=not-callable
                               comment="Date de création de cette ligne")
     created_by = mapped_column(String(100), nullable=True,
                               comment="Utilisateur qui a créé cette ligne")
-    modified_at = mapped_column(DateTime, default=func.current_timestamp,
-                                onupdate=func.current_timestamp, nullable=False,
+    modified_at = mapped_column(DateTime, default=func.current_timestamp(), # pylint: disable=not-callable
+                                onupdate=func.current_timestamp(), nullable=False,  # pylint: disable=not-callable
                                 comment="Date de dernière modification")
     modified_by = mapped_column(String(100), nullable=True,
                               comment="Utilisateur qui a modifié cette ligne")
@@ -222,7 +222,7 @@ class Facture(Base):
     commande = relationship("Order", back_populates="facture")
 
     # === DONNÉES DE FACTURATION ===
-    date_facturation = mapped_column(Date, nullable=False, default=func.current_timestamp)
+    date_facturation = mapped_column(Date, nullable=False, default=func.current_timestamp())    # pylint: disable=not-callable
     montant_facture = mapped_column(Numeric(10, 2), nullable=False, default=0.00)
 
     # === ÉTAT DE LA FACTURE ===
@@ -234,7 +234,7 @@ class Facture(Base):
                                     back_populates="facture")
 
     # === MÉTADONNÉES ===
-    created_at = mapped_column(DateTime, default=func.current_timestamp, nullable=False)
+    created_at = mapped_column(DateTime, default=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     created_by = mapped_column(String(100), nullable=True,
                                comment="Utilisateur ayant créé la facture")
 
@@ -310,10 +310,10 @@ class Expeditions(Base):
     date_expedition_remise = mapped_column(Date, nullable=False)
 
     # === MÉTADONNÉES ===
-    created_at = mapped_column(DateTime, default=func.current_timestamp, nullable=False)
+    created_at = mapped_column(DateTime, default=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     created_by = mapped_column(String(100), nullable=True)
-    modified_at = mapped_column(DateTime, default=func.current_timestamp,
-                                onupdate=func.current_timestamp, nullable=True)
+    modified_at = mapped_column(DateTime, default=func.current_timestamp(),  # pylint: disable=not-callable
+                                onupdate=func.current_timestamp(), nullable=True)  # pylint: disable=not-callable
     modified_by = mapped_column(String(100), nullable=True)
 
     def __repr__(self) -> str:

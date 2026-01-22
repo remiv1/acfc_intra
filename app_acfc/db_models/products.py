@@ -32,11 +32,11 @@ class Catalogue(Base):
                      persisted=True))
 
     # === MÉTADONNÉES ===
-    created_at = mapped_column(Date, default=func.current_date, nullable=False)
+    created_at = mapped_column(Date, default=func.current_date(), nullable=False)  # pylint: disable=not-callable
     created_by = mapped_column(String(100), default='system', nullable=False,
                                comment="Utilisateur ayant créé le produit")
-    modified_at = mapped_column(DateTime, default=func.current_timestamp,
-                                onupdate=func.current_timestamp, nullable=False)
+    modified_at = mapped_column(DateTime, default=func.current_timestamp(),  # pylint: disable=not-callable
+                                onupdate=func.current_timestamp(), nullable=False)  # pylint: disable=not-callable
     modified_by = mapped_column(String(100), nullable=True,
                                 comment="Utilisateur ayant modifié le produit")
 
