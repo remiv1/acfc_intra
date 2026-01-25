@@ -1,18 +1,18 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 22 January 2026  
-**Période analysée :** 15 January 2026 - 22 January 2026 (7 jours)  
-**Nombre de commits :** 9  
+**Date du rapport :** 25 January 2026  
+**Période analysée :** 18 January 2026 - 25 January 2026 (7 jours)  
+**Nombre de commits :** 11  
 **Générateur :** Script automatique v1.0
 
 ---
 
 ## Résumé exécutif
 
-**Activité de développement :** 9 commits sur 7 jours  
-**Volume de code :** 9558 lignes ajoutées, 3198 lignes supprimées  
-**Fichiers impactés :** 205 fichiers modifiés  
-**Productivité moyenne :** 1365 lignes/jour
+**Activité de développement :** 11 commits sur 7 jours  
+**Volume de code :** 9635 lignes ajoutées, 3240 lignes supprimées  
+**Fichiers impactés :** 218 fichiers modifiés  
+**Productivité moyenne :** 1376 lignes/jour
 
 ---
 
@@ -70,6 +70,17 @@
 
 
 ### 22 January 2026
+
+#### 16:26 - 4e0c195 - 📊 Mise à jour automatique du rapport de suivi (22/01/2026)
+
+**Catégorie :** Interface utilisateur  
+**Impact :** +69 -37 lignes, 4 fichiers
+
+**Fichiers modifiés :**
+- `Author: GitHub Action - Progress Report <action@github.com>`
+- `Date:   Thu Jan 22 16:26:26 2026 +0000`
+- `    📊 Mise à jour automatique du rapport de suivi (22/01/2026)`
+- ... et 1 autres fichiers
 
 #### 17:26 - 67aaf22 - Refactor: - Fin de test en situation. Revoir la recherche par filtres. - Refaire application commande/expédition/facturation avec React.
 
@@ -129,38 +140,54 @@
 - ... et 44 autres fichiers
 
 
+### 25 January 2026
+
+#### 17:35 - ce848dc - Mise à jour du fichier .gitignore pour inclure les fichiers .bson et les répertoires .mongodb et diagnostic.data. Modification du Dockerfile Mongo pour convertir les sauts de ligne CRLF en LF avant d'exécuter le script d'entrée. Changement de l'exécution du script d'entrée pour utiliser la configuration de mongod.
+
+**Catégorie :** Documentation  
+**Impact :** +8 -5 lignes, 9 fichiers
+
+**Fichiers modifiés :**
+- `Author: Rémi Verschuur <verschuurrmm@outlook.fr>`
+- `Date:   Sun Jan 25 17:35:18 2026 +0100`
+- `    Mise à jour du fichier .gitignore pour inclure les fichiers .bson et les répertoires .mongodb et diagnostic.data.`
+- `    Modification du Dockerfile Mongo pour convertir les sauts de ligne CRLF en LF avant d'exécuter le script d'entrée.`
+- ... et 6 autres fichiers
+
+
 ---
 
 ## Analyse par type d'activité
 
-- **Refactoring** : 5 commits (55.6%)
-- **Interface utilisateur** : 3 commits (33.3%)
-- **Développement général** : 1 commits (11.1%)
+- **Refactoring** : 5 commits (45.5%)
+- **Interface utilisateur** : 4 commits (36.4%)
+- **Documentation** : 1 commits (9.1%)
+- **Développement général** : 1 commits (9.1%)
 
 ---
 
 ## Technologies et langages utilisés
 
 - **Python** : 66 fichiers modifiés
-- **Documentation** : 6 fichiers modifiés
-- **Docker** : 1 fichiers modifiés
+- **Documentation** : 7 fichiers modifiés
+- **Docker** : 3 fichiers modifiés
+- **YAML/Config** : 2 fichiers modifiés
 - **JavaScript** : 1 fichiers modifiés
-- **YAML/Config** : 1 fichiers modifiés
 
 ---
 
 ## Métriques de productivité
 
-- **Fréquence de commit :** 1.3 commits/jour
-- **Volume de code :** 12756 modifications totales
-- **Ratio ajouts/suppressions :** 2.99
-- **Moyenne lignes par commit :** 1417
+- **Fréquence de commit :** 1.6 commits/jour
+- **Volume de code :** 12875 modifications totales
+- **Ratio ajouts/suppressions :** 2.97
+- **Moyenne lignes par commit :** 1170
 
 ---
 
 ## Conclusion automatique
 
-Période de développement **très active** avec un focus principal sur **refactoring**. Le volume de 9558 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
+Période de développement **très active** avec un focus principal sur **refactoring**. Le volume de 9635 lignes ajoutées témoigne d'un travail de développement substantiel. La proportion élevée d'ajouts par rapport aux suppressions indique un développement de nouvelles fonctionnalités.
 
 ---
-*Rapport généré automatiquement le 22 January 2026*
+*Rapport généré automatiquement le 25 January 2026*
