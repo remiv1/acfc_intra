@@ -8,8 +8,9 @@ COPY mongo/init-mongo.template.js /docker-entrypoint-initdb.d/init-mongo.templat
 COPY mongo/mongod.conf /etc/mongod.conf
 
 # Copie le script shell qui génère le JS final
+# Utilise sed pour convertir les sauts de ligne CRLF en LF
 COPY mongo/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 # Utilise le script shell comme entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["bash", "/entrypoint.sh"]
