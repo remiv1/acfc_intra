@@ -1,7 +1,7 @@
 # Rapport de Suivi de Réalisation - Automatique
 
-**Date du rapport :** 31 May 2026  
-**Période analysée :** 24 May 2026 - 31 May 2026 (7 jours)  
+**Date du rapport :** 07 June 2026  
+**Période analysée :** 31 May 2026 - 07 June 2026 (7 jours)  
 **Générateur :** Script automatique v1.0
 
 ---
@@ -12,4 +12,4 @@ Aucune activité de commit détectée sur la période analysée.
 
 ---
 
-*Rapport généré automatiquement le 31 May 2026*
+*Rapport généré automatiquement le 07 June 2026*
